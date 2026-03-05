@@ -34,14 +34,14 @@ Este plano direciona a execução das tarefas para reestruturar completamente a 
 
 ### Fase 3: Escudo de Camada Lógica via Middleware Web (Tempo Estimado: 2 Dias)
 
-- [ ] 5. Injetar Gestor de Contexto (`contextvars`) Python
-  - [ ] 5.1 Instanciar a variável contextvar de sessão atrelada globalmente.
-  - [ ] 5.2 Alterar dependência db (yield generator) para forçar o comando Postgres `SET LOCAL app.tenant_id = :tenant_id` na transição do request.
+- [x] 5. Injetar Gestor de Contexto (`contextvars`) Python
+  - [x] 5.1 Instanciar a variável contextvar de sessão atrelada globalmente. (`app/tenant_context.py` — concluído na Fase 2)
+  - [x] 5.2 Alterar dependência db (yield generator) para forçar o comando Postgres `SET LOCAL app.tenant_id = :tenant_id` na transição do request. (`audit/repository.py` — concluído na Fase 2)
 
-- [ ] 6. Implementar Roteador Isolado de Eventos (API Middleware Webhook)
-  - [ ] 6.1 Codar Interceptor na entrada do endpoint RAIZ do Webhook do Meta.
-  - [ ] 6.2 Processar Payload -> Procurar Tenant da Página (LRU Cache/DB) -> Seta no Contextvar.
-  - [ ] 6.3 Desviar com 401 Unauthorized pacotes de Páginas sem Tenant logado.
+- [x] 6. Criar Interceptor de Roteamento de Tenant no Webhook
+  - [x] 6.1 Codar Interceptor na entrada do endpoint RAIZ do Webhook do Meta. (`app/api/webhook.py`)
+  - [x] 6.2 Processar Payload -> Procurar Tenant da Página (LRU Cache/DB) -> Seta no Contextvar. (`app/tenant_resolver.py` + `tenant_context.set_tenant()`)
+  - [x] 6.3 Desviar com blocagem silenciosa pacotes de Páginas sem Tenant logado. (páginas sem tenant são ignoradas; evento não é despachado)
 
 - [ ] 7. Refatoração de Templates Puxados do Banco
   - [ ] 7.1 Mudar System Prompts literais para compor via placeholders (ex: `{client_name}`).

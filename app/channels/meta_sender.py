@@ -134,3 +134,34 @@ class MetaSender:
 
 # Instância singleton
 meta_sender = MetaSender()
+
+
+async def send_message(
+    channel: Channel,
+    recipient_id: str,
+    message_text: str,
+    comment_id: Optional[str] = None,
+) -> dict:
+    """
+    Atalho de envio multi-canal para o Webhook Router.
+
+    Roteia automaticamente entre DM e resposta de comentário
+    com base no canal fornecido.
+    """
+    from app.contracts.enums import SurfaceType
+
+    if channel in (Channel.INSTAGRAM_COMMENT, Channel.FACEBOOK_COMMENT):
+        if not comment_id:
+            logger.warning("[SENDER] comment_id ausente para canal de comentário")
+            return {}
+        return await meta_sender.reply_comment(channel, comment_id, message_text)
+
+    # DM (Instagram / Facebook)
+    surface = SurfaceType.INBOX
+    return await meta_sender.send(
+        channel=channel,
+        surface_type=surface,
+        text=message_text,
+        thread_id=recipient_id,
+    )
+

@@ -1,23 +1,21 @@
 version: '3.8'
 
-# {bot_name} - Docker Compose para Produção
+# Nexo Basis Governador - Docker Compose para Produção
 # =======================================
 # Uso: docker-compose up -d --build
-# Logs: docker-compose logs -f terezia
+# Rede: Conectado à infra_nexo-network para roteamento via Traefik
 
 services:
-  terezia:
+  nexo-gov-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: terezia-api
+    container_name: nexo-gov-api
     restart: always
     ports:
-      - "8000:8000"
+      - "8101:8000"
     volumes:
-      # Dados do ChromaDB (persistência)
-      - ./chroma_data:/app/chroma_data
-      # Prompts e base de conhecimento
+      # Prompts e base de conhecimento (A base vetorial em si viverá no nexo-chromadb central)
       - ./prompts:/app/prompts:ro
       - ./base:/app/base:ro
     env_file:
@@ -38,49 +36,10 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - infra-network
 
-
-  # Caddy - Reverse Proxy com HTTPS automático
-  caddy:
-    image: caddy:2-alpine
-    container_name: terezia-caddy
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - terezia
-
-   # Grafana - Observabilidade
-  grafana:
-    image: grafana/grafana:10.2.2
-    container_name: terezia-grafana
-    restart: always
-    ports:
-      - "3001:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin24052014
-      - GF_DATABASE_TYPE=postgres
-      - GF_DATABASE_HOST=host.docker.internal:5432
-      - GF_DATABASE_NAME=terezia_grafana
-      - GF_DATABASE_USER=grafana
-      - GF_DATABASE_PASSWORD=pandora
-      - GF_AUTH_BASIC_ENABLED=true
-      - GF_SERVER_DOMAIN=nexobasis.com.br
-      - GF_SERVER_ROOT_URL=https://nexobasis.com.br/grafana/
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-    volumes:
-      - grafana_data:/var/lib/grafana
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-
-
-
-volumes:
-  caddy_data:
-  caddy_config:
-  grafana_data:
+networks:
+  infra-network:
+    external: true
+    name: infra_nexo-network

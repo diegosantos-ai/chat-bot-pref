@@ -11,26 +11,26 @@ Este plano direciona a execução das tarefas para reestruturar completamente a 
 
 ### Fase 1: Adequação da Infraestrutura & Networking Compartilhado (Tempo Estimado: 1 Dia)
 
-- [ ] 1. Adequação de Contêineres (Docker Compose)
-  - [ ] 1.1 Remover a declaração de construção dos serviços `db`, `chromadb`, e quaisquer bases auxiliares do `docker-compose.yml` da raiz do chatbot.
-  - [ ] 1.2 Atualizar o serviço principal da API para usar a porta `8101:8000` em conformidade com o `PORTS.md`.
-  - [ ] 1.3 Renomear a API no compose para um nome aderente ao padrão (ex: `nexo-gov-api`).
-  - [ ] 1.4 Adicionar rede externa compartilhadora: `networks: infra-network: external: true, name: infra_nexo-network`.
+- [x] 1. Adequação de Contêineres (Docker Compose)
+  - [x] 1.1 Remover a declaração de construção dos serviços `db`, `chromadb`, e quaisquer bases auxiliares do `docker-compose.yml` da raiz do chatbot.
+  - [x] 1.2 Atualizar o serviço principal da API para usar a porta `8101:8000` em conformidade com o `PORTS.md`.
+  - [x] 1.3 Renomear a API no compose para um nome aderente ao padrão (ex: `nexo-gov-api`).
+  - [x] 1.4 Adicionar rede externa compartilhadora: `networks: infra-network: external: true, name: infra_nexo-network`.
   
-- [ ] 2. Adequação de Variáveis de Conexões (.env)
-  - [ ] 2.1 Refatorar TODAS as URIs de configuração e inicialização (SQLAlchemy, Langchain Chroma Client, Redis Cache) para referenciar os contêineres hostnames (ex: `nexo-postgres`, `nexo-chromadb`, `nexo-redis`).
+- [x] 2. Adequação de Variáveis de Conexões (.env)
+  - [x] 2.1 Refatorar TODAS as URIs de configuração e inicialização (SQLAlchemy, Langchain Chroma Client, Redis Cache) para referenciar os contêineres hostnames (ex: `nexo-postgres`, `nexo-chromadb`, `nexo-redis`).
 
 ### Fase 2: Fundação Multi-Tenant de Dados (Tempo Estimado: 2-3 Dias)
 
-- [ ] 3. Configurar Isolamento Lógico de Transações no PostgreSQL (Row-Level Security)
-  - [ ] 3.1 Criar migration para adicionar campo `tenant_id` VARCHAR(50) em tabelas-chave.
-  - [ ] 3.2 Criar tabelas core multi-tenant: `tenants`, `tenant_credentials`, e `tenant_configs`.
-  - [ ] 3.3 Habilitar funcionalidade `ENABLE ROW LEVEL SECURITY` criando *Policy* em TODAS tabelas sensíveis buscando `current_setting('app.tenant_id', true)`.
-  - [ ] 3.4 Escrever queries/scripts administrativos de mock bootstrapping.
+- [x] 3. Configurar Isolamento Lógico de Transações no PostgreSQL (Row-Level Security)
+  - [x] 3.1 Criar migration para adicionar campo `tenant_id` VARCHAR(50) em tabelas-chave.
+  - [x] 3.2 Criar tabelas core multi-tenant: `tenants`, `tenant_credentials`, e `tenant_configs`.
+  - [x] 3.3 Habilitar funcionalidade `ENABLE ROW LEVEL SECURITY` criando *Policy* em TODAS tabelas sensíveis buscando `current_setting('app.tenant_id', true)`.
+  - [x] 3.4 Escrever queries/scripts administrativos de mock bootstrapping.
 
-- [ ] 4. Configurar Separação de Vetores e Coleções via ChromaDB
-  - [ ] 4.1 Refatorar a inicialização da Collections no Retriever alterando para o formato dinâmico `{tenant_id}_knowledge_base`.
-  - [ ] 4.2 Blindar operações de RAG gerando Collections *lazily* na primeira requisição, se necessário.
+- [x] 4. Configurar Separação de Vetores e Coleções via ChromaDB
+  - [x] 4.1 Refatorar a inicialização da Collections no Retriever alterando para o formato dinâmico `{tenant_id}_knowledge_base`.
+  - [x] 4.2 Blindar operações de RAG gerando Collections *lazily* na primeira requisição, se necessário.
 
 ### Fase 3: Escudo de Camada Lógica via Middleware Web (Tempo Estimado: 2 Dias)
 

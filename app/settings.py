@@ -1,12 +1,10 @@
 """
-Configurações — Pilot Atendimento MVE
+Configurações — Nexo Basis Governador SaaS
 ======================================
-Versão: v1.1
-Escopo: MVE_PILOT
-Atualizado: Suporte a Instagram/Facebook
+Versão: v2.0
+Escopo: SAAS_MULTI_TENANT
 
 Todas as configurações sensíveis devem vir do arquivo .env
-ou do AWS Secrets Manager (se USE_SECRETS_MANAGER=True)
 """
 
 from pydantic_settings import BaseSettings
@@ -18,9 +16,9 @@ class Settings(BaseSettings):
     # ========================================
     # APP
     # ========================================
-    APP_NAME: str = "Pilot Atendimento API"
+    APP_NAME: str = "Nexo Basis Governador API"
     ENV: str = "dev"
-    VERSION: str = "0.0.1"
+    VERSION: str = "2.0.0"
     DEBUG: bool = False
     BASE_DIR: str = "."
     APP_HOST: str = "0.0.0.0"
@@ -35,25 +33,27 @@ class Settings(BaseSettings):
     GEMINI_TEMPERATURE: float = 0.3  # Baixo para respostas consistentes
 
     # ========================================
-    # DATABASE - PostgreSQL
+    # DATABASE - PostgreSQL Compartilhado (Row-Level Security)
     # ========================================
-    DATABASE_URL: str = "postgresql://localhost:5432/pilot_atendimento"
+    DATABASE_URL: str = "postgresql://postgres:@nexo-postgres:5432/core_saas_gov"
     DATABASE_POOL_SIZE: int = 5
     DATABASE_MAX_OVERFLOW: int = 10
     USER_HASH_SALT: str = ""
 
     # ========================================
-    # VECTOR STORE — ChromaDB
+    # VECTOR STORE — ChromaDB Compartilhado (HTTP Client)
     # ========================================
-    CHROMA_PERSIST_DIR: str = "./chroma_data"
+    CHROMA_URL: str = "http://nexo-chromadb:8000"  # HTTP Client aponta para infra_nexo-network
+
+    # REDIS CACHE (Compartilhado)
+    REDIS_URL: str = "redis://nexo-redis:6379"
 
     # ========================================
     # RAG
     # ========================================
-    RAG_BASE_ID: str = "BA-RAG-PILOTO-2026.01.v1"
-    RAG_COLLECTION_NAME: str = "rag_ba_rag_piloto_2026_01_v1"
-    RAG_TOP_K: int = 5  # Reduzido para diminuir redundância
-    RAG_MIN_SCORE: float = 0.30  # Ajustado para recuperar mais resultados relevantes
+    RAG_BASE_ID: str = "default"
+    RAG_TOP_K: int = 5
+    RAG_MIN_SCORE: float = 0.30
 
     # ========================================
     # EMBEDDING PROVIDERS
@@ -88,7 +88,7 @@ class Settings(BaseSettings):
     METRICS_STATSD_ENABLED: bool = False
     METRICS_STATSD_HOST: str = "127.0.0.1"
     METRICS_STATSD_PORT: int = 8125
-    METRICS_STATSD_PREFIX: str = "terezia"
+    METRICS_STATSD_PREFIX: str = "nexo-gov"
 
     # ========================================
     # META API (Instagram/Facebook)
@@ -155,11 +155,11 @@ class Settings(BaseSettings):
     DEPLOY_WEBHOOK_TOKEN: str = ""  # Token para autorizar deploy via webhook
 
     # ========================================
-    # FALLBACK HYBRID (Web Scraping)
+    # FALLBACK HYBRID (Web Content Fetch)
     # ========================================
-    FALLBACK_HYBRID_ENABLED: bool = True
+    FALLBACK_HYBRID_ENABLED: bool = False
     FALLBACK_CONFIDENCE_THRESHOLD: float = 0.7
-    FALLBACK_TARGET_URL: str = "https://santatereza.pr.gov.br/noticias"
+    FALLBACK_TARGET_URL: str = ""  # Definido por tenant, não global
     FALLBACK_WEB_TIMEOUT_SECONDS: int = 5
     FALLBACK_WEB_MIN_SCORE: float = 0.35
 

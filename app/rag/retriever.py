@@ -24,6 +24,7 @@ from app.rag.embeddings import (
     resolve_embedding_model,
 )
 from app.settings import settings
+from app import tenant_context
 
 logger = logging.getLogger(__name__)
 
@@ -118,15 +119,15 @@ class RAGRetriever:
     ):
         """
         Args:
-            collection_name: Nome da collection ChromaDB (usa padrao se None)
+            collection_name: Nome override da collection (padrão: resolve dinamicamente por tenant)
             top_k: Numero maximo de chunks a retornar
             min_score: Score minimo para incluir chunk (0-1)
             embedding_provider: Provedor de embedding ("default", "gemini", "openai", "qwen")
         """
         self._embedding_provider = embedding_provider or settings.EMBEDDING_PROVIDER
         self._embedding_model = resolve_embedding_model(self._embedding_provider)
-        base_name = collection_name or settings.RAG_COLLECTION_NAME
-        self.collection_name = get_collection_name(base_name, self._embedding_provider)
+        # Se recebeu um override, usa ele. Senão, resolve pelo tenant ativo em `retrieve()`.
+        self._collection_name_override = collection_name
         self.top_k = top_k
         self.min_score = min_score
         self._client: Optional[chromadb.ClientAPI] = None
@@ -147,37 +148,40 @@ class RAGRetriever:
                 return path
         return candidates[0]
 
+    def _get_tenant_collection_name(self) -> str:
+        """Resolve o nome da collection baseado no tenant ativo."""
+        if self._collection_name_override:
+            return get_collection_name(self._collection_name_override, self._embedding_provider)
+        # Padrão multi-tenant: {tenant_id}_knowledge_base
+        tid = tenant_context.require_tenant()
+        base_name = f"{tid}_knowledge_base"
+        return get_collection_name(base_name, self._embedding_provider)
+
     def _ensure_collection(self) -> chromadb.Collection:
-        """Obtem ou cria conexao com a collection, ingerindo a base se faltar."""
-        if self._collection is None:
-            self._client = get_chroma_client()
-            embedding_fn = get_embedding_function(self._embedding_provider)
-            get_kwargs = {"name": self.collection_name}
+        """Obtém ou cria conexão com a collection do tenant ativo."""
+        # Resolve nome dinâmico a cada chamada (suporta requisições de tenants diferentes)
+        collection_name = self._get_tenant_collection_name()
+        client = get_chroma_client()
+        embedding_fn = get_embedding_function(self._embedding_provider)
+        get_kwargs = {"name": collection_name}
+        if embedding_fn is not None:
+            get_kwargs["embedding_function"] = embedding_fn
+        try:
+            return client.get_collection(**get_kwargs)
+        except Exception as exc:
+            msg = str(exc).lower()
+            if "does not exist" not in msg:
+                raise
+            # Collection ainda não existe: cria vazia (ingest ocorrerá via pipeline noturno)
+            logger.warning(
+                "Collection %s não encontrada para tenant=%s. Criando vazia.",
+                collection_name,
+                tenant_context.get_tenant(),
+            )
+            create_kwargs = {"name": collection_name, "metadata": {"hnsw:space": "cosine"}}
             if embedding_fn is not None:
-                get_kwargs["embedding_function"] = embedding_fn
-            try:
-                self._collection = self._client.get_collection(**get_kwargs)
-            except Exception as exc:
-                msg = str(exc).lower()
-                if "does not exist" not in msg:
-                    raise
-                base_path = self._resolve_base_path()
-                if not base_path.exists():
-                    raise FileNotFoundError(
-                        "Base de conhecimento nao encontrada para auto-ingest: "
-                        f"{base_path}"
-                    )
-                logger.warning(
-                    "Chroma collection %s ausente. Ingerindo base padrao em %s "
-                    "(provider=%s, model=%s).",
-                    self.collection_name,
-                    base_path,
-                    self._embedding_provider,
-                    self._embedding_model or "chromadb-default",
-                )
-                ingest_base(base_path, embedding_provider=self._embedding_provider)
-                self._collection = self._client.get_collection(**get_kwargs)
-        return self._collection
+                create_kwargs["embedding_function"] = embedding_fn
+            return client.get_or_create_collection(**create_kwargs)
 
     async def retrieve(
         self,

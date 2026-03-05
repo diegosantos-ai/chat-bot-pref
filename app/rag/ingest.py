@@ -134,13 +134,18 @@ def load_manifest(base_path: Path) -> dict:
 
 
 def get_chroma_client() -> chromadb.ClientAPI:
-    """Retorna cliente ChromaDB configurado."""
-    return chromadb.PersistentClient(
-        path=settings.CHROMA_PERSIST_DIR,
-        settings=Settings(
-            anonymized_telemetry=False,
-            allow_reset=True,
-        ),
+    """Retorna cliente ChromaDB configurado (HTTP, apontando para nexo-chromadb na rede compartilhada)."""
+    from app.settings import settings as app_settings
+    host_url = app_settings.CHROMA_URL  # ex: http://nexo-chromadb:8000
+    # Extrair host e port da URL
+    url_without_protocol = host_url.replace("http://", "").replace("https://", "")
+    parts = url_without_protocol.split(":")
+    host = parts[0]
+    port = int(parts[1]) if len(parts) > 1 else 8000
+    return chromadb.HttpClient(
+        host=host,
+        port=port,
+        settings=Settings(anonymized_telemetry=False),
     )
 
 

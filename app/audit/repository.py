@@ -1,12 +1,13 @@
 """
-Audit Repository — Pilot Atendimento MVE
+Audit Repository — Nexo Basis Governador SaaS
 =========================================
-Versão: v1.1
-Escopo: MVE_PILOT
-Atualizado: Suporte a Instagram/Facebook
+Versão: v2.0
+Escopo: SAAS_MULTI_TENANT
 
 Repository async para operações de auditoria usando asyncpg.
-Responsável por persistir eventos no PostgreSQL.
+Isolamento de dados por tenant via Row-Level Security (PostgreSQL).
+O tenant ativo é lido via `app.tenant_context.require_tenant()` e injetado
+através de `SET LOCAL app.tenant_id` em cada conexão antes das queries.
 """
 
 import json
@@ -21,6 +22,7 @@ from asyncpg import Pool, Connection
 
 from app.settings import settings
 from app.audit.models import AuditEventCreate, RAGQueryCreate, ConversaCreate
+from app import tenant_context
 
 logger = logging.getLogger(__name__)
 
@@ -54,11 +56,18 @@ class AuditRepository:
     
     @asynccontextmanager
     async def get_connection(self):
-        """Context manager para obter conexão do pool."""
+        """Context manager que obtém conexão do pool e injeta tenant_id via SET LOCAL."""
         if self._pool is None:
             await self.connect()
-        
+
+        # Obtém o tenant ativo do contexto assync (definido pelo middleware)
+        current_tenant = tenant_context.require_tenant()
+
         async with self._pool.acquire() as conn:
+            # Injeta o tenant na sessão PostgreSQL para ativar a RLS
+            await conn.execute(
+                f"SET LOCAL app.tenant_id = '{current_tenant}'"
+            )
             yield conn
     
     async def check_idempotency(
@@ -101,16 +110,17 @@ class AuditRepository:
         conn: Connection,
     ) -> int:
         hash_usuario = self._hash_user(session_id)
+        current_tenant = tenant_context.require_tenant()
         row = await conn.fetchrow(
-            "SELECT id_usuario FROM usuarios_anonimos WHERE hash_usuario = $1",
-            hash_usuario,
+            "SELECT id_usuario FROM usuarios_anonimos WHERE hash_usuario = $1 AND tenant_id = $2",
+            hash_usuario, current_tenant,
         )
         if row:
             return row["id_usuario"]
 
         row = await conn.fetchrow(
-            "INSERT INTO usuarios_anonimos (hash_usuario) VALUES ($1) RETURNING id_usuario",
-            hash_usuario,
+            "INSERT INTO usuarios_anonimos (hash_usuario, tenant_id) VALUES ($1, $2) RETURNING id_usuario",
+            hash_usuario, current_tenant,
         )
         return row["id_usuario"]
 
@@ -145,7 +155,7 @@ class AuditRepository:
                 modelo, temperatura, versao_prompt,
                 tempo_resposta_ms,
                 codigo_erro, tipo_excecao,
-                versao_app
+                versao_app, tenant_id
             ) VALUES (
                 $1, $2, $3,
                 $4, $5, $6,
@@ -157,7 +167,7 @@ class AuditRepository:
                 $20, $21, $22,
                 $23,
                 $24, $25,
-                $26
+                $26, $27
             )
             RETURNING id_evento
         """
@@ -199,6 +209,7 @@ class AuditRepository:
                 event.codigo_erro,
                 event.tipo_excecao,
                 event.versao_app,
+                tenant_context.require_tenant(),  # sempre fornecido pelo context
             )
 
             row = await conn.fetchrow(query, *params)

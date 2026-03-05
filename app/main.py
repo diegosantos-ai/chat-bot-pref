@@ -11,7 +11,7 @@ from slowapi.errors import RateLimitExceeded
 from app.settings import settings
 from app.logging_config import configure_logging
 from app.api.chat import router as chat_router
-from app.integrations.meta.webhook import router as webhook_router
+from app.api.webhook import router as webhook_router     # moved: app/api/webhook.py
 from app.api.analytics import router as analytics_router
 from app.api.deploy import router as deploy_router
 from app.api.admin import router as admin_router
@@ -54,17 +54,12 @@ app.add_middleware(
 )
 
 # Trusted Host Middleware (proteção contra Host header injection)
+# Dominio do cliente é gerido via env var ALLOWED_HOSTS — sem hard-code de pilot
 app.add_middleware(
     TrustedHostMiddleware,
     allowed_hosts=["*"]
     if settings.DEBUG
-    else [
-        "terezia.prefeitura.com.br",
-        "*.meta.facebook.com",
-        "localhost",
-        "127.0.0.1",
-        "nexobasis.com.br",
-    ],
+    else settings.ALLOWED_HOSTS,  # ex: ["*.nexobasis.com.br", "*.meta.facebook.com"]
 )
 
 

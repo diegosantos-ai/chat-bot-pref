@@ -121,9 +121,11 @@ class Settings(BaseSettings):
     # SECURITY - CORS e Rate Limiting
     # ========================================
     CORS_ORIGINS: list[str] = ["*"]  # Em produção, especifique domínios permitidos
+    ALLOWED_HOSTS: list[str] = ["*"]  # Em produção: ["*.nexobasis.com.br", "*.meta.facebook.com"]
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_PER_MINUTE: int = 30  # Limite padrão por IP
     RATE_LIMIT_WEBHOOK_PER_MINUTE: int = 60  # Limite específico para webhook (Meta)
+
 
     # ========================================
     # SECRETS MANAGER (AWS)

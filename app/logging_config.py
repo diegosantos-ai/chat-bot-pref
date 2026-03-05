@@ -1,9 +1,8 @@
 """
-Configuração de logging estruturado (JSON) para a {bot_name}.
-
-Este módulo centraliza a configuração de logs:
-- Formato JSON simples, seguro para ingestão por agregadores.
-- Nível configurável via settings.
+Configuração de logging estruturado (JSON) — Nexo Basis Governador SaaS
+=========================================================================
+Formato JSON com `tenant_id` injetado automaticamente via contextvars.
+Compativel com Loki/Grafana para dashboards filtrados por tenant.
 
 Uso:
     from app.logging_config import configure_logging
@@ -22,51 +21,41 @@ from app.settings import settings
 
 
 class JsonFormatter(logging.Formatter):
-    """Formatter básico que serializa o registro em JSON."""
+    """Formata logs como JSON estruturado com tenant_id injetado automaticamente."""
+
+    # Campos internos do LogRecord que nunca devem aparecer no JSON
+    _SKIP = {
+        "name", "msg", "args", "levelname", "levelno",
+        "pathname", "filename", "module", "exc_info", "exc_text",
+        "stack_info", "lineno", "funcName", "created", "msecs",
+        "relativeCreated", "thread", "threadName", "processName", "process",
+    }
 
     def format(self, record: logging.LogRecord) -> str:
         payload: Dict[str, Any] = {
             "timestamp": datetime.utcnow().isoformat() + "Z",
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
+            "level":     record.levelname,
+            "logger":    record.name,
+            "message":   record.getMessage(),
         }
 
-        # Campos extras conhecidos
+        # ── tenant_id via contextvars (9.1) ──────────────────────────────────
+        try:
+            from app import tenant_context
+            tid = tenant_context.get_tenant()
+            if tid:
+                payload["tenant_id"] = tid
+        except Exception:
+            pass  # nunca deve quebrar o logger
+        # ─────────────────────────────────────────────────────────────────────
+
         if record.exc_info:
             payload["exc_info"] = self.formatException(record.exc_info)
         if record.stack_info:
             payload["stack"] = self.formatStack(record.stack_info)
 
-        # Extras arbitrários adicionados via logger.exception(..., extra={...})
         for key, value in record.__dict__.items():
-            if key.startswith("_"):
-                continue
-            if key in payload:
-                continue
-            # ignora campos padrão do LogRecord
-            if key in {
-                "name",
-                "msg",
-                "args",
-                "levelname",
-                "levelno",
-                "pathname",
-                "filename",
-                "module",
-                "exc_info",
-                "exc_text",
-                "stack_info",
-                "lineno",
-                "funcName",
-                "created",
-                "msecs",
-                "relativeCreated",
-                "thread",
-                "threadName",
-                "processName",
-                "process",
-            }:
+            if key.startswith("_") or key in payload or key in self._SKIP:
                 continue
             try:
                 json.dumps(value)

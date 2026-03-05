@@ -4,13 +4,56 @@
 **Arquiteto/PM:** Kiro
 
 ## Estado Atual
-- **Fase Atual:** Fase 3 - Middleware de Tenant (Camada Lógica)
-- **Último Marco Atingido:** ✅ Fase 1 e 2 completas. Docker-Compose adaptado para `infra_nexo-network` (porta 8101). Migration RLS criada. `app/tenant_context.py` implementado com `contextvars`. `audit/repository.py` injeta o `tenant_id` via `SET LOCAL` antes de cada transação. `app/rag/retriever.py` resolve collections per-tenant dinamicamente (`{tenant_id}_knowledge_base`). ChromaDB migrado de `PersistentClient` para `HttpClient`.
-- **Próxima Tarefa P0:** Fase 3 — Criar o **Middleware Webhook** que intercepta o payload da Meta API, resolve o `Page ID → tenant_id` (via lookup no BD), e chama `tenant_context.set_tenant(...)` para propagar o contexto.
+- **Fase Atual:** ✅ PROJETO CONCLUÍDO — Todas as 4 Fases implementadas
+- **Último Marco Atingido:** Fase 4 completa. Logs com `tenant_id` automático (Grafana/Loki ready). ETL multi-tenant agendável. Demo tenant seed para GTM. `ALLOWED_HOSTS` configurável via env. Correção do import do webhook em `main.py`.
+
+## Resumo das Fases Entregues
+
+| Fase | Status | Principais Entregas |
+|------|--------|---------------------|
+| **1** — Infra | ✅ | `docker-compose.yml` → `nexo-gov-api:8101`, `infra_nexo-network` |
+| **2** — Multi-Tenant DB | ✅ | Migration RLS, `tenant_context.py`, ChromaDB `{tenant_id}_knowledge_base` |
+| **3** — Camada Lógica | ✅ | Webhook router com HMAC-SHA256, `TenantResolver` (LRU+DB), `TenantConfig`, `get_tenant_prompt()` |
+| **4** — Pipeline/Ops | ✅ | `rag_etl_job.py` (cron multi-tenant), `setup_demo_tenant.py` (GTM), logs com `tenant_id` |
+
+## Novos Arquivos Criados
+
+```
+app/
+├── tenant_context.py          # contextvars: set/get/require_tenant
+├── tenant_resolver.py         # LRU cache + DB: page_id → tenant_id
+├── tenant_config.py           # TenantConfig: perfil + tokens Meta do banco
+├── logging_config.py          # JsonFormatter com tenant_id automático
+├── channels/meta_sender.py    # _get_access_token() async e DB-first
+├── prompts/__init__.py        # get_tenant_prompt() com vars do tenant
+├── api/webhook.py             # Router HMAC-SHA256, isolamento por tenant
+db/migrations/
+├── 001_multi_tenant_rls.sql   # tenant_id, RLS policies
+├── 002_tenant_identity_and_credentials.sql  # bot_name, tokens Meta, rag_base_path
+scripts/
+├── rag_etl_job.py             # ETL incremental multi-tenant (CLI + cron)
+├── setup_demo_tenant.py       # Seed GTM: "Prefeitura de Nova Esperança"
+```
+
+## Comandos de Operação
+
+```bash
+# Setup demo tenant (GTM/vendas)
+python scripts/setup_demo_tenant.py
+
+# ETL RAG (todos os tenants)
+python scripts/rag_etl_job.py
+
+# ETL forçado para um tenant específico
+python scripts/rag_etl_job.py --force --tenant prefeitura_nova_esperanca
+
+# Migrations no banco
+psql $DATABASE_URL -f db/migrations/001_multi_tenant_rls.sql
+psql $DATABASE_URL -f db/migrations/002_tenant_identity_and_credentials.sql
+```
 
 ## Histórico de Handoffs
-- **[2026-03-05]** Sessão de Planejamento Inicial:
-  - Os 3 Pilares do Arquiteto (Design, Requisitos e Tasks) foram criados na pasta `white-label-project/`.
-  - Revisão de Infraestrutura: Adaptação massiva nas especificações para remover infra própria e apontar o produto como cliente da infraestrutura core (`infra/`).
-- **[2026-03-05]** Sessão de Implementação — Fase 1 e 2:
-  - Branch `infra-rede` com todas as mudanças commitadas e em push.
+- **[2026-03-05]** Sessão de Planejamento Inicial: Pilares (Design, Requisitos, Tasks) criados em `white-label-project/`.
+- **[2026-03-05]** Sessão Fase 1 e 2: Branch `infra-rede` — Docker, .env, RLS, ChromaDB per-tenant.
+- **[2026-03-05]** Sessão Fase 3: Branch `camada-logica` — Webhook router, TenantResolver, TenantConfig, prompts dinâmicos, MetaSender async.
+- **[2026-03-05]** Sessão Fase 4: Branch `limpeza-pipeline` — ETL job, demo tenant seed, logs com tenant_id, ALLOWED_HOSTS.

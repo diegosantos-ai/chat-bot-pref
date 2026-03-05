@@ -53,6 +53,6 @@ Este plano direciona a execução das tarefas para reestruturar completamente a 
   - [x] 8.1 Ajustar Crawler local fazendo iteração de Tenants via job agendado. (`scripts/rag_etl_job.py` — itera tenants ativos do DB, ingere collection `{tenant_id}_knowledge_base`, suporta `--force` e `--tenant`)
   - [x] 8.2 Criar o Script mock rápido `setup_demo_tenant.py` providenciando bot Dummy "Prefeitura de Nova Espeçana" para GTM Vendas. (`scripts/setup_demo_tenant.py` — cria base de conhecimento, faz upsert no DB e ingere no ChromaDB. Suporta `--reset` e `--dry-run`)
 
-- [ ] 9. Finalizar e Auditar Componentes Residuais
-  - [ ] 9.1 Verificar Grafana Dashboards/Logs certificando-se de que os metadados de logs carregam atrelamento com o `tenant_id`.
-  - [ ] 9.2 Realizar Handoff Final do Kiro de volta ao usuário.
+- [x] 9. Finalizar e Auditar Componentes Residuais
+  - [x] 9.1 Verificar Grafana Dashboards/Logs certificando-se de que os metadados de logs carregam atrelamento com o `tenant_id`. (`app/logging_config.py` — `JsonFormatter` injeta `tenant_id` automaticamente via `tenant_context.get_tenant()` em todo log JSON)
+  - [x] 9.2 Realizar Handoff Final do Kiro de volta ao usuário. (Documentação e progresso.md atualizados. Projeto SaaS multi-tenant completo e commitado na branch `limpeza-pipeline`.)

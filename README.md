@@ -1,195 +1,196 @@
-# {bot_name} - Assistente Virtual da Prefeitura de {client_name}
+# Nexo Basis Governador — White-Label SaaS de Chatbot Municipal
 
-Chatbot institucional para atendimento ao cidadão via Web Widget, Instagram e Facebook.
-Natureza estritamente informativa: não agenda consultas, não concede isenções, não toma decisões administrativas.
-Disclaimer obrigatório em todas as respostas: "Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial."
-A assistente sempre se identifica como IA em treinamento.
+Plataforma **multi-tenant** de atendimento ao cidadão via Instagram e Facebook, projetada para prefeituras brasileiras. Cada cliente (prefeitura) opera em isolamento completo de dados, com base de conhecimento própria (RAG) e identidade visual customizada.
+
+Caráter estritamente informativo: não agenda consultas, não concede isenções, não toma decisões administrativas. O assistente sempre se identifica como IA.
+
+---
 
 ## Status do Projeto
-| Fase | Descrição | Status | Data |
-|------|-----------|--------|------|
-| **Fase 1** | Foundation (Contratos, Settings, Schema) | Completa | 10/01/2025 |
-| **Fase 2** | RAG Base (Ingester, Retriever, Composer) | Completa | 10/01/2025 |
-| **Fase 3** | Pipeline E2E (Classifier, Policy, Orchestrator) | Completa | 11/01/2025 |
-| **Fase 3.1** | Protocolos de Crise & Expansão RAG | Completa | 12/01/2025 |
-| **Fase 4** | API & Integração Meta | Completa | 15/01/2025 |
-| **Fase 5** | Deploy & Observabilidade | Em Progresso | 16/01/2025 |
-| **Fase 5.1** | Saneamento e Reestruturação | Completa | 22/01/2026 |
-| **Fase 5.2** | Refino RAG (Análise Forense) | Completa | 22/01/2026 |
-| **Fase 5.3** | Schema DB & Analytics Views | Completa | 03/02/2026 |
 
-## Visão Geral
-- Canais suportados: Web Widget, Instagram DM/Comentários, Facebook DM/Comentários.
-- Superfícies: Inbox (privado) e Public Comment (comentário público).
-- LGPD: coleta mínima, ocultação de PII em comentários públicos e redirecionamento para inbox.
-- Protocolos de crise: suicídio e violência com respostas estáticas e canais oficiais.
+| Fase | Descrição | Status | Conclusão |
+|------|-----------|--------|-----------|
+| **Fase 1** | Adequação de Infraestrutura & Networking Compartilhado | ✅ Completa | 05/03/2026 |
+| **Fase 2** | Fundação Multi-Tenant (RLS PostgreSQL + Collections ChromaDB) | ✅ Completa | 05/03/2026 |
+| **Fase 3** | Middleware de Roteamento de Tenant (Webhook Router) | 🔄 Em andamento | — |
+| **Fase 4** | Operação, Automação RAG & Demo Tenant | ⏳ Pendente | — |
 
-## Arquitetura (Visão Rápida)
-- Entrada: `POST /api/chat` (web/widget) e `POST /webhook/meta` (Meta).
-- Pipeline: NLP -> Classifier -> Policy Guard PRE -> RAG (ChromaDB) -> Composer (Gemini) -> Policy Guard POST -> Seleção.
-- Saída: resposta formatada por canal + auditoria em PostgreSQL.
-- Observabilidade: métricas Prometheus (`/metrics`), Grafana dashboards e analytics SQL.
+---
+
+## Arquitetura
+
+O sistema opera como **um contêiner** conectado à rede compartilhada `infra_nexo-network`, sem hospedar bancos de dados próprios.
+
+```
+Cidadão (Meta IG/FB)
+        │
+        ▼
+  Traefik (Ingress / TLS)      ← infra/ compartilhado
+        │
+        ▼
+ nexo-gov-api :8101             ← este repositório
+   ├── TenantMiddleware          (resolve Page ID → tenant_id via contextvars)
+   ├── FastAPI Webhook Router    (POST /webhook/meta)
+   ├── RAGRetriever              ({tenant_id}_knowledge_base)
+   └── AuditRepository          (SET LOCAL app.tenant_id → RLS ativa)
+        │                 │
+        ▼                 ▼
+  nexo-postgres:5432   nexo-chromadb:8000   ← infra/ compartilhado (RLS)
+```
+
+### Estratégia Multi-Tenant
+- **PostgreSQL**: Row-Level Security via `SET LOCAL app.tenant_id`. Nenhuma query vaza dados entre prefeituras.
+- **ChromaDB**: Collections isoladas por tenant (`{tenant_id}_knowledge_base`). Drop da collection = direito ao esquecimento (LGPD).
+- **FastAPI**: `contextvars` propaga o `tenant_id` sem passar em cada função.
+
+---
 
 ## Stack
-- Python 3.11+, FastAPI, Pydantic, Uvicorn
-- LLM: Google Gemini 2.0 Flash (configurável via `GEMINI_MODEL`)
-- Vector store: ChromaDB (`chroma_data/`)
-- Banco: PostgreSQL 15+ (auditoria e analytics)
-- Observabilidade: Grafana + Prometheus FastAPI Instrumentator
-- Infra: Docker, Caddy (HTTPS), systemd (Linux)
 
-## Quickstart (dev local)
-### 1. Pré-requisitos
-- Python 3.11+
-- PostgreSQL 15+ (local ou remoto)
-- (Opcional) Docker Desktop para Grafana/Caddy
+| Camada | Tecnologia |
+|--------|-----------|
+| **API** | Python 3.11+, FastAPI, Pydantic, Uvicorn |
+| **LLM** | Google Gemini 2.0 Flash (via `GEMINI_API_KEY`) |
+| **Vector Store** | ChromaDB (HTTP Client → `nexo-chromadb`) |
+| **Banco** | PostgreSQL 15+ com RLS (→ `nexo-postgres`) |
+| **Cache** | Redis (→ `nexo-redis`) |
+| **Proxy / TLS** | Traefik (gerenciado pela `infra/`) |
+| **Container** | Docker (porta host: `8101`) |
 
-### 2. Ambiente
-- Copie `.env.example` para `.env`.
-- Variáveis mínimas: `GEMINI_API_KEY`, `DATABASE_URL`, `CHROMA_PERSIST_DIR`.
-- Para embeddings semânticos externos: `EMBEDDING_PROVIDER` (`gemini|openai|qwen`) + `OPENROUTER_API_KEY`.
-- Ajustes finos opcionais: `EMBEDDING_MODEL_OVERRIDE`, `EMBEDDING_MODEL_*`, `EMBEDDING_BATCH_SIZE`, `EMBEDDING_MAX_RETRIES`.
-- Para Meta: `META_ACCESS_TOKEN_*`, `META_PAGE_ID_*`, `META_APP_SECRET_*`, `META_WEBHOOK_VERIFY_TOKEN*`.
-- Valide: `python scripts/ops/validate_infrastructure.py`.
+---
 
-### 3. Dependências
-`pip install -r requirements.txt`
+## Quickstart (Dev Local)
 
-### 4. Banco de dados
-- Schema: `psql -f db/schema.sql`
-- Views: `python scripts/db/create_views.py` ou `psql -f analytics/v1/views.sql`
+> **Pré-requisito:** A rede `infra_nexo-network` deve estar ativa (`docker network ls`). Consulte o repositório `infra/` para subir os serviços compartilhados.
 
-### 5. Ingestão RAG
-`python -m app.rag.ingest data/knowledge_base/BA-RAG-PILOTO-2026.01.v1`
+### 1. Ambiente
+```bash
+cp .env.example .env
+# Preencha: GEMINI_API_KEY, DATABASE_URL (→ nexo-postgres), CHROMA_URL, REDIS_URL
+```
 
-### 6. Rodar API
-`python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload`
+### 2. Dependências
+```bash
+pip install -r requirements.txt
+```
 
-### 7. Teste rápido
-`POST /api/chat/simple?message=Qual o telefone da prefeitura?&channel=instagram_dm&surface=INBOX`
+### 3. Banco de Dados
+```bash
+# Schema base (se banco novo)
+psql -f db/schema.sql
 
-## Docker / Deploy
-- `docker-compose.yml` sobe API, Caddy e Grafana (PostgreSQL externo).
-- Scripts: `scripts/ops/deploy.sh` e `scripts/ops/deploy.ps1`.
-- Guia completo: `docs/deploy_guide.md`.
-- Serviços systemd: `scripts/systemd/`.
+# Migration multi-tenant (RLS)
+psql -f db/migrations/001_multi_tenant_rls.sql
+```
 
-## Observabilidade e Analytics
-- Métricas Prometheus: `GET /metrics`.
-- Grafana dashboards: `dashboards/terezia/` e provisioning em `provisioning/`.
-- Queries e views: `analytics/v1/queries.sql`, `analytics/v1/views.sql`.
-- API Analytics: `GET /analytics/summary`, `GET /analytics/export-csv`, `POST /analytics/save-summary`.
+### 4. Rodar API
+```bash
+python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-## Base RAG
-- Base versionada em `data/knowledge_base/BA-RAG-PILOTO-2026.01.v1`.
-- Ingestão e manutenção: `app/rag/ingest.py`.
-- Scripts úteis: `scripts/chroma_*`.
-- Benchmark de embeddings: `python scripts/run_embedding_ab_test.py --providers default,openai --verbose`.
+### 5. Docker (produção)
+```bash
+docker-compose up -d --build
+# API disponível em localhost:8101
+```
 
-## Scripts Úteis
-### Operação
-- `scripts/ops/validate_infrastructure.py`
-- `scripts/ops/start_tunnel.py`
-- `scripts/ops/test_webhook_local.py`
-- `scripts/ops/verify_meta_tokens.py`
-- `scripts/ops/smoke_tests_prod.py`
-- `scripts/ops/backup_postgres.py`
-- `scripts/ops/backup_chroma.py`
-- `scripts/ops/backup_all.ps1`
+---
 
-### Banco de dados
-- `scripts/db/setup_db.py`
-- `scripts/db/setup_db.ps1`
-- `scripts/db/create_views.py`
-- `scripts/db/executar_views.py`
+## Variáveis de Ambiente Essenciais
 
-### Debug / QA
-- `scripts/debug/debug_rag_score.py`
-- `scripts/debug/debug_chroma.py`
-- `scripts/run_validation_test.py`
-- `scripts/run_bulk_chatbot.py`
+| Variável | Descrição |
+|----------|-----------|
+| `GEMINI_API_KEY` | Chave Google Gemini |
+| `DATABASE_URL` | `postgresql://user:pass@nexo-postgres:5432/core_saas_gov` |
+| `CHROMA_URL` | `http://nexo-chromadb:8000` |
+| `REDIS_URL` | `redis://nexo-redis:6379` |
+| `EMBEDDING_PROVIDER` | `default` \| `openai` \| `gemini` \| `qwen` |
+| `OPENROUTER_API_KEY` | Necessário para providers externos |
+
+---
 
 ## Endpoints Principais
-- `GET /` e `GET /health`
-- `POST /api/chat`
-- `POST /api/chat/simple`
-- `GET /analytics/summary`
-- `POST /webhook/meta`
-- `GET /metrics`
 
-## Documentação
+| Método | Rota | Descrição |
+|--------|------|-----------|
+| `GET` | `/health` | Health check |
+| `POST` | `/webhook/meta` | Entrada de eventos Instagram/Facebook |
+| `POST` | `/api/chat` | Chat direto (web widget) |
+| `GET` | `/analytics/summary` | Dashboard de auditoria |
+| `GET` | `/metrics` | Prometheus metrics |
+
+---
+
+## Arquivos de Especificação
+
 | Arquivo | Descrição |
 |---------|-----------|
-| `AGENTS.md` / `agents.md` | Contexto central do agente {bot_name} |
-| `docs/QUICKSTART_AGENT.md` | Guia rápido para agentes e manutenção |
-| `docs/estudo.md` | Regras de negócio e FAQs |
-| `docs/apoio_faq.md` | FAQs por cluster |
-| `docs/observability.md` | KPIs, métricas e alertas |
-| `docs/runbook.md` | Operação e incidentes |
-| `docs/deploy_guide.md` | Deploy em Windows/VPS |
-| `docs/guia_tokens_meta.md` | Tokens e configuração Meta |
-| `docs/meta_app_review_troubleshooting.md` | Guia para App Review da Meta |
-| `docs/infrastructure_validation.md` | Validação de infraestrutura |
-| `docs/db_setup.md` | Setup do banco de dados |
-| `docs/migrations/` | Changelogs de mudanças em servidor/banco |
-| `analytics/v1/views.sql` | Views SQL para dashboards |
-| `analytics/v1/queries.sql` | Consultas de auditoria |
+| `white-label-project/design.md` | Arquitetura alvo e diagramas de fluxo |
+| `white-label-project/requirements.md` | Requisitos funcionais e não-funcionais |
+| `white-label-project/task.md` | Plano de implementação faseado |
+| `progresso.md` | Rastreamento de sessões e marcos |
+| `PORTS.md` | Registro de alocação de portas da stack |
+| `GUIA_INFRA.md` | Guia de integração com a infra compartilhada |
+| `docs/deploy_guide.md` | Guia de deploy em VPS |
+| `docs/runbook.md` | Operação e resolução de incidentes |
+
+---
+
+## Estrutura de Diretórios
+
+```
+├── app/
+│   ├── api/              # Routers FastAPI
+│   ├── audit/            # Repository asyncpg (RLS-aware)
+│   ├── rag/              # Retriever, Ingest, Embeddings
+│   ├── tenant_context.py # contextvars para isolamento de tenant
+│   └── settings.py       # Configurações (pydantic-settings)
+├── db/
+│   ├── schema.sql        # Schema base
+│   └── migrations/       # Migrations versionadas
+│       └── 001_multi_tenant_rls.sql
+├── data/knowledge_base/  # Bases RAG (por tenant)
+├── white-label-project/  # Especificações do produto
+└── docker-compose.yml    # Apenas nexo-gov-api (sem DBs locais)
+```
+
+---
 
 ## Changelog
-### v0.7.2 (20/02/2026) - Embeddings semânticos (OpenRouter)
-- Robustez de embeddings com batch, retry/backoff e timeout configuráveis.
-- Seleção de modelo por provedor (`EMBEDDING_MODEL_GEMINI|OPENAI|QWEN`) e override global (`EMBEDDING_MODEL_OVERRIDE`).
-- Metadados de `embedding_provider`/`embedding_model` em ingestão RAG para rastreabilidade.
-- Auto-ingest do retriever ajustado para `data/knowledge_base/...` com fallback legado.
 
-### v0.7.1 (04/02/2026) - Integração Meta IG/FB
-- Separação de credenciais Meta por plataforma (Instagram/Facebook).
-- Webhook unificado em `POST /webhook/meta` com verificação de assinatura.
-- Rate limiting e headers de segurança aplicados por padrão.
+### v2.0.0 (05/03/2026) — Refatoração SaaS Multi-Tenant
+- Arquitetura migrada de monolítico single-tenant para **multi-tenant isolado**.
+- PostgreSQL com **Row-Level Security** (`001_multi_tenant_rls.sql`) e tabela `tenants`.
+- ChromaDB migrado de `PersistentClient` local para **HttpClient** centralizado (`nexo-chromadb`).
+- Novo módulo `app/tenant_context.py` com `contextvars` para propagação assíncrona de tenant.
+- `audit/repository.py`: injeção automática de `SET LOCAL app.tenant_id` em cada conexão.
+- `rag/retriever.py`: collections dinâmicas por tenant (`{tenant_id}_knowledge_base`).
+- `docker-compose.yml`: removido Caddy e Grafana; API conectada à `infra_nexo-network` na porta `8101`.
 
-### v0.7.0 (03/02/2026) - Fase 5.3: Schema DB & Analytics
-- **Banco de Dados**: Schema completo em `db/schema.sql` com tipos ENUM, tabelas normalizadas e índices.
-- **Analytics**: Queries SQL prontas (`analytics/v1/queries.sql`) e Views de observabilidade (`analytics/v1/views.sql`).
-- **Documentação**: Guia de troubleshooting para App Review do Meta (`docs/meta_app_review_troubleshooting.md`).
-- **Anonimização**: Nova tabela `usuarios_anonimos` para compliance LGPD.
+### v0.7.2 (20/02/2026) — Embeddings Semânticos (OpenRouter)
+- Robustez com batch, retry/backoff e timeout configuráveis.
+- Seleção de modelo por provedor e override global via env vars.
 
-### v0.6.0 (22/01/2026) - Fase 5.1: Saneamento e Organização
-- **Estrutura de Pastas**: Reorganização de scripts em `scripts/ops`, `scripts/db`, `scripts/debug` e base RAG em `data/knowledge_base`.
-- **Imports**: Ajuste de paths para compatibilidade com nova estrutura.
-- **RAG**: Otimização de Score/Top-K e correção de imports.
+### v0.7.0 (03/02/2026) — Schema DB & Analytics
+- Schema completo em `db/schema.sql` com tipos ENUM e índices.
+- Queries e views SQL (`analytics/v1/`).
+- Anonimização LGPD com `usuarios_anonimos`.
 
-### v0.5.0 (22/01/2026) - Fase 5: Melhorias RAG & Observabilidade
-- **Observabilidade**: Grafana integrado via Docker Compose.
-- **RAG**: Base enriquecida com "Emergências/Desastres" e "Zeladoria/Infraestrutura".
-- **Prompts**: Fallbacks mais claros, com proteção de dados em canais públicos.
-- **Testes**: Novo script `scripts/run_validation_test.py` para validação em massa.
+### v0.4.0 (15/01/2026) — Integração Meta API
+- Webhook unificado `POST /webhook/meta` com verificação de assinatura HMAC.
+- Pipeline completo validado: Webhook → Classifier → RAG → Resposta → Auditoria.
 
-### v0.4.0 (15/01/2025) - Fase 4: Integração Meta
-- Primeiro teste real bem-sucedido no Facebook Messenger.
-- Webhook `/webhook/meta` com assinatura HMAC e verify token.
-- Pipeline completo validado: Webhook -> Classifier -> RAG -> Resposta -> Auditoria.
+---
 
-### v0.3.0 (11/01/2025) - Fase 3
-- ClassifierService com fast patterns + fallback LLM.
-- PolicyGuard PRE/POST com detecção de saúde clínica e gatilhos de crise.
-- OrchestratorService com eventos de auditoria e seleção de resposta.
+## Compliance & Segurança
 
-### v0.2.0 (10/01/2025) - Fase 2
-- MarkdownIngester, RAGRetriever e RAGComposer.
-- Base de conhecimento inicial (BA-RAG-PILOTO-2026.01.v1).
+- **LGPD**: Coleta mínima. Direito ao Esquecimento via `DROP COLLECTION` por tenant.
+- **RLS**: Isolamento de dados garantido na camada de banco, independente do app.
+- **Policy Guard**: Protocolos de crise (suicídio/violência) com respostas estáticas.
+- **Disclaimer**: Obrigatório em todas as respostas. O assistente se identifica como IA.
 
-### v0.1.0 (10/01/2025) - Fase 1
-- Contratos (Enums, DTOs), Settings e schema PostgreSQL.
-- Sistema de prompts versionado.
-
-## Compliance e Segurança
-- Caráter informativo: não realiza atos administrativos.
-- LGPD: coleta mínima; ocultar PII em comentários públicos; retenção definida.
-- Policy Guard com gatilhos de crise (suicídio/violência), redirecionamentos e bloqueios.
-- Disclaimer obrigatório nas respostas.
+---
 
 ## Licença
-Projeto interno - Prefeitura de {client_name} (2026)
-#   c h a t - b o t - p r e f 
- 
- 
+
+Projeto Nexo Basis — Uso interno. © 2026

@@ -49,9 +49,9 @@ Este plano direciona a execução das tarefas para reestruturar completamente a 
 
 ### Fase 4: Operação, Limpeza, e Pipeline (Tempo Reservado: 2 Dias)
 
-- [ ] 8. Consolidar Automação Assíncrona RAG ETL 
-  - [ ] 8.1 Ajustar Crawler local fazendo iteração de Tenants via job agendado.
-  - [ ] 8.2 Criar o Script mock rápido `setup_demo_tenant.py` providenciando bot Dummy "Prefeitura de Nova Esperança" para GTM Vendas.
+- [x] 8. Consolidar Automação Assíncrona RAG ETL
+  - [x] 8.1 Ajustar Crawler local fazendo iteração de Tenants via job agendado. (`scripts/rag_etl_job.py` — itera tenants ativos do DB, ingere collection `{tenant_id}_knowledge_base`, suporta `--force` e `--tenant`)
+  - [x] 8.2 Criar o Script mock rápido `setup_demo_tenant.py` providenciando bot Dummy "Prefeitura de Nova Espeçana" para GTM Vendas. (`scripts/setup_demo_tenant.py` — cria base de conhecimento, faz upsert no DB e ingere no ChromaDB. Suporta `--reset` e `--dry-run`)
 
 - [ ] 9. Finalizar e Auditar Componentes Residuais
   - [ ] 9.1 Verificar Grafana Dashboards/Logs certificando-se de que os metadados de logs carregam atrelamento com o `tenant_id`.

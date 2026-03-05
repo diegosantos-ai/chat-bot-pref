@@ -1,0 +1,58 @@
+# Implementation Plan: Nexo Basis White-Label SaaS
+
+## Overview
+
+Este plano direciona a execução das tarefas para reestruturar completamente a arquitetura monolítica engessada do Chatbot TerezIA para um produto SaaS governamental. A arquitetura de implantação foi adaptada para plugar-se perfeitamente na *Nexo Shared Infraestrutura* (`infra_nexo-network`), abdicando de contêineres e volumes estatais locais no favor de delegar o tráfego ao Traefik (`80/443`) e os bancos às instâncias unificadas (`nexo-postgres` e `nexo-chromadb`), consumindo a porta host `8101`.
+
+**Stack Tecnológico:** Python, FastAPI, PostgreSQL unificado (RLS ativo), ChromaDB unificado, Traefik, Docker
+**Estratégia:** Subir base de fundação de dados -> Refatorar Rede/Docker -> Limpar códigos sujos na camada lógica -> Implementar Middleware FastAPI de Roteamento -> Abastecer e ligar a Ingestão de conhecimento automatizada.
+
+## Tasks
+
+### Fase 1: Adequação da Infraestrutura & Networking Compartilhado (Tempo Estimado: 1 Dia)
+
+- [ ] 1. Adequação de Contêineres (Docker Compose)
+  - [ ] 1.1 Remover a declaração de construção dos serviços `db`, `chromadb`, e quaisquer bases auxiliares do `docker-compose.yml` da raiz do chatbot.
+  - [ ] 1.2 Atualizar o serviço principal da API para usar a porta `8101:8000` em conformidade com o `PORTS.md`.
+  - [ ] 1.3 Renomear a API no compose para um nome aderente ao padrão (ex: `nexo-gov-api`).
+  - [ ] 1.4 Adicionar rede externa compartilhadora: `networks: infra-network: external: true, name: infra_nexo-network`.
+  
+- [ ] 2. Adequação de Variáveis de Conexões (.env)
+  - [ ] 2.1 Refatorar TODAS as URIs de configuração e inicialização (SQLAlchemy, Langchain Chroma Client, Redis Cache) para referenciar os contêineres hostnames (ex: `nexo-postgres`, `nexo-chromadb`, `nexo-redis`).
+
+### Fase 2: Fundação Multi-Tenant de Dados (Tempo Estimado: 2-3 Dias)
+
+- [ ] 3. Configurar Isolamento Lógico de Transações no PostgreSQL (Row-Level Security)
+  - [ ] 3.1 Criar migration para adicionar campo `tenant_id` VARCHAR(50) em tabelas-chave.
+  - [ ] 3.2 Criar tabelas core multi-tenant: `tenants`, `tenant_credentials`, e `tenant_configs`.
+  - [ ] 3.3 Habilitar funcionalidade `ENABLE ROW LEVEL SECURITY` criando *Policy* em TODAS tabelas sensíveis buscando `current_setting('app.tenant_id', true)`.
+  - [ ] 3.4 Escrever queries/scripts administrativos de mock bootstrapping.
+
+- [ ] 4. Configurar Separação de Vetores e Coleções via ChromaDB
+  - [ ] 4.1 Refatorar a inicialização da Collections no Retriever alterando para o formato dinâmico `{tenant_id}_knowledge_base`.
+  - [ ] 4.2 Blindar operações de RAG gerando Collections *lazily* na primeira requisição, se necessário.
+
+### Fase 3: Escudo de Camada Lógica via Middleware Web (Tempo Estimado: 2 Dias)
+
+- [ ] 5. Injetar Gestor de Contexto (`contextvars`) Python
+  - [ ] 5.1 Instanciar a variável contextvar de sessão atrelada globalmente.
+  - [ ] 5.2 Alterar dependência db (yield generator) para forçar o comando Postgres `SET LOCAL app.tenant_id = :tenant_id` na transição do request.
+
+- [ ] 6. Implementar Roteador Isolado de Eventos (API Middleware Webhook)
+  - [ ] 6.1 Codar Interceptor na entrada do endpoint RAIZ do Webhook do Meta.
+  - [ ] 6.2 Processar Payload -> Procurar Tenant da Página (LRU Cache/DB) -> Seta no Contextvar.
+  - [ ] 6.3 Desviar com 401 Unauthorized pacotes de Páginas sem Tenant logado.
+
+- [ ] 7. Refatoração de Templates Puxados do Banco
+  - [ ] 7.1 Mudar System Prompts literais para compor via placeholders (ex: `{client_name}`).
+  - [ ] 7.2 Migrar chaves hard-coded da Meta (PAGE_ACCESS_TOKEN) de forma para consumo do banco injetados na Sessão atual dinamicamente.
+
+### Fase 4: Operação, Limpeza, e Pipeline (Tempo Reservado: 2 Dias)
+
+- [ ] 8. Consolidar Automação Assíncrona RAG ETL 
+  - [ ] 8.1 Ajustar Crawler local fazendo iteração de Tenants via job agendado.
+  - [ ] 8.2 Criar o Script mock rápido `setup_demo_tenant.py` providenciando bot Dummy "Prefeitura de Nova Esperança" para GTM Vendas.
+
+- [ ] 9. Finalizar e Auditar Componentes Residuais
+  - [ ] 9.1 Verificar Grafana Dashboards/Logs certificando-se de que os metadados de logs carregam atrelamento com o `tenant_id`.
+  - [ ] 9.2 Realizar Handoff Final do Kiro de volta ao usuário.

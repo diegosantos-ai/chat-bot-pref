@@ -1,0 +1,91 @@
+.venv/Scripts/python.exe d:/Projetos/Deploy/pilot-atendimento/scripts/run_embedding_ab_test.py    
+
+============================================================
+TESTE A/B — EMBEDDING PROVIDERS
+============================================================
+Provedores: ['default', 'gemini', 'openai', 'qwen']
+Queries:    10
+Documentos: 8
+Top-K:      3
+
+
+[TEST] Testando provedor: default
+  [INGEST] Ingerindo 8 documentos para 'default'...
+     [OK] Ingestão concluída em 727ms
+  [OK] default: avg_score=0.5162, hit@3=90.0%, latency=73ms
+
+[TEST] Testando provedor: gemini
+  [INGEST] Ingerindo 8 documentos para 'gemini'...
+     [OK] Ingestão concluída em 2112ms
+  [OK] gemini: avg_score=0.7131, hit@3=100.0%, latency=1344ms
+
+[TEST] Testando provedor: openai
+  [INGEST] Ingerindo 8 documentos para 'openai'...
+     [OK] Ingestão concluída em 1636ms
+  [OK] openai: avg_score=0.5239, hit@3=100.0%, latency=1453ms
+
+[TEST] Testando provedor: qwen
+  [INGEST] Ingerindo 8 documentos para 'qwen'...
+     [OK] Ingestão concluída em 2325ms
+  [OK] qwen: avg_score=0.4751, hit@3=100.0%, latency=1455ms
+
+================================================================================
+================================================================================
+RELATÓRIO COMPARATIVO — EMBEDDING PROVIDERS A/B TEST
+================================================================================
+Provedor   | Modelo                              | Avg Score |  Hit@3 |   Latência |  Stddev 
+--------------------------------------------------------------------------------
+default    | chromadb-default (all-MiniLM-L6-v2  |    0.5162 |  90.0% |       73ms |  0.0943 
+gemini     | google/gemini-embedding-001         |    0.7131 | 100.0% |     1344ms |  0.0630 
+openai     | openai/text-embedding-3-large       |    0.5239 | 100.0% |     1453ms |  0.0935 
+qwen       | qwen/qwen3-embedding-8b             |    0.4751 | 100.0% |     1455ms |  0.0882 
+================================================================================
+================================================================================
+Provedor   | Modelo                              | Avg Score |  Hit@3 |   Latência |  Stddev 
+--------------------------------------------------------------------------------
+default    | chromadb-default (all-MiniLM-L6-v2  |    0.5162 |  90.0% |       73ms |  0.0943 
+gemini     | google/gemini-embedding-001         |    0.7131 | 100.0% |     1344ms |  0.0630 
+openai     | openai/text-embedding-3-large       |    0.5239 | 100.0% |     1453ms |  0.0935 
+qwen       | qwen/qwen3-embedding-8b             |    0.4751 | 100.0% |     1455ms |  0.0882 
+================================================================================
+Provedor   | Modelo                              | Avg Score |  Hit@3 |   Latência |  Stddev 
+--------------------------------------------------------------------------------
+default    | chromadb-default (all-MiniLM-L6-v2  |    0.5162 |  90.0% |       73ms |  0.0943 
+gemini     | google/gemini-embedding-001         |    0.7131 | 100.0% |     1344ms |  0.0630 
+openai     | openai/text-embedding-3-large       |    0.5239 | 100.0% |     1453ms |  0.0935 
+qwen       | qwen/qwen3-embedding-8b             |    0.4751 | 100.0% |     1455ms |  0.0882 
+================================================================================
+default    | chromadb-default (all-MiniLM-L6-v2  |    0.5162 |  90.0% |       73ms |  0.0943 
+gemini     | google/gemini-embedding-001         |    0.7131 | 100.0% |     1344ms |  0.0630 
+openai     | openai/text-embedding-3-large       |    0.5239 | 100.0% |     1453ms |  0.0935 
+qwen       | qwen/qwen3-embedding-8b             |    0.4751 | 100.0% |     1455ms |  0.0882 
+================================================================================
+gemini     | google/gemini-embedding-001         |    0.7131 | 100.0% |     1344ms |  0.0630 
+openai     | openai/text-embedding-3-large       |    0.5239 | 100.0% |     1453ms |  0.0935 
+qwen       | qwen/qwen3-embedding-8b             |    0.4751 | 100.0% |     1455ms |  0.0882 
+================================================================================
+openai     | openai/text-embedding-3-large       |    0.5239 | 100.0% |     1453ms |  0.0935 
+qwen       | qwen/qwen3-embedding-8b             |    0.4751 | 100.0% |     1455ms |  0.0882 
+================================================================================
+qwen       | qwen/qwen3-embedding-8b             |    0.4751 | 100.0% |     1455ms |  0.0882 
+================================================================================
+
+Legenda:
+================================================================================
+
+Legenda:
+
+Legenda:
+  Avg Score:  Score médio do chunk mais relevante por query (maior = melhor)
+Legenda:
+  Avg Score:  Score médio do chunk mais relevante por query (maior = melhor)
+  Avg Score:  Score médio do chunk mais relevante por query (maior = melhor)
+  Hit@3:      Taxa de acerto do doc esperado no top-3 (maior = melhor)
+  Latência:   Tempo médio de busca por query (menor = melhor)
+scriminativo)
+
+Destaques:
+   Maior score médio:     gemini
+   Maior hit rate:        gemini
+   Menor latência:        default
+   Mais discriminativo:   default

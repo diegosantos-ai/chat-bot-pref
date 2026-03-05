@@ -1,0 +1,8 @@
+{
+  "rag_config": {
+    "min_score": 0.51,
+    "top_k": 7,
+    "boost_enabled": true,
+    "boost_amount": 0.4
+  }
+}

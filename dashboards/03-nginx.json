@@ -1,0 +1,81 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TerezIA - Nginx",
+    "tags": ["nginx", "web-server", "logs"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "refresh": "10s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Requisicoes por Minuto",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 0, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "count_over_time({job=\"nginx\", logtype=\"access\"}[1m])"}]
+      },
+      {
+        "id": 2,
+        "title": "Erros 4xx",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 6, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "count_over_time({job=\"nginx\", logtype=\"access\"} |~ \"HTTP/[0-9]+ 4[0-9][0-9]\" [5m])"}]
+      },
+      {
+        "id": 3,
+        "title": "Erros 5xx",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 12, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "count_over_time({job=\"nginx\", logtype=\"access\"} |~ \"HTTP/[0-9]+ 5[0-9][0-9]\" [5m])"}]
+      },
+      {
+        "id": 4,
+        "title": "Bytes Transferidos (MB)",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 18, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "sum_over_time({job=\"nginx\"}[1h])"}]
+      },
+      {
+        "id": 5,
+        "title": "Requisicoes ao longo do tempo",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 3},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "rate({job=\"nginx\"}[5m])", "legendFormat": "req/s"}]
+      },
+      {
+        "id": 6,
+        "title": "Requisicoes ao Webhook /meta",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 0, "y": 9},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "count_over_time({job=\"nginx\", logtype=\"access\"} |= \"POST /webhook/meta\" [1h])"}]
+      },
+      {
+        "id": 7,
+        "title": "Erros do Nginx (error.log)",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "{job=\"nginx\", logtype=\"error\"}"}]
+      },
+      {
+        "id": 8,
+        "title": "Access Logs",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [{"expr": "{job=\"nginx\", logtype=\"access\"}"}]
+      }
+    ]
+  },
+  "overwrite": true
+}

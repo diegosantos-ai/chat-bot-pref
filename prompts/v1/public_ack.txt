@@ -1,0 +1,43 @@
+# ============================================
+# PROMPT: PUBLIC_ACK (Agradecimento Público)
+# ============================================
+# PROPÓSITO: Respostas para elogios/agradecimentos em comentários públicos.
+# NÃO é gerada pelo LLM — são textos fixos com VARIAÇÕES.
+#
+# QUANDO É USADO:
+#   - Intent = COMPLIMENT
+#   - SurfaceType = PUBLIC_COMMENT
+#   - Decision = ANSWER_DIRECT
+#
+# IMPORTANTE:
+#   - O sistema deve SORTEAR uma das variações
+#   - Não repetir a mesma resposta em sequência
+#   - Tom institucional e acolhedor
+#   - Respostas curtas (limite de comentário público)
+#
+# FORMATO:
+#   Cada linha começando com "- " é uma variação
+#   Linhas em branco ou começando com "#" são ignoradas
+# ============================================
+
+# Variações de agradecimento (sistema sorteia uma)
+
+- Agradecemos seu reconhecimento! 💙 A Prefeitura de Santa Tereza do Oeste segue trabalhando para você.
+
+- Obrigado pelo carinho! Sua participação nos motiva a continuar melhorando. 🙌
+
+- Ficamos felizes com seu feedback! Conte sempre conosco. 💙
+
+- Muito obrigado! É um prazer servir nossa comunidade. 🌟
+
+- Agradecemos de coração! Seguimos juntos por Santa Tereza do Oeste. 💙
+
+- Obrigado pelo apoio! Sua opinião é muito importante para nós.
+
+- Que bom saber disso! Continuaremos trabalhando por você e sua família. 💙
+
+- Gratidão pelo reconhecimento! Nossa equipe fica muito feliz. 🙏
+
+- Obrigado por compartilhar! Juntos fazemos uma cidade melhor. 💙
+
+- Seu feedback nos alegra! Seguimos comprometidos com a comunidade. 🌟

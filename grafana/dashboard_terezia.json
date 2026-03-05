@@ -1,0 +1,61 @@
+{
+  "title": "TerezIA - Operacional",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Latência p95 (ms) - 24h",
+      "datasource": {"type": "postgres", "uid": "dfaki4kt6c268d"},
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT canal, PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY tempo_resposta_ms) AS p95_ms\nFROM audit_events\nWHERE criado_em >= now() - INTERVAL '24 hours'\nGROUP BY canal\nORDER BY p95_ms DESC;",
+          "refId": "A"
+        }
+      ],
+      "options": {"reduceOptions": {"fields": "", "values": true, "calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "stat",
+      "title": "Fallback rate por canal (24h)",
+      "datasource": {"type": "postgres", "uid": "dfaki4kt6c268d"},
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT canal,\n  ROUND(100.0 * SUM(CASE WHEN tipo_resposta = 'FALLBACK' THEN 1 ELSE 0 END) / NULLIF(COUNT(*),0), 2) AS fallback_rate\nFROM audit_events\nWHERE criado_em >= now() - INTERVAL '24 hours'\nGROUP BY canal\nORDER BY fallback_rate DESC;",
+          "refId": "A"
+        }
+      ],
+      "options": {"reduceOptions": {"fields": "", "values": true, "calcs": ["lastNotNull"]}}
+    },
+    {
+      "type": "table",
+      "title": "Erros por canal (24h)",
+      "datasource": {"type": "postgres", "uid": "dfaki4kt6c268d"},
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT canal, COUNT(*) AS erros\nFROM audit_events\nWHERE criado_em >= now() - INTERVAL '24 hours' AND codigo_erro IS NOT NULL\nGROUP BY canal\nORDER BY erros DESC;",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Falhas RAG (sem docs) - 24h",
+      "datasource": {"type": "postgres", "uid": "dfaki4kt6c268d"},
+      "targets": [
+        {
+          "format": "table",
+          "rawSql": "SELECT e.criado_em, e.canal, r.top_k, r.quantidade_documentos, r.sem_documentos, r.melhor_score\nFROM rag_queries r\nJOIN audit_events e ON e.id_requisicao = r.id_requisicao\nWHERE e.criado_em >= now() - INTERVAL '24 hours' AND r.sem_documentos = TRUE\nORDER BY e.criado_em DESC LIMIT 50;",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}

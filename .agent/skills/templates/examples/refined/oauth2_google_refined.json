@@ -1,0 +1,27 @@
+{
+  "name": "OAuth2 — Google (refinado)",
+  "active": false,
+  "nodes": [
+    {
+      "parameters": { "httpMethod": "GET", "path": "oauth2-start" },
+      "name": "Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 250]
+    },
+    {
+      "parameters": { "authentication": "oAuth2", "url": "https://www.googleapis.com/oauth2/v3/userinfo" },
+      "name": "HTTP Request - Google",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [450, 250],
+      "credentials": { "oAuth2Api": { "name": "cred-google-oauth" } }
+    },
+    { "parameters": { "operation": "set", "values": { "string": [ { "name": "note", "value": "Usuário autenticado via OAuth2 Google" } ] } },
+      "name": "Set — info",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [700, 250] }
+  ],
+  "connections": { "Trigger": { "main": [[{"node":"HTTP Request - Google","type":"main","index":0}]] }, "HTTP Request - Google": { "main": [[{"node":"Set — info","type":"main","index":0}]] } }
+}

@@ -1,0 +1,4 @@
+interface:
+  display_name: "RAG Learning Optimizer"
+  short_description: "Optimize RAG quality, training, and response behavior"
+  default_prompt: "Use $rag-learning-optimizer to diagnose and improve this assistant's retrieval, training loop, and response quality with measurable gates."

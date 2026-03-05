@@ -1,0 +1,11 @@
+{
+  "name": "Authy — OTP send/verify (refinado)",
+  "active": false,
+  "nodes": [
+    { "parameters": { "httpMethod": "POST", "path": "authy-send" }, "name": "Trigger - send", "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 200] },
+    { "parameters": { "requestMethod": "POST", "url": "https://api.authy.com/protected/json/phones/verification/start", "jsonParameters": true, "bodyParametersJson": "={\"country_code\": $json[\"country_code\"], \"phone_number\": $json[\"phone\"], \"via\": \"sms\"}", "options": {} }, "name": "HTTP Request - Authy Send", "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [450, 200], "credentials": { "httpRequest": { "name": "cred-authy" } } },
+    { "parameters": { "httpMethod": "POST", "path": "authy-verify" }, "name": "Trigger - verify", "type": "n8n-nodes-base.webhook", "typeVersion": 1, "position": [200, 450] },
+    { "parameters": { "requestMethod": "GET", "url": "=https://api.authy.com/protected/json/phones/verification/check?country_code={{$json[\"country_code\"]}}&phone_number={{$json[\"phone\"]}}&verification_code={{$json[\"code\"]}}", "options": {} }, "name": "HTTP Request - Authy Verify", "type": "n8n-nodes-base.httpRequest", "typeVersion": 1, "position": [450, 450], "credentials": { "httpRequest": { "name": "cred-authy" } } }
+  ],
+  "connections": { "Trigger - send": { "main": [[{"node":"HTTP Request - Authy Send","type":"main","index":0}]] }, "Trigger - verify": { "main": [[{"node":"HTTP Request - Authy Verify","type":"main","index":0}]] } }
+}

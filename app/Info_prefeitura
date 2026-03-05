@@ -1,0 +1,104 @@
+Segue a coleta das informações solicitadas a partir do site oficial da Prefeitura de Santa Tereza do Oeste e de fontes institucionais relacionadas. Para cada item, indico o dado encontrado, a classificação (Apto/Restrito/Inexistente) e a fonte oficial correspondente.
+1️⃣ Horários de funcionamento (tipo de intenção: SCHEDULE_QUERY)
+Dado solicitado
+Informação encontrada
+Classificação
+Fonte
+Horário geral da Prefeitura
+Segunda a sexta-feira das 8h às 12h e das 13h às 17h (intervalo das 12h às 13h).
+Apto (horário oficial publicado).
+O rodapé do site oficial informa o telefone da prefeitura e os horários de atendimento: segunda a sexta das 8h às 12h e das 13h às 17h.
+Horário de atendimento ao público
+Mesmo horário: 8h–12h e 13h–17h de segunda a sexta-feira.
+Apto.
+Idem acima.
+Funciona aos sábados?
+Não. O horário indicado aplica-se apenas de segunda a sexta-feira; não há atendimento nos finais de semana.
+Apto.
+O site especifica atendimento de 2ª à 6ª.
+Funciona aos domingos?
+Não.
+Apto.
+Idem acima.
+Horários de setores específicos
+Alguns serviços seguem horários iguais ao geral (8h–12h/13h–17h). A página da Sala do Empreendedor confirma atendimento de segunda a sexta das 8h às 12h e das 13h às 17h. O Centro de Referência Covid atende das 7h30 às 11h30 e das 13h às 17h.
+Apto para Sala do Empreendedor (mesmo horário oficial). Outras variações (como a do Covid) são Restritas, pois aplicam-se a setores específicos.
+Sala do Empreendedor; página de Covid.
+Observações oficiais
+Há intervalo de uma hora para almoço (12h–13h) e atendimento apenas em dias úteis.
+Apto.
+Informado no site.
+
+2️⃣ Contatos institucionais (tipo de intenção: CONTACT_REQUEST)
+Dado solicitado
+Informação encontrada
+Classificação
+Fonte
+Telefone geral
+(45) 3124‑1000.
+Apto.
+Rodapé do site oficial.
+Telefones por setor
+Secretaria de Ação Social: (45) 3124‑1030; Conselho Tutelar: (45) 3124‑1035; CRAS (Centro de Referência em Assistência Social): (45) 3124‑1075; Secretaria de Meio Ambiente: (45) 3124‑1095; Secretaria de Agricultura: (45) 3124‑1090; DETRAN (local): (45) 3124‑1016; Sala do Empreendedor: (45) 3124‑1004; Ouvidoria: (45) 3124‑1028; Centro de Referência Covid: (45) 3124‑1020; Vigilância Sanitária: (45) 3124‑1093.
+Apto (lista de secretarias/departamentos disponível).
+Lista de telefones de secretarias e departamentos; Sala do Empreendedor; Ouvidoria; página Covid.
+E‑mail institucional
+prefeitura@santatereza.pr.gov.br.
+Apto.
+Rodapé do site.
+Endereço completo
+Avenida Paraná, 61 – Centro, CEP 85825‑000, Santa Tereza do Oeste – PR.
+Apto.
+Rodapé do site.
+CEP
+85825‑000.
+Apto.
+Rodapé do site.
+WhatsApp institucional
+(45) 3124‑1000.
+Apto
+número institucional.
+Redes sociais oficiais
+Facebook: facebook.com/profile.php?id=100015085690388; Instagram: instagram.com/santaterezapref/; YouTube: youtube.com/channel/UCbFcNYgDjN7Btkyhrf5YtsQ.
+Apto.
+Código-fonte do site (rodapé e barra lateral).
+Site oficial
+https://www.santatereza.pr.gov.br/.
+Apto.
+Endereço principal do portal municipal.
+
+3️⃣ Informações sobre serviços (tipo de intenção: INFO_REQUEST)
+3.1 Secretarias/Setores e serviços oferecidos: O portal possui seções para cada secretaria, mas o conteúdo detalhado dos serviços (ex.: atribuições, documentos exigidos, local de atendimento) não está estruturado em uma tabela oficial de fácil extração. As únicas informações disponíveis são contatos das secretarias e departamentos.
+Classificação: Restrito/Inexistente para esta etapa, pois não há base oficial consolidada dos serviços por secretaria.
+3.2 Detalhamento por serviço: Não há listas institucionais no site informando, por serviço, a descrição, documentos exigidos ou local de atendimento.
+Classificação: Inexistente para a Base Apta; qualquer detalhamento dependerá da criação de conteúdo oficial.
+4️⃣ Informações gerais do município (opcional)
+Dado
+Informação encontrada
+Classificação
+Fonte
+Nome completo do município
+Santa Tereza do Oeste.
+Apto.
+Nome oficial no portal municipal.
+Estado
+Paraná (PR).
+Apto.
+Consta no endereço oficial.
+Nome do prefeito atual
+Amarildo Rigolin (Prefeito), Marcos Aurelio Alves (Vice-Prefeito).
+Apto.
+Página de Legislaturas da Câmara Municipal: para a legislatura 2025-2028, o prefeito listado é Amarildo Rigolin e o vice é Marcos Aurelio Alves.
+Período da gestão atual
+2025‑2028 (10ª legislatura municipal).
+Apto.
+Mesma página legislativa.
+
+5️⃣ Validação da fonte
+Todos os dados acima foram extraídos de:
+Site oficial da Prefeitura de Santa Tereza do Oeste (santatereza.pr.gov.br) – rodapé, páginas de COVID e telefones.
+Páginas institucionais específicas para Sala do Empreendedor, Ouvidoria e listas de telefones de secretarias.
+Câmara Municipal de Santa Tereza do Oeste – seção de Legislaturas, que informa o prefeito e o período de mandato.
+Código-fonte do site municipal – para identificar as redes sociais oficiais.
+Caso algum item não conste nas fontes oficiais ou esteja incompleto, ele foi classificado como Inexistente ou Restrito, indicando a necessidade de validação ou criação de conteúdo oficial antes de ser utilizado na Base Apta.
+

@@ -1,0 +1,238 @@
+{
+  "id": "BA-RAG-PILOTO-2026.01.v1",
+  "name": "Base de Conhecimento - Prefeitura de Santa Tereza do Oeste",
+  "version": "1.0",
+  "created_at": "2026-01-11",
+  "scope": "MVE_PILOT",
+  "frozen_for_pilot": true,
+  "source": {
+    "origin": "Site oficial da Prefeitura",
+    "url": "https://www.santatereza.pr.gov.br/",
+    "extraction_date": "2026-01-11",
+    "validation_status": "approved"
+  },
+  "items": [
+    {
+      "id": "0001",
+      "file": "0001_horarios.md",
+      "title": "Horários de Funcionamento",
+      "intents": [
+        "SCHEDULE_QUERY"
+      ],
+      "keywords": [
+        "horário",
+        "funcionamento",
+        "abre",
+        "fecha",
+        "atendimento",
+        "sábado",
+        "domingo",
+        "ônibus",
+        "itinerário",
+        "transporte"
+      ]
+    },
+    {
+      "id": "0002",
+      "file": "0002_contatos.md",
+      "title": "Contatos Gerais",
+      "intents": [
+        "CONTACT_REQUEST"
+      ],
+      "keywords": [
+        "telefone",
+        "email",
+        "endereço",
+        "contato",
+        "whatsapp",
+        "redes sociais",
+        "procon"
+      ]
+    },
+    {
+      "id": "0003",
+      "file": "0003_secretarias.md",
+      "title": "Secretarias e Departamentos",
+      "intents": [
+        "INFO_REQUEST",
+        "CONTACT_REQUEST"
+      ],
+      "keywords": [
+        "secretaria",
+        "departamento",
+        "setor",
+        "responsável",
+        "secretário"
+      ]
+    },
+    {
+      "id": "0004",
+      "file": "0004_saude.md",
+      "title": "Unidades de Saúde",
+      "intents": [
+        "INFO_REQUEST",
+        "CONTACT_REQUEST"
+      ],
+      "keywords": [
+        "saúde",
+        "UBS",
+        "PSF",
+        "posto",
+        "médico",
+        "consulta",
+        "pronto atendimento",
+        "dentista",
+        "odontologia",
+        "caps",
+        "castração"
+      ]
+    },
+    {
+      "id": "0005",
+      "file": "0005_empreendedor.md",
+      "title": "Sala do Empreendedor",
+      "intents": [
+        "INFO_REQUEST"
+      ],
+      "keywords": [
+        "MEI",
+        "empreendedor",
+        "empresa",
+        "alvará",
+        "CNPJ",
+        "nota fiscal"
+      ]
+    },
+    {
+      "id": "0006",
+      "file": "0006_tributacao.md",
+      "title": "Tributação e Fazenda",
+      "intents": [
+        "INFO_REQUEST",
+        "PROCEDURE_QUERY"
+      ],
+      "keywords": [
+        "IPTU",
+        "imposto",
+        "taxa",
+        "alvará",
+        "ISS",
+        "nota fiscal",
+        "dívida ativa",
+        "REFIS",
+        "lixo",
+        "carnê",
+        "desconto"
+      ]
+    },
+    {
+      "id": "0007",
+      "file": "0007_assistencia_social.md",
+      "title": "Assistência Social",
+      "intents": [
+        "INFO_REQUEST",
+        "PROCEDURE_QUERY"
+      ],
+      "keywords": [
+        "CRAS",
+        "CREAS",
+        "bolsa família",
+        "cadastro único",
+        "auxílio",
+        "cesta básica",
+        "conselho tutelar"
+      ]
+    },
+    {
+      "id": "0008",
+      "file": "0008_educacao.md",
+      "title": "Educação e Cultura",
+      "intents": [
+        "INFO_REQUEST",
+        "PROCEDURE_QUERY",
+        "SCHEDULE_QUERY"
+      ],
+      "keywords": [
+        "escola",
+        "matrícula",
+        "creche",
+        "CMEI",
+        "transporte escolar",
+        "vaga",
+        "inscrição",
+        "material escolar",
+        "lista espera",
+        "cultura",
+        "esporte"
+      ]
+    },
+    {
+      "id": "0009",
+      "file": "0009_emergencias_desastres.md",
+      "title": "Emergências e Desastres",
+      "intents": [
+        "COMPLAINT",
+        "INFO_REQUEST"
+      ],
+      "keywords": [
+        "bombeiros",
+        "samu",
+        "defesa civil",
+        "enchente",
+        "incêndio",
+        "polícia",
+        "emergência"
+      ]
+    },
+    {
+      "id": "0010",
+      "file": "0010_zeladoria_infraestrutura.md",
+      "title": "Zeladoria e Infraestrutura",
+      "intents": [
+        "COMPLAINT",
+        "INFO_REQUEST",
+        "SCHEDULE_QUERY"
+      ],
+      "keywords": [
+        "buraco",
+        "lâmpada",
+        "iluminação",
+        "lixo",
+        "entulho",
+        "poda",
+        "asfalto",
+        "obras",
+        "pavimentação",
+        "dengue",
+        "terreno",
+        "lombada"
+      ]
+    },
+    {
+      "id": "0011",
+      "file": "0011_protocolos_governanca.md",
+      "title": "Protocolos de Governança e Ética",
+      "intents": [
+        "COMPLAINT",
+        "INFO_REQUEST"
+      ],
+      "keywords": [
+        "politica",
+        "privacidade",
+        "crise",
+        "agua",
+        "reclamação",
+        "prefeito",
+        "ouvidoria",
+        "falta de água",
+        "sanepar"
+      ]
+    }
+  ],
+  "metadata": {
+    "total_items": 11,
+    "language": "pt-BR",
+    "institution": "Prefeitura de Santa Tereza do Oeste",
+    "state": "Paraná"
+  }
+}

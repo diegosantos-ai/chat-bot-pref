@@ -1,0 +1,44 @@
+name: Add Issues to Project
+
+on:
+  workflow_dispatch:
+    inputs:
+      project_id:
+        description: 'Project GraphQL id (ex: PVT_kwHODI7RY84BM1k1)'
+        required: true
+      csv_path:
+        description: 'Path to CSV mapping (repo-relative)'
+        required: false
+        default: 'artifacts/issues_mapping.csv'
+
+jobs:
+  add-to-project:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: python -m pip install requests
+
+      - name: Run add script
+        env:
+          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          python scripts/action_add_issues.py --project-id "${{ github.event.inputs.project_id }}" --csv "${{ github.event.inputs.csv_path }}"
+      
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-artifacts
+          path: |
+            artifacts/failed_items.csv
+            artifacts/add_issues_graphql_attempts.sh
+            artifacts/open_issue_urls.sh

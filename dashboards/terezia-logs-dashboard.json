@@ -1,0 +1,151 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TerezIA - Central de Logs",
+    "tags": ["logs", "loki", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "templating": {
+      "list": [
+        {
+          "name": "job",
+          "type": "query",
+          " datasource": {"type": "loki", "uid": "${loki}"},
+          "query": "label_values(job)",
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*"
+        },
+        {
+          "name": "unit",
+          "type": "query",
+          " datasource": {"type": "loki", "uid": "${loki}"},
+          "query": "label_values(unit)",
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*"
+        },
+        {
+          "name": "container",
+          "type": "query",
+          " datasource": {"type": "loki", "uid": "${loki}"},
+          "query": "label_values(container)",
+          "multi": true,
+          "includeAll": true,
+          "allValue": ".*"
+        }
+      ]
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Visão Geral - Todos os Logs",
+        "type": "logs",
+        "gridPos": {"h": 10, "w": 24, "x": 0, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{job=~\"$job\"} |= \"\"",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "showTime": true,
+          "wrapLogMessage": true,
+          "sortOrder": "Descending"
+        }
+      },
+      {
+        "id": 2,
+        "title": "Logs - TerezIA API",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{unit=\"terezia-api.service\"}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Logs - Nginx",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 10},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{job=\"nginx\"}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Logs - N8N",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 18},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{container=\"n8n-n8n-1\"}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Logs - PostgreSQL",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 18},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{job=\"postgresql\"}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Volume de Logs por Job",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 26},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "sum by (job) (rate({job=~\"$job\"}[5m]))",
+            "refId": "A",
+            "legendFormat": "{{job}}"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "Bps"
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Erros TerezIA API",
+        "type": "logs",
+        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 32},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{unit=\"terezia-api.service\"} |= \"ERROR\" or \"CRITICAL\" or \"EXCEPTION\"",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  },
+  "folderId": 0,
+  "overwrite": true
+}

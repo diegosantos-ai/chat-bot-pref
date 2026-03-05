@@ -1,0 +1,45 @@
+Boas práticas de engenharia de dados para uso do banco (manutenção/iteração)
+
+Modelagem e versionamento
+
+Use migrações (Alembic) em vez de aplicar .sql manual; versionamento semântico e rollback testado.
+Defina “data contracts” estáveis entre app e BD (enums, tipos, colunas) com compatibilidade retroativa.
+Padronize chaves idempotentes e constraints NOT NULL/CHECK para garantir integridade.
+Observabilidade e confiabilidade
+
+Métricas: taxa de inserts, latência, erros, saturação do pool, dead-letter de gravação.
+Logs com correlação (request_id, external_message_id) e amostragem para reduzir custo.
+Retries com backoff e circuit breaker; fila assíncrona (outbox/Redis/Kafka) se o BD estiver indisponível.
+Desempenho e escalabilidade
+
+Índices alinhados às consultas (created_at, intent, response_type, channel); use índices parciais para colunas raras (erros).
+Particionamento por tempo em tabelas de alto volume (audit_events por mês) ou TimescaleDB.
+Plano de manutenção: VACUUM/ANALYZE, autovacuum tuning e EXPLAIN para queries críticas.
+Evite dashboards pesados no OLTP; materialize visões para analytics.
+Governança, LGPD e segurança
+
+Minimização de PII; pseudonimização/hash; mascaramento em ambientes de teste.
+Segregação de ambientes; credenciais com privilégios mínimos e rotação periódica.
+Criptografia em trânsito (TLS) e, se possível, em repouso; políticas de retenção/expurgo (ex.: 180 dias bruto → agregados).
+Catálogo e dicionário de dados; use COMMENT ON para documentar colunas (já iniciado no schema).
+Arquitetura de dados para analytics
+
+Camada de leitura (views/materialized views) separada do esquema operacional.
+ELT/CDC para data warehouse (dbt + Airflow/Prefect) e métricas reprodutíveis.
+Tabelas de fatos/dimensões derivadas de audit_events e rag_queries para BI.
+Testes e qualidade
+
+Testes de integração com banco efêmero (Testcontainers) e fixtures determinísticas.
+Seeds controlados para ambientes de dev/homolog; lint/estilo SQL e revisão de migrações.
+KPIs de qualidade: taxa de fallback, top_score RAG, p95 de resposta, erros por canal.
+Backups e DR
+
+Backups automáticos verificados por restore periódico; RPO/RTO definidos.
+Scripts de recuperação e checklist de contingência documentados.
+Próximos passos recomendados
+
+Adotar Alembic para migrações versionadas.
+Particionar audit_events por mês e criar políticas de retenção/expurgo.
+Criar views/materialized views para consultas em queries.sql.
+Implementar retries com backoff + outbox para gravações de auditoria.
+Painel com métricas-chave (taxa de insert, latência, erros, pool usage) e alertas.

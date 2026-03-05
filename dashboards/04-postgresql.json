@@ -1,0 +1,177 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TerezIA - PostgreSQL",
+    "tags": ["postgresql", "database", "logs"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "templating": {
+      "list": []
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Status do PostgreSQL",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 0, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"postgresql.*\"}[5m])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 0}
+              ]
+            },
+            "mappings": [
+              {"options": {"0": {"text": "Offline", "color": "red"}}, "type": "value"},
+              {"options": {"from": 1, "to": 999999}, "type": "range", "result": {"text": "Online", "color": "green"}}
+            ]
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Conexões/Queries (última hora)",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 8, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"postgresql.*\"}[1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Erros do PostgreSQL",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 16, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"postgresql.*\"} |= \"ERROR\" or \"FATAL\" or \"PANIC\" [1h])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Atividade ao Longo do Tempo",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 3},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "rate({job=\"systemd-journal\", unit=~\"postgresql.*\"}[5m])",
+            "refId": "A",
+            "legendFormat": "Logs/min"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Tipos de Log",
+        "type": "piechart",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 3},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "sum by (level) (count_over_time({job=\"systemd-journal\", unit=~\"postgresql.*\"}[1h]))",
+            "refId": "A",
+            "legendFormat": "{{level}}"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Conexões Aceitas",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 0, "y": 9},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"postgresql.*\"} |= \"connection authorized\" [1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Checkpoints",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 8, "y": 9},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"postgresql.*\"} |= \"checkpoint\" [1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Vacuum/Autovacuum",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 16, "y": 9},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"postgresql.*\"} |= \"vacuum\" [1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Erros e Warnings",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{job=\"systemd-journal\", unit=~\"postgresql.*\"} |= \"ERROR\" or \"WARNING\" or \"FATAL\"",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Todos os Logs do PostgreSQL",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{job=\"systemd-journal\", unit=~\"postgresql.*\"}",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

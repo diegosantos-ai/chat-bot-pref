@@ -1,0 +1,19 @@
+[Unit]
+Description=TerezIA API Service
+After=network.target postgresql.service docker.service
+Requires=postgresql.service docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/pilot-atendimento
+Environment="PATH=/root/pilot-atendimento/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=/root/pilot-atendimento/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=always
+RestartSec=5s
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=terezia-api
+
+[Install]
+WantedBy=multi-user.target

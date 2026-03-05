@@ -1,0 +1,185 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "TerezIA - N8N",
+    "tags": ["n8n", "workflow", "automation", "logs"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "templating": {
+      "list": []
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Status do N8N",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 0, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"}[5m])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "red", "value": 0}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Logs (última hora)",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 6, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"}[1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Erros",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 12, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"} |= \"error\" or \"ERROR\" [1h])",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "steps": [
+                {"color": "green", "value": null},
+                {"color": "yellow", "value": 1},
+                {"color": "red", "value": 10}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Workflows Executados",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 6, "x": 18, "y": 0},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"} |= \"Workflow\" or \"workflow\" [1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Atividade ao Longo do Tempo",
+        "type": "timeseries",
+        "gridPos": {"h": 6, "w": 12, "x": 0, "y": 3},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "rate({job=\"systemd-journal\", unit=~\"docker-n8n.*\"}[5m])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Níveis de Log",
+        "type": "piechart",
+        "gridPos": {"h": 6, "w": 12, "x": 12, "y": 3},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "sum by (level) (count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"}[1h]))",
+            "refId": "A",
+            "legendFormat": "{{level}}"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Inicializações",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 0, "y": 9},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"} |= \"n8n ready\" or \"Editor is now accessible\" [1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Webhooks Recebidos",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 8, "y": 9},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"} |= \"webhook\" [1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Conexões HTTP",
+        "type": "stat",
+        "gridPos": {"h": 3, "w": 8, "x": 16, "y": 9},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "count_over_time({job=\"systemd-journal\", unit=~\"docker-n8n.*\"} |= \"GET\" or \"POST\" or \"PUT\" or \"DELETE\" [1h])",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Erros e Warnings",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 12},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{job=\"systemd-journal\", unit=~\"docker-n8n.*\"} |= \"error\" or \"ERROR\" or \"warning\" or \"WARNING\"",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Todos os Logs do N8N",
+        "type": "logs",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 12},
+        "datasource": {"type": "loki", "uid": "${loki}"},
+        "targets": [
+          {
+            "expr": "{job=\"systemd-journal\", unit=~\"docker-n8n.*\"}",
+            "refId": "A"
+          }
+        ]
+      }
+    ]
+  },
+  "overwrite": true
+}

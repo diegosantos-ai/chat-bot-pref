@@ -1,11 +1,20 @@
 """
-Prompt Loader — Pilot Atendimento MVE
-======================================
-Versão: v1.0
-Escopo: MVE_PILOT
+Prompt Loader — Nexo Basis Governador SaaS
+==========================================
+Versão: v2.0
+Escopo: SAAS_MULTI_TENANT
 
-Carrega e gerencia prompts do sistema.
-Suporta variações com seleção aleatória sem repetição.
+Carrega e gerencia prompts do sistema com suporte a:
+- Substituição de placeholders por variáveis do tenant ({{bot_name}}, {{client_name}}, etc.)
+- Seleção aleatória de variações sem repetição por sessão
+
+Uso básico (com variáveis de tenant injetadas automaticamente):
+    from app.prompts import get_tenant_prompt
+    text = await get_tenant_prompt("greeting")
+
+Uso manual (sem tenant context, ex: testes):
+    from app.prompts import get_prompt
+    text = get_prompt("greeting", variables={"bot_name": "TestBot"})
 """
 
 import os
@@ -260,3 +269,36 @@ def get_blocked() -> str:
 def get_escalate() -> str:
     """Obtém mensagem de escalonamento."""
     return get_prompt("escalate")
+
+
+# ============================================================
+# API MULTI-TENANT: prompts com vars do tenant injetadas
+# ============================================================
+
+async def get_tenant_prompt(
+    prompt_key: str,
+    session_id: Optional[str] = None,
+    extra_vars: Optional[Dict[str, str]] = None,
+) -> str:
+    """
+    Versão multi-tenant de `get_prompt`.
+
+    Busca automaticamente as variáveis de identidade do tenant ativo
+    (bot_name, client_name, contact_phone, etc.) e substitui os
+    placeholders {{variable}} no template do prompt.
+
+    Args:
+        prompt_key: Chave do prompt (ex: "greeting", "fallback").
+        session_id: ID de sessão para controle de variações sem repetição.
+        extra_vars: Variáveis adicionais a injetar além das do tenant.
+
+    Returns:
+        Texto do prompt com todos os placeholders substituídos.
+    """
+    from app.tenant_config import get_prompt_vars
+
+    tenant_vars = await get_prompt_vars()
+    variables = {**tenant_vars, **(extra_vars or {})}
+
+    return get_prompt(prompt_key, variables=variables, session_id=session_id)
+

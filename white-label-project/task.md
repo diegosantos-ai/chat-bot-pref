@@ -43,9 +43,9 @@ Este plano direciona a execução das tarefas para reestruturar completamente a 
   - [x] 6.2 Processar Payload -> Procurar Tenant da Página (LRU Cache/DB) -> Seta no Contextvar. (`app/tenant_resolver.py` + `tenant_context.set_tenant()`)
   - [x] 6.3 Desviar com blocagem silenciosa pacotes de Páginas sem Tenant logado. (páginas sem tenant são ignoradas; evento não é despachado)
 
-- [ ] 7. Refatoração de Templates Puxados do Banco
-  - [ ] 7.1 Mudar System Prompts literais para compor via placeholders (ex: `{client_name}`).
-  - [ ] 7.2 Migrar chaves hard-coded da Meta (PAGE_ACCESS_TOKEN) de forma para consumo do banco injetados na Sessão atual dinamicamente.
+- [x] 7. Refatoração de Templates Puxados do Banco
+  - [x] 7.1 Mudar System Prompts literais para compor via placeholders (ex: `{client_name}`). (`get_tenant_prompt()` em `app/prompts/__init__.py` injeta vars do tenant automaticamente)
+  - [x] 7.2 Migrar chaves hard-coded da Meta (PAGE_ACCESS_TOKEN) de forma para consumo do banco injetados na Sessão atual dinamicamente. (`MetaSender._get_access_token()` agora é async e usa `TenantConfig`. Credenciais armazenadas em `tenant_credentials` via migration `002_*.sql`)
 
 ### Fase 4: Operação, Limpeza, e Pipeline (Tempo Reservado: 2 Dias)
 

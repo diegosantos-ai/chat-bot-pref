@@ -1,10 +1,12 @@
 """
-Meta Sender — Pilot Atendimento MVE
-====================================
-Versão: v1.0
-Escopo: MVE_PILOT
+Meta Sender — Nexo Basis Governador SaaS
+=========================================
+Versão: v2.0
+Escopo: SAAS_MULTI_TENANT
 
 Abstração para envio de mensagens via APIs do Instagram e Facebook.
+Os tokens de acesso são carregados dinamicamente do banco por tenant
+(via TenantConfig), com fallback para as variáveis de ambiente globais.
 """
 
 import logging
@@ -34,8 +36,21 @@ class MetaSender:
             return settings.META_PAGE_ID_INSTAGRAM or settings.META_PAGE_ID
         return settings.META_PAGE_ID_FACEBOOK or settings.META_PAGE_ID
 
-    def _get_access_token(self, channel: Channel) -> str:
-        """Retorna o token correto baseado no canal."""
+    async def _get_access_token(self, channel: Channel) -> str:
+        """
+        Retorna o access token Meta para o canal.
+        Prioridade: 1) TenantConfig (banco) → 2) env vars (fallback dev).
+        """
+        try:
+            from app.tenant_config import get_tenant_config
+            config = await get_tenant_config()
+            token = config.meta_access_token(channel.value)
+            if token:
+                return token
+        except (ValueError, RuntimeError):
+            pass  # Sem tenant ativo — usa fallback de env
+
+        # Fallback: variáveis de ambiente globais
         if channel in (Channel.INSTAGRAM_DM, Channel.INSTAGRAM_COMMENT):
             return settings.META_ACCESS_TOKEN_INSTAGRAM
         return settings.META_ACCESS_TOKEN_FACEBOOK
@@ -48,20 +63,11 @@ class MetaSender:
     ) -> dict:
         """
         Envia mensagem de DM.
-
-        Args:
-            channel: INSTAGRAM_DM ou FACEBOOK_DM
-            thread_id: ID do thread/conversa
-            text: Texto da mensagem
-
-        Returns:
-            Resposta da API Meta
         """
-        # TODO: Implementar chamada real à API Meta
-        # Por ora, apenas log e mock
-        logger.info(f"[MOCK] Enviando DM via {channel.value} para thread {thread_id}")
-        logger.debug(f"Texto: {text[:100]}...")
-
+        token = await self._get_access_token(channel)
+        logger.info("[SENDER] Enviando DM canal=%s thread=%s", channel.value, thread_id)
+        logger.debug("Texto: %s...", text[:100])
+        # TODO: implementar chamada real à Graph API usando `token`
         return {
             "recipient_id": thread_id,
             "message_id": f"mock_mid_{thread_id}",
@@ -75,20 +81,11 @@ class MetaSender:
     ) -> dict:
         """
         Responde a um comentário.
-
-        Args:
-            channel: INSTAGRAM_COMMENT ou FACEBOOK_COMMENT
-            comment_id: ID do comentário a responder
-            text: Texto da resposta
-
-        Returns:
-            Resposta da API Meta
         """
-        # TODO: Implementar chamada real à API Meta
-        # Por ora, apenas log e mock
-        logger.info(f"[MOCK] Respondendo comentário via {channel.value}: {comment_id}")
-        logger.debug(f"Texto: {text[:100]}...")
-
+        token = await self._get_access_token(channel)
+        logger.info("[SENDER] Respondendo comentário canal=%s id=%s", channel.value, comment_id)
+        logger.debug("Texto: %s...", text[:100])
+        # TODO: implementar chamada real à Graph API usando `token`
         return {
             "comment_id": comment_id,
             "reply_id": f"mock_reply_{comment_id}",

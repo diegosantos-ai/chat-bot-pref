@@ -1,6 +1,6 @@
-# Guia Rápido de Testes - TerezIA
+# Guia Rápido de Testes - {bot_name}
 
-Este guia explica como testar as funcionalidades principais do TerezIA, incluindo o RAG atualizado e os futuros recursos de Fallback e Google Drive.
+Este guia explica como testar as funcionalidades principais do {bot_name}, incluindo o RAG atualizado e os futuros recursos de Fallback e Google Drive.
 
 ## 1. Teste de RAG (Busca na Base de Conhecimento)
 

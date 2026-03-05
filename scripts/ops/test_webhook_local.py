@@ -50,7 +50,7 @@ async def test_webhook_post():
                         "timestamp": 1705244400000,
                         "message": {
                             "mid": "mid.123456789:abcde",
-                            "text": "Olá TerezIA, isso é um teste local!"
+                            "text": "Olá {bot_name}, isso é um teste local!"
                         }
                     }
                 ]

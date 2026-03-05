@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "TerezIA - Central de Logs",
+    "title": "{bot_name} - Central de Logs",
     "tags": ["logs", "loki", "monitoring"],
     "timezone": "browser",
     "schemaVersion": 38,
@@ -62,7 +62,7 @@
       },
       {
         "id": 2,
-        "title": "Logs - TerezIA API",
+        "title": "Logs - {bot_name} API",
         "type": "logs",
         "gridPos": {"h": 8, "w": 12, "x": 0, "y": 10},
         "datasource": {"type": "loki", "uid": "${loki}"},
@@ -133,7 +133,7 @@
       },
       {
         "id": 7,
-        "title": "Erros TerezIA API",
+        "title": "Erros {bot_name} API",
         "type": "logs",
         "gridPos": {"h": 6, "w": 24, "x": 0, "y": 32},
         "datasource": {"type": "loki", "uid": "${loki}"},

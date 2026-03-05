@@ -1,7 +1,7 @@
 # Relatorio Executivo e Tecnico - Execucao/Observabilidade
 
 Data: 2026-01-19  
-Projeto: TerezIA (pilot-atendimento)
+Projeto: {bot_name} (pilot-atendimento)
 
 ## 1) Resumo Executivo
 
@@ -110,7 +110,7 @@ python scripts\backup_chroma.py
 
 Agendamento (Windows Task Scheduler):
 ```powershell
-schtasks /Query /TN "TerezIA-Backup" /V /FO LIST
+schtasks /Query /TN "{bot_name}-Backup" /V /FO LIST
 ```
 
 ## 5) Lista de arquivos alterados (neste lote)

@@ -1,7 +1,7 @@
 # Migration: Instagram API with Instagram Login
 
 **Data**: 2026-02-11
-**Autor**: TerezIA Dev Team
+**Autor**: {bot_name} Dev Team
 **Tipo**: Breaking Change - Migração de API
 
 ## Resumo

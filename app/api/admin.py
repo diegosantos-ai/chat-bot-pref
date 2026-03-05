@@ -1,5 +1,5 @@
 """
-API de Admin - Painel TerezIA
+API de Admin - Painel {bot_name}
 =============================
 Endpoints para gestão do painel administrativo.
 Requer autenticação JWT.

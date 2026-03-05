@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para criar usuário administrador do painel TerezIA.
+Script para criar usuário administrador do painel {bot_name}.
 
 Uso:
     python scripts/admin_create_user.py <username> <password> [--role admin|operator|viewer]
@@ -104,7 +104,7 @@ async def list_users() -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Gerenciar usuários administradores do painel TerezIA"
+        description="Gerenciar usuários administradores do painel {bot_name}"
     )
     parser.add_argument("username", nargs="?", help="Nome de usuário")
     parser.add_argument("password", nargs="?", help="Senha do usuário")

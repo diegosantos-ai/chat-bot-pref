@@ -1,9 +1,9 @@
-# TerezIA - Guia Rápido para o Agente
+# {bot_name} - Guia Rápido para o Agente
 
-Guia de referência rápida para desenvolvimento e operação do assistente virtual TerezIA.
+Guia de referência rápida para desenvolvimento e operação do assistente virtual {bot_name}.
 
 ## 📋 Visão Geral
-- **Nome**: TerezIA - Chatbot da Prefeitura de Santa Tereza do Oeste - PR
+- **Nome**: {bot_name} - Chatbot da Prefeitura de {client_name} - PR
 - **Objetivo**: Atendimento informativo via Facebook/Instagram
 - **Natureza**: Estritamente informativa (não realiza atos administrativos)
 - **Stack**: Python 3.11+ | FastAPI | PostgreSQL | ChromaDB | Google Gemini

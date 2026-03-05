@@ -1,5 +1,5 @@
 [Unit]
-Description=TerezIA API Service
+Description={bot_name} API Service
 After=network.target postgresql.service docker.service
 Requires=postgresql.service docker.service
 

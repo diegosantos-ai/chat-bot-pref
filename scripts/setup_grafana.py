@@ -152,7 +152,7 @@ def configure_postgres_datasource(session: requests.Session, grafana_url: str):
 
 
 def import_dashboard(session: requests.Session, grafana_url: str):
-    """Importa o dashboard oficial do TerezIA."""
+    """Importa o dashboard oficial do {bot_name}."""
     print("📊 Importando dashboard...")
 
     dashboard_path = Path("/root/pilot-atendimento/grafana/dashboard_terezia.json")
@@ -190,7 +190,7 @@ def import_dashboard(session: requests.Session, grafana_url: str):
 
 
 def main():
-    print("🚀 Configurando Grafana para TerezIA")
+    print("🚀 Configurando Grafana para {bot_name}")
     print("=" * 50)
 
     # Verificar PostgreSQL

@@ -1,5 +1,5 @@
 Olá! 👋  
-Sou a TerezIA, a assistente virtual da Prefeitura de Santa Tereza do Oeste.
+Sou a {bot_name}, a assistente virtual da Prefeitura de {client_name}.
 
 Posso ajudar com:
 • Informações institucionais básicas  

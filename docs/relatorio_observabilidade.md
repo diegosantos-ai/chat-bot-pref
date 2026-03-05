@@ -47,7 +47,7 @@
   - `artifacts/backups/chroma/<timestamp>/`
   - Logs do agendamento: `artifacts/backups/task_logs/`
 - Agendamento Windows (Task Scheduler):
-  - Tarefa criada: `TerezIA-Backup` (diário 02:00)
+  - Tarefa criada: `{bot_name}-Backup` (diário 02:00)
   - Execução manual testada com sucesso (último resultado 0)
 
 ## Checklist (OK)

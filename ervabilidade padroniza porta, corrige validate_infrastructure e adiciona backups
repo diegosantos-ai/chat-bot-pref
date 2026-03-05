@@ -47,7 +47,7 @@
 [32m+[m[32m- `scripts/backup_postgres.py` (CSV via COPY, sem `psql/pg_dump`)[m
 [32m+[m[32m- `scripts/backup_chroma.py` (zip do `CHROMA_PERSIST_DIR`)[m
 [32m+[m[32m- `scripts/backup_all.ps1` (orquestra ambos)[m
-[32m+[m[32m- Task Scheduler: tarefa diária `TerezIA-Backup`[m
+[32m+[m[32m- Task Scheduler: tarefa diária `{bot_name}-Backup`[m
 [32m+[m
  ## 🧠 ChromaDB (Vector Store)[m
  [m
@@ -167,7 +167,7 @@
 [32m+[m[32m  - `artifacts/backups/chroma/<timestamp>/`[m
 [32m+[m[32m  - Logs do agendamento: `artifacts/backups/task_logs/`[m
 [32m+[m[32m- Agendamento Windows (Task Scheduler):[m
-[32m+[m[32m  - Tarefa criada: `TerezIA-Backup` (diário 02:00)[m
+[32m+[m[32m  - Tarefa criada: `{bot_name}-Backup` (diário 02:00)[m
 [32m+[m[32m  - Execução manual testada com sucesso (último resultado 0)[m
 [32m+[m
  ## Checklist (OK)[m
@@ -194,7 +194,7 @@
 [31m-```[m
 [31m-- Testar restauração em base de teste antes de produção.[m
 [32m+[m[32m- Agendamento (Windows Task Scheduler):[m
-[32m+[m[32m  - Tarefa: `TerezIA-Backup` (diário 02:00)[m
+[32m+[m[32m  - Tarefa: `{bot_name}-Backup` (diário 02:00)[m
 [32m+[m[32m  - Runner: `scripts/backup_all.ps1 -Gzip -Verify`[m
 [32m+[m[32m- Saída padrão:[m
 [32m+[m[32m  - `artifacts/backups/postgres/<timestamp>/`[m
@@ -220,7 +220,7 @@
 [32m+[m
 [32m+[m[32mAgendamento (Windows Task Scheduler):[m
 [32m+[m[32m```powershell[m
-[32m+[m[32mschtasks /Query /TN "TerezIA-Backup" /V /FO LIST[m
+[32m+[m[32mschtasks /Query /TN "{bot_name}-Backup" /V /FO LIST[m
 [32m+[m[32m```[m
 [32m+[m
  ## 5) Lista de arquivos alterados (neste lote)[m
@@ -687,11 +687,11 @@
      print(f"\n{Colors.BOLD}{Colors.BLUE}")[m
 [31m-    print("╔═══════════════════════════════════════════════════════════╗")[m
 [31m-    print("║   VALIDAÇÃO DE INFRAESTRUTURA E VARIÁVEIS DE AMBIENTE    ║")[m
-[31m-    print("║              Pilot Atendimento - TerezIA                 ║")[m
+[31m-    print("║              Pilot Atendimento - {bot_name}                 ║")[m
 [31m-    print("╚═══════════════════════════════════════════════════════════╝")[m
 [32m+[m[32m    print("============================================================")[m
 [32m+[m[32m    print("VALIDAÇÃO DE INFRAESTRUTURA E VARIÁVEIS DE AMBIENTE")[m
-[32m+[m[32m    print("Pilot Atendimento - TerezIA")[m
+[32m+[m[32m    print("Pilot Atendimento - {bot_name}")[m
 [32m+[m[32m    print("============================================================")[m
      print(f"{Colors.END}\n")[m
      [m

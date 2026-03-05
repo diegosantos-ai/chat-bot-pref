@@ -263,7 +263,7 @@ COMMENT ON COLUMN rag_queries.tipo_superficie IS 'Superfície da requisição - 
 -- ========================================
 -- TABELA: admin_users - 13/02/2025
 -- ========================================
--- Usuários administradores do painel TerezIA
+-- Usuários administradores do painel {bot_name}
 
 CREATE TABLE admin_users (
     id              BIGSERIAL PRIMARY KEY,
@@ -278,7 +278,7 @@ CREATE TABLE admin_users (
 CREATE INDEX idx_admin_username ON admin_users(username);
 CREATE INDEX idx_admin_ativo ON admin_users(ativo) WHERE ativo = TRUE;
 
-COMMENT ON TABLE admin_users IS 'Usuários administradores do painel TerezIA';
+COMMENT ON TABLE admin_users IS 'Usuários administradores do painel {bot_name}';
 COMMENT ON COLUMN admin_users.username IS 'Nome de usuário para login';
 COMMENT ON COLUMN admin_users.password_hash IS 'Hash bcrypt da senha';
 COMMENT ON COLUMN admin_users.role IS 'Papel: admin, operator, viewer';

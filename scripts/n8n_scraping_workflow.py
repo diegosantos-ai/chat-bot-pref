@@ -13,7 +13,7 @@ headers = {"X-N8N-API-KEY": N8N_API_KEY, "Content-Type": "application/json"}
 
 # Workflow com node HTML correto
 workflow = {
-    "name": "Scraping notícias Santa Tereza do Oeste",
+    "name": "Scraping notícias {client_name}",
     "nodes": [
         # 1: Manual Trigger
         {

@@ -46,11 +46,11 @@ class Mailer:
         if user_name and user_name != user_contact:
             contact_display = f"{user_name} ({user_contact})"
 
-        subject = f"[TerezIA] Ticket Escalado - {contact_display}"
+        subject = f"[{bot_name}] Ticket Escalado - {contact_display}"
 
         body = f"""
         <h2>Solicitação Escalada</h2>
-        <p>A TerezIA não conseguiu responder satisfatoriamente à seguinte questão:</p>
+        <p>A {bot_name} não conseguiu responder satisfatoriamente à seguinte questão:</p>
         <blockquote style="border-left: 3px solid #ccc; padding-left: 10px; margin: 10px 0; color: #555;">
             "{user_query}"
         </blockquote>

@@ -1,4 +1,4 @@
-# Labels recomendadas — TerezIA
+# Labels recomendadas — {bot_name}
 
 Este arquivo descreve as labels sugeridas para o repositório e como usá-las no GitHub Project.
 
@@ -33,8 +33,8 @@ Este arquivo descreve as labels sugeridas para o repositório e como usá-las no
 
 ## Milestones sugeridas
 
-- `TerezIA - Deploy`
-- `TerezIA - Observability`
+- `{bot_name} - Deploy`
+- `{bot_name} - Observability`
 
 ## Automações sugeridas (Projects)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Import all TerezIA dashboards to Grafana
+Import all {bot_name} dashboards to Grafana
 """
 
 import json
@@ -31,14 +31,14 @@ def get_or_create_folder():
     folders = response.json()
 
     for folder in folders:
-        if folder.get("title") == "TerezIA Services":
+        if folder.get("title") == "{bot_name} Services":
             return folder["uid"]
 
     # Create folder
     response = requests.post(
         f"{GRAFANA_URL}/api/folders",
         auth=(GRAFANA_USER, GRAFANA_PASS),
-        json={"title": "TerezIA Services"},
+        json={"title": "{bot_name} Services"},
     )
     return response.json().get("uid")
 
@@ -107,7 +107,7 @@ def main():
     # Get or create folder
     print("📁 Configurando pasta de dashboards...")
     FOLDER_ID = get_or_create_folder()
-    print(f"✅ Pasta 'TerezIA Services' pronta (ID: {FOLDER_ID})")
+    print(f"✅ Pasta '{bot_name} Services' pronta (ID: {FOLDER_ID})")
     print()
 
     # Import dashboards

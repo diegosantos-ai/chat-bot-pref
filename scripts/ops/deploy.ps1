@@ -1,5 +1,5 @@
 # =========================================
-# TerezIA - Script de Deploy (PowerShell)
+# {bot_name} - Script de Deploy (PowerShell)
 # =========================================
 # Uso: .\scripts\deploy.ps1 [comando]
 # Comandos: start, stop, restart, logs, status, build
@@ -37,32 +37,32 @@ function Test-Requirements {
     Write-Info "Pre-requisitos OK"
 }
 
-function Start-TerezIA {
-    Write-Info "Iniciando TerezIA..."
+function Start-{bot_name} {
+    Write-Info "Iniciando {bot_name}..."
     docker-compose up -d --build
     Write-Info "Aguardando container ficar healthy..."
     Start-Sleep -Seconds 10
-    Get-TerezIAStatus
+    Get-{bot_name}Status
 }
 
-function Stop-TerezIA {
-    Write-Info "Parando TerezIA..."
+function Stop-{bot_name} {
+    Write-Info "Parando {bot_name}..."
     docker-compose down
     Write-Info "Containers parados"
 }
 
-function Restart-TerezIA {
-    Write-Info "Reiniciando TerezIA..."
+function Restart-{bot_name} {
+    Write-Info "Reiniciando {bot_name}..."
     docker-compose restart
-    Get-TerezIAStatus
+    Get-{bot_name}Status
 }
 
-function Get-TerezIALogs {
+function Get-{bot_name}Logs {
     Write-Info "Mostrando logs (Ctrl+C para sair)..."
     docker-compose logs -f terezia
 }
 
-function Get-TerezIAStatus {
+function Get-{bot_name}Status {
     Write-Info "Status dos containers:"
     docker-compose ps
     Write-Host ""
@@ -77,21 +77,21 @@ function Get-TerezIAStatus {
     }
 }
 
-function Build-TerezIA {
+function Build-{bot_name} {
     Write-Info "Reconstruindo imagem Docker..."
     docker-compose build --no-cache
     Write-Info "Build concluido"
 }
 
-function Update-TerezIA {
+function Update-{bot_name} {
     Write-Info "Atualizando e reiniciando..."
     git pull origin main
     docker-compose up -d --build
-    Get-TerezIAStatus
+    Get-{bot_name}Status
 }
 
 function Show-Help {
-    Write-Host "TerezIA - Script de Deploy" -ForegroundColor Cyan
+    Write-Host "{bot_name} - Script de Deploy" -ForegroundColor Cyan
     Write-Host "==========================" -ForegroundColor Cyan
     Write-Host ""
     Write-Host "Uso: .\scripts\deploy.ps1 [comando]"
@@ -110,27 +110,27 @@ function Show-Help {
 switch ($Command) {
     "start" {
         Test-Requirements
-        Start-TerezIA
+        Start-{bot_name}
     }
     "stop" {
-        Stop-TerezIA
+        Stop-{bot_name}
     }
     "restart" {
-        Restart-TerezIA
+        Restart-{bot_name}
     }
     "logs" {
-        Get-TerezIALogs
+        Get-{bot_name}Logs
     }
     "status" {
-        Get-TerezIAStatus
+        Get-{bot_name}Status
     }
     "build" {
         Test-Requirements
-        Build-TerezIA
+        Build-{bot_name}
     }
     "update" {
         Test-Requirements
-        Update-TerezIA
+        Update-{bot_name}
     }
     default {
         Show-Help

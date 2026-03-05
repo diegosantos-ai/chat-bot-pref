@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script para remover usuário administrador do painel TerezIA.
+Script para remover usuário administrador do painel {bot_name}.
 
 Uso:
     python scripts/admin_delete_user.py <username>
@@ -125,7 +125,7 @@ async def reactivate_user(username: str) -> bool:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Remover usuários administradores do painel TerezIA")
+    parser = argparse.ArgumentParser(description="Remover usuários administradores do painel {bot_name}")
     subparsers = parser.add_subparsers(dest="command", help="Comandos")
     
     # Comando delete

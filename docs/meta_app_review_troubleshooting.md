@@ -7,7 +7,7 @@ A permissão `pages_utility_messaging` não carrega o formulário para preenchim
 
 ### Opção 1: Remover a Permissão (RECOMENDADO)
 
-Para o **TerezIA**, você **NÃO PRECISA** de `pages_utility_messaging`. Esta permissão é para enviar mensagens proativas (ex: "Sua consulta é amanhã"). Como o bot só responde quando o usuário envia mensagem primeiro, remova-a:
+Para o **{bot_name}**, você **NÃO PRECISA** de `pages_utility_messaging`. Esta permissão é para enviar mensagens proativas (ex: "Sua consulta é amanhã"). Como o bot só responde quando o usuário envia mensagem primeiro, remova-a:
 
 1. No topo da página de App Review, clique no link **"editá-lo"** (azul)
 2. Localize `pages_utility_messaging` na lista
@@ -15,7 +15,7 @@ Para o **TerezIA**, você **NÃO PRECISA** de `pages_utility_messaging`. Esta pe
 4. Clique em **"Salvar"**
 5. A etapa travada desaparecerá
 
-**Permissões necessárias para o TerezIA:**
+**Permissões necessárias para o {bot_name}:**
 - ✅ `pages_messaging` (já tem)
 - ✅ `pages_show_list` (já tem)
 - ✅ `pages_manage_metadata` (já tem)
@@ -40,7 +40,7 @@ Se conseguir acessar o formulário de `pages_utility_messaging`, use estas respo
 
 ### 1. Como seu aplicativo usa esta permissão?
 ```
-O TerezIA é um chatbot de atendimento ao cidadão para a Prefeitura de Santa Tereza do Oeste. 
+O {bot_name} é um chatbot de atendimento ao cidadão para a Prefeitura de {client_name}. 
 
 Usamos pages_utility_messaging para enviar mensagens utilitárias proativas como:
 - Confirmação de recebimento de documentos

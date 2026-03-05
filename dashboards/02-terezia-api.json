@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "TerezIA - API (Uvicorn)",
+    "title": "{bot_name} - API (Uvicorn)",
     "tags": ["terezia", "api", "uvicorn", "logs"],
     "timezone": "browser",
     "schemaVersion": 38,

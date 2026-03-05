@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Script para configurar serviços systemd para TerezIA
+# Script para configurar serviços systemd para {bot_name}
 # Uso: sudo bash setup_systemd.sh
 
-echo "🚀 Configurando serviços systemd para TerezIA"
+echo "🚀 Configurando serviços systemd para {bot_name}"
 echo "=========================================="
 
 # Criar diretório para serviços

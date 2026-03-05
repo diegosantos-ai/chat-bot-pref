@@ -12,7 +12,7 @@ Script principal para configurar o Grafana automaticamente.
 1. Verifica conexão com PostgreSQL local
 2. Aguarda o Grafana ficar disponível
 3. Configura a fonte de dados PostgreSQL
-4. Importa o dashboard oficial do TerezIA
+4. Importa o dashboard oficial do {bot_name}
 
 **Uso:**
 ```bash

@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "TerezIA - N8N",
+    "title": "{bot_name} - N8N",
     "tags": ["n8n", "workflow", "automation", "logs"],
     "timezone": "browser",
     "schemaVersion": 38,

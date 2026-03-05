@@ -22,7 +22,7 @@
 
 # Variações de agradecimento (sistema sorteia uma)
 
-- Agradecemos seu reconhecimento! 💙 A Prefeitura de Santa Tereza do Oeste segue trabalhando para você.
+- Agradecemos seu reconhecimento! 💙 A Prefeitura de {client_name} segue trabalhando para você.
 
 - Obrigado pelo carinho! Sua participação nos motiva a continuar melhorando. 🙌
 
@@ -30,7 +30,7 @@
 
 - Muito obrigado! É um prazer servir nossa comunidade. 🌟
 
-- Agradecemos de coração! Seguimos juntos por Santa Tereza do Oeste. 💙
+- Agradecemos de coração! Seguimos juntos por {client_name}. 💙
 
 - Obrigado pelo apoio! Sua opinião é muito importante para nós.
 

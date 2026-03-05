@@ -2,15 +2,15 @@
 
 # Estratégia de Atendimento Digital
 
-# Automatizado: Projeto TerezIA
+# Automatizado: Projeto {bot_name}
 
 ## 1. Introdução e Contextualização Estratégica
 
 A transformação digital no setor público transcendeu a categoria de inovação desejável para
 se tornar um imperativo de eficiência administrativa e democratização do acesso aos serviços
-estatais. No contexto do Município de Santa Tereza do Oeste, Paraná, a iniciativa de
+estatais. No contexto do Município de {client_name}, Paraná, a iniciativa de
 implementação de um sistema de atendimento automatizado — denominado neste estudo
-como **TerezIA** — representa um marco estratégico na modernização da interface entre a
+como **{bot_name}** — representa um marco estratégico na modernização da interface entre a
 Administração Pública e o cidadão. Este documento constitui um estudo técnico exaustivo,
 desenhado para orientar a implementação, a governança e a operação do assistente virtual,
 em estrita conformidade com a minuta contratual fornecida e as especificações técnicas do
@@ -46,7 +46,7 @@ item 1.2 do contrato.^1
 
 A abrangência deste estudo cobre desde a arquitetura de dados e privacidade (LGPD) até a
 definição granular de fluxos de conversação para saúde, educação, tributação e serviços
-urbanos. O objetivo final é entregar um roteiro que permita ao Município de Santa Tereza do
+urbanos. O objetivo final é entregar um roteiro que permita ao Município de {client_name} do
 Oeste inaugurar um canal de atendimento que seja, ao mesmo tempo, uma ferramenta de
 transparência ativa e um facilitador da vida cotidiana dos seus munícipes.
 
@@ -66,7 +66,7 @@ execução de serviços administrativos, o registro de protocolos e, crucialment
 de decisões automatizadas.^1 Esta delimitação é vital para a configuração da IA.
 
 Diferentemente de chatbots no setor privado, que buscam fechar vendas ou alterar cadastros
-autonomamente, a TerezIA deve operar como um **triador qualificado e um repositório de
+autonomamente, a {bot_name} deve operar como um **triador qualificado e um repositório de
 conhecimento ativo**. O sistema não pode, por exemplo, deferir um pedido de isenção de
 IPTU ou agendar uma consulta médica de forma autônoma sem supervisão humana, pois tais
 atos requerem competência administrativa delegada por lei a servidores públicos.
@@ -135,7 +135,7 @@ que requerem alta precisão factual e baixa alucinação.
 A "alucinação" em IA refere-se à geração de respostas plausíveis, porém factualmente
 incorretas. Em um contexto governamental, uma alucinação pode significar informar uma data
 errada de vencimento de imposto ou um local inexistente de vacinação. Para mitigar esse
-risco, o sistema TerezIA utiliza o seguinte fluxo:
+risco, o sistema {bot_name} utiliza o seguinte fluxo:
 
 1. **Input do Cidadão:** A mensagem chega via API do Facebook/Instagram.
 2. **Classificação de Intenção:** Um modelo intermediário identifica o tema (ex: "Saúde",
@@ -152,7 +152,7 @@ risco, o sistema TerezIA utiliza o seguinte fluxo:
     para garantir que não contém linguagem ofensiva, promessas administrativas ou dados
     sensíveis.
 
-Esta arquitetura garante que a TerezIA atue como um bibliotecário extremamente eficiente,
+Esta arquitetura garante que a {bot_name} atue como um bibliotecário extremamente eficiente,
 que consulta os livros oficiais antes de responder, em vez de um autor criativo que inventa
 histórias.
 
@@ -195,7 +195,7 @@ Prefeitura ajuste sua comunicação e políticas públicas baseada em dados reai
 
 ## Pública
 
-A implementação da TerezIA deve espelhar as melhores práticas observadas em casos de
+A implementação da {bot_name} deve espelhar as melhores práticas observadas em casos de
 sucesso nacionais e diretrizes federais de governo digital. A análise de documentos sobre
 inovação no setor público 4 e manuais de redes sociais 8 aponta para três pilares
 fundamentais: Linguagem Simples, Empatia Digital e Integração de Canais.
@@ -213,19 +213,19 @@ precisa entregar o pedido".
 ```
 (^10) incentivam o uso de linguagem simples para garantir que a informação seja
 compreensível por qualquer pessoa, independentemente do seu grau de instrução.
-● **Aplicação na TerezIA:** As respostas do FAQ (Seção 7) foram redigidas seguindo esse
+● **Aplicação na {bot_name}:** As respostas do FAQ (Seção 7) foram redigidas seguindo esse
 princípio: frases curtas, ordem direta, voz ativa e vocabulário acessível.
 
 ### 4.2. Gestão de Expectativas e Humanização
 
 Embora seja um sistema automatizado, a interação deve ser humanizada, mas honesta. A
-"persona" da TerezIA deve ser cordial, paciente e institucional.
+"persona" da {bot_name} deve ser cordial, paciente e institucional.
 
 ```
 ● Transparência: É imperativo que o chatbot se identifique como uma inteligência artificial
 logo na saudação inicial. Isso ajusta a expectativa do cidadão e reduz a frustração em
 caso de falhas de compreensão.
-○ Exemplo de Saudação: "Olá! Sou a TerezIA, a assistente virtual da Prefeitura de Santa
+○ Exemplo de Saudação: "Olá! Sou a {bot_name}, a assistente virtual da Prefeitura de Santa
 ```
 
 ```
@@ -290,7 +290,7 @@ tentar "investigar" o caso.
 ○ Script: "A violência não pode ser tolerada. Para denúncias de violência contra a
 mulher, ligue 180. Para violação de direitos humanos, ligue 100. Em caso de perigo
 imediato, chame a Polícia Militar no 190. Você também pode procurar o Conselho
-Tutelar de Santa Tereza do Oeste no telefone (45) 3124-1035 ou o CREAS."
+Tutelar de {client_name} no telefone (45) 3124-1035 ou o CREAS."
 ```
 ### 5.3. Protocolo de Crise Institucional e Desinformação
 
@@ -312,7 +312,7 @@ sobre a vacina", e o bot deve priorizar essa resposta quando o tema for menciona
 
 ## Estruturada
 
-Esta seção constitui o "cérebro" da TerezIA. As informações foram rigorosamente extraídas e
+Esta seção constitui o "cérebro" da {bot_name}. As informações foram rigorosamente extraídas e
 consolidadas a partir dos dados brutos coletados do site da Prefeitura, contratos e notícias
 locais. Elas estão organizadas por eixos temáticos para facilitar a ingestão no banco de dados
 vetorial.
@@ -342,7 +342,7 @@ Prefeitura?
 ```
 ```
 A Prefeitura de
-Santa Tereza do
+{client_name} do
 Oeste fica na
 Avenida Paraná,
 61 – Centro. O CEP
@@ -698,11 +698,11 @@ anuais.
 ```
 17
 ```
-Tabela de Horários de Ônibus (Transporte Intermunicipal - Expresso Santa Tereza):
-Ref.: Linha Santa Tereza do Oeste x Cascavel (Vigência Ref. 2024/2025) 19
+Tabela de Horários de Ônibus (Transporte Intermunicipal - Expresso {client_name}):
+Ref.: Linha {client_name} x Cascavel (Vigência Ref. 2024/2025) 19
 
 ```
-Saída de Santa Tereza Saída de Cascavel Observações
+Saída de {client_name} Saída de Cascavel Observações
 ```
 ```
 06:00 06:40 Segunda a Sexta
@@ -726,7 +726,7 @@ _Aviso:_ O bot deve informar que "Os horários de ônibus são de responsabilida
 concessionária e podem sofrer alterações. Consulte a rodoviária ou a empresa Expresso
 
 
-Santa Tereza para confirmação exata."
+{client_name} para confirmação exata."
 
 ### 6.4. Eixo Assistência Social e Cidadania
 
@@ -976,7 +976,7 @@ site).
 2
 ```
 **Nota sobre Coleta de Lixo:** Os dados encontrados nos snippets sobre dias específicos ([28],
-[29]) referem-se a homônimos (Santa Tereza-RS ou TO). **Não utilizar esses dados**. O bot
+[29]) referem-se a homônimos ({client_name}-RS ou TO). **Não utilizar esses dados**. O bot
 deve informar o telefone da Secretaria de Meio Ambiente para essa consulta específica para
 evitar desinformação.
 
@@ -1026,7 +1026,7 @@ Departamento Telefone Endereço (Referência)
 
 ## 8. Roteiro de Implementação e Manutenção
 
-A implementação da TerezIA não termina no lançamento (Go-Live). A sustentabilidade do
+A implementação da {bot_name} não termina no lançamento (Go-Live). A sustentabilidade do
 projeto depende de processos contínuos de curadoria e monitoramento.
 
 
@@ -1043,7 +1043,7 @@ bot não invente dados (ex: perguntar sobre coleta de lixo em um bairro inexiste
 ### 8.2. Fase 2: Lançamento e Comunicação
 
 ```
-● Campanha Educativa: Publicar posts no Facebook e Instagram explicando: "A TerezIA
+● Campanha Educativa: Publicar posts no Facebook e Instagram explicando: "A {bot_name}
 chegou. Sou uma IA em treinamento. Posso te ajudar com informações, telefones e
 endereços."
 ● Gestão de Comentários: Monitorar intensivamente os comentários nas primeiras 48
@@ -1062,8 +1062,8 @@ sistemas de Nota Fiscal continuam ativos e funcionais.
 ```
 ## 9. Conclusão
 
-A implementação do projeto TerezIA, conforme delineado neste estudo, oferece ao Município
-de Santa Tereza do Oeste a oportunidade de elevar o patamar do seu atendimento público.
+A implementação do projeto {bot_name}, conforme delineado neste estudo, oferece ao Município
+de {client_name} a oportunidade de elevar o patamar do seu atendimento público.
 Ao respeitar rigorosamente as limitações contratuais de "caráter informativo" e integrar
 protocolos robustos de segurança para casos sensíveis, a administração municipal
 protege-se legalmente enquanto oferece um serviço de alto valor agregado ao cidadão.
@@ -1072,7 +1072,7 @@ A chave para o sucesso desta iniciativa não reside na sofisticação tecnológi
 qualidade da **Base de Conhecimento** e na eficiência dos **Protocolos de Redirecionamento**.
 O chatbot deve ser visto como um organismo vivo, alimentado constantemente pelas
 demandas reais da população e supervisionado por servidores comprometidos com a ética e
-a transparência pública. Com a adoção deste plano, Santa Tereza do Oeste se posiciona na
+a transparência pública. Com a adoção deste plano, {client_name} se posiciona na
 vanguarda das cidades inteligentes de pequeno e médio porte, utilizando a tecnologia como
 vetor de cidadania e inclusão.
 
@@ -1081,11 +1081,11 @@ vetor de cidadania e inclusão.
 
 #### 1. MINUTA DE CONTRATO - Instagram e Facebook.pdf
 
-#### 2. Prefeitura de Santa Tereza do oeste, acessado em janeiro 12, 2026,
+#### 2. Prefeitura de {client_name} do oeste, acessado em janeiro 12, 2026,
 
 #### https://www.santatereza.pr.gov.br/site/
 
-#### 3. Unidades de Saúde - Prefeitura de Santa Tereza do oeste, acessado em janeiro
+#### 3. Unidades de Saúde - Prefeitura de {client_name} do oeste, acessado em janeiro
 
 #### 12, 2026, https://www.santatereza.pr.gov.br/pagina/519_Unidades-de-Saude.html
 
@@ -1155,7 +1155,7 @@ vetor de cidadania e inclusão.
 
 #### acilitou-a-rotina-de-empresas-publicas.htm
 
-#### 13. Informações COVID - Prefeitura de Santa Tereza do oeste, acessado em janeiro
+#### 13. Informações COVID - Prefeitura de {client_name} do oeste, acessado em janeiro
 
 #### 12, 2026, https://www.santatereza.pr.gov.br/pagina/518_Covid.html
 
@@ -1172,7 +1172,7 @@ vetor de cidadania e inclusão.
 
 #### -Municipal-de-Ensino-.html
 
-#### 16. PLANO DE AÇÃO DA EDUCAÇÃO MUNICIPAL - Prefeitura de Santa Tereza do
+#### 16. PLANO DE AÇÃO DA EDUCAÇÃO MUNICIPAL - Prefeitura de {client_name} do
 
 #### oeste, acessado em janeiro 12, 2026,
 
@@ -1204,7 +1204,7 @@ vetor de cidadania e inclusão.
 
 #### A-01-07-2024.pdf
 
-#### 20. Lista Fones Secretarias - Prefeitura de Santa Tereza do oeste, acessado em
+#### 20. Lista Fones Secretarias - Prefeitura de {client_name} do oeste, acessado em
 
 #### janeiro 12, 2026,
 
@@ -1218,17 +1218,17 @@ vetor de cidadania e inclusão.
 
 #### mprego-disponiveis-na-agencia-do-trabalhador-nesta-quinta-feira21/
 
-#### 22. refis 2025 - Prefeitura de Santa Tereza do oeste, acessado em janeiro 12, 2026,
+#### 22. refis 2025 - Prefeitura de {client_name} do oeste, acessado em janeiro 12, 2026,
 
 #### https://www.santatereza.pr.gov.br/noticiasView/?id=
 
-#### 23. Emissor de Nota Fiscal Santa Tereza do Oeste - GestãoClick, acessado em
+#### 23. Emissor de Nota Fiscal {client_name} - GestãoClick, acessado em
 
 #### janeiro 12, 2026,
 
 #### https://gestaoclick.com.br/nota-fiscal-eletronica-santa-tereza-do-oeste/
 
-#### 24. Sala do Empreendedor - Prefeitura de Santa Tereza do oeste, acessado em
+#### 24. Sala do Empreendedor - Prefeitura de {client_name} do oeste, acessado em
 
 #### janeiro 12, 2026,
 
@@ -1242,7 +1242,7 @@ vetor de cidadania e inclusão.
 
 #### O_PREGAO_124_2021.pdf
 
-#### 26. Prefeitura de Santa Tereza do oeste, acessado em janeiro 12, 2026,
+#### 26. Prefeitura de {client_name} do oeste, acessado em janeiro 12, 2026,
 
 #### https://www.santatereza.pr.gov.br/
 

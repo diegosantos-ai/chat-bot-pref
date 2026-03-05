@@ -1,7 +1,7 @@
 # Migration: Busca Híbrida, Boost de Siglas e Melhorias no Envio de Mensagens
 
 **Data**: 2026-02-12
-**Autor**: TerezIA Dev Team
+**Autor**: {bot_name} Dev Team
 **Tipo**: Feature Enhancement - Melhorias no RAG e Envio de Mensagens
 
 ## Resumo

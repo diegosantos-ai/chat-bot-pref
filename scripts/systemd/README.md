@@ -1,11 +1,11 @@
-# Serviços Systemd para TerezIA
+# Serviços Systemd para {bot_name}
 
-Este diretório contém os arquivos de configuração do systemd para iniciar automaticamente a API e o Grafana do TerezIA com a máquina.
+Este diretório contém os arquivos de configuração do systemd para iniciar automaticamente a API e o Grafana do {bot_name} com a máquina.
 
 ## Arquivos
 
 ### `terezia-api.service`
-Serviço systemd para a API TerezIA.
+Serviço systemd para a API {bot_name}.
 
 **Características:**
 - Inicia a API usando uvicorn

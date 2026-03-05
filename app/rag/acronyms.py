@@ -2,7 +2,7 @@
 Acronyms and Siglas - Mapeamento de siglas para boost no RAG
 
 Este arquivo contém siglas e acrônimos relevantes para o contexto municipal
-de Santa Tereza do Oeste, organizados por categoria.
+de {client_name}, organizados por categoria.
 
 Uso:
     from app.rag.acronyms import get_acronym_boost, extract_acronyms_from_query

@@ -2,7 +2,7 @@
 # ========================================
 # Instalação Completa: Loki + Promtail
 # ========================================
-# Centralização de logs para TerezIA
+# Centralização de logs para {bot_name}
 # Versão: 1.0
 # Data: 2026-02-04
 

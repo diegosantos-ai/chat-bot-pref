@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "TerezIA - PostgreSQL",
+    "title": "{bot_name} - PostgreSQL",
     "tags": ["postgresql", "database", "logs"],
     "timezone": "browser",
     "schemaVersion": 38,

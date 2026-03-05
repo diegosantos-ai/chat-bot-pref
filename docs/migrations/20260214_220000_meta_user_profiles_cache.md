@@ -1,7 +1,7 @@
 # Migração: Cache de Perfis Meta (Instagram/Facebook)
 
 **Data:** 2026-02-14  
-**Autor:** Agente TerezIA  
+**Autor:** Agente {bot_name}  
 **Versão:** v0.8.1  
 **Status:** Pronto para Deploy
 
@@ -70,7 +70,7 @@ CREATE TABLE meta_user_profiles (
 ```
 1. Usuário envia mensagem
    ↓
-2. TerezIA processa normalmente
+2. {bot_name} processa normalmente
    ↓
 3. Se precisar ESCALAR para humano:
    ↓
@@ -177,7 +177,7 @@ Contato do Usuário: Session: 886304507365682
 **Depois:**
 ```
 Informações do Usuário
-• Contato: @prefeitura_sto (Prefeitura de Santa Tereza do Oeste)
+• Contato: @prefeitura_sto (Prefeitura de {client_name})
 • Plataforma: INSTAGRAM
 • ID Interno: 886304507365682
 

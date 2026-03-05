@@ -1,5 +1,5 @@
 """
-Smoke tests (producao) - TerezIA
+Smoke tests (producao) - {bot_name}
 ================================
 Executa testes basicos via API e valida auditoria no Postgres.
 

@@ -1,4 +1,4 @@
-# TerezIA - Caddyfile para HTTPS automático
+# {bot_name} - Caddyfile para HTTPS automático
 # ==========================================
 # Caddy obtém certificado SSL automaticamente via Let's Encrypt
 #

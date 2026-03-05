@@ -1,6 +1,6 @@
 version: '3.8'
 
-# TerezIA - Docker Compose para Produção
+# {bot_name} - Docker Compose para Produção
 # =======================================
 # Uso: docker-compose up -d --build
 # Logs: docker-compose logs -f terezia

@@ -41,8 +41,8 @@ def test_smtp_connection():
         server.login(user, password)
         print("Login realizado com sucesso!")
         
-        msg = MIMEText("Este é um email de teste da TerezIA.")
-        msg['Subject'] = "Teste TerezIA - SMTP OK"
+        msg = MIMEText("Este é um email de teste da {bot_name}.")
+        msg['Subject'] = "Teste {bot_name} - SMTP OK"
         msg['From'] = user
         msg['To'] = recipient
         

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup Rápido de Segurança - TerezIA
+Setup Rápido de Segurança - {bot_name}
 =========================================
 
 Instala dependências de segurança e valida configurações.

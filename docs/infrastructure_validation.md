@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-Este documento descreve o processo de validação da infraestrutura e variáveis de ambiente necessárias para o funcionamento do **TerezIA - Pilot Atendimento**.
+Este documento descreve o processo de validação da infraestrutura e variáveis de ambiente necessárias para o funcionamento do **{bot_name} - Pilot Atendimento**.
 
 ## Script de Validação
 

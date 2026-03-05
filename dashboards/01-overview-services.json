@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "TerezIA - Overview de Servicos",
+    "title": "{bot_name} - Overview de Servicos",
     "tags": ["overview", "services", "monitoring"],
     "timezone": "browser",
     "schemaVersion": 38,
@@ -54,7 +54,7 @@
       },
       {
         "id": 5,
-        "title": "TerezIA API - Logs/min",
+        "title": "{bot_name} API - Logs/min",
         "type": "stat",
         "gridPos": {"h": 4, "w": 8, "x": 8, "y": 12},
         "datasource": {"type": "loki", "uid": "${loki}"},

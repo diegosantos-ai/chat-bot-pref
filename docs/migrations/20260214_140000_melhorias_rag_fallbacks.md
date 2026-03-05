@@ -1,7 +1,7 @@
 # Migração: Melhorias no RAG para Redução de Fallbacks
 
 **Data:** 2026-02-14
-**Autor:** Agente TerezIA
+**Autor:** Agente {bot_name}
 **Versão:** v0.8.0
 
 ## Resumo

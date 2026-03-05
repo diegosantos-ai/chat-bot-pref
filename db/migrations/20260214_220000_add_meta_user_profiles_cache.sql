@@ -1,6 +1,6 @@
 -- Migration: Cache de Perfis Meta (Instagram/Facebook)
 -- Data: 2026-02-14
--- Autor: Agente TerezIA
+-- Autor: Agente {bot_name}
 -- 
 -- Cria tabela para cachear perfis de usuários do Instagram/Facebook
 -- evitando chamadas repetidas à API da Meta.

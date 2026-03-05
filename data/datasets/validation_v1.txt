@@ -102,7 +102,7 @@ Gostaria de parabenizar a equipe da limpeza, o parque está lindo!
  Onde fika a upa mais pertu?
 
 
-### Dataset de Teste: Santa Tereza do Oeste (Foco em RAG) canal instagram_dm, facebook_dm
+### Dataset de Teste: {client_name} (Foco em RAG) canal instagram_dm, facebook_dm
 
 
 "Quando vão terminar o asfalto da estrada que vai pra São Pedro do Iguaçu?"
@@ -111,7 +111,7 @@ Gostaria de parabenizar a equipe da limpeza, o parque está lindo!
 
 "As obras na Quadra 9 no bairro Santa Fé estão paradas? Faz dias que não vejo máquina."
 
-"O asfalto aqui na minha rua tá todo rachado. Santa Tereza merece asfalto de qualidade!"
+"O asfalto aqui na minha rua tá todo rachado. {client_name} merece asfalto de qualidade!"
 
 "Essa pavimentação histórica vai passar aqui pelo Jardim Santa Maria também?"
 
@@ -158,7 +158,7 @@ Gostaria de parabenizar a equipe da limpeza, o parque está lindo!
 
 "Quando começam as comemorações do aniversário de 36 anos da cidade?"
 
-"O evento do FERMOP 2025 vai ser aqui em Santa Tereza ou em Cascavel?"
+"O evento do FERMOP 2025 vai ser aqui em {client_name} ou em Cascavel?"
 
 "Como faz pra minha banda tocar nos eventos da prefeitura?"
 

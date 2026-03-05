@@ -38,7 +38,7 @@ Dado que o RAGRetriever retornou score 0.4 (baixo) para a pergunta "Saiu decreto
 
 Quando o WebScraperService varrer o site e encontrar um título contendo "Dengue" e data de "Hoje".
 
-Então a TerezIA deve formular a resposta com o conteúdo desse texto.
+Então a {bot_name} deve formular a resposta com o conteúdo desse texto.
 
 E NÃO deve enviar e-mail para o gestor.
 
@@ -72,7 +72,7 @@ Função assíncrona (async def send_escalation_alert(...)) para não bloquear a
 Template simples:
 
 Plaintext
-Assunto: [TerezIA] Pergunta sem resposta - Ação Necessária
+Assunto: [{bot_name}] Pergunta sem resposta - Ação Necessária
 Cidadão: {user_id} (Instagram)
 Pergunta: "{user_query}"
 Data: {timestamp}

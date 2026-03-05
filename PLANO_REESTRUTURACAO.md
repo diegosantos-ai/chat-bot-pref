@@ -3,9 +3,9 @@ Transformar um projeto interno em um produto SaaS "white-label" (uma casca perso
 Aqui está o mapa de execução, passo a passo, saindo do código até a estruturação da máquina de vendas pela Nexo Basis.
 
 Fase 1: A Desvinculação (O White-Label)
-O objetivo aqui é garantir que não exista a palavra "TerezIA" ou "Santa Tereza do Oeste" chumbada em nenhum lugar do código.
+O objetivo aqui é garantir que não exista a palavra "{bot_name}" ou "{client_name}" chumbada em nenhum lugar do código.
 
-Varrer e Parametrizar Prompts: Localize todos os system prompts e substitua os nomes fixos por variáveis. Em vez de "Você é a TerezIA, assistente de Santa Tereza", o prompt deve ser montado dinamicamente: "Você é {bot_name}, assistente virtual da {client_name}".
+Varrer e Parametrizar Prompts: Localize todos os system prompts e substitua os nomes fixos por variáveis. Em vez de "Você é a {bot_name}, assistente de {client_name}", o prompt deve ser montado dinamicamente: "Você é {bot_name}, assistente virtual da {client_name}".
 
 Abstração do Disclaimer: O disclaimer obrigatório ("Informações baseadas na base oficial...") já é excelente. Transforme-o em uma variável de ambiente ou configuração no banco de dados, permitindo que cada prefeitura ajuste o texto final conforme a exigência do próprio departamento jurídico.
 

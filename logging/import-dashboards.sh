@@ -56,9 +56,9 @@ else
         -H "Content-Type: application/json" \
         -u "$GRAFANA_USER:$GRAFANA_PASS" \
         "$GRAFANA_URL/api/folders" \
-        -d '{"title":"TerezIA Services"}')
+        -d '{"title":"{bot_name} Services"}')
     FOLDER_ID=$(echo "$FOLDER_CREATE" | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
-    log_success "Pasta 'TerezIA Services' criada (ID: $FOLDER_ID)"
+    log_success "Pasta '{bot_name} Services' criada (ID: $FOLDER_ID)"
 fi
 
 # Counters
@@ -100,7 +100,7 @@ echo ""
 # List of dashboards in desired order
 DASHBOARDS=(
     "01-overview-services.json:Overview de Servicos"
-    "02-terezia-api.json:TerezIA API"
+    "02-terezia-api.json:{bot_name} API"
     "03-nginx.json:Nginx"
     "04-postgresql.json:PostgreSQL"
     "05-n8n.json:N8N"
@@ -129,11 +129,11 @@ echo -e "${RED}Falhas:${NC} $FAILED"
 echo ""
 echo -e "${BLUE}📊 Acesse os dashboards:${NC}"
 echo "   URL: https://nexobasis.com.br/grafana"
-echo "   Pasta: TerezIA Services"
+echo "   Pasta: {bot_name} Services"
 echo ""
 echo -e "${BLUE}📁 Dashboards disponíveis:${NC}"
 echo "   • Overview de Servicos - Visão geral de todos os serviços"
-echo "   • TerezIA API - Logs da API (uvicorn)"
+echo "   • {bot_name} API - Logs da API (uvicorn)"
 echo "   • Nginx - Logs do servidor web"
 echo "   • PostgreSQL - Logs do banco de dados"
 echo "   • N8N - Logs do workflow automation"

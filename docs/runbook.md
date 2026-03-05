@@ -1,4 +1,4 @@
-# Runbook - TerezIA
+# Runbook - {bot_name}
 
 ## Escopo
 - Deploy e rollback da API
@@ -70,7 +70,7 @@ python scripts/backup_postgres.py --gzip --verify
 python scripts/backup_chroma.py
 ```
 - Agendamento (Windows Task Scheduler):
-  - Tarefa: `TerezIA-Backup` (diário 02:00)
+  - Tarefa: `{bot_name}-Backup` (diário 02:00)
   - Runner: `scripts/backup_all.ps1 -Gzip -Verify`
 - Saída padrão:
   - `artifacts/backups/postgres/<timestamp>/`

@@ -1,6 +1,6 @@
-# Guia de Deploy - TerezIA
+# Guia de Deploy - {bot_name}
 
-Este guia explica como fazer o deploy do TerezIA em produção para que o webhook fique **sempre disponível** (24/7).
+Este guia explica como fazer o deploy do {bot_name} em produção para que o webhook fique **sempre disponível** (24/7).
 
 ## 📋 Índice
 
@@ -172,7 +172,7 @@ sudo nano /etc/systemd/system/terezia.service
 Conteúdo:
 ```ini
 [Unit]
-Description=TerezIA Chatbot
+Description={bot_name} Chatbot
 Requires=docker.service
 After=docker.service
 

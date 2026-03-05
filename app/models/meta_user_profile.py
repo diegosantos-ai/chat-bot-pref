@@ -38,7 +38,7 @@ class MetaUserProfile(BaseModel):
     name: Optional[str] = Field(
         None,
         description="Nome completo do perfil",
-        examples=["João da Silva", "Prefeitura de Santa Tereza"],
+        examples=["João da Silva", "Prefeitura de {client_name}"],
     )
     profile_picture_url: Optional[str] = Field(
         None, description="URL da foto de perfil"
@@ -58,7 +58,7 @@ class MetaUserProfile(BaseModel):
                 "platform_user_id": "17841413792837146",
                 "platform": "instagram",
                 "username": "prefeitura_sto",
-                "name": "Prefeitura de Santa Tereza do Oeste",
+                "name": "Prefeitura de {client_name}",
                 "profile_picture_url": "https://instagram.com/...",
                 "created_at": "2026-02-14T22:00:00Z",
                 "updated_at": "2026-02-14T22:00:00Z",

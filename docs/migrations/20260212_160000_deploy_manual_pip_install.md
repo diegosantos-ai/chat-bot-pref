@@ -1,7 +1,7 @@
 # Migration: Deploy Manual e Instalação de Dependências Automática
 
 **Data**: 2026-02-12
-**Autor**: TerezIA Dev Team
+**Autor**: {bot_name} Dev Team
 **Tipo**: Alteração de Processo de Deploy
 
 ## Resumo

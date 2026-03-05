@@ -1,4 +1,4 @@
-# Central de Logs - TerezIA
+# Central de Logs - {bot_name}
 
 ## 🎉 Instalação Concluída!
 

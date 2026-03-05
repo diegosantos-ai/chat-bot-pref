@@ -1,6 +1,6 @@
-# TerezIA - Contexto do Agente
+# {bot_name} - Contexto do Agente
 
-Este documento serve como a fonte central de verdade e contexto para o desenvolvimento, manutenção e operação do assistente virtual TerezIA.
+Este documento serve como a fonte central de verdade e contexto para o desenvolvimento, manutenção e operação do assistente virtual {bot_name}.
 
 ## ATENÇÃO AGENTES DE IA:
 - Quaisquer modificações de scripts devem ser refletidas neste documento.
@@ -33,8 +33,8 @@ Este documento serve como a fonte central de verdade e contexto para o desenvolv
 - Auto-ingest do retriever ajustado para `data/knowledge_base/...` com fallback legado
 
 ## 1. Visão Geral do Projeto
-**Nome**: TerezIA
-**Cliente**: Prefeitura de Santa Tereza do Oeste - PR
+**Nome**: {bot_name}
+**Cliente**: Prefeitura de {client_name} - PR
 **Objetivo**: Chatbot institucional para atendimento ao cidadão via Facebook e Instagram.
 **Natureza**: Estritamente informativa. **Não realiza atos administrativos** (agendamentos, isenções, aprovações).
 **Status Atual**: Fase 5 (Deploy & Observabilidade) **EM PROGRESSO** (16/01/2025). Fase 4 concluída com sucesso - testes reais via Facebook Messenger validados.
@@ -53,7 +53,7 @@ Este documento serve como a fonte central de verdade e contexto para o desenvolv
     *   **Disclaimer Obrigatório**: "Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial."
 
 ## 3. Protocolos de Segurança e Crise (Policy Guard)
-A TerezIA possui "gatilhos de segurança" que interrompem a geração via LLM e usam respostas estáticas seguras.
+A {bot_name} possui "gatilhos de segurança" que interrompem a geração via LLM e usam respostas estáticas seguras.
 
 | Cenário | Ação do Agente | Contatos de Referência |
 | :--- | :--- | :--- |
@@ -685,7 +685,7 @@ python scripts/ops/start_tunnel.py
 - Fornece atendimento automatizado aos cidadãos através de múltiplos canais digitais
 - Trata consultas sobre horários de funcionamento, contatos de setores e informações públicas
 - Escala consultas complexas para atendimento humano quando necessário
-- Opera como **TerezIA**, assistente virtual institucional da prefeitura
+- Opera como **{bot_name}**, assistente virtual institucional da prefeitura
 
 ### Canais Suportados
 - **Web Widget**: Chat no site da prefeitura
@@ -702,7 +702,7 @@ python scripts/ops/start_tunnel.py
 - **Sistema de Prompts**: Prompts versionados e congelados para consistência
 
 ### Domínio
-Atendimento digital institucional para cidadãos de Santa Tereza do Oeste, com foco em informações públicas, orientação e encaminhamento.
+Atendimento digital institucional para cidadãos de {client_name}, com foco em informações públicas, orientação e encaminhamento.
 
 ### Status
 Versão piloto congelada (v1.0) com contratos, enums e prompts bloqueados para manter estabilidade durante os testes.

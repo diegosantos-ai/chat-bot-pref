@@ -1,4 +1,4 @@
-# Guia de Bolso (Windows) - TerezIA / pilot-atendimento
+# Guia de Bolso (Windows) - {bot_name} / pilot-atendimento
 
 Este guia ajuda a **rodar e acessar** a API + observabilidade (DB/Grafana) mesmo para quem nunca viu o projeto.
 

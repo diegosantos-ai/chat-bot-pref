@@ -1,6 +1,6 @@
 #!/bin/bash
 # =========================================
-# TerezIA - Script de Deploy
+# {bot_name} - Script de Deploy
 # =========================================
 # Uso: ./scripts/deploy.sh [comando]
 # Comandos: start, stop, restart, logs, status, build
@@ -43,7 +43,7 @@ check_requirements() {
 
 # Comandos
 start() {
-    log_info "Iniciando TerezIA..."
+    log_info "Iniciando {bot_name}..."
     docker-compose up -d --build
     log_info "Aguardando container ficar healthy..."
     sleep 10
@@ -51,13 +51,13 @@ start() {
 }
 
 stop() {
-    log_info "Parando TerezIA..."
+    log_info "Parando {bot_name}..."
     docker-compose down
     log_info "Containers parados ✓"
 }
 
 restart() {
-    log_info "Reiniciando TerezIA..."
+    log_info "Reiniciando {bot_name}..."
     docker-compose restart
     status
 }
@@ -119,7 +119,7 @@ case "${1:-help}" in
         update
         ;;
     *)
-        echo "TerezIA - Script de Deploy"
+        echo "{bot_name} - Script de Deploy"
         echo "=========================="
         echo ""
         echo "Uso: $0 [comando]"

@@ -1,4 +1,4 @@
-# Observabilidade — TerezIA (Fase 5)
+# Observabilidade — {bot_name} (Fase 5)
 
 Objetivo: garantir visibilidade de saúde, qualidade e segurança do atendimento, com métricas e alertas acionáveis.
 

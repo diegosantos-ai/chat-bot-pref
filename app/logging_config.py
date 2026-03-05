@@ -1,5 +1,5 @@
 """
-Configuração de logging estruturado (JSON) para a TerezIA.
+Configuração de logging estruturado (JSON) para a {bot_name}.
 
 Este módulo centraliza a configuração de logs:
 - Formato JSON simples, seguro para ingestão por agregadores.

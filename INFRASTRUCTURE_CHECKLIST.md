@@ -1,4 +1,4 @@
-# Checklist de Validação de Infraestrutura - TerezIA
+# Checklist de Validação de Infraestrutura - {bot_name}
 
 Use este checklist para validar a infraestrutura antes do deploy em produção.
 
@@ -63,7 +63,7 @@ Use este checklist para validar a infraestrutura antes do deploy em produção.
 - `scripts/backup_postgres.py` (CSV via COPY, sem `psql/pg_dump`)
 - `scripts/backup_chroma.py` (zip do `CHROMA_PERSIST_DIR`)
 - `scripts/backup_all.ps1` (orquestra ambos)
-- Task Scheduler: tarefa diária `TerezIA-Backup`
+- Task Scheduler: tarefa diária `{bot_name}-Backup`
 
 ## 🧠 ChromaDB (Vector Store)
 

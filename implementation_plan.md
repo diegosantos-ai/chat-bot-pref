@@ -1,4 +1,4 @@
-## Checklist de Deploy – Fase 5 (TerezIA)
+## Checklist de Deploy – Fase 5 ({bot_name})
 
 1. **Validação do Ambiente de Produção**
     - [x] Conferir infraestrutura (servidores, cloud, permissões de acesso) - Script criado: `scripts/ops/validate_infrastructure.py`
@@ -62,7 +62,7 @@ Atualização completa dos arquivos Markdown na pasta `base/` com o conteúdo ri
 
 #### [base/BA-RAG-PILOTO-2026.01.v1/items](file:///c:/Users/santo/pilot-atendimento/base/BA-RAG-PILOTO-2026.01.v1/items)
 *   #### [MODIFY] `0001_horarios.md`
-    *   *Adicionar*: Tabela de horários de ônibus (Expresso Santa Tereza) e atualização de horários de secretarias.
+    *   *Adicionar*: Tabela de horários de ônibus (Expresso {client_name}) e atualização de horários de secretarias.
 *   #### [MODIFY] `0002_contatos.md`
     *   *Substituir*: Pela "Matriz de Redirecionamento" completa (Seção 7.2 do estudo).
 *   #### [MODIFY] `0004_saude.md`

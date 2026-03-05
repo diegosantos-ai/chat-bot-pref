@@ -1,5 +1,5 @@
 """
-API endpoint para chat com a TerezIA.
+API endpoint para chat com a {bot_name}.
 """
 
 from fastapi import APIRouter, HTTPException, Request
@@ -34,7 +34,7 @@ async def chat(
     request: Request, response: Response, chat_request: ChatRequest
 ) -> ChatResponse:
     """
-    Processa uma mensagem do usuário e retorna a resposta da TerezIA.
+    Processa uma mensagem do usuário e retorna a resposta da {bot_name}.
 
     **Exemplo de request:**
     ```json

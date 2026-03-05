@@ -1,4 +1,4 @@
-# TerezIA - Assistente Virtual da Prefeitura de Santa Tereza do Oeste
+# {bot_name} - Assistente Virtual da Prefeitura de {client_name}
 
 Chatbot institucional para atendimento ao cidadão via Web Widget, Instagram e Facebook.
 Natureza estritamente informativa: não agenda consultas, não concede isenções, não toma decisões administrativas.
@@ -120,7 +120,7 @@ A assistente sempre se identifica como IA em treinamento.
 ## Documentação
 | Arquivo | Descrição |
 |---------|-----------|
-| `AGENTS.md` / `agents.md` | Contexto central do agente TerezIA |
+| `AGENTS.md` / `agents.md` | Contexto central do agente {bot_name} |
 | `docs/QUICKSTART_AGENT.md` | Guia rápido para agentes e manutenção |
 | `docs/estudo.md` | Regras de negócio e FAQs |
 | `docs/apoio_faq.md` | FAQs por cluster |
@@ -189,6 +189,7 @@ A assistente sempre se identifica como IA em treinamento.
 - Disclaimer obrigatório nas respostas.
 
 ## Licença
-Projeto interno - Prefeitura de Santa Tereza do Oeste (2026)
-#   c h a t - b o t - p r e f  
+Projeto interno - Prefeitura de {client_name} (2026)
+#   c h a t - b o t - p r e f 
+ 
  

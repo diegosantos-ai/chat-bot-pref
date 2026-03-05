@@ -2,7 +2,7 @@
 
 ## 📊 Visão Geral
 
-Os logs do TerezIA agora incluem JSON estruturado que pode ser visualizado em colunas separadas no Grafana.
+Os logs do {bot_name} agora incluem JSON estruturado que pode ser visualizado em colunas separadas no Grafana.
 
 ## 🖱️ Como Visualizar os Campos
 
@@ -10,8 +10,8 @@ Os logs do TerezIA agora incluem JSON estruturado que pode ser visualizado em co
 
 1. **Acesse o Dashboard**
    - Vá em: https://nexobasis.com.br/grafana
-   - Dashboards → TerezIA Services
-   - Clique em: **TerezIA - API Logs (Parsed)**
+   - Dashboards → {bot_name} Services
+   - Clique em: **{bot_name} - API Logs (Parsed)**
 
 2. **Expanda um Log**
    - Clique na seta (▶) ao lado esquerdo de qualquer log
@@ -34,15 +34,15 @@ Os logs do TerezIA agora incluem JSON estruturado que pode ser visualizado em co
 
 ## 🎨 Dashboards Disponíveis
 
-### 1. TerezIA - API Logs
+### 1. {bot_name} - API Logs
 Dashboard básico com todos os logs
 📌 URL: https://nexobasis.com.br/grafana/d/terezia-api-logs
 
-### 2. TerezIA - API Logs (JSON)  
+### 2. {bot_name} - API Logs (JSON)  
 Dashboard com JSON prettificado
 📌 URL: https://nexobasis.com.br/grafana/d/terezia-api-logs-json
 
-### 3. TerezIA - API Logs (Parsed) ⭐ **Recomendado**
+### 3. {bot_name} - API Logs (Parsed) ⭐ **Recomendado**
 Dashboard com:
 - Logs com campos extraídos
 - Gráficos por nível (INFO/WARNING/ERROR)
@@ -96,7 +96,7 @@ Dashboard com:
 
 ---
 
-## 🎛️ Painéis do Dashboard "TerezIA - API Logs (Parsed)"
+## 🎛️ Painéis do Dashboard "{bot_name} - API Logs (Parsed)"
 
 ### Painel 1: Todos os Logs
 - Mostra todos os logs com campos expandidos

@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "TerezIA - Loki Infrastructure",
+    "title": "{bot_name} - Loki Infrastructure",
     "tags": ["loki", "promtail", "infrastructure", "logs"],
     "timezone": "browser",
     "schemaVersion": 38,

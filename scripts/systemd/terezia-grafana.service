@@ -1,5 +1,5 @@
 [Unit]
-Description=TerezIA Grafana Service
+Description={bot_name} Grafana Service
 After=network.target docker.service
 Requires=docker.service
 

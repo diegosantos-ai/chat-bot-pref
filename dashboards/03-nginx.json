@@ -1,7 +1,7 @@
 {
   "dashboard": {
     "id": null,
-    "title": "TerezIA - Nginx",
+    "title": "{bot_name} - Nginx",
     "tags": ["nginx", "web-server", "logs"],
     "timezone": "browser",
     "schemaVersion": 38,

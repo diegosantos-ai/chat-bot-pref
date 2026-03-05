@@ -4,7 +4,7 @@
   "author": "Equipe Prefeitura STO",
   "scope": "MVE_PILOT",
   "frozen_for_pilot": true,
-  "description": "Prompts do Atendimento Digital da Prefeitura de Santa Tereza do Oeste",
+  "description": "Prompts do Atendimento Digital da Prefeitura de {client_name}",
   
   "prompts": {
     "system": {
@@ -57,8 +57,8 @@
     "tone": "Institucional, claro e acolhedor",
     "max_response_length": "500 caracteres",
     "language": "pt-BR",
-    "institution_name": "Prefeitura de Santa Tereza do Oeste",
-    "assistant_name": "Atendimento Digital – Prefeitura de Santa Tereza do Oeste",
+    "institution_name": "Prefeitura de {client_name}",
+    "assistant_name": "Atendimento Digital – Prefeitura de {client_name}",
     "topics": [
       "Informações públicas",
       "Horários de funcionamento",

@@ -34,7 +34,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="API da TerezIA - Assistente Virtual da Prefeitura de Santa Tereza do Oeste",
+    description="API da {bot_name} - Assistente Virtual da Prefeitura de {client_name}",
     lifespan=lifespan,
 )
 
@@ -98,7 +98,7 @@ Instrumentator().instrument(app).expose(app)
 @shared_limiter.limit("60/minute")  # Mais permissivo para health check
 async def root(request: Request, response: Response):
     return {
-        "message": "🤖 TerezIA API está rodando!",
+        "message": "🤖 {bot_name} API está rodando!",
         "env": settings.ENV,
         "version": settings.VERSION,
         "docs": "/docs",

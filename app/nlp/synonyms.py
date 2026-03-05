@@ -2,7 +2,7 @@
 Dicionário de Sinônimos - Vocabulário Popular vs Técnico
 
 Mapeia termos técnicos/formais para equivalentes populares e vice-versa.
-Permite que a TerezIA entenda tanto o empresário quanto a dona de casa.
+Permite que a {bot_name} entenda tanto o empresário quanto a dona de casa.
 
 Estrutura:
 - Chave: termo canônico (usado na base de conhecimento)

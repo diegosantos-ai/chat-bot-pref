@@ -575,7 +575,7 @@ def main():
     print(f"\n{Colors.BOLD}{Colors.BLUE}")
     print("============================================================")
     print("VALIDAÇÃO DE INFRAESTRUTURA E VARIÁVEIS DE AMBIENTE")
-    print("Pilot Atendimento - TerezIA")
+    print("Pilot Atendimento - {bot_name}")
     print("============================================================")
     print(f"{Colors.END}\n")
 

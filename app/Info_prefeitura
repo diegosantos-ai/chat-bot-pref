@@ -78,7 +78,7 @@ Informação encontrada
 Classificação
 Fonte
 Nome completo do município
-Santa Tereza do Oeste.
+{client_name}.
 Apto.
 Nome oficial no portal municipal.
 Estado
@@ -96,9 +96,9 @@ Mesma página legislativa.
 
 5️⃣ Validação da fonte
 Todos os dados acima foram extraídos de:
-Site oficial da Prefeitura de Santa Tereza do Oeste (santatereza.pr.gov.br) – rodapé, páginas de COVID e telefones.
+Site oficial da Prefeitura de {client_name} (santatereza.pr.gov.br) – rodapé, páginas de COVID e telefones.
 Páginas institucionais específicas para Sala do Empreendedor, Ouvidoria e listas de telefones de secretarias.
-Câmara Municipal de Santa Tereza do Oeste – seção de Legislaturas, que informa o prefeito e o período de mandato.
+Câmara Municipal de {client_name} – seção de Legislaturas, que informa o prefeito e o período de mandato.
 Código-fonte do site municipal – para identificar as redes sociais oficiais.
 Caso algum item não conste nas fontes oficiais ou esteja incompleto, ele foi classificado como Inexistente ou Restrito, indicando a necessidade de validação ou criação de conteúdo oficial antes de ser utilizado na Base Apta.
 

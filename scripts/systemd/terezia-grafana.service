@@ -1,0 +1,19 @@
+[Unit]
+Description={bot_name} Grafana Service
+After=network.target docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/pilot-atendimento
+ExecStart=/usr/bin/docker-compose -f /root/pilot-atendimento/docker-compose.yml up grafana
+ExecStop=/usr/bin/docker-compose -f /root/pilot-atendimento/docker-compose.yml down
+Restart=always
+RestartSec=10s
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=terezia-grafana
+
+[Install]
+WantedBy=multi-user.target

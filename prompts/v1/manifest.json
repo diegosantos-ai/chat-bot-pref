@@ -1,0 +1,69 @@
+{
+  "version": "PROMPTS-2026.01.v1",
+  "created_at": "2026-01-11",
+  "author": "Equipe Prefeitura STO",
+  "scope": "MVE_PILOT",
+  "frozen_for_pilot": true,
+  "description": "Prompts do Atendimento Digital da Prefeitura de {client_name}",
+  
+  "prompts": {
+    "system": {
+      "file": "system.txt",
+      "purpose": "Define a persona e regras do assistente",
+      "variables": ["{{base_id}}", "{{current_date}}"]
+    },
+    "classifier": {
+      "file": "classifier.txt", 
+      "purpose": "Classifica a intenção do usuário",
+      "variables": ["{{user_message}}", "{{intents_list}}"]
+    },
+    "rag_answer": {
+      "file": "rag_answer.txt",
+      "purpose": "Gera resposta baseada no contexto recuperado",
+      "variables": ["{{user_message}}", "{{context}}", "{{base_id}}"]
+    },
+    "fallback": {
+      "file": "fallback.txt",
+      "purpose": "Mensagem padrão quando não consegue responder",
+      "variables": []
+    },
+    "greeting": {
+      "file": "greeting.txt",
+      "purpose": "Resposta para saudações",
+      "variables": []
+    },
+    "escalate": {
+      "file": "escalate.txt",
+      "purpose": "Mensagem ao transferir para humano",
+      "variables": []
+    },
+    "blocked": {
+      "file": "blocked.txt",
+      "purpose": "Mensagem quando requisição é bloqueada",
+      "variables": []
+    },
+    "public_ack": {
+      "file": "public_ack.txt",
+      "purpose": "Respostas para elogios/agradecimentos em comentários públicos",
+      "variables": [],
+      "type": "variations",
+      "selection_mode": "random_no_repeat",
+      "surface_type": "PUBLIC_COMMENT",
+      "intent": "COMPLIMENT"
+    }
+  },
+
+  "guidelines": {
+    "tone": "Institucional, claro e acolhedor",
+    "max_response_length": "500 caracteres",
+    "language": "pt-BR",
+    "institution_name": "Prefeitura de {client_name}",
+    "assistant_name": "Atendimento Digital – Prefeitura de {client_name}",
+    "topics": [
+      "Informações públicas",
+      "Horários de funcionamento",
+      "Contatos de setores",
+      "Orientação e encaminhamento"
+    ]
+  }
+}

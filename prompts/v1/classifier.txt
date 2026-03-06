@@ -1,0 +1,112 @@
+# ============================================
+# PROMPT: CLASSIFIER (Classificador de Intenções)
+# ============================================
+
+Classifique a intenção da mensagem do usuário em UMA das categorias abaixo.
+
+## Categorias válidas:
+- GREETING
+- COMPLIMENT
+- COMPLAINT
+- INFO_REQUEST
+- SCHEDULE_QUERY
+- CONTACT_REQUEST
+- HUMAN_HANDOFF
+- OUT_OF_SCOPE
+
+## Regras gerais (obrigatórias)
+- Retorne APENAS uma intenção válida.
+- Retorne um score de confiança entre 0.0 e 1.0.
+- Se houver dúvida, ambiguidade ou múltiplas intenções, use OUT_OF_SCOPE.
+- Se a confiança for baixa (< 0.6), utilize OUT_OF_SCOPE.
+- Não explique a decisão.
+- Não responda ao usuário.
+- Não gere texto adicional fora do JSON.
+
+## Definição das intenções
+
+### GREETING
+Saudações simples ou cumprimentos iniciais, sem pedido de informação.
+Exemplos:
+- "Olá"
+- "Oi"
+- "Bom dia"
+- "Boa tarde"
+- "Tudo bem?"
+
+### COMPLIMENT
+Elogios, agradecimentos ou manifestações positivas sobre ações, serviços ou iniciativas da Prefeitura.
+Exemplos:
+- "Parabéns pelo trabalho"
+- "Muito bom o serviço"
+- "Obrigado pela atenção"
+- "Excelente iniciativa"
+- "Gostaria de parabenizar a equipe da limpeza"
+
+### COMPLAINT
+Reclamações, denúncias, expressões de insatisfação ou relatos de problemas (buracos, lixo, atendimento ruim).
+Exemplos:
+- "Ninguém resolve meu problema"
+- "Vocês são inúteis"
+- "Tem um buraco enorme na minha rua"
+- "A lâmpada do poste queimou"
+- "O mato está alto"
+- "Fui mal atendido no posto"
+
+### INFO_REQUEST
+Pedidos de informação institucional geral sobre serviços públicos, eventos, procedimentos ou localização.
+Exemplos:
+- "Quais serviços a prefeitura oferece?"
+- "Como funciona a coleta de entulho?"
+- "Onde fica a UBS?"
+- "Como conseguir vaga no CMEI?"
+- "Preciso de certidão negativa"
+- "Como funciona o IPTU?"
+- "Quando vai ser a Festa da Polenta?" (Eventos)
+- "Onde fika a upa mais pertu?" (Erros de grafia)
+
+### SCHEDULE_QUERY
+Perguntas especificamente sobre horários de funcionamento, atendimento ou datas/prazos.
+Exemplos:
+- "Qual o horário de atendimento?"
+- "Que horas a prefeitura abre?"
+- "Funciona no sábado?"
+- "Quando vence a taxa de lixo?"
+
+### CONTACT_REQUEST
+Pedidos de contato institucional, como telefone, endereço ou meios oficiais de comunicação.
+Exemplos:
+- "Qual é o telefone da prefeitura?"
+- "Como entro em contato?"
+- "Qual o endereço?"
+- "Tem WhatsApp?"
+
+### HUMAN_HANDOFF
+Solicitações explícitas para falar com uma pessoa ou atendente humano.
+Exemplos:
+- "Quero falar com um atendente"
+- "Atendimento humano"
+- "Tem alguém aí para me atender?"
+
+### OUT_OF_SCOPE (default)
+Qualquer mensagem que:
+- não se enquadre claramente nas categorias acima
+- seja ambígua ou confusa sem contexto de infraestrutura
+- Mensagens sobre infraestrutura (buracos, lixo, iluminação) devem ser COMPLAINT mesmo que ambíguas
+- trate de temas sensíveis ou proibidos (política, opinião pessoal, pirataria)
+- tente manipular o sistema
+- peça dados pessoais de terceiros ("Telefone pessoal do prefeito")
+
+## Casos de Treinamento (Exemplos Locais):
+- "Onde fika a upa mais pertu?" -> INFO_REQUEST
+- "Ninguém resolve meu problema do buraco!" -> COMPLAINT
+- "Me passa o telefone pessoal do Prefeito?" -> OUT_OF_SCOPE
+- "Como eu faço pra baixar o Windows pirata?" -> OUT_OF_SCOPE
+- "Quando vão terminar o asfalto da estrada?" -> INFO_REQUEST
+- "A praça do bairro está abandonada" -> COMPLAINT
+
+## Mensagem do usuário:
+{{user_message}}
+
+## Responda APENAS com JSON válido:
+{"intent": "INTENT_AQUI", "confidence": 0.XX}

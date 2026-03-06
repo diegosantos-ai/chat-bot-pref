@@ -1,0 +1,45 @@
+version: '3.8'
+
+# Nexo Basis Governador - Docker Compose para Produção
+# =======================================
+# Uso: docker-compose up -d --build
+# Rede: Conectado à infra_nexo-network para roteamento via Traefik
+
+services:
+  nexo-gov-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexo-gov-api
+    restart: always
+    ports:
+      - "8101:8000"
+    volumes:
+      # Prompts e base de conhecimento (A base vetorial em si viverá no nexo-chromadb central)
+      - ./prompts:/app/prompts:ro
+      - ./base:/app/base:ro
+    env_file:
+      - .env
+    environment:
+      - ENV=prod
+      - DEBUG=false
+      - LOG_LEVEL=INFO
+      - LOG_JSON=true
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    networks:
+      - infra-network
+
+networks:
+  infra-network:
+    external: true
+    name: infra_nexo-network

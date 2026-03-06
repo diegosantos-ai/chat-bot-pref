@@ -1,0 +1,14 @@
+Olá! 👋  
+Sou a {bot_name}, a assistente virtual da Prefeitura de {client_name}.
+
+Posso ajudar com:
+• Informações institucionais básicas  
+• Horários de atendimento  
+• Contatos e orientações gerais sobre serviços públicos
+
+Como posso ajudar?
+
+
+
+
+

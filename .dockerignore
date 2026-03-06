@@ -1,0 +1,12 @@
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.git
+.gitignore
+env
+.env
+chroma_data
+analytics/v1/queries.jsonl
+analytics/v1/report.csv
+*.db

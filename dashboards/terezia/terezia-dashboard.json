@@ -1,0 +1,128 @@
+{
+  "uid": "terezia-app",
+  "title": "{bot_name} - Application",
+  "timezone": "browser",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Requests",
+      "id": 1,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__timeGroupAlias(criado_em,'1m'), count(*) AS requests FROM audit_events WHERE $__timeFilter(criado_em) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Errors per minute",
+      "id": 2,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__timeGroupAlias(criado_em,'1m'), count(*) AS errors FROM audit_events WHERE codigo_erro IS NOT NULL AND $__timeFilter(criado_em) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Avg Response Time (ms)",
+      "id": 3,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__timeGroupAlias(criado_em,'1m'), avg(tempo_resposta_ms) AS avg_ms FROM audit_events WHERE tempo_resposta_ms IS NOT NULL AND $__timeFilter(criado_em) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Fallback Rate (%)",
+      "id": 4,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__timeGroupAlias(criado_em,'1h'), 100.0 * sum( (tipo_resposta = 'FALLBACK')::int ) / NULLIF(count(*),0) AS fallback_pct FROM audit_events WHERE $__timeFilter(criado_em) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "RAG: No docs vs total",
+      "id": 5,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__timeGroupAlias(criado_em,'1h'), count(*) FILTER (WHERE sem_documentos = TRUE) AS no_docs, count(*) AS total FROM rag_queries WHERE $__timeFilter(criado_em) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Top Intents",
+      "id": 6,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT intencao, count(*) AS cnt FROM audit_events WHERE $__timeFilter(criado_em) GROUP BY intencao ORDER BY cnt DESC LIMIT 10",
+          "format": "table",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Recent Errors",
+      "id": 7,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT id_evento, id_requisicao, id_sessao, codigo_erro, tipo_excecao, criado_em FROM audit_events WHERE codigo_erro IS NOT NULL ORDER BY criado_em DESC LIMIT 100",
+          "format": "table",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Active Users (distinct / 1h)",
+      "id": 8,
+      "targets": [
+        {
+          "refId": "A",
+          "rawSql": "SELECT $__timeGroupAlias(criado_em,'1h'), count(DISTINCT id_usuario) AS active_users FROM audit_events WHERE $__timeFilter(criado_em) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "datasource": {"type":"postgres","uid":"Postgres Terezia"}
+        }
+      ]
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "datasource",
+        "name": "datasource",
+        "label": "Datasource",
+        "query": "",
+        "current": {
+          "text": "Terezia",
+          "value": "Terezia"
+        }
+      }
+    ]
+  }
+}

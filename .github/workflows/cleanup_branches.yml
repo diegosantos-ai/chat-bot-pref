@@ -1,0 +1,82 @@
+name: Cleanup Branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "CONFIRM" to proceed with branch cleanup'
+        required: true
+        default: ''
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'CONFIRM'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Fetch all branches
+        run: git fetch --all
+      
+      - name: Checkout develop branch
+        run: |
+          git checkout develop || git checkout -b develop
+          git pull origin develop || echo "Develop branch não existe remotamente ainda"
+      
+      - name: List branches to merge
+        id: list_branches
+        run: |
+          echo "Branches remotas encontradas:"
+          git branch -r | grep -v '\->' | grep -v 'origin/main' | grep -v 'origin/develop' | sed 's/origin\///' | tr -d ' '
+          
+          # Store branches in a file
+          git branch -r | grep -v '\->' | grep -v 'origin/main' | grep -v 'origin/develop' | sed 's/origin\///' | tr -d ' ' > /tmp/branches_to_merge.txt
+          
+          echo "Total de branches para merge:"
+          wc -l /tmp/branches_to_merge.txt
+      
+      - name: Merge all branches into develop
+        run: |
+          while IFS= read -r branch; do
+            if [ -n "$branch" ]; then
+              echo "🔀 Mergeando branch: $branch"
+              
+              # Try to merge
+              if git merge "origin/$branch" --no-edit -m "Merge branch '$branch' into develop"; then
+                echo "✅ Branch $branch mergeada com sucesso"
+              else
+                echo "⚠️ Conflito ao mergear $branch - resolvendo automaticamente"
+                git merge --abort || true
+                git merge "origin/$branch" -X theirs --no-edit -m "Merge branch '$branch' into develop" || echo "Falha ao mergear $branch"
+              fi
+            fi
+          done < /tmp/branches_to_merge.txt
+      
+      - name: Push develop
+        run: |
+          git push origin develop
+      
+      - name: Delete remote branches
+        run: |
+          while IFS= read -r branch; do
+            if [ -n "$branch" ]; then
+              echo "🗑️ Deletando branch remota: $branch"
+              git push origin --delete "$branch" || echo "⚠️ Falha ao deletar $branch"
+            fi
+          done < /tmp/branches_to_merge.txt
+      
+      - name: Summary
+        run: |
+          echo "✅ Limpeza concluída!"
+          echo "📊 Branches restantes:"
+          git branch -r | grep -E "(main|develop)"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Docker Expert"
+  short_description: "Diagnose and fix Docker/Compose runtime issues"
+  default_prompt: "Use $docker-expert to diagnose this Docker Compose failure and provide the smallest safe fix."

@@ -1,0 +1,698 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex 407f4dc..583366a 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -76,6 +76,10 @@[m [mchroma_db_*.db[m
+ logs/[m
+ log/[m
+ [m
+[32m+[m[32m# Backups (gerados localmente)[m
+[32m+[m[32martifacts/backups/[m
+[32m+[m[32martifacts/logs/[m
+[32m+[m
+ # OS[m
+ .DS_Store[m
+ Thumbs.db[m
+[1mdiff --git a/INFRASTRUCTURE_CHECKLIST.md b/INFRASTRUCTURE_CHECKLIST.md[m
+[1mindex 18ee413..8f32a46 100644[m
+[1m--- a/INFRASTRUCTURE_CHECKLIST.md[m
+[1m+++ b/INFRASTRUCTURE_CHECKLIST.md[m
+[36m@@ -22,7 +22,7 @@[m [mUse este checklist para validar a infraestrutura antes do deploy em produção.[m
+ - [ ] Backup seguro das variáveis em cofre de senhas/secrets manager[m
+ [m
+ ### Variáveis Obrigatórias[m
+[31m-- [ ] `OPENAI_API_KEY` - Chave válida da OpenAI[m
+[32m+[m[32m- [ ] `GEMINI_API_KEY` - Chave válida do Google Gemini[m
+ - [ ] `DATABASE_URL` - URL PostgreSQL no formato `postgresql://user:pass@host:5432/db`[m
+ - [ ] `META_ACCESS_TOKEN` - Token de acesso da página Facebook[m
+ - [ ] `META_PAGE_ID` - ID da página Facebook[m
+[36m@@ -33,7 +33,7 @@[m [mUse este checklist para validar a infraestrutura antes do deploy em produção.[m
+ - [ ] `ENV` - Ambiente (dev/staging/prod)[m
+ - [ ] `DEBUG` - False em produção[m
+ - [ ] `CHROMA_PERSIST_DIR` - Diretório ChromaDB (padrão: `./chroma_data`)[m
+[31m-- [ ] `OPENAI_MODEL` - Modelo a usar (padrão: `gpt-4.1-nano`)[m
+[32m+[m[32m- [ ] `GEMINI_MODEL` - Modelo a usar (padrão: `gemini-2.0-flash`)[m
+ [m
+ ## 🗄️ Banco de Dados PostgreSQL[m
+ [m
+[36m@@ -56,9 +56,15 @@[m [mUse este checklist para validar a infraestrutura antes do deploy em produção.[m
+ [m
+ ### Backup[m
+ - [ ] Estratégia de backup definida[m
+[31m-- [ ] Backup automatizado configurado (se produção)[m
+[32m+[m[32m- [ ] Backup automatizado configurado (Task Scheduler/cron)[m
+ - [ ] Teste de restore realizado[m
+ [m
+[32m+[m[32m**Sugestão (Windows)**:[m
+[32m+[m[32m- `scripts/backup_postgres.py` (CSV via COPY, sem `psql/pg_dump`)[m
+[32m+[m[32m- `scripts/backup_chroma.py` (zip do `CHROMA_PERSIST_DIR`)[m
+[32m+[m[32m- `scripts/backup_all.ps1` (orquestra ambos)[m
+[32m+[m[32m- Task Scheduler: tarefa diária `{bot_name}-Backup`[m
+[32m+[m
+ ## 🧠 ChromaDB (Vector Store)[m
+ [m
+ ### Configuração[m
+[36m@@ -74,12 +80,11 @@[m [mUse este checklist para validar a infraestrutura antes do deploy em produção.[m
+ ### Backup[m
+ - [ ] Backup do diretório ChromaDB configurado (recomendado)[m
+ [m
+[31m-## 🤖 OpenAI API[m
+[32m+[m[32m## 🤖 Google Gemini API[m
+ [m
+ ### Configuração[m
+[31m-- [ ] Chave API `OPENAI_API_KEY` válida[m
+[31m-- [ ] Conta OpenAI com créditos disponíveis[m
+[31m-- [ ] Modelo configurado (`OPENAI_MODEL`) disponível na conta[m
+[32m+[m[32m- [ ] Chave API `GEMINI_API_KEY` válida[m
+[32m+[m[32m- [ ] Modelo configurado (`GEMINI_MODEL`) disponível na conta[m
+ [m
+ ### Testes[m
+ - [ ] Script de validação autentica com sucesso[m
+[36m@@ -87,7 +92,7 @@[m [mUse este checklist para validar a infraestrutura antes do deploy em produção.[m
+ - [ ] Rate limits adequados para volume esperado[m
+ [m
+ ### Monitoramento[m
+[31m-- [ ] Dashboard OpenAI configurado: https://platform.openai.com/usage[m
+[32m+[m[32m- [ ] Monitoramento/limites revisados na console do Google (Gemini)[m
+ - [ ] Alertas de uso/custo configurados[m
+ [m
+ ## 📱 Meta Platform (Facebook/Instagram)[m
+[36m@@ -243,7 +248,7 @@[m [mUse este checklist para validar a infraestrutura antes do deploy em produção.[m
+ ## 📞 Contatos de Suporte[m
+ [m
+ **PostgreSQL**: [Administrador DB]  [m
+[31m-**OpenAI**: https://help.openai.com  [m
+[32m+[m[32m**Gemini**: https://ai.google.dev/[m[41m  [m
+ **Meta Platform**: https://developers.facebook.com/support  [m
+ **Equipe Interna**: [Contatos][m
+ [m
+[1mdiff --git a/README.md b/README.md[m
+[1mindex 08cdc24..6ffd9eb 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -24,7 +24,7 @@[m
+ └─────────────────┘     └──────────────────┘     └────────┬────────┘[m
+                                                           │[m
+ ┌─────────────────┐     ┌──────────────────┐     ┌────────▼────────┐[m
+[31m-│  LLM (OpenAI)   │◀────│  RAG Composer    │◀────│  Policy Guard   │[m
+[32m+[m[32m│  LLM (Gemini)   │◀────│  RAG Composer    │◀────│  Policy Guard   │[m
+ │  Geração        │     │  + Retriever     │     │  (PRE/POST)     │[m
+ └────────┬────────┘     └──────────────────┘     └─────────────────┘[m
+          │[m
+[36m@@ -35,7 +35,7 @@[m
+ └─────────────────┘     └──────────────────┘[m
+ ```[m
+ [m
+[31m-**Stack**: Python 3.11+ | FastAPI | PostgreSQL | ChromaDB | OpenAI[m
+[32m+[m[32m**Stack**: Python 3.11+ | FastAPI | PostgreSQL | ChromaDB | Google Gemini[m
+ [m
+ ---[m
+ [m
+[1mdiff --git a/docs/guia_de_bolso.md b/docs/guia_de_bolso.md[m
+[1mindex 0277972..3778feb 100644[m
+[1m--- a/docs/guia_de_bolso.md[m
+[1m+++ b/docs/guia_de_bolso.md[m
+[36m@@ -136,7 +136,19 @@[m [masyncio.run(main())[m
+ scripts\stop_api.ps1[m
+ ```[m
+ [m
+[31m-## 6) Problemas comuns (check rapido)[m
+[32m+[m[32m## 6) Backups (Postgres + ChromaDB)[m
+[32m+[m
+[32m+[m[32mBackup manual (recomendado antes de mudanças):[m
+[32m+[m[32m```powershell[m
+[32m+[m[32mpython scripts\backup_postgres.py --gzip --verify[m
+[32m+[m[32mpython scripts\backup_chroma.py[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mSaída:[m
+[32m+[m[32m- `artifacts\backups\postgres\...`[m
+[32m+[m[32m- `artifacts\backups\chroma\...`[m
+[32m+[m
+[32m+[m[32m## 7) Problemas comuns (check rapido)[m
+ [m
+ ### Porta 8000 em uso[m
+ ```powershell[m
+[36m@@ -150,4 +162,3 @@[m [mEm geral e lock do SQLite ou servico quebrado. Ver `docs/runbook.md` e o log:[m
+ [m
+ ### "psql nao e reconhecido"[m
+ Nao tem o cliente instalado. Use a secao **4)** (consulta via Python) ou instale o PostgreSQL client tools.[m
+[31m-[m
+[1mdiff --git a/docs/relatorio_observabilidade.md b/docs/relatorio_observabilidade.md[m
+[1mindex d3a0641..056ee70 100644[m
+[1m--- a/docs/relatorio_observabilidade.md[m
+[1m+++ b/docs/relatorio_observabilidade.md[m
+[36m@@ -26,6 +26,30 @@[m
+ - Dashboard: importar `grafana/dashboard_terezia.json` no Grafana.[m
+ - Testes E2E: `pytest tests/e2e/test_pipeline_e2e.py`[m
+ [m
+[32m+[m[32m## Serviços auxiliares (PostgreSQL + ChromaDB)[m
+[32m+[m
+[32m+[m[32m### PostgreSQL[m
+[32m+[m[32m- Conectividade validada via `scripts/validate_infrastructure.py` (9/9 OK).[m
+[32m+[m[32m- `pgcrypto` instalado: `pgcrypto_installed=True` (necessário para `gen_random_uuid()`).[m
+[32m+[m[32m- Schema aplicado e tabelas presentes: `audit_events`, `rag_queries`, `usuarios_anonimos`, `conversas`.[m
+[32m+[m
+[32m+[m[32m### ChromaDB[m
+[32m+[m[32m- Arquitetura atual: **embarcado** (ChromaDB `PersistentClient`), sem serviço separado.[m
+[32m+[m[32m- Persistência validada em `./chroma_data` com collection `settings.RAG_COLLECTION_NAME`.[m
+[32m+[m
+[32m+[m[32m### Backups (agendado e testado)[m
+[32m+[m[32m- Scripts:[m
+[32m+[m[32m  - `scripts/backup_postgres.py` (backup lógico via `COPY` em CSV, sem depender de `psql/pg_dump`)[m
+[32m+[m[32m  - `scripts/backup_chroma.py` (zip do diretório `CHROMA_PERSIST_DIR`)[m
+[32m+[m[32m  - `scripts/backup_all.ps1` (orquestra ambos + log)[m
+[32m+[m[32m- Saída:[m
+[32m+[m[32m  - `artifacts/backups/postgres/<timestamp>/`[m
+[32m+[m[32m  - `artifacts/backups/chroma/<timestamp>/`[m
+[32m+[m[32m  - Logs do agendamento: `artifacts/backups/task_logs/`[m
+[32m+[m[32m- Agendamento Windows (Task Scheduler):[m
+[32m+[m[32m  - Tarefa criada: `{bot_name}-Backup` (diário 02:00)[m
+[32m+[m[32m  - Execução manual testada com sucesso (último resultado 0)[m
+[32m+[m
+ ## Checklist (OK)[m
+ - [x] Logs estruturados JSON configurados e ativos via env.[m
+ - [x] Exportador Prometheus ativo em `/metrics`.[m
+[1mdiff --git a/docs/runbook.md b/docs/runbook.md[m
+[1mindex d09a134..6dd00d1 100644[m
+[1m--- a/docs/runbook.md[m
+[1m+++ b/docs/runbook.md[m
+[36m@@ -64,15 +64,19 @@[m [mdocker run -d --name terezia-api -p 8000:8000 --env-file .env terezia-api:prev[m
+ 5) **Crises (suicídio/violência)**: verificar bloqueios no dashboard, garantir respostas estáticas foram enviadas.[m
+ [m
+ ## Backup e Restauração (PostgreSQL)[m
+[31m-- Backup manual (exemplo):[m
+[32m+[m[32m- Backup (Windows, sem depender de `psql/pg_dump`):[m
+ ```bash[m
+[31m-pg_dump \"$DATABASE_URL\" > backup_terezia_$(date +%Y%m%d).sql[m
+[32m+[m[32mpython scripts/backup_postgres.py --gzip --verify[m
+[32m+[m[32mpython scripts/backup_chroma.py[m
+ ```[m
+[31m-- Restore (atenção: sobrescreve dados):[m
+[31m-```bash[m
+[31m-psql \"$DATABASE_URL\" < backup_terezia_YYYYMMDD.sql[m
+[31m-```[m
+[31m-- Testar restauração em base de teste antes de produção.[m
+[32m+[m[32m- Agendamento (Windows Task Scheduler):[m
+[32m+[m[32m  - Tarefa: `{bot_name}-Backup` (diário 02:00)[m
+[32m+[m[32m  - Runner: `scripts/backup_all.ps1 -Gzip -Verify`[m
+[32m+[m[32m- Saída padrão:[m
+[32m+[m[32m  - `artifacts/backups/postgres/<timestamp>/`[m
+[32m+[m[32m  - `artifacts/backups/chroma/<timestamp>/`[m
+[32m+[m[32m  - `artifacts/backups/task_logs/` (logs do agendamento)[m
+[32m+[m[32m- Testar restauração em base de teste antes de produção (procedimento depende da estratégia do DBA/infra).[m
+ [m
+ ## Testes rápidos pós-deploy[m
+ - `/health` -> 200[m
+[1mdiff --git a/documentos/relatorio_exec_tecnico_execucao_observabilidade.md b/documentos/relatorio_exec_tecnico_execucao_observabilidade.md[m
+[1mindex 94832c6..c7d9ef3 100644[m
+[1m--- a/documentos/relatorio_exec_tecnico_execucao_observabilidade.md[m
+[1m+++ b/documentos/relatorio_exec_tecnico_execucao_observabilidade.md[m
+[36m@@ -102,6 +102,17 @@[m [mpython scripts\smoke_tests_prod.py --base-url http://localhost:8000[m
+ scripts\stop_api.ps1[m
+ ```[m
+ [m
+[32m+[m[32m### 4.4 Backups (Postgres + ChromaDB)[m
+[32m+[m[32m```powershell[m
+[32m+[m[32mpython scripts\backup_postgres.py --gzip --verify[m
+[32m+[m[32mpython scripts\backup_chroma.py[m
+[32m+[m[32m```[m
+[32m+[m
+[32m+[m[32mAgendamento (Windows Task Scheduler):[m
+[32m+[m[32m```powershell[m
+[32m+[m[32mschtasks /Query /TN "{bot_name}-Backup" /V /FO LIST[m
+[32m+[m[32m```[m
+[32m+[m
+ ## 5) Lista de arquivos alterados (neste lote)[m
+ - `INFRASTRUCTURE_CHECKLIST.md`[m
+ - `README.md`[m
+[36m@@ -119,4 +130,3 @@[m [mscripts\stop_api.ps1[m
+ - `tests/test_api.py`[m
+ - `scripts/run_api.ps1` (novo)[m
+ - `scripts/stop_api.ps1` (novo)[m
+[31m-[m
+[1mdiff --git a/implementation_plan.md b/implementation_plan.md[m
+[1mindex 48c13ef..1d45fee 100644[m
+[1m--- a/implementation_plan.md[m
+[1m+++ b/implementation_plan.md[m
+[36m@@ -2,7 +2,7 @@[m
+ [m
+ 1. **Validação do Ambiente de Produção**[m
+     - [x] Conferir infraestrutura (servidores, cloud, permissões de acesso) - Script criado: `scripts/validate_infrastructure.py`[m
+[31m-    - [x] Validar variáveis de ambiente, tokens e segredos (Meta, OpenAI, banco de dados) - Documentação: `docs/infrastructure_validation.md`[m
+[32m+[m[32m    - [x] Validar variáveis de ambiente, tokens e segredos (Meta, Gemini, banco de dados) - Documentação: `docs/infrastructure_validation.md`[m
+     - [ ] Garantir backup dos dados e configurações atuais[m
+ [m
+ 2. **Deploy dos Serviços**[m
+[1mdiff --git a/scripts/backup_all.ps1 b/scripts/backup_all.ps1[m
+[1mnew file mode 100644[m
+[1mindex 0000000..27aa985[m
+[1m--- /dev/null[m
+[1m+++ b/scripts/backup_all.ps1[m
+[36m@@ -0,0 +1,34 @@[m
+[32m+[m[32mparam([m
+[32m+[m[32m    [switch]$Gzip,[m
+[32m+[m[32m    [switch]$Verify[m
+[32m+[m[32m)[m
+[32m+[m
+[32m+[m[32m$root = Split-Path -Parent $PSScriptRoot[m
+[32m+[m[32m$python = Join-Path $root ".venv\Scripts\python.exe"[m
+[32m+[m[32mif (-not (Test-Path $python)) { $python = "python" }[m
+[32m+[m
+[32m+[m[32mSet-Location $root[m
+[32m+[m
+[32m+[m[32m$logDir = Join-Path $root "artifacts\backups\task_logs"[m
+[32m+[m[32mNew-Item -ItemType Directory -Force -Path $logDir | Out-Null[m
+[32m+[m[32m$stamp = Get-Date -Format "yyyyMMdd_HHmmss"[m
+[32m+[m[32m$logFile = Join-Path $logDir "backup_all_$stamp.log"[m
+[32m+[m
+[32m+[m[32mStart-Transcript -Path $logFile -Force | Out-Null[m
+[32m+[m[32mtry {[m
+[32m+[m[32mWrite-Host "== Backup Postgres =="[m
+[32m+[m[32m$pgScript = Join-Path $root "scripts\backup_postgres.py"[m
+[32m+[m[32m$pgArgs = @($pgScript)[m
+[32m+[m[32mif ($Gzip) { $pgArgs += "--gzip" }[m
+[32m+[m[32mif ($Verify) { $pgArgs += "--verify" }[m
+[32m+[m[32m& $python @pgArgs[m
+[32m+[m[32mif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }[m
+[32m+[m
+[32m+[m[32mWrite-Host "`n== Backup ChromaDB =="[m
+[32m+[m[32m$chromaScript = Join-Path $root "scripts\backup_chroma.py"[m
+[32m+[m[32m& $python $chromaScript[m
+[32m+[m[32mexit $LASTEXITCODE[m
+[32m+[m[32m} finally {[m
+[32m+[m[32m    Stop-Transcript | Out-Null[m
+[32m+[m[32m    Write-Host "Log: $logFile"[m
+[32m+[m[32m}[m
+[1mdiff --git a/scripts/backup_chroma.py b/scripts/backup_chroma.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..f65cf62[m
+[1m--- /dev/null[m
+[1m+++ b/scripts/backup_chroma.py[m
+[36m@@ -0,0 +1,86 @@[m
+[32m+[m[32m"""[m
+[32m+[m[32mBackup ChromaDB (diretório de persistência)[m
+[32m+[m[32m===========================================[m
+[32m+[m
+[32m+[m[32mO projeto usa ChromaDB como PersistentClient (arquivos em CHROMA_PERSIST_DIR).[m
+[32m+[m[32mEste script gera um zip do diretório e salva metadados.[m
+[32m+[m
+[32m+[m[32mUso:[m
+[32m+[m[32m  python scripts/backup_chroma.py[m
+[32m+[m[32m  python scripts/backup_chroma.py --out-dir artifacts/backups/chroma[m
+[32m+[m[32m"""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mimport argparse[m
+[32m+[m[32mimport json[m
+[32m+[m[32mimport os[m
+[32m+[m[32mimport sys[m
+[32m+[m[32mfrom datetime import datetime, timezone[m
+[32m+[m[32mfrom pathlib import Path[m
+[32m+[m[32mfrom zipfile import ZIP_DEFLATED, ZipFile[m
+[32m+[m
+[32m+[m[32mfrom dotenv import load_dotenv[m
+[32m+[m
+[32m+[m[32mROOT = Path(__file__).resolve().parents[1][m
+[32m+[m[32mif str(ROOT) not in sys.path:[m
+[32m+[m[32m    sys.path.insert(0, str(ROOT))[m
+[32m+[m
+[32m+[m[32mfrom app.settings import settings[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _utc_stamp() -> str:[m
+[32m+[m[32m    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _zip_dir(src_dir: Path, out_zip: Path) -> tuple[int, int]:[m
+[32m+[m[32m    files = 0[m
+[32m+[m[32m    total_bytes = 0[m
+[32m+[m[32m    out_zip.parent.mkdir(parents=True, exist_ok=True)[m
+[32m+[m
+[32m+[m[32m    with ZipFile(out_zip, "w", compression=ZIP_DEFLATED, compresslevel=6) as zf:[m
+[32m+[m[32m        for path in src_dir.rglob("*"):[m
+[32m+[m[32m            if path.is_dir():[m
+[32m+[m[32m                continue[m
+[32m+[m[32m            rel = path.relative_to(src_dir)[m
+[32m+[m[32m            zf.write(path, arcname=str(rel))[m
+[32m+[m[32m            files += 1[m
+[32m+[m[32m            total_bytes += path.stat().st_size[m
+[32m+[m[32m    return files, total_bytes[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef main() -> int:[m
+[32m+[m[32m    parser = argparse.ArgumentParser()[m
+[32m+[m[32m    parser.add_argument("--out-dir", default="artifacts/backups/chroma", help="Diretório base de saída")[m
+[32m+[m[32m    args = parser.parse_args()[m
+[32m+[m
+[32m+[m[32m    load_dotenv(ROOT / ".env")[m
+[32m+[m
+[32m+[m[32m    src_dir = Path(settings.CHROMA_PERSIST_DIR).resolve()[m
+[32m+[m[32m    if not src_dir.exists():[m
+[32m+[m[32m        raise SystemExit(f"Diretório ChromaDB não encontrado: {src_dir}")[m
+[32m+[m
+[32m+[m[32m    out_base = Path(args.out_dir)[m
+[32m+[m[32m    stamp = _utc_stamp()[m
+[32m+[m[32m    out_dir = out_base / stamp[m
+[32m+[m[32m    out_dir.mkdir(parents=True, exist_ok=True)[m
+[32m+[m
+[32m+[m[32m    out_zip = out_dir / "chroma_data.zip"[m
+[32m+[m[32m    files, total_bytes = _zip_dir(src_dir, out_zip)[m
+[32m+[m
+[32m+[m[32m    meta = {[m
+[32m+[m[32m        "created_at_utc": datetime.now(timezone.utc).isoformat(),[m
+[32m+[m[32m        "chroma_persist_dir": str(src_dir),[m
+[32m+[m[32m        "files": files,[m
+[32m+[m[32m        "total_bytes": total_bytes,[m
+[32m+[m[32m        "zip_bytes": out_zip.stat().st_size,[m
+[32m+[m[32m        "rag_collection_name": settings.RAG_COLLECTION_NAME,[m
+[32m+[m[32m    }[m
+[32m+[m[32m    (out_dir / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")[m
+[32m+[m
+[32m+[m[32m    print(f"Backup OK: {out_zip}")[m
+[32m+[m[32m    return 0[m
+[32m+[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    raise SystemExit(main())[m
+[1mdiff --git a/scripts/backup_postgres.py b/scripts/backup_postgres.py[m
+[1mnew file mode 100644[m
+[1mindex 0000000..700ce65[m
+[1m--- /dev/null[m
+[1m+++ b/scripts/backup_postgres.py[m
+[36m@@ -0,0 +1,180 @@[m
+[32m+[m[32m"""[m
+[32m+[m[32mBackup PostgreSQL (sem depender de psql/pg_dump)[m
+[32m+[m[32m===============================================[m
+[32m+[m
+[32m+[m[32mGera um backup lógico em CSV (COPY) para todas as tabelas do schema public e[m
+[32m+[m[32msalva metadados (counts, tamanho, timestamp).[m
+[32m+[m
+[32m+[m[32mUso:[m
+[32m+[m[32m  python scripts/backup_postgres.py[m
+[32m+[m[32m  python scripts/backup_postgres.py --out-dir artifacts/backups/postgres --gzip --verify[m
+[32m+[m[32m"""[m
+[32m+[m
+[32m+[m[32mfrom __future__ import annotations[m
+[32m+[m
+[32m+[m[32mimport argparse[m
+[32m+[m[32mimport asyncio[m
+[32m+[m[32mimport gzip[m
+[32m+[m[32mimport json[m
+[32m+[m[32mimport os[m
+[32m+[m[32mfrom dataclasses import dataclass[m
+[32m+[m[32mfrom datetime import datetime, timezone[m
+[32m+[m[32mfrom pathlib import Path[m
+[32m+[m[32mfrom typing import BinaryIO[m
+[32m+[m
+[32m+[m[32mimport asyncpg[m
+[32m+[m[32mfrom dotenv import load_dotenv[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _utc_stamp() -> str:[m
+[32m+[m[32m    return datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _quote_ident(ident: str) -> str:[m
+[32m+[m[32m    return '"' + ident.replace('"', '""') + '"'[m
+[32m+[m
+[32m+[m
+[32m+[m[32m@dataclass[m
+[32m+[m[32mclass TableBackupResult:[m
+[32m+[m[32m    table: str[m
+[32m+[m[32m    rows: int[m
+[32m+[m[32m    file: str[m
+[32m+[m[32m    bytes_written: int[m
+[32m+[m
+[32m+[m
+[32m+[m[32masync def _list_public_tables(conn: asyncpg.Connection) -> list[str]:[m
+[32m+[m[32m    rows = await conn.fetch([m
+[32m+[m[32m        """[m
+[32m+[m[32m        SELECT table_name[m
+[32m+[m[32m        FROM information_schema.tables[m
+[32m+[m[32m        WHERE table_schema='public' AND table_type='BASE TABLE'[m
+[32m+[m[32m        ORDER BY table_name[m
+[32m+[m[32m        """[m
+[32m+[m[32m    )[m
+[32m+[m[32m    return [r["table_name"] for r in rows][m
+[32m+[m
+[32m+[m
+[32m+[m[32masync def _row_count(conn: asyncpg.Connection, table: str) -> int:[m
+[32m+[m[32m    q = f"SELECT COUNT(*) FROM {_quote_ident(table)}"[m
+[32m+[m[32m    return int(await conn.fetchval(q))[m
+[32m+[m
+[32m+[m
+[32m+[m[32mdef _open_output(path: Path, gzip_enabled: bool) -> BinaryIO:[m
+[32m+[m[32m    path.parent.mkdir(parents=True, exist_ok=True)[m
+[32m+[m[32m    if gzip_enabled:[m
+[32m+[m[32m        return gzip.open(path, "wb")[m
+[32m+[m[32m    return open(path, "wb")[m
+[32m+[m
+[32m+[m
+[32m+[m[32masync def _backup_table([m
+[32m+[m[32m    conn: asyncpg.Connection,[m
+[32m+[m[32m    table: str,[m
+[32m+[m[32m    out_path: Path,[m
+[32m+[m[32m    gzip_enabled: bool,[m
+[32m+[m[32m) -> TableBackupResult:[m
+[32m+[m[32m    rows = await _row_count(conn, table)[m
+[32m+[m[32m    query = f"SELECT * FROM {_quote_ident(table)}"[m
+[32m+[m
+[32m+[m[32m    with _open_output(out_path, gzip_enabled) as f:[m
+[32m+[m[32m        await conn.copy_from_query([m
+[32m+[m[32m            query,[m
+[32m+[m[32m            output=f,[m
+[32m+[m[32m            format="csv",[m
+[32m+[m[32m            header=True,[m
+[32m+[m[32m        )[m
+[32m+[m
+[32m+[m[32m    bytes_written = out_path.stat().st_size[m
+[32m+[m[32m    return TableBackupResult([m
+[32m+[m[32m        table=table,[m
+[32m+[m[32m        rows=rows,[m
+[32m+[m[32m        file=str(out_path),[m
+[32m+[m[32m        bytes_written=bytes_written,[m
+[32m+[m[32m    )[m
+[32m+[m
+[32m+[m
+[32m+[m[32masync def _verify_counts([m
+[32m+[m[32m    conn: asyncpg.Connection,[m
+[32m+[m[32m    results: list[TableBackupResult],[m
+[32m+[m[32m) -> tuple[bool, list[str]]:[m
+[32m+[m[32m    problems: list[str] = [][m
+[32m+[m[32m    for r in results:[m
+[32m+[m[32m        live = await _row_count(conn, r.table)[m
+[32m+[m[32m        if live != r.rows:[m
+[32m+[m[32m            problems.append(f"{r.table}: live={live} backup={r.rows}")[m
+[32m+[m[32m    return (len(problems) == 0), problems[m
+[32m+[m
+[32m+[m
+[32m+[m[32masync def main() -> int:[m
+[32m+[m[32m    parser = argparse.ArgumentParser()[m
+[32m+[m[32m    parser.add_argument("--out-dir", default="artifacts/backups/postgres", help="Diretório base de saída")[m
+[32m+[m[32m    parser.add_argument("--gzip", action="store_true", help="Compactar CSVs com gzip (.csv.gz)")[m
+[32m+[m[32m    parser.add_argument("--verify", action="store_true", help="Reconta tabelas e compara com o backup")[m
+[32m+[m[32m    args = parser.parse_args()[m
+[32m+[m
+[32m+[m[32m    root = Path(__file__).resolve().parents[1][m
+[32m+[m[32m    load_dotenv(root / ".env")[m
+[32m+[m[32m    dsn = os.getenv("DATABASE_URL")[m
+[32m+[m[32m    if not dsn:[m
+[32m+[m[32m        raise SystemExit("DATABASE_URL não definido no ambiente/.env")[m
+[32m+[m
+[32m+[m[32m    out_base = Path(args.out_dir)[m
+[32m+[m[32m    stamp = _utc_stamp()[m
+[32m+[m[32m    out_dir = out_base / stamp[m
+[32m+[m[32m    out_dir.mkdir(parents=True, exist_ok=True)[m
+[32m+[m
+[32m+[m[32m    conn = await asyncpg.connect(dsn=dsn)[m
+[32m+[m[32m    try:[m
+[32m+[m[32m        db_info = await conn.fetchrow("SELECT current_database() AS db, current_user AS usr")[m
+[32m+[m[32m        pg_ver = await conn.fetchval("SHOW server_version")[m
+[32m+[m[32m        pgcrypto = await conn.fetchval("SELECT exists(select 1 from pg_extension where extname='pgcrypto')")[m
+[32m+[m
+[32m+[m[32m        tables = await _list_public_tables(conn)[m
+[32m+[m[32m        if not tables:[m
+[32m+[m[32m            raise SystemExit("Nenhuma tabela encontrada no schema public.")[m
+[32m+[m
+[32m+[m[32m        results: list[TableBackupResult] = [][m
+[32m+[m[32m        for t in tables:[m
+[32m+[m[32m            suffix = ".csv.gz" if args.gzip else ".csv"[m
+[32m+[m[32m            out_path = out_dir / f"{t}{suffix}"[m
+[32m+[m[32m            res = await _backup_table(conn, t, out_path, args.gzip)[m
+[32m+[m[32m            results.append(res)[m
+[32m+[m
+[32m+[m[32m        meta = {[m
+[32m+[m[32m            "created_at_utc": datetime.now(timezone.utc).isoformat(),[m
+[32m+[m[32m            "database": str(db_info["db"]),[m
+[32m+[m[32m            "user": str(db_info["usr"]),[m
+[32m+[m[32m            "postgres_version": str(pg_ver),[m
+[32m+[m[32m            "pgcrypto_installed": bool(pgcrypto),[m
+[32m+[m[32m            "tables": [[m
+[32m+[m[32m                {[m
+[32m+[m[32m                    "name": r.table,[m
+[32m+[m[32m                    "rows": r.rows,[m
+[32m+[m[32m                    "file": Path(r.file).name,[m
+[32m+[m[32m                    "bytes": r.bytes_written,[m
+[32m+[m[32m                }[m
+[32m+[m[32m                for r in results[m
+[32m+[m[32m            ],[m
+[32m+[m[32m        }[m
+[32m+[m[32m        (out_dir / "metadata.json").write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")[m
+[32m+[m
+[32m+[m[32m        if args.verify:[m
+[32m+[m[32m            ok, problems = await _verify_counts(conn, results)[m
+[32m+[m[32m            (out_dir / "verify.txt").write_text([m
+[32m+[m[32m                "OK\n" if ok else "FAIL\n" + "\n".join(problems) + "\n",[m
+[32m+[m[32m                encoding="utf-8",[m
+[32m+[m[32m            )[m
+[32m+[m[32m            if not ok:[m
+[32m+[m[32m                print("VERIFY_FAIL")[m
+[32m+[m[32m                for p in problems:[m
+[32m+[m[32m                    print("-", p)[m
+[32m+[m[32m                return 2[m
+[32m+[m
+[32m+[m[32m        print(f"Backup OK: {out_dir}")[m
+[32m+[m[32m        print(f"Tabelas: {len(results)}")[m
+[32m+[m[32m        return 0[m
+[32m+[m[32m    finally:[m
+[32m+[m[32m        await conn.close()[m
+[32m+[m
+[32m+[m
+[32m+[m[32mif __name__ == "__main__":[m
+[32m+[m[32m    raise SystemExit(asyncio.run(main()))[m
+[1mdiff --git a/scripts/validate_infrastructure.py b/scripts/validate_infrastructure.py[m
+[1mindex a2691af..2fd22b9 100644[m
+[1m--- a/scripts/validate_infrastructure.py[m
+[1m+++ b/scripts/validate_infrastructure.py[m
+[36m@@ -9,7 +9,7 @@[m [mEste script verifica:[m
+ 2. Conectividade com PostgreSQL[m
+ 3. ChromaDB (diretório de persistência)[m
+ 4. Tokens da Meta Platform (Facebook/Instagram)[m
+[31m-5. OpenAI API Key[m
+[32m+[m[32m5. Gemini API Key[m
+ 6. Dependências Python[m
+ """[m
+ [m
+[36m@@ -19,6 +19,12 @@[m [mfrom pathlib import Path[m
+ from typing import List, Tuple[m
+ import importlib.util[m
+ [m
+[32m+[m[32m# Evita falhas de encode em consoles Windows (cp1252) quando o script imprime Unicode.[m
+[32m+[m[32mtry:[m
+[32m+[m[32m    sys.stdout.reconfigure(encoding="utf-8", errors="replace")  # py3.7+[m
+[32m+[m[32mexcept Exception:[m
+[32m+[m[32m    pass[m
+[32m+[m
+ # Cores para output no terminal[m
+ class Colors:[m
+     GREEN = '\033[92m'[m
+[36m@@ -36,19 +42,19 @@[m [mdef print_header(text: str):[m
+ [m
+ def print_success(text: str):[m
+     """Imprime mensagem de sucesso."""[m
+[31m-    print(f"{Colors.GREEN}✅ {text}{Colors.END}")[m
+[32m+[m[32m    print(f"{Colors.GREEN}[OK] {text}{Colors.END}")[m
+ [m
+ def print_error(text: str):[m
+     """Imprime mensagem de erro."""[m
+[31m-    print(f"{Colors.RED}❌ {text}{Colors.END}")[m
+[32m+[m[32m    print(f"{Colors.RED}[ERRO] {text}{Colors.END}")[m
+ [m
+ def print_warning(text: str):[m
+     """Imprime mensagem de aviso."""[m
+[31m-    print(f"{Colors.YELLOW}⚠️  {text}{Colors.END}")[m
+[32m+[m[32m    print(f"{Colors.YELLOW}[AVISO] {text}{Colors.END}")[m
+ [m
+ def print_info(text: str):[m
+     """Imprime mensagem informativa."""[m
+[31m-    print(f"{Colors.BLUE}ℹ️  {text}{Colors.END}")[m
+[32m+[m[32m    print(f"{Colors.BLUE}[INFO] {text}{Colors.END}")[m
+ [m
+ def check_python_version() -> bool:[m
+     """Verifica se a versão do Python é compatível (3.11+)."""[m
+[36m@@ -168,11 +174,11 @@[m [mdef check_environment_variables() -> Tuple[bool, List[str]]:[m
+             print_info(f"{var} - Usando padrão ({description})")[m
+     [m
+     if missing:[m
+[31m-        print_error(f"\n❌ Variáveis obrigatórias faltando: {', '.join(missing)}")[m
+[32m+[m[32m        print_error(f"\nVariáveis obrigatórias faltando: {', '.join(missing)}")[m
+         return False, missing[m
+     [m
+     if empty:[m
+[31m-        print_warning(f"\n⚠️  Variáveis definidas mas vazias: {', '.join(empty)}")[m
+[32m+[m[32m        print_warning(f"\nVariáveis definidas mas vazias: {', '.join(empty)}")[m
+         return False, empty[m
+     [m
+     return True, [][m
+[36m@@ -196,6 +202,9 @@[m [mdef check_database_connection() -> bool:[m
+             connection = await asyncpg.connect(url)[m
+             try:[m
+                 version = await connection.fetchval("SELECT version();")[m
+[32m+[m[32m                pgcrypto = await connection.fetchval([m
+[32m+[m[32m                    "SELECT exists(select 1 from pg_extension where extname='pgcrypto');"[m
+[32m+[m[32m                )[m
+                 tables_result = await connection.fetch("""[m
+                     SELECT table_name [m
+                     FROM information_schema.tables [m
+[36m@@ -203,14 +212,18 @@[m [mdef check_database_connection() -> bool:[m
+                     AND table_name IN ('audit_events', 'rag_queries', 'conversas', 'usuarios_anonimos')[m
+                 """)[m
+                 tables = [row[0] for row in tables_result][m
+[31m-                return version, tables[m
+[32m+[m[32m                return version, tables, pgcrypto[m
+             finally:[m
+                 await connection.close()[m
+ [m
+[31m-        version, tables = asyncio.run(_check_db(database_url))[m
+[32m+[m[32m        version, tables, pgcrypto = asyncio.run(_check_db(database_url))[m
+ [m
+         print_success("Conexão estabelecida com sucesso!")[m
+         print_info(f"Versão do PostgreSQL: {version}")[m
+[32m+[m[32m        if pgcrypto:[m
+[32m+[m[32m            print_success("Extensão 'pgcrypto' instalada")[m
+[32m+[m[32m        else:[m
+[32m+[m[32m            print_warning("Extensão 'pgcrypto' NÃO instalada - execute: CREATE EXTENSION pgcrypto;")[m
+ [m
+         if 'audit_events' in tables:[m
+             print_success("Tabela 'audit_events' encontrada")[m
+[36m@@ -418,29 +431,29 @@[m [mdef generate_report(results: dict):[m
+     failed = total - passed[m
+     [m
+     print(f"\n{Colors.BOLD}Total de Verificações: {total}{Colors.END}")[m
+[31m-    print(f"{Colors.GREEN}✅ Passou: {passed}{Colors.END}")[m
+[31m-    print(f"{Colors.RED}❌ Falhou: {failed}{Colors.END}")[m
+[32m+[m[32m    print(f"{Colors.GREEN}Passou: {passed}{Colors.END}")[m
+[32m+[m[32m    print(f"{Colors.RED}Falhou: {failed}{Colors.END}")[m
+     print()[m
+     [m
+     if failed == 0:[m
+[31m-        print_success("🎉 Todas as verificações passaram! A infraestrutura está pronta.")[m
+[32m+[m[32m        print_success("Todas as verificações passaram! A infraestrutura está pronta.")[m
+         print_info("Você pode iniciar a aplicação com: uvicorn app.main:app --host 0.0.0.0 --port 8000 (ou APP_PORT)")[m
+         return 0[m
+     else:[m
+[31m-        print_error("⚠️  Algumas verificações falharam. Corrija os problemas antes de continuar.")[m
+[32m+[m[32m        print_error("Algumas verificações falharam. Corrija os problemas antes de continuar.")[m
+         print_info("\nVerificações que falharam:")[m
+         for check, passed in results.items():[m
+             if not passed:[m
+[31m-                print(f"  • {check}")[m
+[32m+[m[32m                print(f"  - {check}")[m
+         return 1[m
+ [m
+ def main():[m
+     """Função principal."""[m
+     print(f"\n{Colors.BOLD}{Colors.BLUE}")[m
+[31m-    print("╔═══════════════════════════════════════════════════════════╗")[m
+[31m-    print("║   VALIDAÇÃO DE INFRAESTRUTURA E VARIÁVEIS DE AMBIENTE    ║")[m
+[31m-    print("║              Pilot Atendimento - {bot_name}                 ║")[m
+[31m-    print("╚═══════════════════════════════════════════════════════════╝")[m
+[32m+[m[32m    print("============================================================")[m
+[32m+[m[32m    print("VALIDAÇÃO DE INFRAESTRUTURA E VARIÁVEIS DE AMBIENTE")[m
+[32m+[m[32m    print("Pilot Atendimento - {bot_name}")[m
+[32m+[m[32m    print("============================================================")[m
+     print(f"{Colors.END}\n")[m
+     [m
+     # Executar todas as verificações[m

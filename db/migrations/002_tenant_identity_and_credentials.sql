@@ -10,17 +10,19 @@ ALTER TABLE tenants
     ADD COLUMN IF NOT EXISTS fallback_url     TEXT         NOT NULL DEFAULT '',
     ADD COLUMN IF NOT EXISTS contact_phone    VARCHAR(30)  NOT NULL DEFAULT '',
     ADD COLUMN IF NOT EXISTS contact_address  TEXT         NOT NULL DEFAULT '',
-    ADD COLUMN IF NOT EXISTS support_email    VARCHAR(150) NOT NULL DEFAULT '';
+    ADD COLUMN IF NOT EXISTS support_email    VARCHAR(150) NOT NULL DEFAULT '',
+    ADD COLUMN IF NOT EXISTS rag_base_path    TEXT;   -- Caminho local da base de conhecimento para o ETL job
 
 -- ========================================================
 -- 2. Adicionar colunas de credenciais Meta separadas por plataforma
 --    na tabela `tenant_credentials`
 -- ========================================================
 ALTER TABLE tenant_credentials
-    ADD COLUMN IF NOT EXISTS meta_ig_page_id         VARCHAR(50),
-    ADD COLUMN IF NOT EXISTS meta_fb_page_id         VARCHAR(50),
-    ADD COLUMN IF NOT EXISTS meta_access_token_ig    TEXT,
-    ADD COLUMN IF NOT EXISTS meta_access_token_fb    TEXT;
+    ADD COLUMN IF NOT EXISTS meta_ig_page_id             VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS meta_fb_page_id             VARCHAR(50),
+    ADD COLUMN IF NOT EXISTS meta_access_token_ig        TEXT,
+    ADD COLUMN IF NOT EXISTS meta_access_token_fb        TEXT,
+    ADD COLUMN IF NOT EXISTS meta_webhook_verify_token   VARCHAR(255);  -- Token de verificação do webhook por tenant
 
 -- Index para lookup por page_id (usado pelo TenantResolver)
 CREATE INDEX IF NOT EXISTS idx_tc_ig_page_id ON tenant_credentials(meta_ig_page_id)

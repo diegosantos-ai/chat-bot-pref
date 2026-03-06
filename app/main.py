@@ -1,9 +1,11 @@
 # Reload trigger
 from contextlib import asynccontextmanager
+from pathlib import Path
 from fastapi import FastAPI, Request
-from fastapi.responses import Response
+from fastapi.responses import Response, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.staticfiles import StaticFiles
 from prometheus_fastapi_instrumentator import Instrumentator
 from slowapi import _rate_limit_exceeded_handler
 from app.extensions import limiter as shared_limiter
@@ -11,10 +13,11 @@ from slowapi.errors import RateLimitExceeded
 from app.settings import settings
 from app.logging_config import configure_logging
 from app.api.chat import router as chat_router
-from app.api.webhook import router as webhook_router     # moved: app/api/webhook.py
+from app.api.webhook import router as webhook_router
 from app.api.analytics import router as analytics_router
 from app.api.deploy import router as deploy_router
 from app.api.admin import router as admin_router
+from app.api.panel import router as panel_router
 from app.services.scheduler import scheduler
 
 # Configura logging estruturado
@@ -70,7 +73,14 @@ async def add_security_headers(request: Request, call_next):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
-    response.headers["Content-Security-Policy"] = "default-src 'self'"
+    # CSP relaxed to allow Google Fonts for the panel UI
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'self'; "
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+        "font-src 'self' https://fonts.gstatic.com; "
+        "script-src 'self' 'unsafe-inline'; "
+        "connect-src 'self'"
+    )
     if not settings.DEBUG:
         response.headers["Strict-Transport-Security"] = (
             "max-age=31536000; includeSubDomains"
@@ -84,6 +94,12 @@ app.include_router(webhook_router)
 app.include_router(analytics_router)
 app.include_router(deploy_router)
 app.include_router(admin_router)
+app.include_router(panel_router)
+
+# Serve Nexo Prefa panel static files at /panel
+_panel_dir = Path(__file__).parent.parent / "panel"
+if _panel_dir.exists():
+    app.mount("/panel", StaticFiles(directory=str(_panel_dir), html=True), name="panel")
 
 # Instrumentação Prometheus
 Instrumentator().instrument(app).expose(app)

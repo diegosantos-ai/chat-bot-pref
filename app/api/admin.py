@@ -969,7 +969,7 @@ async def ops_validate(current_user: dict = Depends(require_admin)):
     try:
         from google import genai
 
-        client_gemini = genai.Client(api_key=settings.GEMINI_API_KEY)
+        genai.Client(api_key=settings.GEMINI_API_KEY)
         # Quick test - não gera conteúdo, só verifica key
         if settings.GEMINI_API_KEY:
             results["gemini"] = {"status": "ok", "message": "API Key configurada"}

@@ -146,7 +146,7 @@ async def get_total_boost(
 
     total_boost = 0.0
 
-    query_upper = query.upper()
+    query.upper()
     query_normalized = normalize_text(query)
     chunk_normalized = normalize_text(chunk_text)
 

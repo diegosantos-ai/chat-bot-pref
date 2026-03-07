@@ -17,7 +17,7 @@ Uso manual (sem tenant context, ex: testes):
     text = get_prompt("greeting", variables={"bot_name": "TestBot"})
 """
 
-import os
+import os  # noqa: F401
 import json
 import random
 import logging

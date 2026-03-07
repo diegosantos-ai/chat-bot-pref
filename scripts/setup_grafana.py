@@ -25,7 +25,7 @@ def check_postgres_connection():
     try:
         env = os.environ.copy()
         env["PGPASSWORD"] = "pandora"
-        result = subprocess.run(
+        subprocess.run(
             [
                 "psql",
                 "-h",

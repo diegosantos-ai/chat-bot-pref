@@ -1,4 +1,3 @@
-import os
 import sys
 import argparse
 from pathlib import Path
@@ -40,7 +39,7 @@ def create_scaffold(name, desc, skills):
 
     # Escrever Skills
     for skill in skills_list:
-        if not skill: continue
+        if not skill: continue  # noqa: E701
         skill_path = skills_dir / skill
         skill_path.mkdir(parents=True, exist_ok=True)
         

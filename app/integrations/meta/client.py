@@ -5,7 +5,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-import re
+import re  # noqa: E402
 
 
 def strip_markdown(text: str) -> str:

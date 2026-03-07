@@ -28,7 +28,6 @@ import json
 import sys
 import time
 from pathlib import Path
-from pathlib import Path
 from typing import Dict, List, Optional
 
 # Adiciona raiz ao path

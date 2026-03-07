@@ -1,0 +1,555 @@
+E701 Multiple statements on one line (colon)
+  --> .agent\scripts\scaffold_agent.py:42:21
+   |
+40 |     # Escrever Skills
+41 |     for skill in skills_list:
+42 |         if not skill: continue
+   |                     ^
+43 |         skill_path = skills_dir / skill
+44 |         skill_path.mkdir(parents=True, exist_ok=True)
+   |
+
+F841 Local variable `client_gemini` is assigned to but never used
+   --> app\api\admin.py:972:9
+    |
+970 |         from google import genai
+971 |
+972 |         client_gemini = genai.Client(api_key=settings.GEMINI_API_KEY)
+    |         ^^^^^^^^^^^^^
+973 |         # Quick test - não gera conteúdo, só verifica key
+974 |         if settings.GEMINI_API_KEY:
+    |
+help: Remove assignment to unused variable `client_gemini`
+
+F841 Local variable `classifier_prompt` is assigned to but never used
+   --> app\classifier\service.py:173:9
+    |
+172 |         # Carrega prompt do classifier
+173 |         classifier_prompt = load_prompt("classifier")
+    |         ^^^^^^^^^^^^^^^^^
+174 |
+175 |         # Lista de intents válidos
+    |
+help: Remove assignment to unused variable `classifier_prompt`
+
+E402 Module level import not at top of file
+ --> app\integrations\meta\client.py:8:1
+  |
+8 | import re
+  | ^^^^^^^^^
+  |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:25:1
+   |
+23 |   logger = logging.getLogger(__name__)
+24 |
+25 | / from app.contracts.enums import (
+26 | |     Intent,
+27 | |     Decision,
+28 | |     ResponseType,
+29 | |     PolicyDecision,
+30 | |     PolicyReason,
+31 | |     FallbackReason,
+32 | |     SurfaceType,
+33 | |     Channel,
+34 | |     AuditEventType,
+35 | | )
+   | |_^
+36 |   from app.contracts.dto import (
+37 |       ChatRequest,
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:36:1
+   |
+34 |       AuditEventType,
+35 |   )
+36 | / from app.contracts.dto import (
+37 | |     ChatRequest,
+38 | |     ChatResponse,
+39 | |     RequestContext,
+40 | |     PolicyPreResult,
+41 | |     RAGRetrieveResult,
+42 | |     ResponseSelectedResult,
+43 | |     MessageSentResult,
+44 | |     PublicAckResult,
+45 | | )
+   | |_^
+46 |   from app.classifier.service import ClassifierService, get_classifier
+47 |   from app.policy_guard.service import PolicyGuardService, get_policy_guard
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:46:1
+   |
+44 |     PublicAckResult,
+45 | )
+46 | from app.classifier.service import ClassifierService, get_classifier
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+47 | from app.policy_guard.service import PolicyGuardService, get_policy_guard
+48 | from app.rag.retriever import RAGRetriever, get_retriever
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:47:1
+   |
+45 | )
+46 | from app.classifier.service import ClassifierService, get_classifier
+47 | from app.policy_guard.service import PolicyGuardService, get_policy_guard
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+48 | from app.rag.retriever import RAGRetriever, get_retriever
+49 | from app.rag.composer import RAGComposer, get_composer
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:48:1
+   |
+46 | from app.classifier.service import ClassifierService, get_classifier
+47 | from app.policy_guard.service import PolicyGuardService, get_policy_guard
+48 | from app.rag.retriever import RAGRetriever, get_retriever
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+49 | from app.rag.composer import RAGComposer, get_composer
+50 | from app.prompts import load_prompt, get_public_ack
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:49:1
+   |
+47 | from app.policy_guard.service import PolicyGuardService, get_policy_guard
+48 | from app.rag.retriever import RAGRetriever, get_retriever
+49 | from app.rag.composer import RAGComposer, get_composer
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+50 | from app.prompts import load_prompt, get_public_ack
+51 | from app.settings import settings
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:50:1
+   |
+48 | from app.rag.retriever import RAGRetriever, get_retriever
+49 | from app.rag.composer import RAGComposer, get_composer
+50 | from app.prompts import load_prompt, get_public_ack
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+51 | from app.settings import settings
+52 | from app.services.mailer import mailer
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:51:1
+   |
+49 | from app.rag.composer import RAGComposer, get_composer
+50 | from app.prompts import load_prompt, get_public_ack
+51 | from app.settings import settings
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+52 | from app.services.mailer import mailer
+53 | from app.repositories.meta_user_profile_repository import meta_user_profile_repository
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:52:1
+   |
+50 | from app.prompts import load_prompt, get_public_ack
+51 | from app.settings import settings
+52 | from app.services.mailer import mailer
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+53 | from app.repositories.meta_user_profile_repository import meta_user_profile_repository
+54 | from app.integrations.meta.client import get_meta_client
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:53:1
+   |
+51 | from app.settings import settings
+52 | from app.services.mailer import mailer
+53 | from app.repositories.meta_user_profile_repository import meta_user_profile_repository
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+54 | from app.integrations.meta.client import get_meta_client
+55 | from app.models.meta_user_profile import MetaUserProfileCreate
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:54:1
+   |
+52 | from app.services.mailer import mailer
+53 | from app.repositories.meta_user_profile_repository import meta_user_profile_repository
+54 | from app.integrations.meta.client import get_meta_client
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+55 | from app.models.meta_user_profile import MetaUserProfileCreate
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:55:1
+   |
+53 | from app.repositories.meta_user_profile_repository import meta_user_profile_repository
+54 | from app.integrations.meta.client import get_meta_client
+55 | from app.models.meta_user_profile import MetaUserProfileCreate
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+56 |
+57 | # NLP - Análise de sentimentos e expansão de queries
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:58:1
+   |
+57 | # NLP - Análise de sentimentos e expansão de queries
+58 | from app.nlp.sentiment import analyze_sentiment
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+59 | from app.nlp.query_expander import expand_query
+60 | from app.nlp.normalizer import normalize_text, detect_formality_level
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:59:1
+   |
+57 | # NLP - Análise de sentimentos e expansão de queries
+58 | from app.nlp.sentiment import analyze_sentiment
+59 | from app.nlp.query_expander import expand_query
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+60 | from app.nlp.normalizer import normalize_text, detect_formality_level
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:60:1
+   |
+58 | from app.nlp.sentiment import analyze_sentiment
+59 | from app.nlp.query_expander import expand_query
+60 | from app.nlp.normalizer import normalize_text, detect_formality_level
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+61 |
+62 | # Analytics - Coleta de dados para melhorar RAG
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:63:1
+   |
+62 | # Analytics - Coleta de dados para melhorar RAG
+63 | from app.analytics import QueryAnalytics
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+64 | from app.audit.repository import audit_repository
+65 | from app.audit.models import AuditEventCreate, RAGQueryCreate, ConversaCreate
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:64:1
+   |
+62 | # Analytics - Coleta de dados para melhorar RAG
+63 | from app.analytics import QueryAnalytics
+64 | from app.audit.repository import audit_repository
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+65 | from app.audit.models import AuditEventCreate, RAGQueryCreate, ConversaCreate
+   |
+
+E402 Module level import not at top of file
+  --> app\orchestrator\service.py:65:1
+   |
+63 | from app.analytics import QueryAnalytics
+64 | from app.audit.repository import audit_repository
+65 | from app.audit.models import AuditEventCreate, RAGQueryCreate, ConversaCreate
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+F401 `os` imported but unused
+  --> app\prompts\__init__.py:20:8
+   |
+18 | """
+19 |
+20 | import os
+   |        ^^
+21 | import json
+22 | import random
+   |
+help: Remove unused import: `os`
+
+F841 Local variable `query_upper` is assigned to but never used
+   --> app\rag\boosts.py:149:5
+    |
+147 |     total_boost = 0.0
+148 |
+149 |     query_upper = query.upper()
+    |     ^^^^^^^^^^^
+150 |     query_normalized = normalize_text(query)
+151 |     chunk_normalized = normalize_text(chunk_text)
+    |
+help: Remove assignment to unused variable `query_upper`
+
+F821 Undefined name `bot_name`
+  --> app\services\mailer.py:49:23
+   |
+47 |             contact_display = f"{user_name} ({user_contact})"
+48 |
+49 |         subject = f"[{bot_name}] Ticket Escalado - {contact_display}"
+   |                       ^^^^^^^^
+50 |
+51 |         body = f"""
+   |
+
+F821 Undefined name `bot_name`
+  --> app\services\mailer.py:53:15
+   |
+51 |         body = f"""
+52 |         <h2>Solicitação Escalada</h2>
+53 |         <p>A {bot_name} não conseguiu responder satisfatoriamente à seguinte questão:</p>
+   |               ^^^^^^^^
+54 |         <blockquote style="border-left: 3px solid #ccc; padding-left: 10px; margin: 10px 0; color: #555;">
+55 |             "{user_query}"
+   |
+
+F821 Undefined name `bot_name`
+   --> logging\import_dashboards.py:110:23
+    |
+108 |     print("📁 Configurando pasta de dashboards...")
+109 |     FOLDER_ID = get_or_create_folder()
+110 |     print(f"✅ Pasta '{bot_name} Services' pronta (ID: {FOLDER_ID})")
+    |                        ^^^^^^^^
+111 |     print()
+    |
+
+invalid-syntax: Expected a statement
+   --> scripts\admin_delete_user.py:164:5
+    |
+163 |         asyncio.run(delete_user(username, force=False))
+164 |     else:
+    |     ^^^^
+165 |         parser.print_help()
+    |
+
+invalid-syntax: Expected a statement
+   --> scripts\admin_delete_user.py:164:9
+    |
+163 |         asyncio.run(delete_user(username, force=False))
+164 |     else:
+    |         ^
+165 |         parser.print_help()
+    |
+
+invalid-syntax: Expected a statement
+   --> scripts\admin_delete_user.py:164:10
+    |
+163 |         asyncio.run(delete_user(username, force=False))
+164 |     else:
+    |          ^
+165 |         parser.print_help()
+    |
+
+invalid-syntax: Unexpected indentation
+   --> scripts\admin_delete_user.py:165:1
+    |
+163 |         asyncio.run(delete_user(username, force=False))
+164 |     else:
+165 |         parser.print_help()
+    | ^^^^^^^^
+    |
+
+invalid-syntax: Expected a statement
+   --> scripts\admin_delete_user.py:168:1
+    |
+168 | if __name__ == "__main__":
+    | ^
+169 |     main()
+    |
+
+E741 Ambiguous variable name: `l`
+  --> scripts\create_issues_via_gh.py:78:9
+   |
+76 |         tf_path = tf.name
+77 |     cmd = ['gh', 'issue', 'create', '--repo', repo, '--title', title, '--body-file', tf_path]
+78 |     for l in labels:
+   |         ^
+79 |         cmd += ['--label', l]
+80 |     if milestone:
+   |
+
+F821 Undefined name `sys`
+  --> scripts\db\create_views.py:12:16
+   |
+11 | # Adiciona raiz ao sys.path se necessário
+12 | if ROOT not in sys.path:
+   |                ^^^
+13 |     sys.path.append(ROOT)
+   |
+
+F821 Undefined name `sys`
+  --> scripts\db\create_views.py:13:5
+   |
+11 | # Adiciona raiz ao sys.path se necessário
+12 | if ROOT not in sys.path:
+13 |     sys.path.append(ROOT)
+   |     ^^^
+14 |
+15 | # Garante carregamento do .env da raiz
+   |
+
+F821 Undefined name `sys`
+  --> scripts\db\setup_db.py:14:16
+   |
+13 | # Adiciona raiz ao sys.path se necessário
+14 | if ROOT not in sys.path:
+   |                ^^^
+15 |     sys.path.append(ROOT)
+   |
+
+F821 Undefined name `sys`
+  --> scripts\db\setup_db.py:15:5
+   |
+13 | # Adiciona raiz ao sys.path se necessário
+14 | if ROOT not in sys.path:
+15 |     sys.path.append(ROOT)
+   |     ^^^
+16 |
+17 | # Garante carregamento do .env da raiz
+   |
+
+E402 Module level import not at top of file
+  --> scripts\ops\backup_chroma.py:28:1
+   |
+26 |     sys.path.insert(0, str(ROOT))
+27 |
+28 | from app.settings import settings
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+E402 Module level import not at top of file
+  --> scripts\ops\check_token.py:10:1
+   |
+ 8 |     sys.path.insert(0, str(ROOT_DIR))
+ 9 |
+10 | from app.settings import settings
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+11 | print(f"TOKEN_CARREGADO: '{settings.META_WEBHOOK_VERIFY_TOKEN}'")
+   |
+
+E402 Module level import not at top of file
+  --> scripts\ops\smoke_tests_prod.py:31:1
+   |
+29 |     sys.path.insert(0, str(ROOT))
+30 |
+31 | from app.prompts import load_prompt
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+
+F841 Local variable `optional_meta_vars` is assigned to but never used
+   --> scripts\ops\validate_infrastructure.py:168:5
+    |
+167 |     # Variáveis opcionais novas (Instagram App Secret pode ser vazio se igual ao Facebook)
+168 |     optional_meta_vars = {
+    |     ^^^^^^^^^^^^^^^^^^
+169 |         "META_APP_SECRET_INSTAGRAM": "App Secret do Instagram (opcional se igual ao Facebook)",
+170 |         "META_PAGE_ID": "ID da Página (legacy - será removido)",
+    |
+help: Remove assignment to unused variable `optional_meta_vars`
+
+F401 `httpx` imported but unused; consider using `importlib.util.find_spec` to test for availability
+   --> scripts\ops\validate_infrastructure.py:470:16
+    |
+469 |     try:
+470 |         import httpx
+    |                ^^^^^
+471 |
+472 |         # Verificar Facebook
+    |
+help: Remove unused import: `httpx`
+
+F841 Local variable `cats` is assigned to but never used
+   --> scripts\run_bulk_chatbot.py:220:5
+    |
+218 | def gen_message(idx: int) -> str:
+219 |     # Weighted category selection to match distribution in plan
+220 |     cats = list(TEMPLATES.keys())
+    |     ^^^^
+221 |     weights = [
+222 |         40,
+    |
+help: Remove assignment to unused variable `cats`
+
+F841 Local variable `weights` is assigned to but never used
+   --> scripts\run_bulk_chatbot.py:221:5
+    |
+219 |     # Weighted category selection to match distribution in plan
+220 |     cats = list(TEMPLATES.keys())
+221 |     weights = [
+    |     ^^^^^^^
+222 |         40,
+223 |         30,
+    |
+help: Remove assignment to unused variable `weights`
+
+F841 Local variable `items_dir` is assigned to but never used
+   --> scripts\setup_demo_tenant.py:220:5
+    |
+218 | def create_demo_files(base_dir: Path, dry_run: bool = False) -> None:
+219 |     """Cria os arquivos da base de conhecimento demo localmente."""
+220 |     items_dir = base_dir / "items"
+    |     ^^^^^^^^^
+221 |
+222 |     for filename, content in DEMO_DOCUMENTS.items():
+    |
+help: Remove assignment to unused variable `items_dir`
+
+F821 Undefined name `asyncpg`
+   --> scripts\setup_demo_tenant.py:236:31
+    |
+234 | # ──────────────────────────────────────────────────────────────
+235 |
+236 | async def seed_database(pool: asyncpg.Pool, reset: bool = False, dry_run: bool = False) -> None:
+    |                               ^^^^^^^
+237 |     """Insere o tenant demo no PostgreSQL."""
+238 |     tenant_id = DEMO_TENANT["tenant_id"]
+    |
+
+F821 Undefined name `asyncpg`
+   --> scripts\setup_demo_tenant.py:343:22
+    |
+341 |     logger.info("\n[2/3] Semeando banco de dados...")
+342 |     if not dry_run:
+343 |         pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL, min_size=1, max_size=3)
+    |                      ^^^^^^^
+344 |         try:
+345 |             await seed_database(pool, reset=reset, dry_run=dry_run)
+    |
+
+F841 Local variable `result` is assigned to but never used
+  --> scripts\setup_grafana.py:28:9
+   |
+26 |         env = os.environ.copy()
+27 |         env["PGPASSWORD"] = "pandora"
+28 |         result = subprocess.run(
+   |         ^^^^^^
+29 |             [
+30 |                 "psql",
+   |
+help: Remove assignment to unused variable `result`
+
+E402 Module level import not at top of file
+  --> tests\test_orchestrator_scraper_fallback.py:11:1
+   |
+ 9 | load_dotenv()
+10 |
+11 | from app.models.schemas import ChatRequest, SurfaceType, Channel
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+12 | from app.orchestrator.service import get_orchestrator
+13 | from app.settings import settings
+   |
+
+E402 Module level import not at top of file
+  --> tests\test_orchestrator_scraper_fallback.py:12:1
+   |
+11 | from app.models.schemas import ChatRequest, SurfaceType, Channel
+12 | from app.orchestrator.service import get_orchestrator
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+13 | from app.settings import settings
+   |
+
+E402 Module level import not at top of file
+  --> tests\test_orchestrator_scraper_fallback.py:13:1
+   |
+11 | from app.models.schemas import ChatRequest, SurfaceType, Channel
+12 | from app.orchestrator.service import get_orchestrator
+13 | from app.settings import settings
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+14 |
+15 | async def main():
+   |
+
+Found 51 errors.
+No fixes available (8 hidden fixes can be enabled with the `--unsafe-fixes` option).

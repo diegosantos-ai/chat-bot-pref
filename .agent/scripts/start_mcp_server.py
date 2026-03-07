@@ -69,7 +69,7 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nShutting down MCP server.", file=sys.stderr)
-    except Exception as e:
+    except Exception:
         logging.basicConfig()
         logging.getLogger().exception("An unexpected error occurred in the MCP server")
         sys.exit(1)

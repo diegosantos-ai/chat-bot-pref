@@ -1,24 +1,28 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  FileText, 
-  Search, 
-  Settings2, 
-  Terminal, 
+import {
+  LayoutDashboard,
+  FileText,
+  Search,
+  Settings2,
+  Terminal,
   LogOut,
   Menu,
   X,
   Bot,
   Sliders,
   Globe,
-  Zap
+  Zap,
+  Megaphone,
+  ShieldAlert
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Layout.module.css';
 
 const navItems = [
   { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
+  { path: '/alerts', icon: Megaphone, label: 'Alertas' },
+  { path: '/tickets', icon: ShieldAlert, label: 'Ouvidoria' },
   { path: '/rag', icon: FileText, label: 'RAG Manager' },
   { path: '/rag-test', icon: Search, label: 'RAG Tester' },
   { path: '/rag-config', icon: Sliders, label: 'Config RAG' },
@@ -41,7 +45,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className={styles.layout}>
       {/* Mobile toggle */}
-      <button 
+      <button
         className={styles.mobileToggle}
         onClick={() => setSidebarOpen(!sidebarOpen)}
       >
@@ -62,7 +66,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               key={item.path}
               to={item.path}
               end={item.path === '/'}
-              className={({ isActive }) => 
+              className={({ isActive }) =>
                 `${styles.navItem} ${isActive ? styles.active : ''}`
               }
               onClick={() => setSidebarOpen(false)}
@@ -91,9 +95,9 @@ export default function Layout({ children }: { children: ReactNode }) {
 
       {/* Overlay for mobile */}
       {sidebarOpen && (
-        <div 
-          className={styles.overlay} 
-          onClick={() => setSidebarOpen(false)} 
+        <div
+          className={styles.overlay}
+          onClick={() => setSidebarOpen(false)}
         />
       )}
 

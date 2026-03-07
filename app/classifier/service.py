@@ -44,6 +44,14 @@ HUMAN_HANDOFF_PATTERNS = [
     r"(quero reclamar|fazer reclamação|registrar|protocolo)",
 ]
 
+TRANSACTIONAL_IPTU_PATTERNS = [
+    r"(iptu|2a via iptu|segunda via iptu|boleto iptu|pagar iptu|imposto predial)",
+]
+
+TRANSACTIONAL_TICKET_PATTERNS = [
+    r"(buraco na rua|abrir chamado|reportar problema|denunciar|entulho|lâmpada queimada|iluminação|poste|mato alto|vazamento)",
+]
+
 
 class ClassifierService:
     """
@@ -110,6 +118,24 @@ class ClassifierService:
                     raw_output="fast_detect:complaint",
                 )
 
+        # IPTU
+        for pattern in TRANSACTIONAL_IPTU_PATTERNS:
+            if re.search(pattern, text, re.IGNORECASE):
+                return ClassifierResult(
+                    intent=Intent.TRANSACTIONAL_IPTU,
+                    confidence=0.95,
+                    raw_output="fast_detect:transactional_iptu",
+                )
+
+        # Abertura de Chamado (Zeladoria)
+        for pattern in TRANSACTIONAL_TICKET_PATTERNS:
+            if re.search(pattern, text, re.IGNORECASE):
+                return ClassifierResult(
+                    intent=Intent.TRANSACTIONAL_TICKET,
+                    confidence=0.95,
+                    raw_output="fast_detect:transactional_ticket",
+                )
+
         # Human handoff
         for pattern in HUMAN_HANDOFF_PATTERNS:
             if re.search(pattern, text, re.IGNORECASE):
@@ -144,7 +170,7 @@ class ClassifierService:
         """Classifica usando LLM."""
 
         # Carrega prompt do classifier
-        classifier_prompt = load_prompt("classifier")
+        load_prompt("classifier")
 
         # Lista de intents válidos
         valid_intents = [intent.value for intent in Intent]

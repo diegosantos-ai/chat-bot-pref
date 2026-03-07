@@ -26,6 +26,8 @@ class Intent(str, Enum):
     CONTACT_REQUEST = "CONTACT_REQUEST"
     COMPLAINT = "COMPLAINT"  # Reclamação
     HUMAN_HANDOFF = "HUMAN_HANDOFF"
+    TRANSACTIONAL_IPTU = "TRANSACTIONAL_IPTU" # Emissão de 2ª via IPTU (Mock GTM)
+    TRANSACTIONAL_TICKET = "TRANSACTIONAL_TICKET" # Abertura de chamado (Mock GTM)
     OUT_OF_SCOPE = "OUT_OF_SCOPE"  # Default obrigatório
 
 

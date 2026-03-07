@@ -65,6 +65,7 @@ class MetaSender:
         Envia mensagem de DM.
         """
         token = await self._get_access_token(channel)
+        logger.debug("[SENDER] Token access fetched, length: %d", len(token) if token else 0)
         logger.info("[SENDER] Enviando DM canal=%s thread=%s", channel.value, thread_id)
         logger.debug("Texto: %s...", text[:100])
         # TODO: implementar chamada real à Graph API usando `token`
@@ -83,6 +84,7 @@ class MetaSender:
         Responde a um comentário.
         """
         token = await self._get_access_token(channel)
+        logger.debug("[SENDER] Token access fetched, length: %d", len(token) if token else 0)
         logger.info("[SENDER] Respondendo comentário canal=%s id=%s", channel.value, comment_id)
         logger.debug("Texto: %s...", text[:100])
         # TODO: implementar chamada real à Graph API usando `token`

@@ -33,7 +33,7 @@ def handle_start(args):
 def handle_handoff(args):
     progresso_file = os.path.join(args.dir, "progresso.md")
     hoje = datetime.now().strftime('%d/%m/%Y')
-    print(f"[HANDOFF GATE]")
+    print("[HANDOFF GATE]")
     if not os.path.exists(progresso_file):
         print("ERRO: O projeto não possui progresso.md. Crie-o imediatamente baseando-se nas specs criadas.")
         return

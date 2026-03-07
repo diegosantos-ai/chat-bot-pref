@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="8" skipped="0" tests="8" time="9.384" timestamp="2026-03-06T09:23:46.502575-03:00" hostname="WIN-IA8C4HUNMFF"><testcase classname="tests.e2e.test_pipeline_e2e" name="test_e2e_01_inbox_contact_rag_success" time="0.268"><failure message="ValueError: Nenhum tenant_id ativo no contexto. O middleware de webhook deve ser executado antes de qualquer operação de dados.">orchestrator = &lt;app.orchestrator.service.OrchestratorService object at 0x000001CFE45496D0&gt;
+
+    @pytest.mark.asyncio
+    async def test_e2e_01_inbox_contact_rag_success(orchestrator):
+        """
+        E2E-01: Inbox contato institucional (happy path RAG)
+    
+        Entrada:
+        - surface = INBOX (IG/FB DM)
+        - user_message = "Qual o telefone da prefeitura?"
+        - external_message_id = "m1"
+    
+        Saída esperada:
+        - decision = ANSWER_RAG
+        - response_type = SUCCESS
+        - Resposta contém dados vindos do doc
+    
+        Asserts de auditoria:
+        - classifier_result com {intent, confidence}
+        - policy_pre com {policy_decision: ALLOW}
+        - rag_retrieve com {base_id, query_id, k, docs_count&gt;0}
+        - response_selected com {template: "rag_answer.txt"}
+        - message_sent com {surface: INBOX, channel: IG|FB}
+        """
+        request = ChatRequest(
+            session_id="test_session_1",
+            message="Qual o telefone da prefeitura?",
+            channel=Channel.INSTAGRAM_DM,
+            surface_type=SurfaceType.INBOX,
+            external_message_id="m1",
+        )
+    
+&gt;       response, ctx = await orchestrator.process(request)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\e2e\test_pipeline_e2e.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+app\orchestrator\service.py:251: in process
+    rag_result = await self._execute_rag(ctx, expanded_query, policy_pre)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\orchestrator\service.py:334: in _execute_rag
+    retrieval = await self.retriever.retrieve(query)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:208: in retrieve
+    collection = self._ensure_collection()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:163: in _ensure_collection
+    collection_name = self._get_tenant_collection_name()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:156: in _get_tenant_collection_name
+    tid = tenant_context.require_tenant()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_tenant() -&gt; str:
+        """
+        Retorna o tenant ativo ou levanta ValueError se não configurado.
+        Use em operações que nunca devem rodar sem tenant isolado.
+        """
+        tenant_id = _tenant_id_var.get()
+        if not tenant_id:
+&gt;           raise ValueError(
+                "Nenhum tenant_id ativo no contexto. "
+                "O middleware de webhook deve ser executado antes de qualquer operação de dados."
+            )
+E           ValueError: Nenhum tenant_id ativo no contexto. O middleware de webhook deve ser executado antes de qualquer operação de dados.
+
+app\tenant_context.py:42: ValueError</failure></testcase><testcase classname="tests.e2e.test_pipeline_e2e" name="test_required_audit_fields" time="0.088"><failure message="ValueError: Nenhum tenant_id ativo no contexto. O middleware de webhook deve ser executado antes de qualquer operação de dados.">orchestrator = &lt;app.orchestrator.service.OrchestratorService object at 0x000001CFE45FB830&gt;
+
+    @pytest.mark.asyncio
+    async def test_required_audit_fields(orchestrator):
+        """
+        Verifica campos obrigatórios em qualquer request.
+        """
+        request = ChatRequest(
+            session_id="test_required",
+            message="Qual o horário?",
+            channel=Channel.WEB_WIDGET,
+            surface_type=SurfaceType.INBOX,
+            external_message_id="req1",
+        )
+    
+&gt;       response, ctx = await orchestrator.process(request)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\e2e\test_pipeline_e2e.py:698: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+app\orchestrator\service.py:251: in process
+    rag_result = await self._execute_rag(ctx, expanded_query, policy_pre)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\orchestrator\service.py:334: in _execute_rag
+    retrieval = await self.retriever.retrieve(query)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:208: in retrieve
+    collection = self._ensure_collection()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:163: in _ensure_collection
+    collection_name = self._get_tenant_collection_name()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:156: in _get_tenant_collection_name
+    tid = tenant_context.require_tenant()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def require_tenant() -&gt; str:
+        """
+        Retorna o tenant ativo ou levanta ValueError se não configurado.
+        Use em operações que nunca devem rodar sem tenant isolado.
+        """
+        tenant_id = _tenant_id_var.get()
+        if not tenant_id:
+&gt;           raise ValueError(
+                "Nenhum tenant_id ativo no contexto. "
+                "O middleware de webhook deve ser executado antes de qualquer operação de dados."
+            )
+E           ValueError: Nenhum tenant_id ativo no contexto. O middleware de webhook deve ser executado antes de qualquer operação de dados.
+
+app\tenant_context.py:42: ValueError</failure></testcase><testcase classname="tests.test_api" name="test_analytics_summary" time="1.078"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">@pytest.mark.asyncio
+    async def test_analytics_summary():
+        async with httpx.AsyncClient(base_url=BASE_URL) as client:
+            response = await client.get("/analytics/summary")
+&gt;           assert response.status_code == 200
+E           assert 404 == 200
+E            +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_api.py:18: AssertionError</failure></testcase><testcase classname="tests.test_api" name="test_api_chat" time="0.902"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">@pytest.mark.asyncio
+    async def test_api_chat():
+        async with httpx.AsyncClient(base_url=BASE_URL) as client:
+            payload = {"session_id": "test_session", "message": "Qual o telefone da prefeitura?", "channel": "web", "surface_type": "inbox"}
+            response = await client.post("/api/chat", json=payload)
+&gt;           assert response.status_code == 200
+E           assert 404 == 200
+E            +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests\test_api.py:30: AssertionError</failure></testcase><testcase classname="tests.test_api" name="test_webhook_meta" time="0.397"><failure message="AttributeError: &lt;module 'app.api.webhook' from 'D:\\Projetos\\Desenvolvendo\\chat-bot-pref\\app\\api\\webhook.py'&gt; does not have the attribute 'WebhookHandler'">@pytest.mark.asyncio
+    async def test_webhook_meta():
+        # Mock the WebhookHandler class
+&gt;       with patch("app.api.webhook.WebhookHandler") as MockWebhookHandler:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_api.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py:1467: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;unittest.mock._patch object at 0x000001CFE47E2900&gt;
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+&gt;           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: &lt;module 'app.api.webhook' from 'D:\\Projetos\\Desenvolvendo\\chat-bot-pref\\app\\api\\webhook.py'&gt; does not have the attribute 'WebhookHandler'
+
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py:1437: AttributeError</failure></testcase><testcase classname="tests.test_scraper_ai" name="test_scraper_ai" time="0.003"><failure message="OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.">async def test_scraper_ai():
+        print("\n" + "="*60)
+        print("#x1F916 TESTE DE QA COM SCRAPING E IA (GEMINI)")
+        print("="*60)
+    
+        # URL padrão baseada na notícia mencionada pelo usuário
+        default_url = "https://santatereza.pr.gov.br/noticiasView/1883_2o-ENCONTRO-DE-MULHERES-DIA-INTERNACIONAL-DA-MULHER-.html"
+    
+&gt;       url = input(f"Digite a URL da página (ou aperte Enter para usar a padrão):\n[{default_url}]:\n&gt; ").strip()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_scraper_ai.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.capture.DontReadFromInput object at 0x000001CFCBC8E4E0&gt;
+size = -1
+
+    def read(self, size: int = -1) -&gt; str:
+&gt;       raise OSError(
+            "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        )
+E       OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
+
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\capture.py:229: OSError</failure></testcase><testcase classname="tests.test_scraper_basic" name="test_scraper" time="0.004"><failure message="OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.">async def test_scraper():
+        print("\n" + "="*60)
+        print("#x1F916 TESTE INTERATIVO DE BUSCA NO SCRAPER")
+        print("="*60)
+    
+&gt;       termo = input("Digite um termo para buscar na página (ex: INTERNACIONAL): ").strip()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_scraper_basic.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;_pytest.capture.DontReadFromInput object at 0x000001CFCBC8E4E0&gt;
+size = -1
+
+    def read(self, size: int = -1) -&gt; str:
+&gt;       raise OSError(
+            "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        )
+E       OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
+
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\capture.py:229: OSError</failure></testcase><testcase classname="tests.test_verify_fix.TestVerifyAllFix" name="test_03_valid_arguments_simulation" time="0.007"><failure message="AssertionError: Argparse rejeitou argumentos válidos. Exit code: 1">self = &lt;tests.test_verify_fix.TestVerifyAllFix testMethod=test_03_valid_arguments_simulation&gt;
+
+    def test_03_valid_arguments_simulation(self):
+        """
+        Simula execução com argumentos VÁLIDOS.
+        Verifica se o script passa da fase de argumentos.
+        """
+        try:
+            import verify_all
+    
+            # Simula: python verify_all.py pilot-atendimento --url http://localhost:8000
+            test_args = ['verify_all.py', 'pilot-atendimento', '--url', 'http://localhost:8000']
+    
+            with patch.object(sys, 'argv', test_args):
+                # Mockamos a função interna de lógica (se soubéssemos o nome) ou requests
+                # Aqui, vamos capturar qualquer Exception que NÃO seja SystemExit.
+                # Se der erro de conexão/arquivo, significa que o argparse funcionou!
+                try:
+                    with patch('builtins.print'): # Silencia output
+&gt;                       verify_all.main()
+
+tests\test_verify_fix.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def main():
+        parser = argparse.ArgumentParser(
+            description="Run complete Antigravity Kit verification suite",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""
+    Examples:
+      python scripts/verify_all.py . --url http://localhost:3000
+      python scripts/verify_all.py . --url https://staging.example.com --no-e2e
+            """
+        )
+        parser.add_argument("project", help="Project path to validate")
+        parser.add_argument("--url", required=True, help="URL for performance &amp; E2E checks")
+        parser.add_argument("--no-e2e", action="store_true", help="Skip E2E tests")
+        parser.add_argument("--stop-on-fail", action="store_true", help="Stop on first failure")
+    
+        args = parser.parse_args()
+    
+        project_path = Path(args.project).resolve()
+    
+        if not project_path.exists():
+            print_error(f"Project path does not exist: {project_path}")
+&gt;           sys.exit(1)
+E           SystemExit: 1
+
+.agent\scripts\verify_all.py:284: SystemExit
+
+During handling of the above exception, another exception occurred:
+
+self = &lt;tests.test_verify_fix.TestVerifyAllFix testMethod=test_03_valid_arguments_simulation&gt;
+
+    def test_03_valid_arguments_simulation(self):
+        """
+        Simula execução com argumentos VÁLIDOS.
+        Verifica se o script passa da fase de argumentos.
+        """
+        try:
+            import verify_all
+    
+            # Simula: python verify_all.py pilot-atendimento --url http://localhost:8000
+            test_args = ['verify_all.py', 'pilot-atendimento', '--url', 'http://localhost:8000']
+    
+            with patch.object(sys, 'argv', test_args):
+                # Mockamos a função interna de lógica (se soubéssemos o nome) ou requests
+                # Aqui, vamos capturar qualquer Exception que NÃO seja SystemExit.
+                # Se der erro de conexão/arquivo, significa que o argparse funcionou!
+                try:
+                    with patch('builtins.print'): # Silencia output
+                        verify_all.main()
+                except SystemExit as e:
+                    if e.code != 0:
+&gt;                       self.fail(f"Argparse rejeitou argumentos válidos. Exit code: {e.code}")
+E                       AssertionError: Argparse rejeitou argumentos válidos. Exit code: 1
+
+tests\test_verify_fix.py:74: AssertionError</failure></testcase></testsuite></testsuites>

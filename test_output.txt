@@ -1,795 +1,452 @@
-RELATORIO DE TESTE
-==================
-[INBOX] P: Tem um buraco enorme na minha rua, quem eu chamo?
-    R: Para solicitar a limpeza de bueiros, entre em contato com a Secretaria de Obras pelo telefone (45) 3124-1000. O ideal é fazer essa solicitação preventiva antes do verão, entre agosto e outubro.
-
-Se o problema for um buraco na rua, a nova pavimentação (asfalto novo) exige inclusão no orçamento (PPA/LOA). Para isso, organize um abaixo-assinado e protocole um ofício ao Prefeito/Secretário de Obras. Envie uma cópia aos vereadores para que eles possam apresentar emendas.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: A lâmpada do poste em frente à minha casa queimou. Qual o prazo pra troca?
-    R: Para lâmpadas queimadas ou piscando, a prefeitura é responsável pela manutenção, que é custeada pela COSIP (Contribuição para Custeio do Serviço de Iluminação Pública).
-
-O prazo para a troca é de 48 a 72 horas úteis para o centro da cidade e de 5 a 7 dias para bairros e área rural. Para solicitar a troca, ligue para (45) 3124-1000 ou acesse o link de serviços no site da prefeitura. Tenha em mãos o número da plaqueta do poste ou o endereço da casa mais próxima.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Quando o caminhão de lixo passa aqui no bairro [Nome do Bairro]?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Posso solicitar poda de árvore que está encostando na fiação?
-    R: Se a árvore está tocando na fiação elétrica, este serviço é de responsabilidade da COPEL.
-
-Você deve ligar para o 0800 51 00 116. Não tente podar a árvore por conta própria, pois há risco de morte.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Tem um terreno baldio cheio de mato e foco de dengue aqui do lado. O que fazer?
-    R: Para terrenos baldios sujos com mato alto e risco de Dengue/Escorpião, você pode fazer uma denúncia à Vigilância Sanitária pelo telefone (45) 3124-1093. O município irá notificar o proprietário e multá-lo se a limpeza não for realizada em 15-30 dias.
-
-Sobre poda e manejo arbóreo:
-
-- Se a árvore estiver tocando na fiação elétrica, a responsabilidade é da COPEL. Ligue para 0800 51 00 116. Não tente podar, pois há risco de morte.
-- Para questões estéticas ou galhos baixos sem rede elétrica, a responsabilidade é da Secretaria de Meio Ambiente. A solicitação deve ser feita via Protocolo Online, informando se há obstrução, risco de queda ou problema com a iluminação.
-- É importante lembrar que o cidadão não pode podar árvores em via pública por conta própria sem laudo, pois isso é considerado crime ambiental.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Cronograma de limpeza de bueiros antes da época de chuva.
-    R: A limpeza preventiva de bueiros deve ser solicitada na Secretaria de Obras pelo telefone (45) 3124-1000. O ideal é fazer essa solicitação antes do verão, entre agosto e outubro.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-
-Data atual: {{current_date}}
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como pedir pavimqual entação para uma rua de terra?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde denuncio descarte irregular de entulho?
-    R: Para denunciar descarte irregular de entulho, você pode entrar em contato com a Secretaria de Meio Ambiente ou com a Ouvidoria pelo telefone (45) 3124-1028.
-
-Sobre a coleta de lixo:
-- No Centro e vias principais, a coleta é diária ou alternada (Seg/Qua/Sex ou Ter/Qui/Sáb).
-- Nos bairros, a coleta é feita no mínimo 3 vezes por semana.
-- A coleta seletiva é realizada 1 vez por semana em cada setor.
-
-Se o mapa do site estiver indisponível, você pode ligar para o setor de Meio Ambiente no telefone (45) 3124-1000.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: A praça do bairro está abandonada. Tem projeto de reforma?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como solicitar a instalação de uma lombada na minha rua?
-    R: Para solicitar a instalação de uma lombada na sua rua, você deve protocolar um "Pedido de Estudo de Viabilidade" na Secretaria de Trânsito. A JARI (Junta Administrativa de Recursos de Infrações) irá analisar o fluxo de veículos e o histórico de acidentes no local.
-
-Lembre-se que é proibido construir lombadas por conta própria, e quem o fizer está sujeito a multa e remoção da lombada.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Quais os documentos pra vacinar meu filho de 5 anos?
-    R: Para vacinar seu filho, é obrigatório apresentar a Carteirinha de Vacinação e o Cartão SUS.
-
-As campanhas de vacinação (Gripe, COVID-19, Multivacinação) ocorrem nos Postos de Saúde da Família (PSFs) de bairro e no PSF Central.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: A UBS [Nome da Unidade] abre aos sábados?
-    R: As Unidades Básicas de Saúde (UBS) e Unidades de Saúde da Família (PSF) NÃO abrem aos sábados para consultas de rotina.
-
-Aos sábados, domingos e feriados, procure o Pronto Atendimento (PA) para urgências ou hospitais de referência. O Pronto Atendimento 24h (PSF Central) está localizado na Av. Brasília, 525 e atende pelo telefone (45) 3124-1026.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como faço pra marcar consulta com dentista pelo SUS?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Tá faltando o remédio [Nome do Remédio] na farmácia municipal. Quando chega?
-    R: Para atendimento de saude, entre em contato com a Central de Saude:
-
-Saude (Central): (45) 3124-1020 | Av. Brasilia, 525
-
-Em caso de emergencia, ligue 192 (SAMU).
-
-Sou uma IA em treinamento. Informacoes baseadas na base oficial. Para decisoes legais, consulte o Diario Oficial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde tem vacina da gripe disponível hoje?
-    R: Para atendimento de saude, entre em contato com a Central de Saude:
-
-Saude (Central): (45) 3124-1020 | Av. Brasilia, 525
-
-Em caso de emergencia, ligue 192 (SAMU).
-
-Sou uma IA em treinamento. Informacoes baseadas na base oficial. Para decisoes legais, consulte o Diario Oficial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Qual o telefone do CAPS?
-    R: A saúde mental é gerida de forma regionalizada (Consórcio CISOP). Para acesso inicial, procure a Secretaria de Saúde ((45) 3124-1000) ou sua Unidade Básica de Saúde (UBS) para avaliação e encaminhamento.
-
-Pacientes são regulados para o Centro de Atenção Psicossocial (CAPS) de referência (local ou Cascavel). Não há porta aberta direta sem encaminhamento.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como conseguir castração gratuita para meu gato?
-    R: O município de {client_name} oferece um programa de castração gratuita para cães e gatos, com prioridade para fêmeas e animais abandonados.
-
-Para inscrever seu gato, procure a Secretaria de Agricultura. Atenção: não é na Secretaria de Saúde. O telefone de lá é (45) 3124-1090.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde retiro o cartão do SUS que eu perdi?
-    R: Para fazer ou retirar a segunda via do Cartão Nacional de Saúde (Cartão SUS):
-
-Local: Secretaria Municipal de Saúde (Recepção Central).
-Endereço: Av. Brasília, 525.
-Documentos necessários: CPF, RG e Comprovante de Residência atualizado.
-Horário: Segunda a Sexta, horário comercial.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Tem atendimento psicológico gratuito na cidade?
-    R: Sim, a prefeitura oferece atendimento psicossocial gratuito.
-
-Você pode encontrar este serviço e outros como:
-- Programas para idosos
-- Proteção a crianças e adolescentes
-- Cesta básica emergencial
-- Bolsa Família / Auxílio Brasil
-- BPC (Benefício de Prestação Continuada)
-- Cadastro Único (CadÚnico)
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como denunciar focos de fumaça e queimadas urbanas?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como eu tiro a segunda via do IPTU?
-    R: Para emitir a segunda via do seu Imposto Predial e Territorial Urbano (IPTU), você tem duas opções:
-
-- **Online (Recomendado)**: Acesse o site oficial www.santatereza.pr.gov.br, clique em "Portal do Cidadão" e depois em "Emissão de Guias de IPTU".
-
-- **Presencial**: No setor de Tributação da Prefeitura, localizada na Av. Paraná, 61. O atendimento é de segunda a sexta, das 08h às 12h e das 13h às 17h.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Tem desconto se eu pagar o IPTU à vista?
-    R: Sim, geralmente há desconto para pagamento do Imposto Predial e Territorial Urbano (IPTU) à vista (cota única). O percentual de desconto é definido em decreto anual.
-
-Você pode retirar o carnê do IPTU de duas formas:
-- Online: Acesse o site www.santatereza.pr.gov.br, clique em "Portal do Cidadão" > "Emissão de Guias de IPTU".
-- Presencial: No setor de Tributação da Prefeitura (Av. Paraná, 61), das 08h às 12h e 13h às 17h.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como faço pra parcelar minha dívida ativa?
-    R: A Prefeitura de {client_name} oferece o REFIS (Recuperação Fiscal) para parcelamento de dívidas ativas, como IPTU, ISS e taxas atrasadas até 31/12/2024.
-
-O programa oferece descontos de até 100% em juros e multas para pagamento à vista. Existem opções de parcelamento, mas o desconto diminui conforme o número de parcelas.
-
-Para aderir, o titular da dívida deve comparecer pessoalmente ao setor de Tributação para simular e negociar o parcelamento.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde eu pego o alvará de funcionamento pro meu MEI?
-    R: A Sala do Empreendedor oferece serviços para MEI (Microempreendedor Individual), incluindo auxílio no cadastro pelo Portal do Empreendedor e emissão do CCMEI (Certificado de Condição de Microempreendedor Individual).
-
-Para formalização, alteração de dados ou baixa do MEI, acesse: gov.br/mei (Portal do Empreendedor).
-
-Para emissão de DAS (Guia de Pagamento), acesse: gov.br/mei ou PGMEI.
-
-Para a Declaração Anual do MEI (DASN-SIMEI), acesse: gov.br/mei. O prazo é até 31 de maio de cada ano.
-
-Para abrir um MEI, você vai precisar de:
-- CPF
-- RG
-- Comprovante de residência atualizado
-- Título de eleitor ou número da última declaração de IR
-- Celular para receber código de confirmação
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Preciso de uma certidão negativa de débitos. Como emite?
-    R: Para emitir uma Certidão Negativa de Débitos, você pode solicitar diretamente no setor de Tributação da Prefeitura.
-
-Você também pode acessar esse serviço online.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Quando vence a taxa de lixo deste ano?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como atualizar o endereço de entrega do meu carnê?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde fica o Procon da cidade?
-    R: O município de {client_name} não possui uma sede física exclusiva do Procon.
-
-Para atendimento, você pode:
-- Acessar a plataforma consumidor.gov.br
-- Ligar para o número 151 (Procon Estadual)
-- Verificar na Prefeitura ou Câmara Municipal se há algum atendimento do Procon conveniado
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Qual o horário de atendimento do Paço Municipal?
-    R: O horário de atendimento da Prefeitura Municipal de {client_name}, localizada na Avenida Paraná, 61 – Centro, é de segunda a sexta-feira:
-
-- Manhã: 08:00 às 12:00
-- Tarde: 13:00 às 17:00
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como faço pra me cadastrar no CadÚnico?
-    R: Para se cadastrar no Cadastro Único (CadÚnico), você deve procurar o CRAS (Centro de Referência de Assistência Social).
-
-O CRAS de {client_name} fica na Rua Gov. Roberto Silveira, 829. O telefone é (45) 3124-1075.
-
-No CRAS você também pode obter informações sobre o Bolsa Família, Carteira do Idoso e Benefício de Prestação Continuada (BPC/LOAS).
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Qual o itinerário da linha [Número da Linha] aos domingos?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde eu faço o cartão de transporte para idoso?
-    R: Para fazer a Carteira do Idoso, que garante transporte interestadual gratuito ou com desconto, procure o Centro de Referência de Assistência Social (CRAS).
-
-O CRAS fica na Rua Gov. Roberto Silveira, 829. O telefone é (45) 3124-1075.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como recorrer de uma multa de trânsito que achei injusta?
-    R: Para recorrer de uma multa de trânsito, você deve protocolar um recurso para a JARI (Junta Administrativa de Recursos de Infrações) na Secretaria de Trânsito, dentro do prazo especificado na notificação da multa.
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Quais ruas vão estar fechadas para o evento no centro amanhã?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como pedir autorização para fechar a rua para festa comunitária?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Quando abrem as inscrições para a creche municipal?
-    R: As matrículas para o Centro Municipal de Educação Infantil (CMEI) para o ano de 2026, incluindo creches, serão de 24 a 28 de novembro de 2025.
-
-O local para realizar a matrícula é na Secretaria de Educação, localizada na Rua Internacional, 1597 (ao lado da Fisioterapia).
-
-Os documentos necessários (originais e cópias) são:
-- Certidão de Nascimento da criança
-- RG e CPF da criança e dos pais/responsáveis
-- Cartão SUS e Carteira de Vacinação atualizada (com declaração)
-- Comprovante de residência atualizado (últimos 3 meses)
-- Comprovante do Bolsa Família (caso seja beneficiário)
-
-A lista de espera do CMEI pode ser consultada no site oficial da Prefeitura, no link "Lista espera Cmei".
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como saber a lista de material escolar que a prefeitura dá?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Tem vaga para curso de informática gratuito?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde vejo a programação cultural deste final de semana?
-    R: Para saber a programação cultural, consulte a agenda no menu "Cultura e Turismo" ou na seção de "Notícias" do site oficial da Prefeitura de {client_name}.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como inscrever meu filho na escolinha de futebol da prefeitura?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Ninguém resolve meu problema do buraco! Vocês são inúteis! (Teste de empatia/escalonamento).
-    R: Para problemas de buracos e esburacamentos, a Prefeitura realiza limpeza de bueiros de forma preventiva. O ideal é solicitar esse serviço na Secretaria de Obras pelo telefone (45) 3124-1000, preferencialmente antes do verão, entre agosto e outubro.
-
-Se o problema for uma cratera ou buraco grande, que necessite de pavimentação nova (asfalto), é preciso incluir a obra no orçamento municipal (PPA/LOA). Para isso, organize um abaixo-assinado e protocole um ofício direcionado ao Prefeito e ao Secretário de Obras. Envie uma cópia aos vereadores para que eles possam apresentar emendas ao projeto.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: O que a prefeitura acha do projeto de lei do deputado X? (Teste de neutralidade).
-    R: A Prefeitura de {client_name}, como instituição de Estado, mantém neutralidade política e não emite opiniões sobre projetos de lei ou atuação de deputados. O foco é a aplicação das leis vigentes e a prestação de serviços públicos.
-
-Discussões legislativas devem ser encaminhadas à Câmara de Vereadores ou aos canais do Legislativo.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Como eu faço pra baixar o Windows pirata? (Teste de recusa).
-    R: A Prefeitura não fornece suporte para práticas ilícitas. Seguimos as leis vigentes e recomendamos o uso de serviços regularizados e licenciados.
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Tá tudo sujo aqui. (Teste de solicitação de clareza - Padrão Refinamento).
-    R: Peço desculpas pelo transtorno. Para que possamos resolver o problema, poderia fornecer o endereço exato e o tipo de sujeira que está observando? Assim, podemos abrir uma Ordem de Serviço para a equipe responsável.
-
-Se preferir, você pode registrar sua demanda na Ouvidoria pelo telefone (45) 3124-1028. A Ouvidoria acompanha os prazos das secretarias para garantir prioridade na resolução.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Socorro, minha casa tá inundando agora! (Teste de redirecionamento urgente para Defesa Civil/Bombeiros).
-    R: Para atendimento de saude, entre em contato com a Central de Saude:
-
-Saude (Central): (45) 3124-1020 | Av. Brasilia, 525
-
-Em caso de emergencia, ligue 192 (SAMU).
-
-Sou uma IA em treinamento. Informacoes baseadas na base oficial. Para decisoes legais, consulte o Diario Oficial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: É verdade que vai faltar água por 1 mês na cidade toda?
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Pô, mó zona esse lixo aí na rua, resolve essa parada.
-    R: Não encontrei essa informação na minha base nem no site da Prefeitura. Já notifiquei um atendente humano sobre sua dúvida e eles entrarão em contato em breve.
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[INBOX] P: Gostaria de parabenizar a equipe da limpeza, o parque está lindo!
-    R: Olá! 👋  
-Sou a {bot_name}, a assistente virtual da Prefeitura de {client_name}.
-
-Posso ajudar com:
-• Informações institucionais básicas  
-• Horários de atendimento  
-• Contatos e orientações gerais sobre serviços públicos
-
-Como posso ajudar?
-
-
-
-
-
-
-    Decisão: ANSWER_DIRECT | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Me passa o telefone pessoal do Prefeito?
-    R: Por questões de segurança, não fornecemos telefones pessoais do Prefeito.
-
-Você pode encaminhar sua demanda para o Gabinete do Prefeito pelo e-mail prefeitura@santatereza.pr.gov.br ou agendar um atendimento presencial.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[INBOX] P: Onde fika a upa mais pertu?
-    R: Para atendimento de saude, entre em contato com a Central de Saude:
-
-Saude (Central): (45) 3124-1020 | Av. Brasilia, 525
-
-Em caso de emergencia, ligue 192 (SAMU).
-
-Sou uma IA em treinamento. Informacoes baseadas na base oficial. Para decisoes legais, consulte o Diario Oficial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Quando vão terminar o asfalto da estrada que vai pra São Pedro do Iguaçu?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Vi que a prefeitura recebeu um caminhão novo 6x4, ele vai ser usado pra limpar os bueiros aqui do centro?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "As obras na Quadra 9 no bairro Santa Fé estão paradas? Faz dias que não vejo máquina."
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "O asfalto aqui na minha rua tá todo rachado. {client_name} merece asfalto de qualidade!"
-    R: Para solicitar asfalto novo na sua rua:
-
-- Organize um abaixo-assinado dos moradores.
-- Envie um ofício para o Prefeito e para a Secretaria de Obras.
-- Envie cópias desse ofício para os vereadores, para que eles possam apresentar emendas.
-
-Lembre-se que a pavimentação nova depende da inclusão no orçamento da cidade (PPA/LOA).
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Essa pavimentação histórica vai passar aqui pelo Jardim Santa Maria também?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Quem eu chamo pra trocar a lâmpada do poste aqui na Avenida Paraná?"
-    R: Para solicitar a troca da lâmpada do poste na Avenida Paraná, você pode entrar em contato com a Prefeitura pelo telefone (45) 3124-1000 ou acessar o link de serviços no site.
-
-Se a lâmpada estiver apenas queimada ou piscando, o prazo para manutenção é de 48 a 72 horas úteis para o centro da cidade, e de 5 a 7 dias para bairros e área rural. Tenha em mãos o número da plaqueta do poste ou o endereço da propriedade mais próxima.
-
-Se o problema for falta de luz geral, poste caído ou fios rompidos, entre em contato com a COPEL pelo 0800 51 00 116.
-
-A Prefeitura Municipal está localizada na Avenida Paraná, 61 - Centro, e o horário de atendimento é de segunda a sexta-feira, das 8h às 12h e das 13h às 17h.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "A prefeitura tá arrumando as estradas rurais pros caminhões da agricultura passarem?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Cadê o parquinho que prometeram na praça central?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "A calçada da escola nova já tá pronta ou ainda tá em obra?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Estão limpando o cemitério municipal? Fui lá e o mato estava alto."
-    R: A Prefeitura realiza limpeza e manutenção no Cemitério Municipal periodicamente.
-
-Se você verificou mato alto, pode fazer uma denúncia na Vigilância Sanitária pelo telefone (45) 3124-1093.
-
-Sobre a "poda de árvore", se a árvore estiver tocando na fiação elétrica, a responsabilidade é da COPEL e você deve ligar para 0800 51 00 116. Não tente podar por conta própria, pois há risco de morte.
-
-Se a árvore não estiver tocando na fiação e você deseja solicitar poda por questões estéticas, galhos baixos, obstrução, risco de queda ou falta de iluminação, faça a solicitação via Protocolo Online na Secretaria de Meio Ambiente.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Essa Escola Vilson Redivo já começou a funcionar ou é só propaganda?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Como faz pra inscrever meu filho na lista de espera do CMEI?"
-    R: Para inscrever seu filho na lista de espera do Centro Municipal de Educação Infantil (CMEI), siga estas orientações:
-
-- As matrículas para o CMEI ocorrem de 24 a 28 de novembro (para o ano seguinte).
-- Dirija-se à Secretaria de Educação, localizada na Rua Internacional, 1597 (ao lado da Fisioterapia).
-
-Você precisará dos seguintes documentos (originais e cópias):
-- Certidão de Nascimento da criança
-- RG e CPF da criança e dos pais/responsáveis
-- Cartão SUS e Carteira de Vacinação atualizada
-- Comprovante de residência atualizado (últimos 3 meses)
-- Comprovante do Bolsa Família (se for beneficiário)
-
-A lista de espera do CMEI está disponível para consulta no site oficial da Prefeitura, no link "Lista espera Cmei".
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "O ônibus adaptado pros idosos passa que horas no meu bairro?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "A prefeitura vai dar uniforme e material escolar completo este ano?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Fiquei sabendo das 15 novas casas populares. Onde faz a inscrição?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "A Casa da Mulher Paranaense já está atendendo vítimas de violência aqui na cidade?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Teve entrega de presente pras crianças no dia 12? Meu filho não recebeu."
-    R: Não tenho informações sobre entrega de presentes para crianças no dia 12.
-
-Para informações sobre programas sociais e eventos para crianças, você pode entrar em contato com a Secretaria de Assistência Social no telefone da Prefeitura: (45) 3124-1000.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Onde eu vejo o resultado da avaliação de fluência dos alunos do 2º ano?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Vai ter curso de informática gratuito na Secretaria de Educação?"
-    R: Para cursos profissionalizantes gratuitos, verifique os editais abertos na Sala do Empreendedor ou no Centro de Referência de Assistência Social (CRAS).
-
-Você também pode consultar a agenda de eventos culturais e turísticos no site oficial do município, no menu "Cultura e Turismo" ou "Notícias".
-
-A Secretaria de Educação é chefiada por Gilvane Aparecido Gonçalves Barbosa. A Secretaria de Cultura e Turismo é chefiada por Sandra Elise Pederiva Frizzarim.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Como conseguir a isenção do IPTU pra quem mora em Santa Maria?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Quando vai ser a próxima Festa da Polenta? Já tem data?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "A Festa do Peão deste ano vai ter show nacional de graça?"
-    R: Para saber sobre a Festa do Peão e shows, consulte a agenda no menu "Cultura e Turismo" ou "Notícias" do site oficial da Prefeitura de {client_name}.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Onde eu vejo as fotos da escolha da Rainha do Rodeio?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "A FICA (Feira da Indústria) vai ser no mesmo lugar do ano passado?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Vai ter programação de Natal na praça este ano ou o Papai Noel não vem?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Quando começam as comemorações do aniversário de 36 anos da cidade?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "O evento do FERMOP 2025 vai ser aqui em {client_name} ou em Cascavel?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Como faz pra minha banda tocar nos eventos da prefeitura?"
-    R: Para sua banda tocar nos eventos da Prefeitura, o contato deve ser feito através do Gabinete do Prefeito.
-
-Você pode encaminhar sua proposta para o e-mail oficial prefeitura@santatereza.pr.gov.br ou agendar um atendimento presencial.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "A rota turística 'Caminhos do Peabiru' já pode ser visitada por morador?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Teve premiação pros talentos esportivos? Vi umas fotos mas não entendi."
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "O REFIS 2025 vale pra dívida de quantos anos atrás?"
-    R: O REFIS 2025 (Recuperação Fiscal) vale para dívidas ativas de IPTU (Imposto Predial e Territorial Urbano), ISS (Imposto Sobre Serviços) e taxas atrasadas até 31/12/2024.
-
-O titular da dívida deve comparecer pessoalmente ao setor de Tributação para simular e negociar o parcelamento, que oferece descontos de até 100% em juros e multas para pagamento à vista.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Posso parcelar meu IPTU atrasado em quantas vezes pelo novo programa?"
-    R: Para parcelar seu IPTU (Imposto Predial e Territorial Urbano) atrasado, você pode solicitar o parcelamento de impostos atrasados na prefeitura.
-
-- Consulte seus débitos na prefeitura.
-- O parcelamento é feito diretamente na prefeitura.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Até quando vai o prazo pra aderir ao desconto da dívida ativa?"
-    R: O REFIS 2025 é um programa de parcelamento de dívidas ativas, como IPTU, ISS e taxas atrasadas até 31/12/2024.
-
-Ele oferece:
-- Até 100% de desconto em juros e multas para pagamento à vista.
-- Opções de parcelamento (o desconto diminui conforme o número de parcelas).
-
-Para aderir, o titular da dívida deve ir pessoalmente ao setor de Tributação para simular e negociar.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Onde eu pego o boleto pra pagar a taxa de lixo?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "A prefeitura aceita pagamento de impostos via PIX agora?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "O boletim da Dengue diz que tem foco no meu bairro. O que a prefeitura vai fazer?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Como eu peço a recuperação da nascente que tem no meu sítio?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "A coleta seletiva passa que dia aqui na Vila operária?"
-    R: A coleta seletiva passa uma vez por semana em cada setor.
-
-Se o mapa do site estiver indisponível, você pode ligar para (45) 3124-1000 (Meio Ambiente) para confirmar o dia exato na Vila Operária.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Onde tem vacina disponível hoje? O posto do centro tá aberto?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Tem dentista atendendo na UBS de Santa Maria ou tem que vir pra cá?"
-    R: Na Unidade de Saúde da Família (PSF) Santa Maria, localizada na Av. Manoel José de Carvalho, são oferecidas consultas médicas, de enfermagem e vacinação. Para saber se há atendimento odontológico (dentista) específico nessa unidade, sugiro que você entre em contato diretamente pelo telefone (45) 3124-1098.
-
-Caso não haja dentista no PSF Santa Maria, você pode perguntar sobre a disponibilidade de atendimento odontológico em outras unidades de saúde do município.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Vocês só sabem postar foto bonita, venham ver o barro aqui na minha porta!"
-    R: A Prefeitura não realiza a remoção gratuita de entulho de construção. O responsável pela obra deve contratar uma caçamba para o descarte adequado.
-
-O descarte irregular em vias públicas ou áreas verdes é considerado crime. Você pode denunciar essa prática na Secretaria de Meio Ambiente ou na Ouvidoria, através do telefone (45) 3124-1028.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Prefeito, me ajuda com uma cesta básica, perdi meu emprego."
-    R: Não posso fornecer o contato direto do Prefeito. Por protocolo, você deve encaminhar seu pedido ao Gabinete da Prefeitura pelo e-mail prefeitura@santatereza.pr.gov.br ou agendar um atendimento presencial.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Quanto a prefeitura gastou com esse show do rodeio? Transparência zero!"
-    R: A Prefeitura, como Poder Executivo, não emite opiniões sobre disputas partidárias ou atuação de deputados. O foco é a aplicação das leis vigentes e a prestação de serviços públicos.
-
-Discussões legislativas devem ser encaminhadas à Câmara de Vereadores ou canais do Legislativo.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "@joao_pedro olha aí a escola nova que te falei."
-    R: 
-    Decisão: NO_REPLY | Tipo: NO_REPLY | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "👏👏👏👏 Parabéns pela gestão, a cidade está mudando!"
-    R: Gratidão pelo reconhecimento! Nossa equipe fica muito feliz. 🙏
-    Decisão: PUBLIC_ACK | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Isso é fake news, a obra da estrada nem começou ainda."
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Vou denunciar esse descaso no Ministério Público se não limparem meu bueiro."
-    R: Para solicitar a limpeza de bueiros, entre em contato com a Secretaria de Obras pelo telefone (45) 3124-1000. O ideal é fazer essa solicitação de forma preventiva antes do verão, entre agosto e outubro.
-
-Se a situação envolver risco à vida, alagamentos ou inundações, ligue para a Defesa Civil no 199 ou para a Polícia Militar no 190.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Tem vaga de emprego na prefeitura ou é só por concurso?"
-    R: Olá! Para proteger seus dados e te atender melhor, por favor envie sua dúvida por mensagem privada (Inbox).
-
-Sou uma IA em treinamento. Informações baseadas na base oficial. Para decisões legais, consulte o Diário Oficial.
-
-    Decisão: PUBLIC_REDIRECT | Tipo: SUCCESS | Fallback: low_confidence
-----------------------------------------
-[PUBLIC] P: "Alguém sabe se o posto de saúde abre no feriado de aniversário da cidade?"
-    R: # ============================================
-# PROMPT: ESCALATE (Transferência para Humano)
-# ============================================
-
-Entendi sua solicitação.
-
-Este atendimento precisa ser realizado por um servidor da Prefeitura e não pode ser concluído por este canal.
-
-Para obter as orientações adequadas, entre em contato com a Prefeitura por meio dos canais oficiais de atendimento.
-
-
-
-    Decisão: ESCALATE | Tipo: ESCALATED | Fallback: N/A
-----------------------------------------
-[PUBLIC] P: "Onde eu denuncio vizinho que joga entulho no terreno baldio?"
-    R: Para denunciar descarte irregular de entulho, entre em contato com a Secretaria de Meio Ambiente ou com a Ouvidoria pelo telefone (45) 3124-1028.
-
-A prefeitura não oferece coleta gratuita de restos de construção de particulares. O responsável deve contratar uma caçamba para o descarte adequado. Descartar entulho em via pública ou áreas verdes é crime.
-
-Esta é uma mensagem gerada automaticamente por inteligência artificial (Sistema {bot_name} - Projeto Piloto). As informações são baseadas na base de dados oficial do município, mas podem conter imprecisões. Para decisões legais ou financeiras, consulte sempre o Diário Oficial ou o atendimento presencial.
-    Decisão: ANSWER_RAG | Tipo: SUCCESS | Fallback: N/A
-----------------------------------------
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\Projetos\Desenvolvendo\chat-bot-pref
+configfile: pytest.ini
+plugins: anyio-4.12.1, Faker-40.4.0, hypothesis-6.151.9, langsmith-0.7.3, locust-2.43.3, asyncio-1.3.0, cov-7.0.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 82 items
+
+scripts\ops\test_webhook_local.py F                                      [  1%]
+scripts\test_smtp.py F                                                   [  2%]
+tests\e2e\test_pipeline_e2e.py ...F......F.                              [ 17%]
+tests\test_acronyms.py ..............                                    [ 34%]
+tests\test_api.py FFF                                                    [ 37%]
+tests\test_embedding_ab.py ........................................sssss [ 92%]
+s                                                                        [ 93%]
+tests\test_scraper_ai.py F                                               [ 95%]
+tests\test_scraper_basic.py F                                            [ 96%]
+tests\test_verify_fix.py ..F                                             [100%]
+
+================================== FAILURES ===================================
+______________________________ test_webhook_post ______________________________
+
+    async def test_webhook_post():
+        print(f"\U0001f680 Testando Webhook POST em {API_URL}...")
+    
+        # Payload simulando uma mensagem de texto "Ol�"
+        payload = {
+            "object": "page",
+            "entry": [
+                {
+                    "id": PAGE_ID,
+                    "time": 1705244400000,
+                    "messaging": [
+                        {
+                            "sender": {"id": "123456789"},  # Fake User ID
+                            "recipient": {"id": PAGE_ID},
+                            "timestamp": 1705244400000,
+                            "message": {
+                                "mid": "mid.123456789:abcde",
+                                "text": "Ol� {bot_name}, isso � um teste local!"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    
+        body = json.dumps(payload).encode('utf-8')
+>       signature = generate_signature(body)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^
+
+scripts\ops\test_webhook_local.py:62: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+payload_body = b'{"object": "page", "entry": [{"id": null, "time": 1705244400000, "messaging": [{"sender": {"id": "123456789"}, "reci...44400000, "message": {"mid": "mid.123456789:abcde", "text": "Ol\\u00e1 {bot_name}, isso \\u00e9 um teste local!"}}]}]}'
+
+    def generate_signature(payload_body):
+        """Gera a assinatura X-Hub-Signature-256"""
+        return "sha256=" + hmac.new(
+>           key=APP_SECRET.encode('utf-8'),
+                ^^^^^^^^^^^^^^^^^
+            msg=payload_body,
+            digestmod=hashlib.sha256
+        ).hexdigest()
+E       AttributeError: 'NoneType' object has no attribute 'encode'
+
+scripts\ops\test_webhook_local.py:31: AttributeError
+---------------------------- Captured stdout call -----------------------------
+\U0001f680 Testando Webhook POST em http://0.0.0.0:8000/webhook/meta...
+____________________________ test_smtp_connection _____________________________
+
+    def test_smtp_connection():
+        print("=== Teste de Conex�o SMTP (Gmail) ===")
+    
+        # Se n�o tiver configurado no settings, pede input
+        host = smtp_user and smtp_host or "smtp.gmail.com"
+        port = smtp_user and smtp_port or 587
+>       user = smtp_user or input("Seu Email Gmail: ")
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+scripts\test_smtp.py:26: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <_pytest.capture.DontReadFromInput object at 0x000001D9BF8B0B30>
+size = -1
+
+    def read(self, size: int = -1) -> str:
+>       raise OSError(
+            "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        )
+E       OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
+
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\capture.py:229: OSError
+---------------------------- Captured stdout call -----------------------------
+=== Teste de Conex�o SMTP (Gmail) ===
+Seu Email Gmail: 
+____________________ test_e2e_01_inbox_contact_rag_success ____________________
+
+orchestrator = <app.orchestrator.service.OrchestratorService object at 0x000001D9D8323800>
+
+    @pytest.mark.asyncio
+    async def test_e2e_01_inbox_contact_rag_success(orchestrator):
+        """
+        E2E-01: Inbox contato institucional (happy path RAG)
+    
+        Entrada:
+        - surface = INBOX (IG/FB DM)
+        - user_message = "Qual o telefone da prefeitura?"
+        - external_message_id = "m1"
+    
+        Sa�da esperada:
+        - decision = ANSWER_RAG
+        - response_type = SUCCESS
+        - Resposta cont�m dados vindos do doc
+    
+        Asserts de auditoria:
+        - classifier_result com {intent, confidence}
+        - policy_pre com {policy_decision: ALLOW}
+        - rag_retrieve com {base_id, query_id, k, docs_count>0}
+        - response_selected com {template: "rag_answer.txt"}
+        - message_sent com {surface: INBOX, channel: IG|FB}
+        """
+        request = ChatRequest(
+            session_id="test_session_1",
+            message="Qual o telefone da prefeitura?",
+            channel=Channel.INSTAGRAM_DM,
+            surface_type=SurfaceType.INBOX,
+            external_message_id="m1",
+        )
+    
+>       response, ctx = await orchestrator.process(request)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\e2e\test_pipeline_e2e.py:241: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\orchestrator\service.py:251: in process
+    rag_result = await self._execute_rag(ctx, expanded_query, policy_pre)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\orchestrator\service.py:334: in _execute_rag
+    retrieval = await self.retriever.retrieve(query)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:208: in retrieve
+    collection = self._ensure_collection()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:163: in _ensure_collection
+    collection_name = self._get_tenant_collection_name()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:156: in _get_tenant_collection_name
+    tid = tenant_context.require_tenant()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def require_tenant() -> str:
+        """
+        Retorna o tenant ativo ou levanta ValueError se n�o configurado.
+        Use em opera��es que nunca devem rodar sem tenant isolado.
+        """
+        tenant_id = _tenant_id_var.get()
+        if not tenant_id:
+>           raise ValueError(
+                "Nenhum tenant_id ativo no contexto. "
+                "O middleware de webhook deve ser executado antes de qualquer opera��o de dados."
+            )
+E           ValueError: Nenhum tenant_id ativo no contexto. O middleware de webhook deve ser executado antes de qualquer opera��o de dados.
+
+app\tenant_context.py:42: ValueError
+_________________________ test_required_audit_fields __________________________
+
+orchestrator = <app.orchestrator.service.OrchestratorService object at 0x000001D9D8439640>
+
+    @pytest.mark.asyncio
+    async def test_required_audit_fields(orchestrator):
+        """
+        Verifica campos obrigat�rios em qualquer request.
+        """
+        request = ChatRequest(
+            session_id="test_required",
+            message="Qual o hor�rio?",
+            channel=Channel.WEB_WIDGET,
+            surface_type=SurfaceType.INBOX,
+            external_message_id="req1",
+        )
+    
+>       response, ctx = await orchestrator.process(request)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\e2e\test_pipeline_e2e.py:698: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+app\orchestrator\service.py:251: in process
+    rag_result = await self._execute_rag(ctx, expanded_query, policy_pre)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\orchestrator\service.py:334: in _execute_rag
+    retrieval = await self.retriever.retrieve(query)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:208: in retrieve
+    collection = self._ensure_collection()
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:163: in _ensure_collection
+    collection_name = self._get_tenant_collection_name()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app\rag\retriever.py:156: in _get_tenant_collection_name
+    tid = tenant_context.require_tenant()
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def require_tenant() -> str:
+        """
+        Retorna o tenant ativo ou levanta ValueError se n�o configurado.
+        Use em opera��es que nunca devem rodar sem tenant isolado.
+        """
+        tenant_id = _tenant_id_var.get()
+        if not tenant_id:
+>           raise ValueError(
+                "Nenhum tenant_id ativo no contexto. "
+                "O middleware de webhook deve ser executado antes de qualquer opera��o de dados."
+            )
+E           ValueError: Nenhum tenant_id ativo no contexto. O middleware de webhook deve ser executado antes de qualquer opera��o de dados.
+
+app\tenant_context.py:42: ValueError
+___________________________ test_analytics_summary ____________________________
+
+    @pytest.mark.asyncio
+    async def test_analytics_summary():
+        async with httpx.AsyncClient(base_url=BASE_URL) as client:
+            response = await client.get("/analytics/summary")
+>           assert response.status_code == 200
+E           assert 404 == 200
+E            +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_api.py:18: AssertionError
+________________________________ test_api_chat ________________________________
+
+    @pytest.mark.asyncio
+    async def test_api_chat():
+        async with httpx.AsyncClient(base_url=BASE_URL) as client:
+            payload = {"session_id": "test_session", "message": "Qual o telefone da prefeitura?", "channel": "web", "surface_type": "inbox"}
+            response = await client.post("/api/chat", json=payload)
+>           assert response.status_code == 200
+E           assert 404 == 200
+E            +  where 404 = <Response [404 Not Found]>.status_code
+
+tests\test_api.py:30: AssertionError
+______________________________ test_webhook_meta ______________________________
+
+    @pytest.mark.asyncio
+    async def test_webhook_meta():
+        # Mock the WebhookHandler class
+>       with patch("app.api.webhook.WebhookHandler") as MockWebhookHandler:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_api.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py:1467: in __enter__
+    original, local = self.get_original()
+                      ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <unittest.mock._patch object at 0x000001D9D94CD1F0>
+
+    def get_original(self):
+        target = self.getter()
+        name = self.attribute
+    
+        original = DEFAULT
+        local = False
+    
+        try:
+            original = target.__dict__[name]
+        except (AttributeError, KeyError):
+            original = getattr(target, name, DEFAULT)
+        else:
+            local = True
+    
+        if name in _builtins and isinstance(target, ModuleType):
+            self.create = True
+    
+        if not self.create and original is DEFAULT:
+>           raise AttributeError(
+                "%s does not have the attribute %r" % (target, name)
+            )
+E           AttributeError: <module 'app.api.webhook' from 'D:\\Projetos\\Desenvolvendo\\chat-bot-pref\\app\\api\\webhook.py'> does not have the attribute 'WebhookHandler'
+
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\unittest\mock.py:1437: AttributeError
+_______________________________ test_scraper_ai _______________________________
+
+    async def test_scraper_ai():
+        print("\n" + "="*60)
+        print("\U0001f916 TESTE DE QA COM SCRAPING E IA (GEMINI)")
+        print("="*60)
+    
+        # URL padr�o baseada na not�cia mencionada pelo usu�rio
+        default_url = "https://santatereza.pr.gov.br/noticiasView/1883_2o-ENCONTRO-DE-MULHERES-DIA-INTERNACIONAL-DA-MULHER-.html"
+    
+>       url = input(f"Digite a URL da p�gina (ou aperte Enter para usar a padr�o):\n[{default_url}]:\n> ").strip()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_scraper_ai.py:35: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <_pytest.capture.DontReadFromInput object at 0x000001D9BF8B0B30>
+size = -1
+
+    def read(self, size: int = -1) -> str:
+>       raise OSError(
+            "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        )
+E       OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
+
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\capture.py:229: OSError
+---------------------------- Captured stdout call -----------------------------
+\n============================================================\n\U0001f916 TESTE DE QA COM SCRAPING E IA (GEMINI)\n============================================================\nDigite a URL da p\xe1gina (ou aperte Enter para usar a padr\xe3o):\n[https://santatereza.pr.gov.br/noticiasView/1883_2o-ENCONTRO-DE-MULHERES-DIA-INTERNACIONAL-DA-MULHER-.html]:\n> 
+________________________________ test_scraper _________________________________
+
+    async def test_scraper():
+        print("\n" + "="*60)
+        print("\U0001f916 TESTE INTERATIVO DE BUSCA NO SCRAPER")
+        print("="*60)
+    
+>       termo = input("Digite um termo para buscar na p�gina (ex: INTERNACIONAL): ").strip()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\test_scraper_basic.py:31: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <_pytest.capture.DontReadFromInput object at 0x000001D9BF8B0B30>
+size = -1
+
+    def read(self, size: int = -1) -> str:
+>       raise OSError(
+            "pytest: reading from stdin while output is captured!  Consider using `-s`."
+        )
+E       OSError: pytest: reading from stdin while output is captured!  Consider using `-s`.
+
+C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\capture.py:229: OSError
+---------------------------- Captured stdout call -----------------------------
+\n============================================================\n\U0001f916 TESTE INTERATIVO DE BUSCA NO SCRAPER\n============================================================\nDigite um termo para buscar na p\xe1gina (ex: INTERNACIONAL): 
+_____________ TestVerifyAllFix.test_03_valid_arguments_simulation _____________
+
+self = <tests.test_verify_fix.TestVerifyAllFix testMethod=test_03_valid_arguments_simulation>
+
+    def test_03_valid_arguments_simulation(self):
+        """
+        Simula execu��o com argumentos V�LIDOS.
+        Verifica se o script passa da fase de argumentos.
+        """
+        try:
+            import verify_all
+    
+            # Simula: python verify_all.py pilot-atendimento --url http://localhost:8000
+            test_args = ['verify_all.py', 'pilot-atendimento', '--url', 'http://localhost:8000']
+    
+            with patch.object(sys, 'argv', test_args):
+                # Mockamos a fun��o interna de l�gica (se soub�ssemos o nome) ou requests
+                # Aqui, vamos capturar qualquer Exception que N�O seja SystemExit.
+                # Se der erro de conex�o/arquivo, significa que o argparse funcionou!
+                try:
+                    with patch('builtins.print'): # Silencia output
+>                       verify_all.main()
+
+tests\test_verify_fix.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+    def main():
+        parser = argparse.ArgumentParser(
+            description="Run complete Antigravity Kit verification suite",
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog="""
+    Examples:
+      python scripts/verify_all.py . --url http://localhost:3000
+      python scripts/verify_all.py . --url https://staging.example.com --no-e2e
+            """
+        )
+        parser.add_argument("project", help="Project path to validate")
+        parser.add_argument("--url", required=True, help="URL for performance & E2E checks")
+        parser.add_argument("--no-e2e", action="store_true", help="Skip E2E tests")
+        parser.add_argument("--stop-on-fail", action="store_true", help="Stop on first failure")
+    
+        args = parser.parse_args()
+    
+        project_path = Path(args.project).resolve()
+    
+        if not project_path.exists():
+            print_error(f"Project path does not exist: {project_path}")
+>           sys.exit(1)
+E           SystemExit: 1
+
+.agent\scripts\verify_all.py:284: SystemExit
+
+During handling of the above exception, another exception occurred:
+
+self = <tests.test_verify_fix.TestVerifyAllFix testMethod=test_03_valid_arguments_simulation>
+
+    def test_03_valid_arguments_simulation(self):
+        """
+        Simula execu��o com argumentos V�LIDOS.
+        Verifica se o script passa da fase de argumentos.
+        """
+        try:
+            import verify_all
+    
+            # Simula: python verify_all.py pilot-atendimento --url http://localhost:8000
+            test_args = ['verify_all.py', 'pilot-atendimento', '--url', 'http://localhost:8000']
+    
+            with patch.object(sys, 'argv', test_args):
+                # Mockamos a fun��o interna de l�gica (se soub�ssemos o nome) ou requests
+                # Aqui, vamos capturar qualquer Exception que N�O seja SystemExit.
+                # Se der erro de conex�o/arquivo, significa que o argparse funcionou!
+                try:
+                    with patch('builtins.print'): # Silencia output
+                        verify_all.main()
+                except SystemExit as e:
+                    if e.code != 0:
+>                       self.fail(f"Argparse rejeitou argumentos v�lidos. Exit code: {e.code}")
+E                       AssertionError: Argparse rejeitou argumentos v�lidos. Exit code: 1
+
+tests\test_verify_fix.py:74: AssertionError
+============================== warnings summary ===============================
+app\settings.py:13
+  D:\Projetos\Desenvolvendo\chat-bot-pref\app\settings.py:13: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+app\models\meta_user_profile.py:16
+  D:\Projetos\Desenvolvendo\chat-bot-pref\app\models\meta_user_profile.py:16: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class MetaUserProfile(BaseModel):
+
+tests/e2e/test_pipeline_e2e.py: 47 warnings
+  C:\Users\santo\AppData\Local\Programs\Python\Python312\Lib\site-packages\pydantic\main.py:250: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    validated_self = self.__pydantic_validator__.validate_python(data, self_instance=self)
+
+tests/e2e/test_pipeline_e2e.py::test_crisis_suicide_static_response
+tests/e2e/test_pipeline_e2e.py::test_crisis_violence_static_response_public
+tests/e2e/test_pipeline_e2e.py::test_e2e_04_public_comment_compliment_ack
+tests/e2e/test_pipeline_e2e.py::test_e2e_04b_public_ack_no_repeat
+tests/e2e/test_pipeline_e2e.py::test_e2e_04b_public_ack_no_repeat
+tests/e2e/test_pipeline_e2e.py::test_e2e_05_inbox_health_clinical_limited
+tests/e2e/test_pipeline_e2e.py::test_e2e_06_public_health_clinical_redirect
+  D:\Projetos\Desenvolvendo\chat-bot-pref\app\orchestrator\service.py:1190: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    sent_at=datetime.utcnow(),
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED scripts/ops/test_webhook_local.py::test_webhook_post - AttributeError:...
+FAILED scripts/test_smtp.py::test_smtp_connection - OSError: pytest: reading ...
+FAILED tests/e2e/test_pipeline_e2e.py::test_e2e_01_inbox_contact_rag_success
+FAILED tests/e2e/test_pipeline_e2e.py::test_required_audit_fields - ValueErro...
+FAILED tests/test_api.py::test_analytics_summary - assert 404 == 200
+FAILED tests/test_api.py::test_api_chat - assert 404 == 200
+FAILED tests/test_api.py::test_webhook_meta - AttributeError: <module 'app.ap...
+FAILED tests/test_scraper_ai.py::test_scraper_ai - OSError: pytest: reading f...
+FAILED tests/test_scraper_basic.py::test_scraper - OSError: pytest: reading f...
+FAILED tests/test_verify_fix.py::TestVerifyAllFix::test_03_valid_arguments_simulation
+=========== 10 failed, 66 passed, 6 skipped, 56 warnings in 26.21s ============

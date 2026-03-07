@@ -165,12 +165,6 @@ def check_environment_variables() -> Tuple[bool, List[str]]:
     }
 
     # Variáveis opcionais novas (Instagram App Secret pode ser vazio se igual ao Facebook)
-    optional_meta_vars = {
-        "META_APP_SECRET_INSTAGRAM": "App Secret do Instagram (opcional se igual ao Facebook)",
-        "META_PAGE_ID": "ID da Página (legacy - será removido)",
-        "META_APP_SECRET": "App Secret (legacy - será removido)",
-        "META_ACCESS_TOKEN": "Token de acesso (legacy - será removido)",
-    }
 
     optional_vars = {
         "CHROMA_PERSIST_DIR": "Diretório de persistência do ChromaDB",
@@ -467,7 +461,7 @@ def check_meta_tokens() -> bool:
     results = []
 
     try:
-        import httpx
+        import httpx  # noqa: F401
 
         # Verificar Facebook
         if all([fb_token, fb_page_id, fb_secret]):

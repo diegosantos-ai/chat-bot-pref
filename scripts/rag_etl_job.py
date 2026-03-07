@@ -24,7 +24,6 @@ import asyncio
 import argparse
 import logging
 import sys
-import os
 from datetime import datetime
 from pathlib import Path
 
@@ -83,7 +82,7 @@ def run_ingest_for_tenant(tenant_id: str, base_path: str, force: bool) -> dict:
         dict com stats da ingestão.
     """
     from app.rag.ingest import get_chroma_client, ingest_document, load_manifest
-    from app.rag.embeddings import get_collection_name, resolve_embedding_model, get_embedding_function
+    from app.rag.embeddings import get_embedding_function
     from app.settings import settings
 
     collection_name = f"{tenant_id}_knowledge_base"

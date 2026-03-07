@@ -4,8 +4,8 @@
 **Arquiteto/PM:** Kiro
 
 ## Estado Atual
-- **Fase Atual:** ✅ PROJETO CONCLUÍDO — Todas as 4 Fases implementadas
-- **Último Marco Atingido:** Fase 4 completa. Logs com `tenant_id` automático (Grafana/Loki ready). ETL multi-tenant agendável. Demo tenant seed para GTM. `ALLOWED_HOSTS` configurável via env. Correção do import do webhook em `main.py`.
+- **Fase Atual:** 🚧 FASE 5 — Elevação Comercial (Demo / GTM)
+- **Último Marco Atingido:** Fase 4 completa. Criação do plano `gtm-elevation-plan.md` para as "Killer Features" de mercado.
 
 ## Resumo das Fases Entregues
 
@@ -15,6 +15,7 @@
 | **2** — Multi-Tenant DB | ✅ | Migration RLS, `tenant_context.py`, ChromaDB `{tenant_id}_knowledge_base` |
 | **3** — Camada Lógica | ✅ | Webhook router com HMAC-SHA256, `TenantResolver` (LRU+DB), `TenantConfig`, `get_tenant_prompt()` |
 | **4** — Pipeline/Ops | ✅ | `rag_etl_job.py` (cron multi-tenant), `setup_demo_tenant.py` (GTM), logs com `tenant_id` |
+| **5** — Comerc./GTM | 🚧 | Plano de Elevação `gtm-elevation-plan.md` gerado. Mocks de features matadoras. |
 
 ## Novos Arquivos Criados
 

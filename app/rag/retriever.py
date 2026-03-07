@@ -15,7 +15,7 @@ from typing import Optional
 
 import chromadb
 
-from app.rag.ingest import get_chroma_client, ingest_base
+from app.rag.ingest import get_chroma_client
 from app.rag.boosts import get_total_boost
 from app.rag.acronyms import extract_acronyms_from_query
 from app.rag.embeddings import (

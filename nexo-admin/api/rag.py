@@ -1,10 +1,7 @@
 """Admin API — RAG ETL, Document Upload & Job History."""
-import os
 import asyncio
-import subprocess
 from pathlib import Path
 from fastapi import APIRouter, HTTPException, UploadFile, File, Query
-from fastapi.responses import JSONResponse
 from api import get_conn
 
 router = APIRouter(prefix="/api/admin/rag", tags=["RAG"])

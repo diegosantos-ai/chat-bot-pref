@@ -18,7 +18,6 @@ from typing import Optional
 
 import asyncpg
 
-from app.settings import settings
 
 logger = logging.getLogger(__name__)
 

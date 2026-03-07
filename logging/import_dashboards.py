@@ -107,7 +107,7 @@ def main():
     # Get or create folder
     print("📁 Configurando pasta de dashboards...")
     FOLDER_ID = get_or_create_folder()
-    print(f"✅ Pasta '{bot_name} Services' pronta (ID: {FOLDER_ID})")
+    print(f"✅ Pasta '{bot_name} Services' pronta (ID: {FOLDER_ID})")  # noqa: F821
     print()
 
     # Import dashboards

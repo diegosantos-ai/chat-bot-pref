@@ -22,7 +22,6 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from uuid import uuid4
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -74,6 +73,10 @@ DEMO_DOCUMENTS = {
              "title": "Programas Sociais da Prefeitura", "tags": ["social", "beneficios"]},
             {"id": "alvara_funcionamento", "file": "alvara_funcionamento.md",
              "title": "Alvará de Funcionamento — Requisitos", "tags": ["alvara", "comercio"]},
+            {"id": "iluminacao_publica",   "file": "iluminacao_publica.md",
+             "title": "Troca de Lâmpadas e Iluminação Pública", "tags": ["iluminacao", "zeladoria"]},
+            {"id": "matricula_creche",    "file": "matricula_creche.md",
+             "title": "Fila de Espera e Vagas em Creches (CMEI)", "tags": ["creche", "educacao", "cmei"]},
         ],
     }, ensure_ascii=False, indent=2),
 
@@ -165,6 +168,46 @@ Acesse: **portal.novaesperanca.gov.br/iptu** ou ligue (19) 3456-7890
 - Online: portal.novaesperanca.gov.br/alvara
 - Telefone: (19) 3456-7894
 """,
+
+    "items/iluminacao_publica.md": """\
+## Troca de Lâmpadas e Manutenção de Iluminação Pública
+
+### Procedimento para Solicitação
+A prefeitura realiza a troca de lâmpadas queimadas em vias públicas através da Secretaria de Obras e Zeladoria Urbana.
+Para solicitar manutenção, certifique-se de ter as seguintes informações:
+1. Endereço completo (Rua, Número, Bairro)
+2. Ponto de referência
+3. Número de identificação do poste (numeração amarela na altura dos olhos)
+
+### Prazos e Condições
+- **Troca de lâmpada simples:** Até 48 horas úteis após a abertura do chamado.
+- **Braço do poste danificado:** Até 5 dias úteis (requer equipe especializada).
+- **Poste com risco de queda:** Atendimento EMERGENCIAL 24h (Ligue para a Defesa Civil no 199).
+
+Lembrando que a manutenção da iluminação DENTRO de condomínios fechados é de responsabilidade da administração do condomínio.
+""",
+
+    "items/matricula_creche.md": """\
+## Fila de Espera e Vagas em Creches (CMEI)
+
+O cadastramento para a fila de espera dos Centros Municipais de Educação Infantil (CMEIs) ocorre o ano todo via Central de Vagas.
+
+### Como Cadastrar a Criança na Fila
+1. Compareça à Secretaria da Educação (Rua das Palmeiras, 50 - Centro) portando:
+    - Certidão de Nascimento da criança
+    - CPF dos pais ou responsáveis legais
+    - Comprovante de residência atualizado (conta de água ou luz)
+    - Comprovante de trabalho da mãe (para critério de prioridade) e carteira de vacinação da criança.
+
+### Critérios de Prioridade (Lei Municipal 1234/2020)
+As vagas não são distribuídas apenas por ondem de chegada. Os seguintes critérios garantem maior pontuação na fila:
+- Mãe trabalhadora (comprovado via carteira de trabalho)
+- Família cadastrada e beneficiária do Bolsa Família
+- Crianças sob medida de proteção (encaminhadas pelo Conselho Tutelar)
+- Crianças com laudo médico de deficiência ou TEA.
+
+A lista contendo a posição na fila de espera pode ser consultada a qualquer momento no nosso portal educacao.novaesperanca.gov.br/fila-creche utilizando o protocolo gerado no momento do cadastro.
+""",
 }
 
 
@@ -174,7 +217,7 @@ Acesse: **portal.novaesperanca.gov.br/iptu** ou ligue (19) 3456-7890
 
 def create_demo_files(base_dir: Path, dry_run: bool = False) -> None:
     """Cria os arquivos da base de conhecimento demo localmente."""
-    items_dir = base_dir / "items"
+    base_dir / "items"
 
     for filename, content in DEMO_DOCUMENTS.items():
         file_path = base_dir / filename
@@ -190,7 +233,7 @@ def create_demo_files(base_dir: Path, dry_run: bool = False) -> None:
 # Banco de dados
 # ──────────────────────────────────────────────────────────────
 
-async def seed_database(pool: asyncpg.Pool, reset: bool = False, dry_run: bool = False) -> None:
+async def seed_database(pool: asyncpg.Pool, reset: bool = False, dry_run: bool = False) -> None:  # noqa: F821
     """Insere o tenant demo no PostgreSQL."""
     tenant_id = DEMO_TENANT["tenant_id"]
 
@@ -297,7 +340,7 @@ async def main(reset: bool = False, dry_run: bool = False) -> None:
     # 2. Banco de dados
     logger.info("\n[2/3] Semeando banco de dados...")
     if not dry_run:
-        pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL, min_size=1, max_size=3)
+        pool = await asyncpg.create_pool(dsn=settings.DATABASE_URL, min_size=1, max_size=3)  # noqa: F821
         try:
             await seed_database(pool, reset=reset, dry_run=dry_run)
         finally:

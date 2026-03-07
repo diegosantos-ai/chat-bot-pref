@@ -11,11 +11,9 @@ import logging
 import time
 from pathlib import Path
 from typing import Optional
-from uuid import uuid4
 
 import asyncpg
 from fastapi import APIRouter, BackgroundTasks, HTTPException, Query, UploadFile, File
-from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from app.settings import settings
@@ -165,7 +163,6 @@ async def trigger_etl(tenant_id: str, background_tasks: BackgroundTasks):
 
     async def _run():
         try:
-            import subprocess
             import sys
             proc = await asyncio.create_subprocess_exec(
                 sys.executable, "scripts/rag_etl_job.py", "--tenant", tenant_id,

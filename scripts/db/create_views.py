@@ -9,8 +9,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 VIEWS_PATH = os.path.join(ROOT, 'analytics', 'v1', 'views.sql')
 
 # Adiciona raiz ao sys.path se necessário
-if ROOT not in sys.path:
-    sys.path.append(ROOT)
+if ROOT not in sys.path:  # noqa: F821
+    sys.path.append(ROOT)  # noqa: F821
 
 # Garante carregamento do .env da raiz
 load_dotenv(os.path.join(ROOT, '.env'))

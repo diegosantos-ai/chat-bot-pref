@@ -8,9 +8,10 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 load_dotenv()
 
-from app.models.schemas import ChatRequest, SurfaceType, Channel
-from app.orchestrator.service import get_orchestrator
-from app.settings import settings
+from app.contracts.dto import ChatRequest  # noqa: E402
+from app.contracts.enums import SurfaceType, Channel  # noqa: E402
+from app.orchestrator.service import get_orchestrator  # noqa: E402
+from app.settings import settings  # noqa: E402
 
 async def main():
     print("=============================================")
@@ -40,7 +41,8 @@ async def main():
     # Aqui precisamos simular que RAG e Intent falharam ou passaram direto
     # Como rodar `process()` completo exige banco e chaves OpenAI/etc configurados para RAG
     # Nós vamos "Injetar" um contexto para testar APENAS o Call de Fallback
-    from app.orchestrator.models import RequestContext, Intent, FallbackReason
+    from app.contracts.dto import RequestContext
+    from app.contracts.enums import Intent, FallbackReason
     from uuid import uuid4
     
     ctx = RequestContext(
@@ -64,7 +66,7 @@ async def main():
         if response_tuple:
             chat_resp, out_ctx = response_tuple
             print("\n================ RESULTADO ================")
-            print(f"[SUCESSO] O Bot Respondeu usando Web Scraping!")
+            print("[SUCESSO] O Bot Respondeu usando Web Scraping!")
             print(f"Decisão: {out_ctx.final_decision}")
             print(f"Texto da Resposta:\n{chat_resp.message}")
             print("===========================================")

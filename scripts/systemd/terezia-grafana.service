@@ -1,5 +1,6 @@
+# Legacy reference only. Do not install this unit as active project runtime.
 [Unit]
-Description={bot_name} Grafana Service
+Description=Chat Pref Grafana Service (legacy reference)
 After=network.target docker.service
 Requires=docker.service
 
@@ -13,7 +14,7 @@ Restart=always
 RestartSec=10s
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=terezia-grafana
+SyslogIdentifier=chat-pref-grafana-legacy
 
 [Install]
 WantedBy=multi-user.target

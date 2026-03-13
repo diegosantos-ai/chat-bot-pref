@@ -1,5 +1,6 @@
+# Legacy reference only. Do not install this unit as active project runtime.
 [Unit]
-Description={bot_name} API Service
+Description=Chat Pref API Service (legacy reference)
 After=network.target postgresql.service docker.service
 Requires=postgresql.service docker.service
 
@@ -13,7 +14,7 @@ Restart=always
 RestartSec=5s
 StandardOutput=syslog
 StandardError=syslog
-SyslogIdentifier=terezia-api
+SyslogIdentifier=chat-pref-api-legacy
 
 [Install]
 WantedBy=multi-user.target

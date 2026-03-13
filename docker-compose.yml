@@ -1,23 +1,18 @@
-version: '3.8'
-
-# Nexo Basis Governador - Docker Compose para Produção
-# =======================================
-# Uso: docker-compose up -d --build
-# Rede: Conectado à infra_nexo-network para roteamento via Traefik
+# Chat Pref - Compose base para execucao local/servidor unico.
+# Esta stack nao depende de rede externa privada.
 
 services:
-  nexo-gov-api:
+  chat-pref-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nexo-gov-api
-    restart: always
+    container_name: chat-pref-api
+    restart: unless-stopped
     ports:
-      - "8101:8000"
+      - "8000:8000"
     volumes:
-      # Prompts e base de conhecimento (A base vetorial em si viverá no nexo-chromadb central)
       - ./prompts:/app/prompts:ro
-      - ./base:/app/base:ro
+      - ./data/knowledge_base:/app/data/knowledge_base:ro
     env_file:
       - .env
     environment:
@@ -37,9 +32,8 @@ services:
         max-size: "10m"
         max-file: "3"
     networks:
-      - infra-network
+      - chat-pref
 
 networks:
-  infra-network:
-    external: true
-    name: infra_nexo-network
+  chat-pref:
+    driver: bridge

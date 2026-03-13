@@ -1,7 +1,7 @@
 # =========================================
-# {bot_name} - Script de Deploy (PowerShell)
+# Chat Pref - Script de Operacao com Docker Compose
 # =========================================
-# Uso: .\scripts\deploy.ps1 [comando]
+# Uso: .\scripts\ops\deploy.ps1 [comando]
 # Comandos: start, stop, restart, logs, status, build
 
 param(
@@ -11,12 +11,34 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$ProjectDir = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
+$ProjectDir = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path))
 Set-Location $ProjectDir
+$ServiceName = if ($env:SERVICE_NAME) { $env:SERVICE_NAME } else { "chat-pref-api" }
 
 function Write-Info { param($Message) Write-Host "[INFO] $Message" -ForegroundColor Green }
 function Write-Warn { param($Message) Write-Host "[WARN] $Message" -ForegroundColor Yellow }
 function Write-Err { param($Message) Write-Host "[ERROR] $Message" -ForegroundColor Red }
+
+function Invoke-Compose {
+    param(
+        [Parameter(ValueFromRemainingArguments = $true)]
+        [string[]]$Arguments
+    )
+
+    docker compose version *> $null
+    if ($LASTEXITCODE -eq 0) {
+        & docker compose @Arguments
+        return
+    }
+
+    if (Get-Command docker-compose -ErrorAction SilentlyContinue) {
+        & docker-compose @Arguments
+        return
+    }
+
+    Write-Err "Docker Compose nao esta instalado."
+    exit 1
+}
 
 function Test-Requirements {
     # Verifica Docker
@@ -37,34 +59,34 @@ function Test-Requirements {
     Write-Info "Pre-requisitos OK"
 }
 
-function Start-{bot_name} {
-    Write-Info "Iniciando {bot_name}..."
-    docker-compose up -d --build
+function Start-ChatPref {
+    Write-Info "Iniciando Chat Pref..."
+    Invoke-Compose up -d --build
     Write-Info "Aguardando container ficar healthy..."
     Start-Sleep -Seconds 10
-    Get-{bot_name}Status
+    Get-ChatPrefStatus
 }
 
-function Stop-{bot_name} {
-    Write-Info "Parando {bot_name}..."
-    docker-compose down
+function Stop-ChatPref {
+    Write-Info "Parando Chat Pref..."
+    Invoke-Compose down
     Write-Info "Containers parados"
 }
 
-function Restart-{bot_name} {
-    Write-Info "Reiniciando {bot_name}..."
-    docker-compose restart
-    Get-{bot_name}Status
+function Restart-ChatPref {
+    Write-Info "Reiniciando Chat Pref..."
+    Invoke-Compose restart
+    Get-ChatPrefStatus
 }
 
-function Get-{bot_name}Logs {
+function Get-ChatPrefLogs {
     Write-Info "Mostrando logs (Ctrl+C para sair)..."
-    docker-compose logs -f terezia
+    Invoke-Compose logs -f $ServiceName
 }
 
-function Get-{bot_name}Status {
+function Get-ChatPrefStatus {
     Write-Info "Status dos containers:"
-    docker-compose ps
+    Invoke-Compose ps
     Write-Host ""
     Write-Info "Testando health check..."
     try {
@@ -77,24 +99,25 @@ function Get-{bot_name}Status {
     }
 }
 
-function Build-{bot_name} {
+function Build-ChatPref {
     Write-Info "Reconstruindo imagem Docker..."
-    docker-compose build --no-cache
+    Invoke-Compose build --no-cache
     Write-Info "Build concluido"
 }
 
-function Update-{bot_name} {
+function Update-ChatPref {
     Write-Info "Atualizando e reiniciando..."
-    git pull origin main
-    docker-compose up -d --build
-    Get-{bot_name}Status
+    $CurrentBranch = git branch --show-current
+    git pull --ff-only origin $CurrentBranch
+    Invoke-Compose up -d --build
+    Get-ChatPrefStatus
 }
 
 function Show-Help {
-    Write-Host "{bot_name} - Script de Deploy" -ForegroundColor Cyan
+    Write-Host "Chat Pref - Script de Operacao" -ForegroundColor Cyan
     Write-Host "==========================" -ForegroundColor Cyan
     Write-Host ""
-    Write-Host "Uso: .\scripts\deploy.ps1 [comando]"
+    Write-Host "Uso: .\scripts\ops\deploy.ps1 [comando]"
     Write-Host ""
     Write-Host "Comandos:"
     Write-Host "  start    - Inicia os containers (build + up)"
@@ -110,27 +133,27 @@ function Show-Help {
 switch ($Command) {
     "start" {
         Test-Requirements
-        Start-{bot_name}
+        Start-ChatPref
     }
     "stop" {
-        Stop-{bot_name}
+        Stop-ChatPref
     }
     "restart" {
-        Restart-{bot_name}
+        Restart-ChatPref
     }
     "logs" {
-        Get-{bot_name}Logs
+        Get-ChatPrefLogs
     }
     "status" {
-        Get-{bot_name}Status
+        Get-ChatPrefStatus
     }
     "build" {
         Test-Requirements
-        Build-{bot_name}
+        Build-ChatPref
     }
     "update" {
         Test-Requirements
-        Update-{bot_name}
+        Update-ChatPref
     }
     default {
         Show-Help

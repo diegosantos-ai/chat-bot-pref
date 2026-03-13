@@ -65,7 +65,19 @@ O tenant demonstrativo oficial desta fase e `prefeitura-vila-serena`. Para mater
 .venv/bin/python scripts/bootstrap_demo_tenant.py \
   --manifest tenants/prefeitura-vila-serena/tenant.json \
   --purge-documents \
-  --ingest
+  --ingest \
+  --phase-report fase8
+```
+
+Para validar a base documental ficticia com o smoke completo e relatorio gerencial da fase:
+
+```bash
+.venv/bin/python scripts/smoke_tests.py \
+  --env prod \
+  --tenant-id prefeitura-vila-serena \
+  --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
+  --phase-report fase8 \
+  --json-out artifacts/fase8-smoke-prod.json
 ```
 
 ### 1. Validar estado inicial sem base

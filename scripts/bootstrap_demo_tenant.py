@@ -33,20 +33,32 @@ def main() -> None:
         action="store_true",
         help="Executa a ingestao ao final da materializacao.",
     )
+    parser.add_argument(
+        "--phase-report",
+        choices=["fase7", "fase8"],
+        default="fase7",
+        help="Tipo de relatorio estrutural a anexar ao bootstrap do tenant.",
+    )
     args = parser.parse_args()
 
     service = DemoTenantService()
-    validation = service.validate_bundle(args.manifest)
-    managerial_report = service.build_managerial_report(args.manifest)
+    if args.phase_report == "fase8":
+        validation = service.validate_knowledge_base_bundle(args.manifest)
+        phase_report = validation
+    else:
+        validation = service.validate_bundle(args.manifest)
+        phase_report = service.build_managerial_report(args.manifest)
+
     if validation["status"] != "passed":
-        raise SystemExit(json.dumps(managerial_report, ensure_ascii=True, indent=2))
+        raise SystemExit(json.dumps(phase_report, ensure_ascii=True, indent=2))
 
     summary = service.bootstrap_bundle(
         manifest_path=args.manifest,
         target_base_dir=args.base_dir,
         purge_documents=args.purge_documents,
     )
-    summary["managerial_report"] = managerial_report
+    summary["phase_report"] = args.phase_report
+    summary["bundle_report"] = phase_report
 
     if args.ingest:
         rag_service = RagService(

@@ -91,6 +91,32 @@ class DemoTenantKnowledgeBase(BaseModel):
         return normalized
 
 
+class ControlledRetrievalCheck(BaseModel):
+    id: str
+    question: str
+    expected_title_contains: str
+    expected_terms: list[str]
+    chat_expected_terms: list[str] = Field(default_factory=list)
+    use_in_chat: bool = False
+
+    @field_validator("id", "question", "expected_title_contains", mode="before")
+    @classmethod
+    def normalize_text_fields(cls, value: Any, info) -> str:
+        return _normalize_text(value, info.field_name)
+
+    @field_validator("expected_terms", mode="before")
+    @classmethod
+    def normalize_expected_terms(cls, value: Any, info) -> list[str]:
+        return _normalize_list(value, info.field_name)
+
+    @field_validator("chat_expected_terms", mode="before")
+    @classmethod
+    def normalize_optional_terms(cls, value: Any) -> list[str]:
+        if value in (None, ""):
+            return []
+        return _normalize_list(value, "chat_expected_terms")
+
+
 class DemoTenantManifest(BaseModel):
     tenant_id: str
     client_name: str
@@ -138,6 +164,32 @@ class DemoTenantService:
     def documents_dir(self, manifest_path: str | Path) -> Path:
         manifest = self.load_manifest(manifest_path)
         return self.bundle_root(manifest_path) / manifest.knowledge_base.documents_dir
+
+    def load_knowledge_manifest(self, manifest_path: str | Path) -> dict[str, Any]:
+        knowledge_manifest_path = self.knowledge_manifest_path(manifest_path)
+        if not knowledge_manifest_path.exists():
+            return {}
+        return json.loads(knowledge_manifest_path.read_text(encoding="utf-8"))
+
+    def retrieval_checks_path(self, manifest_path: str | Path) -> Path | None:
+        knowledge_manifest = self.load_knowledge_manifest(manifest_path)
+        raw_path = str(knowledge_manifest.get("retrieval_checks_file", "")).strip()
+        if not raw_path:
+            return None
+        relative_path = Path(raw_path)
+        if relative_path.is_absolute():
+            raise ValueError("retrieval_checks_file deve ser relativo ao tenant bundle")
+        return self.bundle_root(manifest_path) / relative_path
+
+    def load_retrieval_checks(self, manifest_path: str | Path) -> list[ControlledRetrievalCheck]:
+        checks_path = self.retrieval_checks_path(manifest_path)
+        if checks_path is None or not checks_path.exists():
+            return []
+        payload = json.loads(checks_path.read_text(encoding="utf-8"))
+        return [
+            ControlledRetrievalCheck.model_validate(item)
+            for item in payload.get("checks", [])
+        ]
 
     def list_source_documents(self, manifest_path: str | Path) -> list[RagDocumentRecord]:
         documents: list[RagDocumentRecord] = []
@@ -264,6 +316,145 @@ class DemoTenantService:
                 "Tenant demonstrativo coerente e pronto para ingest."
                 if validation["status"] == "passed"
                 else "Tenant demonstrativo ainda possui pendencias estruturais."
+            ),
+            "criteria": criteria,
+        }
+
+    def validate_knowledge_base_bundle(self, manifest_path: str | Path) -> dict[str, Any]:
+        manifest = self.load_manifest(manifest_path)
+        knowledge_manifest = self.load_knowledge_manifest(manifest_path)
+        documents = self.list_source_documents(manifest_path)
+        retrieval_checks = self.load_retrieval_checks(manifest_path)
+
+        listed_documents = sorted(
+            Path(str(item).strip()).name
+            for item in knowledge_manifest.get("documents", [])
+            if str(item).strip()
+        )
+        document_names = sorted(
+            path.name for path in self.documents_dir(manifest_path).glob("*.json")
+        )
+
+        groups = knowledge_manifest.get("document_groups", [])
+        group_names = {
+            str(group.get("group", "")).strip()
+            for group in groups
+            if str(group.get("group", "")).strip()
+        }
+        grouped_documents = sorted(
+            {
+                Path(str(document).strip()).name
+                for group in groups
+                for document in group.get("documents", [])
+                if str(document).strip()
+            }
+        )
+        group_sizes = {
+            str(group.get("group", "")).strip(): len(
+                [document for document in group.get("documents", []) if str(document).strip()]
+            )
+            for group in groups
+            if str(group.get("group", "")).strip()
+        }
+
+        required_group_names = {"institucional", "atendimento", "servicos", "faq"}
+        covers_required_groups = required_group_names.issubset(group_names)
+        balanced_group_sizes = (
+            group_sizes.get("institucional", 0) >= 3
+            and group_sizes.get("atendimento", 0) >= 2
+            and group_sizes.get("servicos", 0) >= 4
+            and group_sizes.get("faq", 0) >= 1
+        )
+
+        criteria = [
+            AcceptanceCriterion(
+                criterion="documentos ficticios criados e organizados",
+                ok=(
+                    len(documents) >= 8
+                    and listed_documents == document_names
+                    and grouped_documents == document_names
+                ),
+                evidence=(
+                    f"documents={len(documents)} | "
+                    f"listed_documents={len(listed_documents)} | "
+                    f"grouped_documents={len(grouped_documents)}"
+                ),
+            ),
+            AcceptanceCriterion(
+                criterion="base cobre os principais temas da prefeitura ficticia",
+                ok=(
+                    covers_required_groups
+                    and balanced_group_sizes
+                    and len(retrieval_checks) >= 6
+                ),
+                evidence=(
+                    f"groups={sorted(group_names)} | "
+                    f"group_sizes={group_sizes} | "
+                    f"retrieval_checks={len(retrieval_checks)}"
+                ),
+            ),
+        ]
+
+        retrieval_checks_path = self.retrieval_checks_path(manifest_path)
+
+        return {
+            "tenant_id": manifest.tenant_id,
+            "client_name": manifest.client_name,
+            "status": "passed" if all(item.ok for item in criteria) else "failed",
+            "documents_count": len(documents),
+            "groups": sorted(group_names),
+            "retrieval_checks_count": len(retrieval_checks),
+            "retrieval_checks_path": str(retrieval_checks_path) if retrieval_checks_path else None,
+            "criteria": [asdict(item) for item in criteria],
+        }
+
+    def build_phase8_managerial_report(
+        self,
+        manifest_path: str | Path,
+        runtime_validation: dict[str, Any],
+    ) -> dict[str, Any]:
+        bundle_validation = self.validate_knowledge_base_bundle(manifest_path)
+        criteria = list(bundle_validation["criteria"])
+
+        ingest_validation = runtime_validation.get("ingest_validation", {})
+        retrieval_validation = runtime_validation.get("retrieval_validation", {})
+        empty_state_validation = runtime_validation.get("empty_state_validation", {})
+
+        criteria.extend(
+            [
+                {
+                    "criterion": "ingest executada sem acoplamento legado",
+                    "ok": bool(ingest_validation.get("ok")),
+                    "evidence": str(ingest_validation.get("evidence", "")),
+                },
+                {
+                    "criterion": "retrieval retorna contexto util para perguntas controladas",
+                    "ok": bool(retrieval_validation.get("ok")),
+                    "evidence": str(retrieval_validation.get("evidence", "")),
+                },
+                {
+                    "criterion": "ausencia de base e tratada de forma controlada antes da ingest",
+                    "ok": bool(empty_state_validation.get("ok")),
+                    "evidence": str(empty_state_validation.get("evidence", "")),
+                },
+            ]
+        )
+
+        passed = sum(1 for item in criteria if item["ok"])
+        total = len(criteria)
+
+        return {
+            "phase": "Fase 8 - Construcao da Base Documental Ficticia e Ingest Limpa",
+            "tenant_id": bundle_validation["tenant_id"],
+            "client_name": bundle_validation["client_name"],
+            "status": "passed" if passed == total else "failed",
+            "criteria_total": total,
+            "criteria_passed": passed,
+            "criteria_failed": total - passed,
+            "executive_summary": (
+                "Base documental ficticia pronta e retrieval controlado validado."
+                if passed == total
+                else "Base documental ficticia ainda possui pendencias de estrutura ou retrieval."
             ),
             "criteria": criteria,
         }

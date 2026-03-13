@@ -1,0 +1,16 @@
+{
+  "id": "servico-ubs-vacinacao",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Atendimento da UBS Jardim Sereno e Sala de Vacinacao",
+  "content": "A UBS Jardim Sereno realiza atendimento clinico geral de segunda a sexta, das 7h as 17h. A sala de vacinacao funciona das 8h as 16h, com pausa operacional curta entre 12h e 13h para organizacao interna.\n\nPara vacinacao, a orientacao e levar documento com foto, cartao do SUS e caderneta de vacinacao quando houver. Campanhas especificas podem ampliar horarios ou exigir publico prioritario definido pela Secretaria Municipal de Saude.",
+  "keywords": [
+    "saude",
+    "ubs",
+    "vacinacao",
+    "horario"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

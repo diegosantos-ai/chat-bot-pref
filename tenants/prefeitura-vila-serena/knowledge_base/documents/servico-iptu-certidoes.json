@@ -1,0 +1,16 @@
+{
+  "id": "servico-iptu-certidoes",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "IPTU e Certidoes Imobiliarias",
+  "content": "A segunda via do IPTU pode ser emitida no portal oficial da Prefeitura Municipal de Vila Serena ou solicitada presencialmente no Setor de Tributacao, que atende de segunda a sexta, das 8h as 16h30. O portal tambem informa vencimentos e orientacoes gerais sobre pagamento.\n\nPara atendimento presencial sobre IPTU e certidoes imobiliarias, e recomendado levar CPF ou CNPJ do contribuinte e numero do cadastro imobiliario. Certidoes dependentes de verificacao cadastral podem exigir prazo adicional de emissao informado pelo Setor de Tributacao.",
+  "keywords": [
+    "iptu",
+    "tributacao",
+    "certidao",
+    "imovel"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

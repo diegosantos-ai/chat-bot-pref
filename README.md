@@ -264,7 +264,7 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
-**Fase ativa na branch:** Fase 6 — Validação estrutural da base refatorada.
+**Fase ativa na branch:** Fase 7 — Construção do tenant demonstrativo fictício.
 **Status da fase na branch:** concluída e validada localmente.
 
 ### Já existe
@@ -275,13 +275,14 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * auditoria e métricas
 * documentação técnica relevante
 * base de observabilidade e suporte operacional
+* tenant fictício demonstrativo versionado
 
 ### Em andamento
 
 * saneamento do legado mono-tenant
 * consolidação do contrato de `tenant_id`
 * reset da base RAG
-* tenant fictício demonstrativo
+* base documental fictícia expandida para o tenant demonstrativo
 * canal real de demonstração via Telegram
 
 ### Próxima direção

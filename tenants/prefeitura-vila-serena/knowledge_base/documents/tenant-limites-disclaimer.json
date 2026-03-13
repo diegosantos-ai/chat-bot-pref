@@ -1,0 +1,16 @@
+{
+  "id": "tenant-limites-disclaimer",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Limites Operacionais e Disclaimer do Atende Vila Serena",
+  "content": "O Atende Vila Serena fornece apenas informacoes gerais e nao substitui atendimento humano, protocolo oficial ou avaliacao tecnica da Prefeitura Municipal de Vila Serena. Sempre que a demanda depender de analise individual, documentos oficiais ou decisao administrativa, o usuario deve ser direcionado aos canais formais.\n\nO assistente nao emite protocolo, nao agenda atendimento, nao acessa processos pessoais e nao confirma resultados administrativos. Em casos sensiveis, urgentes ou com dados pessoais, a orientacao correta e procurar diretamente os canais institucionais da prefeitura.",
+  "keywords": [
+    "limites",
+    "disclaimer",
+    "protocolo",
+    "atendimento"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "DISCLAIMER"
+  ]
+}

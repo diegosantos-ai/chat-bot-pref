@@ -12,6 +12,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY app ./app
 COPY scripts ./scripts
+COPY tenants ./tenants
 COPY .env.example ./.env.example
 
 RUN mkdir -p /app/data/runtime /app/data/knowledge_base /app/data/chroma

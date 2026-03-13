@@ -10,11 +10,21 @@ Leia nesta ordem:
 4. `docs/arquitetura.md`
 5. `docs/planejamento_fases.md`
 
+Se a task tocar as Fases 9 a 12, leia tambem:
+
+6. `docs/guardrail_rastreavel.md`
+7. `docs/genai_com_metodo.md`
+
+Se a task tocar as Fases 10 a 12, consulte tambem:
+
+8. `docs/matriz_cenarios_validacao.md`
+9. `docs/rubrica_qualidade_resposta.md`
+
 Use `.github/agents/`, `.ai/skills/` e `.ai/workflows/` como camada ativa de governança.
 
 ## Estado atual do projeto
 
-O runtime ativo atual é uma base mínima reconstruída.
+O runtime ativo atual é uma base mínima reconstruída, mas já validada além do chat direto.
 
 Escopo implementado:
 
@@ -22,21 +32,33 @@ Escopo implementado:
 - `GET /`
 - `GET /health`
 - `POST /api/chat`
+- `POST /api/webhook`
+- `GET /api/rag/status`
+- `POST /api/rag/documents`
+- `POST /api/rag/ingest`
+- `POST /api/rag/query`
+- `POST /api/rag/reset`
 - `tenant_id` explícito no chat direto
 - contexto de tenant por request
 - persistência local por tenant
 - auditoria mínima por tenant
+- RAG tenant-aware com ingest limpa
+- tenant demonstrativo e base documental fictícia
 - Docker funcional
-- testes mínimos
+- smoke tests e retrieval checks
 
 Não assuma como ativos no runtime atual:
 
-- webhook
-- RAG
+- canal Telegram ponta a ponta
+- composição generativa ativa com provedor LLM
+- `policy_pre` e `policy_post`
+- `PolicyDecision` e `AuditEvent` versionado
+- logs estruturados
+- `/metrics`
+- traces com OpenTelemetry
 - painel/admin no caminho crítico
-- integrações externas
-- banco relacional
-- observabilidade completa
+- banco relacional como dependência operacional
+- CI e deploy em nuvem como parte do runtime da branch
 
 ## Guardrails de alteração
 
@@ -44,8 +66,10 @@ Não assuma como ativos no runtime atual:
 - não trate arquitetura futura como se já estivesse implementada
 - não reintroduza arquivos, termos ou estruturas históricas removidas
 - `tenant_id` é contrato explícito, não detalhe opcional
+- preserve o contrato mínimo de `request_id` nos fluxos que já o expõem
 - não versione `.env` real nem segredos
-- se a alteração impactar arquitetura, tenant, Docker ou operação, atualize a documentação correspondente
+- se a alteração impactar arquitetura, tenant, RAG, guardrails, Docker ou operação, atualize a documentação correspondente
+- nas Fases 9 a 12, siga `docs/guardrail_rastreavel.md` e `docs/genai_com_metodo.md` como referência de contrato
 
 ## Áreas ativas principais
 
@@ -56,13 +80,17 @@ Não assuma como ativos no runtime atual:
 - `app/services/`
 - `app/storage/`
 - `app/tenant_context.py`
+- `app/tenant_resolver.py`
+- `scripts/`
+- `tenants/`
+- `docs/`
 - `tests/`
 - `docker-compose.yml`
 - `docker-compose.local.yml`
 
 ## Áreas fora do caminho crítico atual
 
-Diretórios como `admin-api/`, `admin-panel/`, `db/`, `panel/`, `prompts/`, `data/knowledge_base/` e afins não devem ser assumidos como parte do runtime mínimo validado sem confirmação explícita da task.
+Diretórios como `admin-api/`, `admin-panel/`, `db/`, `panel/`, `prompts/`, `logging/`, `dashboards/`, `grafana/` e afins não devem ser assumidos como parte do runtime mínimo validado sem confirmação explícita da task.
 
 ## Validação mínima recomendada
 
@@ -75,12 +103,16 @@ Use apenas validações coerentes com a task. Exemplos:
 - `curl http://localhost:8000/`
 - `curl http://localhost:8000/health`
 - `curl -X POST http://localhost:8000/api/chat -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
+- `curl -X POST http://localhost:8000/api/webhook -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
+- `curl "http://localhost:8000/api/rag/status?tenant_id=prefeitura-demo"`
+- `.venv/bin/python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase8`
 
 ## Forma de trabalho
 
 - explique o bloco antes de mudanças maiores
 - faça o menor corte que produza valor real
 - valide imediatamente depois
+- diferencie explicitamente o que ja existe no runtime, o que e contrato planejado e o que e apenas stack-alvo
 - feche cada tarefa informando:
   - arquivos alterados
   - validação executada

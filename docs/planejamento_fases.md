@@ -38,10 +38,10 @@ seguir para a próxima fase.
 - [x] Fase 4 — Reset da Base RAG e Reingestão Limpa
 - [x] Fase 5 — Containerização e Ambiente Local Reproduzível
 - [x] Fase 6 — Validação Estrutural da Base Refatorada
-- [ ] Fase 7 — Construção do Tenant Demonstrativo Fictício
-- [ ] Fase 8 — Construção da Base Documental Fictícia e Ingest Limpa
+- [x] Fase 7 — Construção do Tenant Demonstrativo Fictício
+- [x] Fase 8 — Construção da Base Documental Fictícia e Ingest Limpa
 - [ ] Fase 9 — Operacionalização do Chat via Telegram
-- [ ] Fase 10 — Validação Funcional, Guardrails e Evidências
+- [ ] Fase 10 — Composição Generativa, Guardrails e Evidências
 - [ ] Fase 11 — Observabilidade Aplicada e Fechamento Técnico do Case
 - [ ] Fase 12 — Automação de Qualidade com GitHub Actions
 - [ ] Fase 13 — Infraestrutura como Código e Deploy em AWS
@@ -348,7 +348,8 @@ Chat operacional no Telegram, integrado ao backend da plataforma, com fluxo func
 - integração backend ↔ Telegram implementada
 - tenant demonstrativo acessível via Telegram
 - mensagens simples respondidas corretamente
-- logs e auditoria registram as interações
+- logs e auditoria registram as interações com correlação mínima por `request_id`, `tenant_id`, `channel`, `chat_id`, `message_id` e `update_id`
+- comportamento do Telegram consistente com o fluxo principal de `POST /api/chat`
 
 ### Riscos
 - acoplamento excessivo do canal à lógica principal
@@ -371,49 +372,51 @@ O Telegram deve ser tratado como canal demonstrativo operacional do núcleo da p
 - `CPP-F9-T3 — Implementar entrada de mensagens do Telegram`
 - `CPP-F9-T4 — Integrar Telegram ao fluxo principal de chat`
 - `CPP-F9-T5 — Garantir associação do Telegram ao tenant demonstrativo`
-- `CPP-F9-T6 — Registrar auditoria das conversas via Telegram`
-- `CPP-F9-T7 — Validar fluxo ponta a ponta com perguntas reais`
+- `CPP-F9-T6 — Registrar auditoria correlacionada das conversas via Telegram`
+- `CPP-F9-T7 — Validar fluxo ponta a ponta com perguntas reais e consistência com /api/chat`
 - `CPP-F9-T8 — Corrigir inconsistências do canal demonstrativo`
 
 ---
 
-## Card Macro — Fase 10 — Validação Funcional, Guardrails e Evidências
+## Card Macro — Fase 10 — Composição Generativa, Guardrails e Evidências
 
 ### Objetivo da fase
-Executar cenários controlados para comprovar funcionamento, segurança, fallback, guardrails e comportamento do sistema com evidências rastreáveis.
+Introduzir a camada generativa mínima do projeto, com composição controlada sobre o contexto recuperado, guardrails executáveis e evidências rastreáveis.
 
 ### Resultado esperado
-Conjunto de testes demonstrativos e evidências concretas de que o assistente responde corretamente, limita escopo quando necessário e registra seu comportamento.
+Assistente operando com composição generativa controlada, prompts e políticas versionados, decisões auditáveis e cenários validados com rastreabilidade por request.
 
 ### Critério de aceite
-- cenários normais validados
-- cenários fora de escopo validados
-- cenários de guardrail validados
-- cenários de fallback validados
-- evidências registradas em logs, prints ou tabelas
+- adaptador de provedor LLM implementado e isolado do restante da aplicação
+- composição de resposta limitada ao contexto recuperado e ao escopo institucional
+- prompts e políticas versionados
+- `policy_pre` e `policy_post` executados com `reason_codes`
+- cenários normais, fora de escopo, baixa confiança e risco validados
+- evidências registradas com correlação mínima por `request_id`
 - comportamento alinhado ao escopo institucional do tenant fictício
 
 ### Riscos
-- testar poucos cenários e gerar evidência fraca
-- focar só em sucesso e ignorar falhas controladas
-- falta de consistência entre resposta, logs e auditoria
+- acoplar o provedor LLM diretamente ao fluxo principal
+- introduzir composição generativa sem limite claro de contexto e escopo
+- validar cenários sem versionar prompt, policy e evidência
+- falta de consistência entre resposta, guardrail e auditoria
 
 ### Dependências
 - fase 9 concluída
 
 ### Observações
-Esta fase transforma o projeto em case demonstrável e fecha o ciclo funcional do chat.
+Esta fase marca a entrada da camada generativa mínima do case. Ate aqui, o projeto continua sendo retrieval-first; a partir daqui, passa a demonstrar GenAI controlada.
 
 #### Tasks — Fase 10
 
-- `CPP-F10-T1 — Definir matriz de cenários de validação`
-- `CPP-F10-T2 — Validar perguntas institucionais normais`
-- `CPP-F10-T3 — Validar perguntas fora de escopo`
-- `CPP-F10-T4 — Validar guardrails clínicos e de crise`
-- `CPP-F10-T5 — Validar fallback por ausência ou baixa confiança`
-- `CPP-F10-T6 — Registrar evidências visuais e técnicas`
-- `CPP-F10-T7 — Consolidar tabela de resultados da demonstração`
-- `CPP-F10-T8 — Revisar falhas e ajustar comportamento do sistema`
+- `CPP-F10-T1 — Definir contrato da composição generativa e do adaptador LLM`
+- `CPP-F10-T2 — Versionar prompt base, prompt de fallback e política textual`
+- `CPP-F10-T3 — Implementar composição de resposta sobre contexto recuperado`
+- `CPP-F10-T4 — Implementar PolicyDecision padronizado`
+- `CPP-F10-T5 — Implementar AuditEvent versionado e persistência rastreável`
+- `CPP-F10-T6 — Definir matriz de cenários de validação e rubrica de qualidade`
+- `CPP-F10-T7 — Validar cenários normais, fora de escopo, baixa confiança e risco`
+- `CPP-F10-T8 — Consolidar evidências e tabela de resultados por request_id`
 
 ---
 
@@ -426,9 +429,10 @@ Consolidar uma visão operacional mínima do sistema em funcionamento, com obser
 Projeto demonstrável com evidências de operação, logs, métricas, fluxo rastreável e narrativa técnica pronta para portfólio, currículo e entrevista.
 
 ### Critério de aceite
-- logs estruturados acessíveis
-- métricas básicas expostas e verificáveis
-- trilha mínima de processamento observável
+- logs estruturados acessíveis e correlacionados ao audit trail
+- métricas básicas expostas e verificáveis em `/metrics`
+- trilha mínima de processamento observável `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
+- auditoria, logs e traces usando os mesmos IDs de correlação
 - fluxo do tenant demonstrativo documentado
 - resumo técnico do case consolidado
 - material suficiente para demonstração profissional
@@ -446,10 +450,10 @@ A observabilidade desta fase deve ser suficiente para demonstrar maturidade oper
 
 #### Tasks — Fase 11
 
-- `CPP-F11-T1 — Validar logs estruturados do fluxo de atendimento`
-- `CPP-F11-T2 — Validar métricas básicas e endpoint /metrics`
-- `CPP-F11-T3 — Mapear trilha request → classificação → retrieval → resposta`
-- `CPP-F11-T4 — Revisar auditoria do tenant demonstrativo`
+- `CPP-F11-T1 — Validar logs estruturados correlacionados do fluxo de atendimento`
+- `CPP-F11-T2 — Validar métricas básicas de retrieval, fallback, bloqueio e latência de composição`
+- `CPP-F11-T3 — Instrumentar OpenTelemetry na trilha request → policy_pre → retrieval → compose → policy_post → resposta`
+- `CPP-F11-T4 — Revisar correlação entre auditoria, logs, métricas e traces do tenant demonstrativo`
 - `CPP-F11-T5 — Consolidar resumo técnico do case`
 - `CPP-F11-T6 — Organizar evidências para portfólio e entrevista`
 - `CPP-F11-T7 — Revisar aderência do case aos requisitos da vaga`
@@ -470,6 +474,9 @@ Pipeline de CI funcional executando checks técnicos relevantes sobre o projeto.
 - lint, testes e validações mínimas executados automaticamente
 - build Docker validado no pipeline
 - varredura anti-resíduos históricos automatizada
+- schema de auditoria e campos obrigatórios validados automaticamente
+- matriz de cenários controlados executada automaticamente
+- regressões de comportamento e rastreabilidade bloqueiam o pipeline
 - falhas relevantes bloqueiam o pipeline
 
 ### Riscos
@@ -490,8 +497,10 @@ Esta fase deve focar em CI. CD só entra quando houver alvo de deploy estável.
 - `CPP-F12-T2 — Criar workflow de lint e testes`
 - `CPP-F12-T3 — Adicionar validação de build Docker`
 - `CPP-F12-T4 — Automatizar varredura de termos proibidos`
-- `CPP-F12-T5 — Revisar secrets e variáveis do GitHub Actions`
-- `CPP-F12-T6 — Validar execução da pipeline em branch de teste`
+- `CPP-F12-T5 — Automatizar validação do schema de auditoria e campos obrigatórios`
+- `CPP-F12-T6 — Adicionar regressão de request_id, tenant_id, reason_codes e integridade do audit trail`
+- `CPP-F12-T7 — Automatizar matriz de cenários controlados e rubrica de qualidade`
+- `CPP-F12-T8 — Revisar secrets, variáveis e gatilhos de bloqueio do GitHub Actions`
 
 ---
 
@@ -509,12 +518,15 @@ Projeto preparado para rodar em infraestrutura provisionada por Terraform, com d
 - aplicação executando em EC2 ou equivalente escolhido
 - deploy reproduzível e documentado
 - acesso controlado e validação do serviço em nuvem
+- contratos de `request_id`, `tenant_id` e observabilidade mínima preservados no deploy
+- validação remota de `/health`, `/metrics` e smoke mínimo do tenant demonstrativo
 
 ### Riscos
 - complexidade excessiva de infraestrutura para o estágio do case
 - custo desnecessário
 - atrasar fechamento do projeto com decisões cloud exageradas
 - criar ambiente nuvem sem refletir o runtime local validado
+- perder contratos do método entre ambiente local e ambiente em nuvem
 
 ### Dependências
 - fases 5, 11 e 12 concluídas ou estabilizadas
@@ -530,10 +542,10 @@ O alvo recomendado é infraestrutura mínima, simples e explicável. O objetivo 
 - `CPP-F13-T2 — Estruturar projeto Terraform do ambiente`
 - `CPP-F13-T3 — Provisionar rede e segurança mínimas`
 - `CPP-F13-T4 — Provisionar instância de execução da aplicação`
-- `CPP-F13-T5 — Preparar estratégia de deploy com Docker`
+- `CPP-F13-T5 — Preparar estratégia de deploy com Docker e secrets do LLM/Telegram`
 - `CPP-F13-T6 — Executar primeiro deploy em ambiente AWS`
-- `CPP-F13-T7 — Validar acesso e funcionamento da aplicação em nuvem`
-- `CPP-F13-T8 — Documentar operação mínima do ambiente provisionado`
+- `CPP-F13-T7 — Validar /health, /metrics e smoke mínimo do tenant demonstrativo em nuvem`
+- `CPP-F13-T8 — Documentar operação mínima, envs e secrets do ambiente provisionado`
 
 ---
 
@@ -551,6 +563,7 @@ Projeto coerente, retomável, explicável e pronto para apresentação profissio
 - documentação principal coerente com CI, Docker, tenant demo e AWS
 - decisões técnicas relevantes registradas
 - narrativa do projeto alinhada ao que efetivamente funciona
+- checklist final `claim -> evidência -> artefato` consolidado
 
 ### Riscos
 - documentação prometer mais do que o projeto entrega
@@ -571,6 +584,7 @@ Esta é a fase de acabamento técnico e narrativo. Ela não substitui validaçã
 - `CPP-F14-T4 — Revisar README com base no sistema real`
 - `CPP-F14-T5 — Atualizar documentação crítica de operação`
 - `CPP-F14-T6 — Validar coerência entre docs, runtime, CI e AWS`
+- `CPP-F14-T7 — Consolidar checklist final de GenAI com método`
 
 ---
 

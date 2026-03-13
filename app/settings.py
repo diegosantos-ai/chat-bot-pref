@@ -13,8 +13,10 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     DATA_DIR: str = "data/runtime"
+    KNOWLEDGE_BASE_DIR: str = "data/knowledge_base"
     CHROMA_DIR: str = "data/chroma"
-    CHROMA_COLLECTION_PREFIX: str = "chat_pref"
+    CHROMA_COLLECTION_PREFIX: str = "chat_pref_docs"
+    CHROMA_LEGACY_COLLECTION_PREFIXES: list[str] = Field(default_factory=lambda: ["chat_pref"])
     WEBHOOK_PAGE_TENANT_MAP: dict[str, str] = Field(default_factory=dict)
     CORS_ORIGINS: list[str] = Field(
         default_factory=lambda: [
@@ -87,7 +89,12 @@ class Settings(BaseSettings):
                 pairs[normalized_key] = normalized_item
         return pairs
 
-    @field_validator("CORS_ORIGINS", "ALLOWED_HOSTS", mode="before")
+    @field_validator(
+        "CORS_ORIGINS",
+        "ALLOWED_HOSTS",
+        "CHROMA_LEGACY_COLLECTION_PREFIXES",
+        mode="before",
+    )
     @classmethod
     def parse_string_list(cls, value: Any) -> list[str]:
         if isinstance(value, list):

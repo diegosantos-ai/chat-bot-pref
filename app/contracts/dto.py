@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from typing import Any
 from typing import Optional
 from uuid import uuid4
 
@@ -12,6 +13,28 @@ def _normalize_optional_identifier(value: Optional[str]) -> Optional[str]:
     if not normalized:
         return None
     return normalized
+
+
+def _normalize_required_text(value: Any, field_name: str) -> str:
+    normalized = str(value).strip()
+    if not normalized:
+        raise ValueError(f"{field_name} obrigatória")
+    return normalized
+
+
+def _normalize_string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        items = value
+    else:
+        items = str(value).split(",")
+    normalized_items: list[str] = []
+    for item in items:
+        normalized = str(item).strip()
+        if normalized and normalized not in normalized_items:
+            normalized_items.append(normalized)
+    return normalized_items
 
 
 class ChatRequest(BaseModel):
@@ -31,10 +54,7 @@ class ChatRequest(BaseModel):
     @field_validator("message", mode="before")
     @classmethod
     def normalize_message(cls, value: str) -> str:
-        normalized = str(value).strip()
-        if not normalized:
-            raise ValueError("message obrigatória")
-        return normalized
+        return _normalize_required_text(value, "message")
 
 
 class WebhookChatRequest(BaseModel):
@@ -58,10 +78,7 @@ class WebhookChatRequest(BaseModel):
     @field_validator("message", mode="before")
     @classmethod
     def normalize_message(cls, value: str) -> str:
-        normalized = str(value).strip()
-        if not normalized:
-            raise ValueError("message obrigatória")
-        return normalized
+        return _normalize_required_text(value, "message")
 
 
 class ChatResponse(BaseModel):
@@ -89,3 +106,196 @@ class AuditEventRecord(BaseModel):
     event_type: str
     payload: dict[str, str]
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class RagDocumentCreateRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1, max_length=20000)
+    keywords: list[str] = Field(default_factory=list)
+    intents: list[str] = Field(default_factory=list)
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+    @field_validator("title", "content", mode="before")
+    @classmethod
+    def normalize_required_fields(cls, value: str, info) -> str:
+        return _normalize_required_text(value, info.field_name)
+
+    @field_validator("keywords", "intents", mode="before")
+    @classmethod
+    def normalize_tags(cls, value: Any) -> list[str]:
+        return _normalize_string_list(value)
+
+
+class RagDocumentUpdateRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    title: Optional[str] = Field(default=None, min_length=1, max_length=200)
+    content: Optional[str] = Field(default=None, min_length=1, max_length=20000)
+    keywords: Optional[list[str]] = None
+    intents: Optional[list[str]] = None
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+    @field_validator("title", "content", mode="before")
+    @classmethod
+    def normalize_optional_fields(cls, value: Optional[str], info) -> Optional[str]:
+        if value is None:
+            return None
+        return _normalize_required_text(value, info.field_name)
+
+    @field_validator("keywords", "intents", mode="before")
+    @classmethod
+    def normalize_optional_tags(cls, value: Any) -> Optional[list[str]]:
+        if value is None:
+            return None
+        return _normalize_string_list(value)
+
+
+class RagDocumentRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    tenant_id: str
+    title: str
+    content: str
+    keywords: list[str] = Field(default_factory=list)
+    intents: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class RagDocumentSummary(BaseModel):
+    id: str
+    tenant_id: str
+    title: str
+    file: str
+    tags: list[str]
+    intents: list[str]
+    updated_at: datetime
+
+
+class RagDocumentContent(BaseModel):
+    id: str
+    tenant_id: str
+    title: str
+    file: str
+    content: str
+    keywords: list[str]
+    intents: list[str]
+    created_at: datetime
+    updated_at: datetime
+
+
+class RagDocumentListResponse(BaseModel):
+    tenant_id: str
+    source_dir: str
+    collection_name: str
+    ready: bool
+    documents_count: int
+    chunks_count: int
+    last_ingested_at: Optional[datetime] = None
+    documents: list[RagDocumentSummary]
+
+
+class RagIngestRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    reset_collection: bool = True
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+
+class RagIngestResponse(BaseModel):
+    tenant_id: str
+    collection_name: str
+    source_dir: str
+    documents_count: int
+    chunks_count: int
+    ready: bool
+    reset_collection: bool
+    last_ingested_at: Optional[datetime] = None
+    message: str
+
+
+class RagResetRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    purge_documents: bool = False
+    remove_legacy_collections: bool = True
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+
+class RagResetResponse(BaseModel):
+    tenant_id: str
+    collection_name: str
+    removed_collections: list[str]
+    removed_documents_count: int
+    source_dir: str
+    message: str
+
+
+class RagStatusResponse(BaseModel):
+    tenant_id: str
+    collection_name: str
+    source_dir: str
+    documents_count: int
+    chunks_count: int
+    ready: bool
+    last_ingested_at: Optional[datetime] = None
+    message: str
+
+
+class RagQueryRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    query: str = Field(..., min_length=1, max_length=2000)
+    min_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    top_k: int = Field(default=5, ge=1, le=20)
+    boost_enabled: bool = False
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+    @field_validator("query", mode="before")
+    @classmethod
+    def normalize_query(cls, value: str) -> str:
+        return _normalize_required_text(value, "query")
+
+
+class RagRetrievedChunk(BaseModel):
+    id: str
+    text: str
+    source: str
+    title: str
+    section: str
+    score: float
+    tags: list[str]
+
+
+class RagQueryParamsUsed(BaseModel):
+    min_score: float
+    top_k: int
+    boost_enabled: bool
+    collection: str
+
+
+class RagQueryResponse(BaseModel):
+    tenant_id: str
+    query: str
+    status: str
+    message: str
+    chunks: list[RagRetrievedChunk]
+    total_chunks: int
+    best_score: float
+    params_used: RagQueryParamsUsed

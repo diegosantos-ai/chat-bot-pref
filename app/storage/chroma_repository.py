@@ -7,7 +7,6 @@ from pathlib import Path
 import chromadb
 from chromadb.api.types import Documents, EmbeddingFunction
 
-from app.contracts.dto import ChatExchangeRecord
 from app.settings import settings
 
 TOKEN_PATTERN = re.compile(r"[a-z0-9]+", re.IGNORECASE)
@@ -18,12 +17,26 @@ def _tokenize(text: str) -> list[str]:
 
 
 @dataclass(frozen=True)
-class RetrievedContext:
+class IngestChunk:
+    chunk_id: str
     document_id: str
-    content: str
-    distance: float | None
-    metadata: dict[str, str]
-    token_overlap: int
+    title: str
+    section: str
+    source: str
+    text: str
+    tags: list[str]
+
+
+@dataclass(frozen=True)
+class RetrievedChunk:
+    chunk_id: str
+    document_id: str
+    title: str
+    section: str
+    source: str
+    text: str
+    tags: list[str]
+    score: float
 
 
 class HashEmbeddingFunction(EmbeddingFunction[Documents]):
@@ -68,44 +81,68 @@ class TenantChromaRepository:
         self,
         base_dir: str | Path | None = None,
         collection_prefix: str | None = None,
+        legacy_prefixes: list[str] | None = None,
     ) -> None:
         self.base_dir = Path(base_dir or settings.CHROMA_DIR)
         self.base_dir.mkdir(parents=True, exist_ok=True)
         self.collection_prefix = collection_prefix or settings.CHROMA_COLLECTION_PREFIX
+        self.legacy_prefixes = legacy_prefixes or settings.CHROMA_LEGACY_COLLECTION_PREFIXES
         self.client = chromadb.PersistentClient(path=str(self.base_dir))
         self.embedding_function = HashEmbeddingFunction()
 
     def collection_name(self, tenant_id: str) -> str:
-        normalized_tenant = re.sub(r"[^a-z0-9]+", "_", tenant_id.lower()).strip("_")
-        if not normalized_tenant:
-            raise ValueError("tenant_id inválido para collection")
+        normalized_tenant = self._normalize_tenant(tenant_id)
         return f"{self.collection_prefix}__{normalized_tenant}"
 
-    def upsert_exchange(self, record: ChatExchangeRecord) -> str:
-        collection = self._get_collection(record.tenant_id)
-        document_id = f"{record.session_id}:{record.request_id}"
+    def list_collection_names(self) -> list[str]:
+        return [collection.name for collection in self.client.list_collections()]
+
+    def collection_stats(self) -> list[tuple[str, int]]:
+        stats: list[tuple[str, int]] = []
+        for collection_name in self.list_collection_names():
+            collection = self.client.get_collection(
+                name=collection_name,
+                embedding_function=self.embedding_function,
+            )
+            stats.append((collection_name, collection.count()))
+        return stats
+
+    def count_chunks(self, tenant_id: str) -> int:
+        collection = self._get_collection_if_exists(tenant_id)
+        if collection is None:
+            return 0
+        return collection.count()
+
+    def ingest_chunks(self, tenant_id: str, chunks: list[IngestChunk]) -> int:
+        if not chunks:
+            return 0
+        collection = self._get_or_create_collection(tenant_id)
         collection.upsert(
-            ids=[document_id],
-            documents=[record.user_message],
+            ids=[chunk.chunk_id for chunk in chunks],
+            documents=[chunk.text for chunk in chunks],
             metadatas=[
                 {
-                    "tenant_id": record.tenant_id,
-                    "session_id": record.session_id,
-                    "request_id": record.request_id,
-                    "channel": record.channel,
+                    "tenant_id": tenant_id,
+                    "document_id": chunk.document_id,
+                    "title": chunk.title,
+                    "section": chunk.section,
+                    "source": chunk.source,
+                    "tags": "|".join(chunk.tags),
                 }
+                for chunk in chunks
             ],
         )
-        return document_id
+        return len(chunks)
 
-    def query_context(
+    def query_chunks(
         self,
         tenant_id: str,
         query_text: str,
-        limit: int = 1,
-    ) -> list[RetrievedContext]:
-        collection = self._get_collection(tenant_id)
-        if collection.count() == 0:
+        limit: int,
+        min_score: float,
+    ) -> list[RetrievedChunk]:
+        collection = self._get_collection_if_exists(tenant_id)
+        if collection is None or collection.count() == 0:
             return []
 
         result = collection.query(
@@ -117,37 +154,84 @@ class TenantChromaRepository:
         metadatas = result.get("metadatas", [[]])[0]
         distances = result.get("distances", [[]])[0]
 
-        contexts: list[RetrievedContext] = []
-        for document_id, content, metadata, distance in zip(ids, documents, metadatas, distances):
-            token_overlap = self._token_overlap(query_text, content)
-            if token_overlap == 0:
+        query_tokens = set(_tokenize(query_text))
+        scored_results: list[RetrievedChunk] = []
+        for chunk_id, text, metadata, distance in zip(ids, documents, metadatas, distances):
+            content_tokens = set(_tokenize(text))
+            overlap = len(query_tokens & content_tokens)
+            if not query_tokens:
+                score = 0.0
+            else:
+                semantic_score = 0.0 if distance is None else 1 / (1 + max(distance, 0))
+                lexical_score = overlap / len(query_tokens)
+                score = round(min(1.0, (lexical_score * 0.75) + (semantic_score * 0.25)), 4)
+            if score < min_score:
                 continue
-            contexts.append(
-                RetrievedContext(
-                    document_id=document_id,
-                    content=content,
-                    distance=distance,
-                    metadata={key: str(value) for key, value in (metadata or {}).items()},
-                    token_overlap=token_overlap,
+            scored_results.append(
+                RetrievedChunk(
+                    chunk_id=chunk_id,
+                    document_id=str((metadata or {}).get("document_id", "")),
+                    title=str((metadata or {}).get("title", "")),
+                    section=str((metadata or {}).get("section", "")),
+                    source=str((metadata or {}).get("source", "")),
+                    text=text,
+                    tags=self._split_tags(str((metadata or {}).get("tags", ""))),
+                    score=score,
                 )
             )
 
-        contexts.sort(
-            key=lambda item: (
-                -item.token_overlap,
-                item.distance if item.distance is not None else float("inf"),
-                item.document_id,
-            )
-        )
-        return contexts[:limit]
+        scored_results.sort(key=lambda item: (-item.score, item.title, item.chunk_id))
+        return scored_results[:limit]
 
-    def _get_collection(self, tenant_id: str):
+    def reset_tenant_collection(self, tenant_id: str) -> list[str]:
+        removed_collections: list[str] = []
+        current_name = self.collection_name(tenant_id)
+        if current_name in self.list_collection_names():
+            self.client.delete_collection(current_name)
+            removed_collections.append(current_name)
+        return removed_collections
+
+    def remove_legacy_collections(self, tenant_id: str | None = None) -> list[str]:
+        normalized_tenant = self._normalize_tenant(tenant_id) if tenant_id is not None else None
+        current_collection_name = (
+            self.collection_name(tenant_id) if tenant_id is not None else None
+        )
+        removed_collections: list[str] = []
+        for collection_name in self.list_collection_names():
+            if current_collection_name is not None and collection_name == current_collection_name:
+                continue
+            if not any(collection_name.startswith(f"{prefix}__") for prefix in self.legacy_prefixes):
+                continue
+            if normalized_tenant is not None and not collection_name.endswith(f"__{normalized_tenant}"):
+                continue
+            self.client.delete_collection(collection_name)
+            removed_collections.append(collection_name)
+        return removed_collections
+
+    def _get_collection_if_exists(self, tenant_id: str):
+        collection_name = self.collection_name(tenant_id)
+        if collection_name not in self.list_collection_names():
+            return None
+        return self.client.get_collection(
+            name=collection_name,
+            embedding_function=self.embedding_function,
+        )
+
+    def _get_or_create_collection(self, tenant_id: str):
         return self.client.get_or_create_collection(
             name=self.collection_name(tenant_id),
             embedding_function=self.embedding_function,
         )
 
-    def _token_overlap(self, query_text: str, content: str) -> int:
-        query_tokens = set(_tokenize(query_text))
-        content_tokens = set(_tokenize(content))
-        return len(query_tokens & content_tokens)
+    def _normalize_tenant(self, tenant_id: str) -> str:
+        normalized_tenant = re.sub(r"[^a-z0-9]+", "_", tenant_id.lower()).strip("_")
+        if not normalized_tenant:
+            raise ValueError("tenant_id inválido para collection")
+        if len(normalized_tenant) < 3:
+            normalized_tenant = f"tnt_{normalized_tenant}"
+        return normalized_tenant
+
+    def _split_tags(self, raw_tags: str) -> list[str]:
+        if not raw_tags:
+            return []
+        return [tag for tag in raw_tags.split("|") if tag]

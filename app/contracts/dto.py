@@ -65,6 +65,10 @@ class NormalizedInboundEvent(BaseModel):
     thread_id: Optional[str] = Field(
         default=None, description="ID do thread de DM (Instagram/Facebook)"
     )
+    page_id: Optional[str] = Field(
+        default=None,
+        description="ID da página/conta Meta que originou a entry do webhook",
+    )
 
     # IDs da plataforma (Comentários)
     post_id: Optional[str] = Field(
@@ -107,6 +111,11 @@ class ChatRequest(BaseModel):
     )
     external_message_id: Optional[str] = Field(
         default=None, description="ID externo para idempotência"
+    )
+    tenant_id: Optional[str] = Field(
+        default=None,
+        description="Identificador explícito do tenant para fluxos de chat direto",
+        examples=["prefeitura_nova_esperanca"],
     )
 
     # Campos para comentários públicos
@@ -256,6 +265,7 @@ class RequestContext(BaseModel):
     request_id: str = Field(default_factory=lambda: str(uuid4()))
     external_message_id: Optional[str] = None
     session_id: str
+    tenant_id: Optional[str] = None
 
     # Input
     surface: SurfaceType

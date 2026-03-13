@@ -44,7 +44,7 @@ Nenhuma limpeza ampla deve ocorrer antes do fechamento do inventário. O foco de
 
 ## Card Macro — Fase 2 — Sanitização Funcional do Runtime
 
-```md
+```
 ## Objetivo da fase
 Remover hardcodes, defaults históricos e dependências operacionais legadas que impactam execução real.
 
@@ -86,7 +86,7 @@ Priorizar backend, painel e scripts de runtime. Documentação ampla não entra 
 
 ## Card Macro — Fase 3 — Consolidação do Contrato Multi-Tenant
 
-```md
+```
 ## Objetivo da fase
 Tornar tenant_id um contrato explícito e consistente nos fluxos principais.
 
@@ -129,7 +129,7 @@ Nenhum fluxo crítico deve depender de tenant herdado por sorte ou base default.
 
 ## Card Macro — Fase 4 — Reset da Base RAG e Reingestão Limpa
 
-```md
+```
 ## Objetivo da fase
 Eliminar herança semântica antiga e preparar o projeto para nova ingestão neutra e controlada.
 

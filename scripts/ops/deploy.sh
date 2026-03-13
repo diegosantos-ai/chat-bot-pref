@@ -1,14 +1,15 @@
 #!/bin/bash
 # =========================================
-# {bot_name} - Script de Deploy
+# Chat Pref - Script de Operacao com Docker Compose
 # =========================================
-# Uso: ./scripts/deploy.sh [comando]
+# Uso: ./scripts/ops/deploy.sh [comando]
 # Comandos: start, stop, restart, logs, status, build
 
 set -e
 
-PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$PROJECT_DIR"
+SERVICE_NAME="${SERVICE_NAME:-chat-pref-api}"
 
 # Cores para output
 RED='\033[0;31m'
@@ -20,79 +21,84 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
-# Verifica pré-requisitos
+compose_cmd() {
+    if docker compose version >/dev/null 2>&1; then
+        docker compose "$@"
+    elif command -v docker-compose >/dev/null 2>&1; then
+        docker-compose "$@"
+    else
+        log_error "Docker Compose nao esta instalado."
+        exit 1
+    fi
+}
+
 check_requirements() {
-    if ! command -v docker &> /dev/null; then
-        log_error "Docker não está instalado. Instale em: https://docs.docker.com/get-docker/"
+    if ! command -v docker >/dev/null 2>&1; then
+        log_error "Docker nao esta instalado. Instale em: https://docs.docker.com/get-docker/"
         exit 1
     fi
-    
-    if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null; then
-        log_error "Docker Compose não está instalado."
-        exit 1
-    fi
-    
+
     if [ ! -f ".env" ]; then
-        log_error "Arquivo .env não encontrado!"
+        log_error "Arquivo .env nao encontrado!"
         log_warn "Copie .env.prod.example para .env e configure os valores."
         exit 1
     fi
-    
-    log_info "Pré-requisitos OK ✓"
+
+    log_info "Pre-requisitos OK"
 }
 
-# Comandos
 start() {
-    log_info "Iniciando {bot_name}..."
-    docker-compose up -d --build
+    log_info "Iniciando Chat Pref..."
+    compose_cmd up -d --build
     log_info "Aguardando container ficar healthy..."
     sleep 10
     status
 }
 
 stop() {
-    log_info "Parando {bot_name}..."
-    docker-compose down
-    log_info "Containers parados ✓"
+    log_info "Parando Chat Pref..."
+    compose_cmd down
+    log_info "Containers parados"
 }
 
 restart() {
-    log_info "Reiniciando {bot_name}..."
-    docker-compose restart
+    log_info "Reiniciando Chat Pref..."
+    compose_cmd restart
     status
 }
 
 logs() {
     log_info "Mostrando logs (Ctrl+C para sair)..."
-    docker-compose logs -f terezia
+    compose_cmd logs -f "$SERVICE_NAME"
 }
 
 status() {
     log_info "Status dos containers:"
-    docker-compose ps
+    compose_cmd ps
     echo ""
     log_info "Testando health check..."
-    if curl -sf http://localhost:8000/health > /dev/null 2>&1; then
-        log_info "API está respondendo ✓"
+    if curl -sf http://localhost:8000/health >/dev/null 2>&1; then
+        log_info "API esta respondendo"
     else
-        log_warn "API ainda não está respondendo (pode estar iniciando)"
+        log_warn "API ainda nao esta respondendo (pode estar iniciando)"
     fi
 }
 
 build() {
     log_info "Reconstruindo imagem Docker..."
-    docker-compose build --no-cache
-    log_info "Build concluído ✓"
+    compose_cmd build --no-cache
+    log_info "Build concluido"
 }
 
 update() {
     log_info "Atualizando e reiniciando..."
-    git pull origin main
-    docker-compose up -d --build
+    local current_branch
+    current_branch="$(git branch --show-current)"
+    git pull --ff-only origin "$current_branch"
+    compose_cmd up -d --build
     status
 }
 
-# Menu principal
 case "${1:-help}" in
     start)
         check_requirements
@@ -119,7 +125,7 @@ case "${1:-help}" in
         update
         ;;
     *)
-        echo "{bot_name} - Script de Deploy"
+        echo "Chat Pref - Script de Operacao"
         echo "=========================="
         echo ""
         echo "Uso: $0 [comando]"

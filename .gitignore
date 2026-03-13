@@ -364,3 +364,4 @@ scripts/verify_features.py
 .agent/scripts/session_manager.py
 .agent/scripts/auto_preview.py
 tmp/marketingskills
+docs/conferencia_testes.txt

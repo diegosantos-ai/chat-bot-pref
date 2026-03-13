@@ -1,9 +1,9 @@
 """
-Panel API — Nexo Prefa Dashboard
-=================================
+Tenant Panel API.
+
 Endpoints internos do painel de controle do tenant.
 Prefixo: /api/panel   Tags: Panel
-Sem autenticação (dev mode — preparado para X-Admin-Key futuramente).
+Sem autenticacao nesta fase.
 """
 
 import asyncio

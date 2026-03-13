@@ -1,10 +1,9 @@
 """
-Configurações — Nexo Basis Governador SaaS
-======================================
-Versão: v2.0
-Escopo: SAAS_MULTI_TENANT
+Configuracoes centrais do backend.
 
-Todas as configurações sensíveis devem vir do arquivo .env
+Todas as configuracoes sensiveis devem vir do ambiente ou de um provider
+de segredos. Os defaults abaixo existem apenas para desenvolvimento local
+e nunca devem apontar para infraestrutura privada.
 """
 
 from pydantic_settings import BaseSettings
@@ -16,7 +15,7 @@ class Settings(BaseSettings):
     # ========================================
     # APP
     # ========================================
-    APP_NAME: str = "Nexo Basis Governador API"
+    APP_NAME: str = "Chat Pref API"
     ENV: str = "dev"
     VERSION: str = "2.0.0"
     DEBUG: bool = False
@@ -33,25 +32,26 @@ class Settings(BaseSettings):
     GEMINI_TEMPERATURE: float = 0.3  # Baixo para respostas consistentes
 
     # ========================================
-    # DATABASE - PostgreSQL Compartilhado (Row-Level Security)
+    # DATABASE
     # ========================================
-    DATABASE_URL: str = "postgresql://postgres:@nexo-postgres:5432/core_saas_gov"
+    DATABASE_URL: str = "postgresql://localhost:5432/chat_pref"
     DATABASE_POOL_SIZE: int = 5
     DATABASE_MAX_OVERFLOW: int = 10
     USER_HASH_SALT: str = ""
 
     # ========================================
-    # VECTOR STORE — ChromaDB Compartilhado (HTTP Client)
+    # VECTOR STORE
     # ========================================
-    CHROMA_URL: str = "http://nexo-chromadb:8000"  # HTTP Client aponta para infra_nexo-network
+    CHROMA_URL: str = "http://localhost:8000"
 
-    # REDIS CACHE (Compartilhado)
-    REDIS_URL: str = "redis://nexo-redis:6379"
+    # REDIS CACHE
+    REDIS_URL: str = "redis://localhost:6379/0"
 
     # ========================================
     # RAG
     # ========================================
-    RAG_BASE_ID: str = "default"
+    RAG_BASE_ID: str = ""
+    RAG_COLLECTION_NAME: str = "knowledge_base"
     RAG_TOP_K: int = 5
     RAG_MIN_SCORE: float = 0.30
 
@@ -88,7 +88,7 @@ class Settings(BaseSettings):
     METRICS_STATSD_ENABLED: bool = False
     METRICS_STATSD_HOST: str = "127.0.0.1"
     METRICS_STATSD_PORT: int = 8125
-    METRICS_STATSD_PREFIX: str = "nexo-gov"
+    METRICS_STATSD_PREFIX: str = "chat-pref"
 
     # ========================================
     # META API (Instagram/Facebook)
@@ -102,11 +102,11 @@ class Settings(BaseSettings):
     # App Secrets (para verificação de webhook)
     META_APP_SECRET_FACEBOOK: str = ""
     META_APP_SECRET_INSTAGRAM: str = ""
-    # Legacy (retrocompatibilidade - usar apenas se as novas não estiverem configuradas)
+    # Legacy (retrocompatibilidade temporaria - remover nas fases seguintes)
     META_PAGE_ID: str = ""
     META_APP_SECRET: str = ""
     # Webhook Verify Token
-    META_WEBHOOK_VERIFY_TOKEN: str = "verify_token_webhook"
+    META_WEBHOOK_VERIFY_TOKEN: str = ""
     META_WEBHOOK_VERIFY_TOKEN_FACEBOOK: str = ""
     META_WEBHOOK_VERIFY_TOKEN_INSTAGRAM: str = ""
     META_API_VERSION: str = "v19.0"
@@ -120,8 +120,15 @@ class Settings(BaseSettings):
     # ========================================
     # SECURITY - CORS e Rate Limiting
     # ========================================
-    CORS_ORIGINS: list[str] = ["*"]  # Em produção, especifique domínios permitidos
-    ALLOWED_HOSTS: list[str] = ["*"]  # Em produção: ["*.nexobasis.com.br", "*.meta.facebook.com"]
+    CORS_ORIGINS: list[str] = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:8080",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:8080",
+    ]
+    ALLOWED_HOSTS: list[str] = ["localhost", "127.0.0.1", "testserver"]
     RATE_LIMIT_ENABLED: bool = True
     RATE_LIMIT_PER_MINUTE: int = 30  # Limite padrão por IP
     RATE_LIMIT_WEBHOOK_PER_MINUTE: int = 60  # Limite específico para webhook (Meta)
@@ -132,7 +139,7 @@ class Settings(BaseSettings):
     # ========================================
     USE_SECRETS_MANAGER: bool = False  # Se True, carrega secrets do AWS Secrets Manager
     AWS_REGION: str = "sa-east-1"
-    AWS_SECRET_NAME: str = "terezia/prod"
+    AWS_SECRET_NAME: str = ""
 
     # ========================================
     # ADMIN API
@@ -142,7 +149,7 @@ class Settings(BaseSettings):
     # ========================================
     # GOOGLE DRIVE & SMTP (FALLBACK)
     # ========================================
-    GOOGLE_APPLICATION_CREDENTIALS: str = "service_account.json"
+    GOOGLE_APPLICATION_CREDENTIALS: str = ""
     GOOGLE_DRIVE_FOLDER_ID: str = ""
 
     SMTP_HOST: str = ""
@@ -170,6 +177,27 @@ class Settings(BaseSettings):
         env_file_encoding = "utf-8"
         case_sensitive = True
         extra = "ignore"
+
+    @property
+    def configured_webhook_verify_tokens(self) -> set[str]:
+        return {
+            token
+            for token in (
+                self.META_WEBHOOK_VERIFY_TOKEN,
+                self.META_WEBHOOK_VERIFY_TOKEN_FACEBOOK,
+                self.META_WEBHOOK_VERIFY_TOKEN_INSTAGRAM,
+            )
+            if token
+        }
+
+    @property
+    def configured_meta_app_secrets(self) -> list[str]:
+        secrets = [
+            self.META_APP_SECRET_FACEBOOK,
+            self.META_APP_SECRET_INSTAGRAM,
+            self.META_APP_SECRET,
+        ]
+        return [secret for secret in secrets if secret]
 
 
 def _load_settings_with_secrets() -> Settings:

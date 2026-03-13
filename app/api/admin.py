@@ -36,12 +36,20 @@ from app.settings import settings
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/tereziapi/tereziadmin", tags=["Admin"])
+router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 # Configurações JWT
-JWT_SECRET = settings.ADMIN_API_KEY or "dev-secret-change-in-production"
 JWT_ALGORITHM = "HS256"
 JWT_EXPIRE_HOURS = 24
+
+
+def _get_jwt_secret() -> str:
+    if not settings.ADMIN_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="ADMIN_API_KEY não configurada",
+        )
+    return settings.ADMIN_API_KEY
 
 
 # ========================================
@@ -208,6 +216,8 @@ class ConfigResponse(BaseModel):
 
 async def get_current_user(authorization: str = Header(None)) -> dict:
     """Valida token JWT e retorna dados do usuário."""
+    jwt_secret = _get_jwt_secret()
+
     if not authorization:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -217,7 +227,7 @@ async def get_current_user(authorization: str = Header(None)) -> dict:
     try:
         # Bearer token
         token = authorization.replace("Bearer ", "")
-        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        payload = jwt.decode(token, jwt_secret, algorithms=[JWT_ALGORITHM])
         return payload
     except jwt.ExpiredSignatureError:
         raise HTTPException(
@@ -249,6 +259,7 @@ async def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
 @router.post("/auth/login", response_model=LoginResponse)
 async def login(request: LoginRequest):
     """Autentica usuário e retorna token JWT."""
+    jwt_secret = _get_jwt_secret()
 
     conn = None
     try:
@@ -293,7 +304,7 @@ async def login(request: LoginRequest):
             "role": user["role"],
             "exp": datetime.utcnow() + timedelta(hours=JWT_EXPIRE_HOURS),
         }
-        token = jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        token = jwt.encode(payload, jwt_secret, algorithm=JWT_ALGORITHM)
 
         return LoginResponse(
             token=token,
@@ -1580,7 +1591,7 @@ class BoostConfigUpdate(BaseModel):
     ativo: Optional[bool] = None
 
 
-@router.get("/admin/boosts")
+@router.get("/boosts")
 async def list_boosts(
     tipo: Optional[str] = None,
     ativo: Optional[bool] = None,
@@ -1608,7 +1619,7 @@ async def list_boosts(
         await conn.close()
 
 
-@router.post("/admin/boosts")
+@router.post("/boosts")
 async def create_boost(data: BoostConfigCreate, _: str = Depends(require_admin)):
     """Cria um novo boost."""
     from app.rag.boosts import invalidate_cache
@@ -1635,7 +1646,7 @@ async def create_boost(data: BoostConfigCreate, _: str = Depends(require_admin))
         await conn.close()
 
 
-@router.put("/admin/boosts/{boost_id}")
+@router.put("/boosts/{boost_id}")
 async def update_boost(
     boost_id: str, data: BoostConfigUpdate, _: str = Depends(require_admin)
 ):
@@ -1697,7 +1708,7 @@ async def update_boost(
         await conn.close()
 
 
-@router.delete("/admin/boosts/{boost_id}")
+@router.delete("/boosts/{boost_id}")
 async def delete_boost(boost_id: str, _: str = Depends(require_admin)):
     """Remove um boost (soft delete)."""
     from app.rag.boosts import invalidate_cache
@@ -1722,7 +1733,7 @@ async def delete_boost(boost_id: str, _: str = Depends(require_admin)):
         await conn.close()
 
 
-@router.get("/admin/boosts/templates")
+@router.get("/boosts/templates")
 async def get_boost_templates(_: str = Depends(require_admin)):
     """Retorna lista de siglas disponíveis (do arquivo atual)."""
     from app.rag.acronyms import ALL_ACRONYMS
@@ -1730,7 +1741,7 @@ async def get_boost_templates(_: str = Depends(require_admin)):
     return [{"sigla": k, "descricao": v} for k, v in ALL_ACRONYMS.items()]
 
 
-@router.post("/admin/boosts/import")
+@router.post("/boosts/import")
 async def import_acronyms_boosts(_: str = Depends(require_admin)):
     """Importa siglas do arquivo hardcoded para o banco."""
     from app.rag.acronyms import ALL_ACRONYM_KEYS

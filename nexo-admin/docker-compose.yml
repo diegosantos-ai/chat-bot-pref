@@ -1,16 +1,12 @@
-version: '3.8'
-
-# Nexo Admin — Superadmin Interface
-# Porta reservada: 8093:8000 (PORTS.md)
-# Domino: admin.nexobasis.tech
+# Chat Pref Admin API - compose isolado para desenvolvimento local.
 
 services:
-  nexo-admin:
+  admin-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nexo-admin
-    restart: always
+    container_name: chat-pref-admin-api
+    restart: unless-stopped
     ports:
       - "8093:8000"
     env_file:
@@ -26,9 +22,8 @@ services:
       retries: 3
       start_period: 30s
     networks:
-      - infra-network
+      - chat-pref-admin
 
 networks:
-  infra-network:
-    external: true
-    name: infra_nexo-network
+  chat-pref-admin:
+    driver: bridge

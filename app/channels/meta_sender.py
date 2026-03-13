@@ -31,10 +31,10 @@ class MetaSender:
     """
 
     def _get_page_id(self, channel: Channel) -> str:
-        """Retorna o page ID correto baseado no canal (com fallback para legacy)."""
+        """Retorna o page ID correto baseado no canal."""
         if channel in (Channel.INSTAGRAM_DM, Channel.INSTAGRAM_COMMENT):
-            return settings.META_PAGE_ID_INSTAGRAM or settings.META_PAGE_ID
-        return settings.META_PAGE_ID_FACEBOOK or settings.META_PAGE_ID
+            return settings.META_PAGE_ID_INSTAGRAM
+        return settings.META_PAGE_ID_FACEBOOK
 
     async def _get_access_token(self, channel: Channel) -> str:
         """
@@ -52,8 +52,16 @@ class MetaSender:
 
         # Fallback: variáveis de ambiente globais
         if channel in (Channel.INSTAGRAM_DM, Channel.INSTAGRAM_COMMENT):
-            return settings.META_ACCESS_TOKEN_INSTAGRAM
-        return settings.META_ACCESS_TOKEN_FACEBOOK
+            token = settings.META_ACCESS_TOKEN_INSTAGRAM
+        else:
+            token = settings.META_ACCESS_TOKEN_FACEBOOK
+
+        if not token:
+            raise MetaSenderError(
+                f"Token Meta nao configurado para o canal {channel.value}."
+            )
+
+        return token
 
     async def send_dm(
         self,

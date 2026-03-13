@@ -37,7 +37,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title=settings.APP_NAME,
     version=settings.VERSION,
-    description="API da {bot_name} - Assistente Virtual da Prefeitura de {client_name}",
+    description="API multi-tenant de atendimento digital com RAG, auditoria e guardrails.",
     lifespan=lifespan,
 )
 
@@ -60,9 +60,7 @@ app.add_middleware(
 # Dominio do cliente é gerido via env var ALLOWED_HOSTS — sem hard-code de pilot
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"]
-    if settings.DEBUG
-    else settings.ALLOWED_HOSTS,  # ex: ["*.nexobasis.com.br", "*.meta.facebook.com"]
+    allowed_hosts=settings.ALLOWED_HOSTS,
 )
 
 
@@ -96,7 +94,7 @@ app.include_router(deploy_router)
 app.include_router(admin_router)
 app.include_router(panel_router)
 
-# Serve Nexo Prefa panel static files at /panel
+# Serve panel static files at /panel when present
 _panel_dir = Path(__file__).parent.parent / "panel"
 if _panel_dir.exists():
     app.mount("/panel", StaticFiles(directory=str(_panel_dir), html=True), name="panel")
@@ -109,7 +107,7 @@ Instrumentator().instrument(app).expose(app)
 @shared_limiter.limit("60/minute")  # Mais permissivo para health check
 async def root(request: Request, response: Response):
     return {
-        "message": "🤖 {bot_name} API está rodando!",
+        "message": "Chat Pref API esta rodando.",
         "env": settings.ENV,
         "version": settings.VERSION,
         "docs": "/docs",

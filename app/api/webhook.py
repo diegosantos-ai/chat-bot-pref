@@ -54,27 +54,35 @@ async def get_db_pool() -> asyncpg.Pool:
 # Verificação de assinatura Meta
 # ────────────────────────────────────────────────────
 
-def _verify_signature(body: bytes, signature_header: Optional[str], app_secret: str) -> bool:
+def _verify_signature(
+    body: bytes,
+    signature_header: Optional[str],
+    secrets: list[str],
+) -> bool:
     """
     Valida a assinatura X-Hub-Signature-256 do webhook Meta.
     Usa HMAC-SHA256 (padrão atual da Meta Graph API v18+).
     """
     if not signature_header:
         return False
-    if not app_secret:
-        logger.warning("META_APP_SECRET não configurado — aceitando sem verificação")
-        return True
+    if not secrets:
+        logger.error("Nenhum segredo de webhook Meta configurado.")
+        return False
 
     prefix = "sha256="
     if not signature_header.startswith(prefix):
         return False
 
-    expected = "sha256=" + hmac.new(
-        app_secret.encode(),
-        body,
-        hashlib.sha256,
-    ).hexdigest()
-    return hmac.compare_digest(signature_header, expected)
+    for app_secret in secrets:
+        expected = "sha256=" + hmac.new(
+            app_secret.encode(),
+            body,
+            hashlib.sha256,
+        ).hexdigest()
+        if hmac.compare_digest(signature_header, expected):
+            return True
+
+    return False
 
 
 # ────────────────────────────────────────────────────
@@ -144,7 +152,12 @@ async def webhook_verify(
     if hub_mode != "subscribe":
         raise HTTPException(status_code=403, detail="Invalid hub_mode")
 
-    if hub_verify_token != settings.META_WEBHOOK_VERIFY_TOKEN:
+    valid_tokens = settings.configured_webhook_verify_tokens
+    if not valid_tokens:
+        logger.error("[WEBHOOK] Nenhum verify token configurado")
+        raise HTTPException(status_code=503, detail="Webhook verify token not configured")
+
+    if hub_verify_token not in valid_tokens:
         logger.error("[WEBHOOK] Verify token inválido")
         raise HTTPException(status_code=403, detail="Invalid verify token")
 
@@ -170,7 +183,7 @@ async def webhook_receive(
     body = await request.body()
     signature = request.headers.get("X-Hub-Signature-256")
 
-    if not _verify_signature(body, signature, settings.META_APP_SECRET):
+    if not _verify_signature(body, signature, settings.configured_meta_app_secrets):
         logger.error("[WEBHOOK] Assinatura inválida — request rejeitado")
         raise HTTPException(status_code=403, detail="Invalid signature")
 

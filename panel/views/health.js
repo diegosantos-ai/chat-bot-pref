@@ -28,11 +28,11 @@ const HealthView = (() => {
         `).join('')}
       </div>
 
-      <div class="card mt-16">
+        <div class="card mt-16">
         <div class="card__title">AUTO-REFRESH</div>
         <p style="font-size:13px;color:var(--steel-gray)">
           Verificação automática a cada <span class="text-orange fw-600">30 segundos</span>.
-          Os serviços são compartilhados pela infraestrutura <span class="text-mono">infra_nexo-network</span>.
+          Os serviços refletem o ambiente local configurado para a demonstração.
         </p>
       </div>
     `;

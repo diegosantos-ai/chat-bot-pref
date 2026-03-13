@@ -2,17 +2,30 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 import logging
 
-from app.services.drive_watcher import DriveWatcher
-
 logger = logging.getLogger(__name__)
 
 class AppScheduler:
     def __init__(self):
         self.scheduler = BackgroundScheduler()
-        self.drive_watcher = DriveWatcher()
+        self.drive_watcher = None
 
     def start(self):
         """Inicia o agendador."""
+        try:
+            from app.services.drive_watcher import DriveWatcher
+
+            self.drive_watcher = DriveWatcher()
+        except ModuleNotFoundError as exc:
+            logger.warning(
+                "Drive watcher desabilitado no startup. Dependencia ausente: %s",
+                exc.name,
+            )
+            self.drive_watcher = None
+
+        if self.drive_watcher is None:
+            logger.info("Scheduler iniciado sem jobs opcionais.")
+            return
+
         # Agenda sync do Drive para rodar diariamente as 08:00 e 14:00
         # Para testes debug, vamos rodar a cada 10 minutos se estiver em DEBUG
         # Mas para MVP producao:
@@ -33,7 +46,8 @@ class AppScheduler:
 
     def shutdown(self):
         """Para o agendador."""
-        self.scheduler.shutdown()
+        if self.scheduler.running:
+            self.scheduler.shutdown()
         logger.info("Scheduler finalizado.")
 
 scheduler = AppScheduler()

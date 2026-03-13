@@ -1,22 +1,16 @@
-version: '3.8'
-
-# GTM Commercial Readiness - Ambiente All-in-One
-# ===============================================
-# Este arquivo sobe a stack inteira para demonstração 
-# comercial ou desenvolvimento local unificado.
+# Chat Pref - ambiente local com API principal, admin API e painel web.
 
 services:
-  # 1. API Core do Chatbot (O bot em si)
-  nexo-gov-api:
+  chat-pref-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nexo-gov-api-demo
+    container_name: chat-pref-api-dev
     ports:
       - "8101:8000"
     volumes:
       - ./prompts:/app/prompts:ro
-      - ./base:/app/base:ro
+      - ./data/knowledge_base:/app/data/knowledge_base:ro
     env_file:
       - .env
     environment:
@@ -28,14 +22,13 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - infra-network
+      - chat-pref-local
 
-  # 2. FastAPI do Admin System (Backend do Painel)
-  nexo-admin:
+  admin-api:
     build:
       context: ./nexo-admin
       dockerfile: Dockerfile
-    container_name: nexo-admin-demo
+    container_name: chat-pref-admin-api
     ports:
       - "8093:8000"
     volumes:
@@ -51,25 +44,22 @@ services:
       timeout: 10s
       retries: 3
     networks:
-      - infra-network
+      - chat-pref-local
 
-  # 3. React SPA do Admin System (Frontend do Painel)
   admin-panel:
     build:
       context: ./admin-panel
       dockerfile: Dockerfile
       args:
-        # Quando construirmos a imagem, o Vite vai embutir esta URL na variavel process.env.VITE_API_URL
         - VITE_API_URL=http://localhost:8093
-    container_name: admin-panel-demo
+    container_name: chat-pref-admin-panel
     ports:
       - "8080:80"
     depends_on:
-      - nexo-admin
+      - admin-api
     networks:
-      - infra-network
+      - chat-pref-local
 
 networks:
-  infra-network:
-    external: true
-    name: infra_nexo-network
+  chat-pref-local:
+    driver: bridge

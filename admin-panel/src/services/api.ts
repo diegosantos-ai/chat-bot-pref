@@ -30,7 +30,7 @@ import type {
   BoostTemplate
 } from '../types';
 
-const API_BASE = import.meta.env.VITE_API_URL || '/tereziapi/tereziadmin';
+const API_BASE = import.meta.env.VITE_API_URL || '/api/admin';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -52,7 +52,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      window.location.href = '/admin/login';
     }
     return Promise.reject(error);
   }
@@ -182,22 +182,22 @@ export const scrap = {
 
 export const boosts = {
   list: (params?: { tipo?: string; ativo?: boolean }) =>
-    api.get<BoostConfig[]>('/admin/boosts', { params }),
+    api.get<BoostConfig[]>('/boosts', { params }),
 
   create: (data: BoostConfigCreate) =>
-    api.post<BoostConfig>('/admin/boosts', data),
+    api.post<BoostConfig>('/boosts', data),
 
   update: (id: string, data: BoostConfigUpdate) =>
-    api.put<BoostConfig>('/admin/boosts/' + id, data),
+    api.put<BoostConfig>('/boosts/' + id, data),
 
   delete: (id: string) =>
-    api.delete('/admin/boosts/' + id),
+    api.delete('/boosts/' + id),
 
   templates: () =>
-    api.get<BoostTemplate[]>('/admin/boosts/templates'),
+    api.get<BoostTemplate[]>('/boosts/templates'),
 
   import: () =>
-    api.post<{ imported: number; skipped: number }>('/admin/boosts/import'),
+    api.post<{ imported: number; skipped: number }>('/boosts/import'),
 };
 
 export default api;

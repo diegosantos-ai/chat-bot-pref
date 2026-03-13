@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ShieldAlert, Image as ImageIcon, MapPin } from 'lucide-react';
 import styles from './Tickets.module.css';
 
@@ -112,7 +112,7 @@ export default function Tickets() {
                                         <td>{ticket.citizen}</td>
                                         <td>
                                             {ticket.hasImage ? (
-                                                <ImageIcon size={18} style={{ color: 'var(--info)' }} title="Contém imagem" />
+                                                <span title="Contém imagem"><ImageIcon size={18} style={{ color: 'var(--info)' }} /></span>
                                             ) : (
                                                 <span style={{ color: 'var(--text-muted)' }}>-</span>
                                             )}

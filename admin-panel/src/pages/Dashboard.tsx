@@ -69,7 +69,7 @@ export default function Dashboard() {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1>Dashboard</h1>
-        <p className={styles.subtitle}>Visão geral do assistente {bot_name}</p>
+        <p className={styles.subtitle}>Visão geral do sistema de atendimento Nexo</p>
       </header>
 
       {/* Status Cards */}

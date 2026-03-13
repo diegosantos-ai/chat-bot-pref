@@ -53,3 +53,4 @@ pyjwt>=2.8.0  # JWT authentication
 # SCRAPING
 # ========================================
 playwright>=1.40.0
+apscheduler>=3.10.4

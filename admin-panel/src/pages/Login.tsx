@@ -37,11 +37,11 @@ export default function Login() {
       <div className={styles.background}>
         <div className={styles.grid} />
       </div>
-      
+
       <div className={styles.card}>
         <div className={styles.logo}>
           <Bot size={48} strokeWidth={1.5} />
-          <h1>{bot_name}</h1>
+          <h1>Nexo Admin</h1>
           <span className={styles.badge}>Admin Panel</span>
         </div>
 

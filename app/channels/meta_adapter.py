@@ -67,7 +67,9 @@ class MetaWebhookPayload(BaseModel):
 # Funções de parsing
 # ========================================
 
-def parse_instagram_dm(entry: MetaMessagingEntry) -> Optional[NormalizedInboundEvent]:
+def parse_instagram_dm(
+    entry: MetaMessagingEntry, page_id: str
+) -> Optional[NormalizedInboundEvent]:
     """
     Parseia DM do Instagram.
     
@@ -92,11 +94,14 @@ def parse_instagram_dm(entry: MetaMessagingEntry) -> Optional[NormalizedInboundE
         text=entry.message.text or "",
         has_media=bool(entry.message.attachments),
         thread_id=thread_id,
+        page_id=page_id,
         author_platform_id=sender_id,
     )
 
 
-def parse_facebook_dm(entry: MetaMessagingEntry) -> Optional[NormalizedInboundEvent]:
+def parse_facebook_dm(
+    entry: MetaMessagingEntry, page_id: str
+) -> Optional[NormalizedInboundEvent]:
     """
     Parseia DM do Facebook Messenger.
     
@@ -121,11 +126,14 @@ def parse_facebook_dm(entry: MetaMessagingEntry) -> Optional[NormalizedInboundEv
         text=entry.message.text or "",
         has_media=bool(entry.message.attachments),
         thread_id=thread_id,
+        page_id=page_id,
         author_platform_id=sender_id,
     )
 
 
-def parse_instagram_comment(change: MetaCommentChange) -> Optional[NormalizedInboundEvent]:
+def parse_instagram_comment(
+    change: MetaCommentChange, page_id: str
+) -> Optional[NormalizedInboundEvent]:
     """
     Parseia comentário do Instagram.
     
@@ -153,6 +161,7 @@ def parse_instagram_comment(change: MetaCommentChange) -> Optional[NormalizedInb
         surface_type=SurfaceType.PUBLIC_COMMENT,
         text=text,
         has_media=False,
+        page_id=page_id,
         post_id=post_id,
         comment_id=comment_id,
         parent_comment_id=parent_id,
@@ -160,7 +169,9 @@ def parse_instagram_comment(change: MetaCommentChange) -> Optional[NormalizedInb
     )
 
 
-def parse_facebook_comment(change: MetaCommentChange) -> Optional[NormalizedInboundEvent]:
+def parse_facebook_comment(
+    change: MetaCommentChange, page_id: str
+) -> Optional[NormalizedInboundEvent]:
     """
     Parseia comentário do Facebook.
     
@@ -192,6 +203,7 @@ def parse_facebook_comment(change: MetaCommentChange) -> Optional[NormalizedInbo
         surface_type=SurfaceType.PUBLIC_COMMENT,
         text=text,
         has_media=False,
+        page_id=page_id,
         post_id=post_id,
         comment_id=comment_id,
         parent_comment_id=parent_id,
@@ -220,13 +232,14 @@ def parse_meta_webhook(payload: dict) -> List[NormalizedInboundEvent]:
     is_instagram = webhook.object == "instagram"
     
     for entry in webhook.entry:
+        page_id = entry.id
         # Processa DMs
         if entry.messaging:
             for msg_entry in entry.messaging:
                 if is_instagram:
-                    event = parse_instagram_dm(msg_entry)
+                    event = parse_instagram_dm(msg_entry, page_id)
                 else:
-                    event = parse_facebook_dm(msg_entry)
+                    event = parse_facebook_dm(msg_entry, page_id)
                 
                 if event:
                     events.append(event)
@@ -235,9 +248,9 @@ def parse_meta_webhook(payload: dict) -> List[NormalizedInboundEvent]:
         if entry.changes:
             for change in entry.changes:
                 if is_instagram:
-                    event = parse_instagram_comment(change)
+                    event = parse_instagram_comment(change, page_id)
                 else:
-                    event = parse_facebook_comment(change)
+                    event = parse_facebook_comment(change, page_id)
                 
                 if event:
                     events.append(event)

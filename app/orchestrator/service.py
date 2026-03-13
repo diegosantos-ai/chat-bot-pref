@@ -53,6 +53,7 @@ from app.services.mailer import mailer  # noqa: E402
 from app.repositories.meta_user_profile_repository import meta_user_profile_repository  # noqa: E402
 from app.integrations.meta.client import get_meta_client  # noqa: E402
 from app.models.meta_user_profile import MetaUserProfileCreate  # noqa: E402
+from app import tenant_context  # noqa: E402
 
 # NLP - Análise de sentimentos e expansão de queries
 from app.nlp.sentiment import analyze_sentiment  # noqa: E402
@@ -121,6 +122,7 @@ class OrchestratorService:
             request_id=str(uuid4()),
             external_message_id=request.external_message_id,
             session_id=request.session_id,
+            tenant_id=request.tenant_id or tenant_context.get_tenant(),
             surface=request.surface_type,
             channel=request.channel,
             user_message=request.message,

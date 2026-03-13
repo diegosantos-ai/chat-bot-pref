@@ -104,15 +104,14 @@ async def _process_event(
     orchestrator = get_orchestrator()
 
     from app.contracts.dto import ChatRequest
-    from datetime import datetime
 
     chat_request = ChatRequest(
         session_id=event.session_id,
         message=event.text or "",
+        tenant_id=tenant_id,
         channel=event.channel,
         surface_type=event.surface_type,
         external_message_id=event.external_message_id,
-        timestamp=datetime.utcnow(),
     )
 
     try:
@@ -133,6 +132,8 @@ async def _process_event(
             "[WEBHOOK] Erro ao processar evento tenant=%s page=%s msg=%s",
             tenant_id, page_id, event.external_message_id,
         )
+    finally:
+        tenant_context.clear_tenant()
 
 
 # ────────────────────────────────────────────────────
@@ -211,19 +212,24 @@ async def webhook_receive(
     # Despacha apenas eventos de páginas com tenant resolvido
     dispatched = 0
     for event in events:
-        # O page_id do evento está codificado no session_id (ex: "instagram_dm:{sender}")
-        # mas o entry.id (page_id) foi resolvido acima. Verificamos se há tenant para despachar.
-        # Como o evento vem de uma entry específica, buscamos o primeiro tenant disponível
-        # Para mono-entry payloads (caso comum), isso é direto.
-        if not page_ids:
+        if not event.page_id:
+            logger.warning(
+                "[WEBHOOK] Evento sem page_id normalizado: msg=%s canal=%s",
+                event.external_message_id,
+                event.channel,
+            )
             continue
 
-        # Usa o tenant da única (ou primeira) página do payload
-        # Multi-página no mesmo payload é raro na prática (Meta geralmente envia um entry por vez)
-        tenant_id = next(iter(page_ids.values()))
-        page_id = next(iter(page_ids.keys()))
+        tenant_id = page_ids.get(event.page_id)
+        if not tenant_id:
+            logger.warning(
+                "[WEBHOOK] Evento ignorado por page_id sem tenant resolvido: page=%s msg=%s",
+                event.page_id,
+                event.external_message_id,
+            )
+            continue
 
-        background_tasks.add_task(_process_event, event, tenant_id, page_id)
+        background_tasks.add_task(_process_event, event, tenant_id, event.page_id)
         dispatched += 1
 
     logger.info("[WEBHOOK] %d eventos despachados para %d tenants", dispatched, len(page_ids))

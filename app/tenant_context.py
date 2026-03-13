@@ -27,6 +27,11 @@ def set_tenant(tenant_id: str) -> None:
     _tenant_id_var.set(tenant_id)
 
 
+def clear_tenant() -> None:
+    """Limpa o tenant ativo do contexto da coroutine corrente."""
+    _tenant_id_var.set(None)
+
+
 def get_tenant() -> Optional[str]:
     """Retorna o tenant ativo. Retorna None se não configurado."""
     return _tenant_id_var.get()

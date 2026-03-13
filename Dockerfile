@@ -1,5 +1,4 @@
-# Base: Python slim
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -7,17 +6,11 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# Sistema: build essentials para asyncpg
-RUN apt-get update && apt-get install -y build-essential libpq-dev && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-COPY . .
-
-# Variáveis padrão (sobrescrever em runtime)
-ENV LOG_LEVEL=INFO \
-    LOG_JSON=true
+COPY app ./app
+COPY .env.example ./.env.example
 
 EXPOSE 8000
 

@@ -1,459 +1,241 @@
 # Arquitetura do Projeto
 
-## 1. Visão geral
+## 1. Visao geral
+
+Este documento descreve a arquitetura real da base ativa do Chat Pref.
+
+O `README.md` continua mantendo a stack-alvo do case. Aqui, a prioridade e registrar:
+
+- o runtime ativo hoje
+- os contratos ja validados
+- o que ainda e apenas evolucao planejada
+
+## 2. Runtime ativo hoje
+
+O runtime ativo e um backend FastAPI minimo, com foco em:
+
+- contrato explicito de `tenant_id`
+- contexto de tenant por request
+- persistencia local em arquivo
+- auditoria minima por tenant
+- retrieval tenant-aware em Chroma
+- tenant demonstrativo versionado
+- execucao local e via Docker
+
+Rotas ativas no `app/main.py`:
+
+- `GET /`
+- `GET /health`
+- `POST /api/chat`
+- `POST /api/webhook`
+- `GET /api/rag/status`
+- `POST /api/rag/documents`
+- `POST /api/rag/ingest`
+- `POST /api/rag/query`
+- `POST /api/rag/reset`
+
+## 3. Componentes ativos do backend
 
-A arquitetura deste projeto foi estruturada para suportar uma plataforma de atendimento digital com IA aplicada ao setor público, com foco em processamento de mensagens, integração com canais externos, recuperação de contexto via RAG, auditoria operacional e evolução para um modelo multi-tenant.
+| Componente | Papel atual |
+| --- | --- |
+| `app/main.py` | bootstrap do FastAPI e registro dos routers ativos |
+| `app/api/chat.py` | entrada HTTP do chat direto com `tenant_id` explicito |
+| `app/api/webhook.py` | entrada HTTP do webhook minimo com resolucao controlada de tenant |
+| `app/api/rag.py` | operacoes de documentos, ingest, query, status e reset do RAG |
+| `app/api/health.py` | endpoints de raiz e healthcheck |
+| `app/services/chat_service.py` | fluxo principal atual de chat, retrieval e auditoria minima |
+| `app/services/rag_service.py` | operacoes do RAG por tenant |
+| `app/services/demo_tenant_service.py` | validacao e bootstrap do tenant demonstrativo |
+| `app/tenant_context.py` | injecao, leitura e limpeza do tenant no fluxo por request |
+| `app/tenant_resolver.py` | resolucao de tenant em fluxos externos simples |
+| `app/storage/chat_repository.py` | historico de conversa em arquivo por tenant |
+| `app/storage/audit_repository.py` | auditoria minima em arquivo por tenant |
+| `app/storage/document_repository.py` | persistencia de documentos da base RAG por tenant |
+| `app/storage/chroma_repository.py` | collections e retrieval no Chroma segregados por tenant |
 
-A solução utiliza um backend principal em FastAPI, componentes de classificação e policy guard, um pipeline de recuperação semântica com ChromaDB, persistência relacional com PostgreSQL, integrações com canais Meta e componentes auxiliares de administração, ingestão e observabilidade.
+## 4. Fluxo ativo atual
+
+### Chat direto
+
+1. `POST /api/chat` recebe `tenant_id` e `message`
+2. o endpoint injeta `tenant_id` no `tenant_context`
+3. `ChatService` confirma o tenant ativo
+4. o fluxo gera `request_id` e `session_id`
+5. o request e auditado
+6. o `RagService` consulta a collection do tenant
+7. a resposta e devolvida ao cliente
+8. historico e auditoria sao persistidos em arquivo
+
+### Webhook minimo
 
-A separação entre camadas foi pensada para permitir:
+1. `POST /api/webhook` recebe `tenant_id` explicito ou `page_id`
+2. o tenant e resolvido de forma controlada
+3. o endpoint injeta o tenant no contexto
+4. o fluxo reaproveita o mesmo `ChatService`
+5. a resposta volta em HTTP com o mesmo contrato funcional do chat
 
-* isolamento progressivo de responsabilidades
-* rastreabilidade do fluxo de decisão
-* evolução do projeto por etapas
-* refatoração controlada do legado mono-tenant para uma arquitetura multi-tenant mais consistente
+## 5. Persistencia ativa
 
----
+### Historico de conversa
+
+- repositorio ativo: `app/storage/chat_repository.py`
+- formato: JSONL
+- segregacao: `data/runtime/<tenant_id>/<session_id>.jsonl`
+
+### Auditoria
 
-## 2. Objetivo arquitetural
+- repositorio ativo: `app/storage/audit_repository.py`
+- formato: JSONL
+- segregacao: `data/runtime/audit/<tenant_id>/<session_id>.jsonl`
+- schema ativo hoje: `AuditEventRecord`
 
-A arquitetura precisa suportar um fluxo de atendimento institucional baseado em IA, com capacidade de:
+Campos atuais do `AuditEventRecord`:
 
-* receber mensagens de diferentes canais
-* classificar intenção e aplicar guardrails antes da geração de resposta
-* recuperar contexto a partir de uma base de conhecimento
-* gerar respostas informativas com escopo controlado
-* registrar auditoria e métricas do processamento
-* evoluir para isolamento por tenant em dados, configuração e base semântica
-
-Além de funcionar, a arquitetura também precisa provar:
-
-* capacidade de composição entre backend, RAG, integração externa e observabilidade
-* preocupação com governança, compliance e rastreabilidade
-* maturidade de refatoração de um sistema funcional para um modelo mais robusto
-
-As principais decisões arquiteturais buscaram simplicidade operacional, clareza de módulos e separação de papéis, evitando transformar o projeto em uma colcha de retalhos ainda mais caótica do que o inevitável em sistemas que cresceram por iteração acelerada.
-
----
-
-## 3. Componentes principais
-
-| Componente                            | Função                         | Responsabilidade                                                                |
-| ------------------------------------- | ------------------------------ | ------------------------------------------------------------------------------- |
-| `app/main.py`                         | Bootstrap da aplicação         | Inicialização do FastAPI, middlewares, rotas, scheduler e instrumentação        |
-| `app/api/`                            | Camada de entrada HTTP         | Expor endpoints de chat, webhook, analytics, deploy, admin e painel             |
-| `app/orchestrator/service.py`         | Orquestração principal         | Coordenar classificação, policy guard, RAG, fallback e geração de resposta      |
-| `app/classifier/service.py`           | Classificação de intenção      | Detectar intent por regex e LLM                                                 |
-| `app/policy_guard/service.py`         | Guardrails                     | Aplicar regras de segurança, bloqueio, redirecionamento e validação de resposta |
-| `app/rag/retriever.py`                | Recuperação semântica          | Buscar chunks relevantes no ChromaDB com base no tenant ativo                   |
-| `app/rag/composer.py`                 | Geração de resposta contextual | Montar contexto e chamar o modelo LLM                                           |
-| `app/audit/`                          | Auditoria                      | Registrar eventos de processamento e rastreabilidade                            |
-| `app/tenant_context.py`               | Contexto de tenant             | Propagar `tenant_id` no fluxo assíncrono                                        |
-| `app/tenant_resolver.py`              | Resolução de tenant            | Resolver tenant a partir de contexto externo, como `page_id`                    |
-| `app/channels/`                       | Integração com canais          | Adaptar payloads externos e enviar mensagens de saída                           |
-| `db/`                                 | Persistência relacional        | Schema, migrations e suporte a RLS                                              |
-| `admin-panel/`                        | Interface administrativa       | Operação e configuração auxiliar da plataforma                                  |
-| `logging/`, `dashboards/`, `grafana/` | Observabilidade                | Coleta, visualização e suporte operacional                                      |
-
----
-
-## 4. Fluxo geral da solução
-
-### Fluxo resumido
-
-1. A aplicação recebe mensagens via endpoint interno (`/api/chat`) ou webhook externo (`/webhook/meta`).
-2. O fluxo resolve ou deveria resolver explicitamente o contexto de tenant.
-3. A mensagem é normalizada, classificada e submetida ao `policy_guard`.
-4. Se permitida, a consulta segue para recuperação RAG e composição da resposta.
-5. A resposta passa por validação posterior, auditoria, métricas e envio/retorno.
-6. Os eventos do sistema podem ser acompanhados por logs, métricas e dashboards operacionais.
-
-### Fluxo detalhado atual
-
-1. **Entrada**
-
-   * `chat.py` recebe requisições diretas
-   * `webhook.py` recebe eventos da Meta
-2. **Resolução de contexto**
-
-   * no webhook, há tentativa de resolver `page_id -> tenant_id`
-   * no chat direto, esse contrato ainda precisa ser consolidado
-3. **Pipeline**
-
-   * normalização NLP
-   * detecção de formalidade e sentimento
-   * classificação de intent
-   * avaliação `policy_pre`
-4. **RAG**
-
-   * expansão de query
-   * retrieval semântico
-   * composição da resposta com LLM
-   * avaliação `policy_post`
-5. **Saída**
-
-   * resposta HTTP ou envio via canal Meta
-6. **Rastreabilidade**
-
-   * auditoria
-   * analytics
-   * métricas Prometheus
-   * logging estruturado
-
----
-
-## 5. Estrutura física / lógica
-
-### Diretórios principais
-
-```text
-chat-bot-pref/
-├── app/
-│   ├── api/
-│   ├── audit/
-│   ├── channels/
-│   ├── classifier/
-│   ├── contracts/
-│   ├── integrations/
-│   ├── nlp/
-│   ├── orchestrator/
-│   ├── policy_guard/
-│   ├── prompts/
-│   ├── rag/
-│   ├── repositories/
-│   ├── services/
-│   ├── main.py
-│   ├── settings.py
-│   ├── tenant_context.py
-│   └── tenant_resolver.py
-├── admin-panel/
-├── db/
-│   ├── migrations/
-│   └── schema.sql
-├── docs/
-├── dashboards/
-├── logging/
-├── grafana/
-├── scripts/
-├── docker-compose.yml
-├── docker-compose.local.yml
-└── README.md
-```
-
-### Papéis dos diretórios
-
-* `app/`: núcleo da aplicação backend
-* `app/api/`: camada HTTP e pontos de entrada
-* `app/orchestrator/`: coordenação do fluxo principal
-* `app/rag/`: recuperação semântica, embeddings e composição
-* `app/channels/`: integração com canais externos
-* `app/audit/`: persistência de auditoria
-* `app/services/`: serviços auxiliares
-* `db/`: modelagem e evolução do banco relacional
-* `admin-panel/`: interface operacional
-* `docs/`: documentação técnica e operacional
-* `logging/`, `dashboards/`, `grafana/`: componentes de observabilidade
-* `scripts/`: automações e utilitários de manutenção
-
----
+- `request_id`
+- `tenant_id`
+- `session_id`
+- `event_type`
+- `payload`
+- `created_at`
 
-## 6. Camadas da arquitetura
-
-### Camada 1 — Entrada e interface
+### Base documental e retrieval
 
-**Responsabilidade:**
-Receber requisições HTTP, validar payloads, expor endpoints administrativos e integrar eventos externos ao backend.
+- documentos persistidos por tenant
+- collections do Chroma separadas por tenant
+- o chat usa a collection do tenant ativo
+- historico de conversa nao e promovido automaticamente para base RAG
 
-**Principais arquivos:**
+## 6. Contratos arquiteturais ativos
 
-* `app/main.py`
-* `app/api/chat.py`
-* `app/api/webhook.py`
-* `app/api/admin.py`
-* `app/api/analytics.py`
-* `app/api/deploy.py`
-* `admin-panel/`
+- `tenant_id` e obrigatorio nos fluxos criticos
+- ausencia de tenant gera erro controlado
+- webhook nao usa tenant default silencioso
+- persistencia e retrieval devem respeitar segregacao por tenant
+- `request_id` ja existe no fluxo de chat e na auditoria minima
+- o runtime atual continua usando persistencia local em arquivo
 
-**Cuidados:**
+## 7. Componentes fora do runtime ativo atual
 
-* contratos de entrada precisam ser consistentes
-* o fluxo de tenant ainda precisa ser explicitado melhor no chat direto
-* validações de segurança não podem depender apenas da camada HTTP
+Os itens abaixo podem existir como narrativa do case, artefato antigo ou objetivo futuro, mas nao fazem parte do runtime minimo validado hoje:
 
----
+- `app/orchestrator/service.py`
+- `app/classifier/service.py`
+- `app/policy_guard/service.py`
+- `app/audit/` como modulo-fonte ativo
+- analytics e deploy como routers ativos
+- webhook Meta especifico como canal validado
+- pipeline completo de logs estruturados, Prometheus, Grafana e Loki
+- PostgreSQL e Redis como dependencias operacionais do runtime atual
 
-### Camada 2 — Orquestração e regras de negócio
+Quando estes elementos voltarem ao projeto, devem ser reintroduzidos como implementacao nova e validada, nao como heranca assumida.
 
-**Responsabilidade:**
-Controlar o fluxo de decisão, aplicar políticas, classificar mensagens, acionar RAG, tratar fallback e coordenar a resposta final.
+## 8. Eixo planejado: Guardrail Rastreavel
 
-**Principais arquivos:**
+As Fases 9 a 12 passam a carregar um eixo transversal de guardrail rastreavel.
 
-* `app/orchestrator/service.py`
-* `app/classifier/service.py`
-* `app/policy_guard/service.py`
-* `app/nlp/*`
-* `app/prompts/*`
+Objetivo:
 
-**Cuidados:**
+- tornar a trilha de decisao auditavel
+- correlacionar request, tenant, canal, logs e traces
+- registrar guardrails com vocabulario minimo consistente
 
-* evitar acoplamento excessivo dentro do orchestrator
-* impedir duplicação de retrieval ou decisões divergentes
-* manter rastreabilidade entre classificação, política, recuperação e resposta
+Modelo de correlacao planejado:
 
----
+- `request_id`
+- `tenant_id`
+- `session_id`
+- `channel`
 
-### Camada 3 — Recuperação, persistência e contexto
+Evolucoes planejadas:
 
-**Responsabilidade:**
-Resolver tenant, acessar armazenamento semântico e relacional, registrar auditoria e sustentar o contexto de execução.
+- `PolicyDecision` padronizado
+- `AuditEvent` versionado
+- `policy_pre`
+- `policy_post`
+- composicao generativa controlada
+- `reason_codes`
+- prompts e politicas versionados
+- logs estruturados
+- `/metrics`
+- OpenTelemetry
 
-**Principais arquivos:**
+Esses itens ainda nao fazem parte do runtime atual. Os documentos normativos desse eixo sao:
 
-* `app/rag/retriever.py`
-* `app/rag/composer.py`
-* `app/tenant_context.py`
-* `app/tenant_resolver.py`
-* `app/audit/repository.py`
-* `db/schema.sql`
-* `db/migrations/*`
+- `docs/guardrail_rastreavel.md`
+- `docs/genai_com_metodo.md`
 
-**Cuidados:**
+### Arquitetura-alvo das Fases 10 a 12
 
-* o multi-tenant precisa ser consistente ponta a ponta
-* não pode haver fallback silencioso para tenant/base default
-* RLS, collection por tenant e contexto assíncrono precisam permanecer alinhados
+A partir da Fase 10, o projeto deixa de ser apenas retrieval-first e passa a demonstrar GenAI controlada.
 
----
+Pipeline alvo:
 
-### Camada 4 — Integrações e operação
+1. entrada HTTP ou Telegram
+2. resolucao de `tenant_id`
+3. `policy_pre`
+4. retrieval tenant-aware
+5. composicao generativa sobre o contexto recuperado
+6. `policy_post`
+7. auditoria versionada
+8. logs estruturados, metricas e traces
+9. resposta final
 
-**Responsabilidade:**
-Conectar o sistema a serviços externos, administrar envio de mensagens, observabilidade, deploy e manutenção operacional.
+Regras dessa arquitetura-alvo:
 
-**Principais arquivos:**
+- a composicao generativa nao deve bypassar retrieval e policy
+- o adaptador LLM deve ficar isolado da logica de transporte
+- prompt base, prompt de fallback e politica textual devem ser versionados
+- a trilha deve permanecer correlacionavel por `request_id`, `tenant_id`, `session_id` e `channel`
+- a observabilidade da Fase 11 deve observar o pipeline completo, nao apenas HTTP
 
-* `app/channels/meta_adapter.py`
-* `app/channels/meta_sender.py`
-* `app/services/*`
-* `docker-compose.yml`
-* `logging/*`
-* `dashboards/*`
-* `grafana/*`
+## 9. Evolucao planejada por fase
 
-**Cuidados:**
+### Fase 9 — Telegram
 
-* evitar hardcodes de domínio, path e credencial
-* manter a operação desacoplada da identidade histórica do projeto
-* garantir que scripts e configuração reflitam a arquitetura atual
+- integrar o tenant demonstrativo a um canal Telegram
+- manter consistencia funcional com `POST /api/chat`
+- adicionar auditoria correlacionada do canal
 
----
+### Fase 10 — Composicao generativa, guardrails e evidencias
 
-## 7. Decisões arquiteturais
+- introduzir a composicao generativa minima controlada
+- isolar o adaptador de provedor LLM
+- versionar prompt base, prompt de fallback e politica textual
+- introduzir `PolicyDecision`
+- versionar o schema de auditoria
+- executar `policy_pre` e `policy_post`
+- registrar evidencias por `request_id`
 
-### Decisão 1 — Adotar FastAPI como núcleo da aplicação
+### Fase 11 — Observabilidade aplicada
 
-**Contexto:**
-O projeto precisava de uma API clara, modular e adequada a integrações HTTP e webhook.
+- expor `/metrics`
+- adicionar logs estruturados correlacionados
+- instrumentar traces com OpenTelemetry
+- consolidar a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
 
-**Decisão tomada:**
-Utilizar FastAPI como camada central do backend.
+### Fase 12 — CI
 
-**Motivo:**
-Boa produtividade, organização por routers, integração natural com tipagem e modelos de dados.
+- automatizar regressao dos contratos de correlacao
+- validar schema de auditoria
+- bloquear pipeline em falhas relevantes
 
-**Impacto:**
-Facilitou a organização do backend e a expansão de endpoints.
+## 10. Validacao arquitetural
 
-**Risco:**
-Se a lógica de negócio crescer demais nos endpoints ou no orchestrator, a aplicação pode se tornar difícil de manter.
+Validacoes minimas desta base:
 
----
+- startup do backend
+- `GET /`
+- `GET /health`
+- `POST /api/chat`
+- `POST /api/webhook`
+- fluxo tenant-aware
+- persistencia por tenant
+- auditoria por tenant
+- smoke local e via Docker
 
-### Decisão 2 — Centralizar o fluxo de decisão no `OrchestratorService`
+## 11. Regras de manutencao do documento
 
-**Contexto:**
-Era necessário coordenar classificação, política, RAG, fallback e resposta em um fluxo único.
-
-**Decisão tomada:**
-Criar um orquestrador principal para o pipeline.
-
-**Motivo:**
-Concentrar o fluxo e manter uma trilha de execução mais visível.
-
-**Impacto:**
-Facilitou o entendimento do pipeline fim a fim.
-
-**Risco:**
-O orchestrator pode se tornar um ponto de acoplamento excessivo se continuar acumulando responsabilidades.
-
----
-
-### Decisão 3 — Evoluir o projeto para multi-tenant com `tenant_context` + RLS + collection por tenant
-
-**Contexto:**
-O projeto começou orientado a um único cliente e passou a exigir isolamento para múltiplos tenants.
-
-**Decisão tomada:**
-Adotar `contextvars` para contexto de tenant, RLS no PostgreSQL e collections separadas no ChromaDB.
-
-**Motivo:**
-Permitir isolamento lógico e físico coerente com o modelo white-label.
-
-**Impacto:**
-Criou uma base técnica mais sólida para o futuro multi-tenant.
-
-**Risco:**
-A migração ainda está incompleta em todos os fluxos, especialmente onde o tenant não entra de forma explícita.
-
----
-
-### Decisão 4 — Usar policy guard em fases PRE e POST
-
-**Contexto:**
-Era necessário impedir respostas inadequadas e controlar riscos em contexto institucional.
-
-**Decisão tomada:**
-Aplicar validação antes e depois da geração de resposta.
-
-**Motivo:**
-Reduzir risco de conteúdo impróprio, clínico, ofensivo ou fora de escopo.
-
-**Impacto:**
-Melhorou governança e previsibilidade do comportamento.
-
-**Risco:**
-Regras excessivamente acopladas ou heurísticas frágeis podem gerar falsos positivos ou silenciosamente bloquear casos legítimos.
-
----
-
-### Decisão 5 — Separar retriever e composer no RAG
-
-**Contexto:**
-A recuperação semântica e a geração de resposta têm responsabilidades distintas.
-
-**Decisão tomada:**
-Manter módulos separados para retrieval e composição.
-
-**Motivo:**
-Facilitar manutenção, teste e evolução independente.
-
-**Impacto:**
-A estrutura ficou mais organizada para raciocínio modular.
-
-**Risco:**
-Sem contrato bem definido, pode haver duplicação de trabalho entre orquestração e composição.
-
----
-
-## 8. Configurações críticas
-
-| Arquivo / área                | Motivo de criticidade                             | Risco de alteração incorreta                                        |
-| ----------------------------- | ------------------------------------------------- | ------------------------------------------------------------------- |
-| `app/settings.py`             | Centraliza configuração do backend                | ambiente inconsistente, defaults perigosos, falhas de inicialização |
-| `app/main.py`                 | Define bootstrap, middlewares e routers           | quebra global da aplicação                                          |
-| `app/api/webhook.py`          | Entrada de eventos externos e resolução de tenant | processamento incorreto, segurança frágil, tenant errado            |
-| `app/orchestrator/service.py` | Pipeline principal de decisão                     | regressão funcional ampla                                           |
-| `app/rag/retriever.py`        | Resolve collection e retrieval contextual         | vazamento lógico entre tenants ou falha de resposta                 |
-| `app/audit/repository.py`     | Registra trilha de auditoria                      | perda de rastreabilidade e inconsistência em RLS                    |
-| `docker-compose.yml`          | Define ambiente de execução local/operacional     | falhas de subida e integração entre serviços                        |
-| `.env`                        | Armazena segredos e parâmetros sensíveis          | vazamento de credenciais e comportamento imprevisível               |
-| `admin_config.json`           | Afeta parâmetros efetivos do RAG                  | divergência entre ambiente e comportamento real                     |
-
----
-
-## 9. Estratégia de execução e validação
-
-A arquitetura é validada por execução incremental, inspeção dos fluxos principais, subida da aplicação e verificação dos componentes críticos.
-
-### Validações esperadas
-
-* a aplicação sobe sem dependências legadas indevidas
-* endpoints principais continuam acessíveis
-* webhook processa eventos com tenant resolvido corretamente
-* retrieval usa collection compatível com o tenant ativo
-* logs e métricas continuam disponíveis após refatorações
-* documentação e estrutura permanecem coerentes com o código real
-
-### Comandos de apoio
-
-* `git status`
-* `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`
-* `pytest`
-* `grep -Rni "pilot-atendimento\|santa tereza\|BA-RAG-PILOTO\|terezia" .`
-* comandos de subida do compose e validação dos serviços auxiliares
-
----
-
-## 10. Integrações externas
-
-| Integração                  | Tipo                 | Finalidade                                                   |
-| --------------------------- | -------------------- | ------------------------------------------------------------ |
-| Meta Graph API              | API externa          | Receber eventos e enviar mensagens para Instagram/Facebook   |
-| Google Gemini               | API externa          | Classificação e geração de resposta                          |
-| ChromaDB                    | serviço de vetor     | Armazenar e recuperar base semântica                         |
-| PostgreSQL                  | banco relacional     | Persistência transacional, auditoria e suporte a RLS         |
-| Redis                       | cache/infra auxiliar | suporte operacional e futura expansão                        |
-| SMTP                        | serviço externo      | notificações e fallback operacional                          |
-| Google Drive                | serviço externo      | ingestão e sincronização de conteúdo em cenários específicos |
-| Prometheus / Grafana / Loki | observabilidade      | métricas, logs e visualização operacional                    |
-
----
-
-## 11. Segurança e cuidados operacionais
-
-### Onde existem secrets
-
-* `.env`
-* credenciais de Meta
-* chaves de API de LLM
-* credenciais de banco, Redis, SMTP e AWS
-* arquivos auxiliares de credenciais locais, quando existirem
-
-### Como variáveis sensíveis são tratadas
-
-* prioritariamente via ambiente
-* com suporte opcional a AWS Secrets Manager
-* sem hardcode direto no código de runtime
-
-### O que não deve ir para Git
-
-* `.env`
-* credenciais de serviço
-* chaves privadas
-* bases sensíveis
-* artefatos gerados com dados reais
-* ambientes `venv` e `.venv`
-* arquivos locais de sessão, cookies ou dumps operacionais
-
-### O que precisa ser protegido
-
-* segredos de integração
-* dados de tenants
-* trilhas de auditoria
-* configuração operacional efetiva
-* scripts que possam expor paths, domínios ou estruturas internas
-
----
-
-## 12. Limitações atuais
-
-* a arquitetura multi-tenant ainda não está consolidada de forma uniforme em todos os fluxos
-* parte do projeto ainda carrega resíduos de legado mono-tenant
-* existem sinais de acoplamento excessivo no orchestrator
-* a estratégia de avaliação formal do RAG ainda não está madura
-* painel, scripts e backend ainda precisam convergir para um contrato de configuração mais limpo
-* parte da documentação ainda precisa ser ajustada ao estado real do código
-
----
-
-## 13. Evoluções previstas
-
-* tornar `tenant_id` um contrato explícito ponta a ponta na arquitetura
-* desacoplar ainda mais orquestração, recuperação e composição de resposta
-* consolidar ingest e administração tenant-aware
-* ampliar avaliação de RAG com métricas formais e datasets controlados
-* fortalecer observabilidade aplicada ao pipeline de IA
-* evoluir a plataforma para um case mais robusto de backend + IA + governança para contexto público
-
-
+- descrever como presente apenas o que esta no runtime validado
+- marcar como planejado o que ainda depende das Fases 9 a 12
+- preservar coerencia com `README.md`, `docs/contexto.md` e `docs/planejamento_fases.md`
+- atualizar o documento sempre que um contrato de runtime mudar de fato

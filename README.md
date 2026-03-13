@@ -264,8 +264,8 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
-**Fase ativa na branch:** Fase 7 — Construção do tenant demonstrativo fictício.
-**Status da fase na branch:** concluída e validada localmente.
+**Fase ativa na branch:** Fase 8 — Construção da base documental fictícia e ingest limpa.
+**Status da fase na branch:** iniciada na branch de trabalho.
 
 ### Já existe
 

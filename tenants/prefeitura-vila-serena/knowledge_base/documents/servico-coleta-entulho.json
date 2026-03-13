@@ -1,0 +1,16 @@
+{
+  "id": "servico-coleta-entulho",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Coleta Seletiva e Recolhimento de Entulho",
+  "content": "A coleta seletiva em Vila Serena ocorre em dias alternados por bairro, conforme cronograma divulgado pela Secretaria de Limpeza Urbana. Materiais reciclaveis devem ser separados e colocados para coleta ate as 7h do dia programado.\n\nO recolhimento de entulho residencial de pequeno volume depende de agendamento previo pela Limpeza Urbana ou pelo Protocolo Geral. O limite orientativo e de ate 1 metro cubico por solicitacao, e nao sao recolhidos residuos perigosos, hospitalares ou restos de poda em grande quantidade sem analise especifica.",
+  "keywords": [
+    "limpeza",
+    "coleta",
+    "entulho",
+    "agendamento"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

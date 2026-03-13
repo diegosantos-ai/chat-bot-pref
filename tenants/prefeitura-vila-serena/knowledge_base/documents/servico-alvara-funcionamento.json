@@ -1,0 +1,16 @@
+{
+  "id": "servico-alvara-funcionamento",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Alvara de Funcionamento para Comercio de Baixo Risco",
+  "content": "Pedidos de alvara para comercio de baixo risco devem ser iniciados na Sala do Empreendedor ou pelo Protocolo Geral, conforme a natureza da atividade. O atendimento inicial ocorre de segunda a sexta, das 8h as 16h.\n\nPara solicitar alvara de funcionamento, a prefeitura orienta apresentar CPF ou CNPJ, inscricao imobiliaria do imovel, comprovante de endereco do estabelecimento, descricao da atividade pretendida e contato do responsavel. Depois da conferencia cadastral, o pedido segue para analise administrativa com prazo estimado de ate 5 dias uteis.",
+  "keywords": [
+    "alvara",
+    "comercio",
+    "empreendedor",
+    "documentos"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "atendimento-canais-oficiais",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Central de Atendimento Presencial e Canais Oficiais",
+  "content": "A Central de Atendimento ao Cidadao da Prefeitura Municipal de Vila Serena funciona de segunda a sexta, das 8h as 17h, com distribuicao de senhas ate as 16h30. O atendimento presencial e realizado na Praca das Palmeiras, 100, Centro Administrativo.\n\nOs canais oficiais de orientacao sao o telefone (88) 4002-2020, o e-mail atendimento@vilaserena.gov.exemplo e o portal www.vilaserena.gov.exemplo. Demandas sobre servicos especificos podem ser triadas pela central antes do encaminhamento ao setor responsavel.",
+  "keywords": [
+    "atendimento",
+    "canais",
+    "horario",
+    "contato"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "CONTACT_INFO"
+  ]
+}

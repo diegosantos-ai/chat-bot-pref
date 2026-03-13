@@ -32,12 +32,25 @@ Ele nao pode:
 - `webhook_page_id`: `page-demo-vila-serena`
 - base documental versionada neste bundle e materializada no runtime por script explicito
 
-## Estrutura documental inicial
+## Estrutura documental
 
-Este bundle inclui tres documentos iniciais:
+Este bundle inclui uma base documental enxuta e organizada em quatro grupos:
 
-- identidade institucional
-- escopo informativo do assistente
-- limites operacionais e disclaimer
+- institucional
+- atendimento
+- servicos municipais prioritarios
+- FAQ e procedimentos informativos
 
-O objetivo desta base inicial nao e cobrir toda a prefeitura ficticia, e sim oferecer uma fundacao coerente para ingest, demonstracao e evolucao das fases seguintes.
+Temas cobertos na base atual:
+
+- identidade institucional e limites do assistente
+- central de atendimento e canais oficiais
+- protocolo geral e documentos basicos
+- alvara de funcionamento
+- IPTU e certidoes imobiliarias
+- UBS e vacinacao
+- matricula e transferencia escolar
+- coleta seletiva e recolhimento de entulho
+- FAQ de servicos digitais
+
+As perguntas controladas de retrieval ficam em `knowledge_base/retrieval_checks.json` e servem como evidencia objetiva do comportamento esperado do RAG nas validacoes da fase.

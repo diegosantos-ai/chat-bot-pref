@@ -262,6 +262,11 @@ chat-bot-pref/
 
 O projeto está em **refatoração estrutural com foco em demonstração funcional**.
 
+Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
+
+**Fase ativa na branch:** Fase 5 — Containerização e ambiente local reproduzível.
+**Status da fase na branch:** concluída e validada para integração em `develop`.
+
 ### Já existe
 
 * backend funcional em FastAPI
@@ -276,7 +281,6 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 * saneamento do legado mono-tenant
 * consolidação do contrato de `tenant_id`
 * reset da base RAG
-* containerização e ambiente local reproduzível
 * tenant fictício demonstrativo
 * canal real de demonstração via Telegram
 
@@ -389,6 +393,8 @@ Comandos simples devem ser suficientes para:
 * reproduzir o fluxo de demonstração
 
 > O detalhamento do ambiente local deve refletir o estado real do `Dockerfile` e do `docker-compose` vigente.
+
+Na fase atual, o bootstrap mínimo validado do backend está descrito em [docs/bootstrap_local.md](docs/bootstrap_local.md).
 
 ---
 

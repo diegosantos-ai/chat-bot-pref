@@ -157,7 +157,7 @@ Posso ajudar você com:
 
 ```bash
 # Reingestão necessária devido ao aumento do CHUNK_OVERLAP
-python -m app.rag.ingest data/knowledge_base/BA-RAG-PILOTO-2026.01.v1 --force
+python -m app.rag.ingest data/knowledge_base/default --force
 ```
 
 ### 2. Verificação de Configurações

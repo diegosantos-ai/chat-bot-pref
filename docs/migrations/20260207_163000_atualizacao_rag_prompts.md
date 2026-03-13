@@ -15,7 +15,7 @@
 ## Passos de aplicação no servidor
 1. Atualizar o código (git pull).
 2. Reingerir a base RAG:
-   - `python -m app.rag.ingest data/knowledge_base/BA-RAG-PILOTO-2026.01.v1 --force`
+   - `python -m app.rag.ingest data/knowledge_base/default --force`
 3. Reiniciar a API (para recarregar prompts em cache).
    - Se Docker: `docker-compose restart terezia`
    - Se systemd: `sudo systemctl restart terezia-api`

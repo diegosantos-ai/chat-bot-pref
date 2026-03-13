@@ -9,8 +9,10 @@ set -e
 
 GRAFANA_URL="http://localhost:3001"
 GRAFANA_USER="admin"
-GRAFANA_PASS="admin24052014"
-DASHBOARDS_DIR="/root/pilot-atendimento/dashboards"
+GRAFANA_PASS="${GRAFANA_PASS:-admin}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+DASHBOARDS_DIR="$PROJECT_DIR/dashboards"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'

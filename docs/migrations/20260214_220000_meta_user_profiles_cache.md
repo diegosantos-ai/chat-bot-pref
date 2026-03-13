@@ -177,11 +177,11 @@ Contato do Usuário: Session: 886304507365682
 **Depois:**
 ```
 Informações do Usuário
-• Contato: @prefeitura_sto (Prefeitura de {client_name})
+• Contato: @perfil_oficial (Prefeitura de {client_name})
 • Plataforma: INSTAGRAM
 • ID Interno: 886304507365682
 
-Para responder via Instagram/Facebook, procure pelo usuário: @prefeitura_sto
+Para responder via Instagram/Facebook, procure pelo usuário: @perfil_oficial
 ```
 
 ## Performance

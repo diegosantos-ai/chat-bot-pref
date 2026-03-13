@@ -6,9 +6,9 @@ Requires=postgresql.service docker.service
 [Service]
 Type=simple
 User=root
-WorkingDirectory=/root/pilot-atendimento
-Environment="PATH=/root/pilot-atendimento/venv/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-ExecStart=/root/pilot-atendimento/venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+WorkingDirectory=__PROJECT_DIR__
+Environment="PATH=__VENV_BIN__:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+ExecStart=__VENV_BIN__/uvicorn app.main:app --host 0.0.0.0 --port 8000
 Restart=always
 RestartSec=5s
 StandardOutput=syslog

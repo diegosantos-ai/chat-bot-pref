@@ -8,7 +8,9 @@ set -e
 
 GRAFANA_URL="http://localhost:3001"
 GRAFANA_USER="admin"
-GRAFANA_PASS="admin24052014"
+GRAFANA_PASS="${GRAFANA_PASS:-admin}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 echo "🔧 Configurando data source Loki no Grafana..."
 
@@ -66,7 +68,7 @@ else
 fi
 
 # Importar dashboard de logs (se existir)
-if [ -f "/root/pilot-atendimento/dashboards/terezia-logs-dashboard.json" ]; then
+if [ -f "$PROJECT_DIR/dashboards/terezia-logs-dashboard.json" ]; then
     echo ""
     echo "📈 Importando dashboard de logs..."
     
@@ -74,7 +76,7 @@ if [ -f "/root/pilot-atendimento/dashboards/terezia-logs-dashboard.json" ]; then
       -H "Content-Type: application/json" \
       -u "$GRAFANA_USER:$GRAFANA_PASS" \
       "$GRAFANA_URL/api/dashboards/db" \
-      -d @/root/pilot-atendimento/dashboards/terezia-logs-dashboard.json > /dev/null 2>&1
+      -d @"$PROJECT_DIR/dashboards/terezia-logs-dashboard.json" > /dev/null 2>&1
     
     echo "✅ Dashboard importado!"
 fi

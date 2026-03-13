@@ -10,7 +10,7 @@ Configuração e deploy do admin-panel em produção, disponível em /tereziadmi
 ### 1. Build do Admin Panel
 - Instaladas dependências npm
 - Build de produção executado com base path /tereziadmin/
-- Arquivos gerados em /root/pilot-atendimento/admin-panel/dist/
+- Arquivos gerados em /root/chat-bot-pref/admin-panel/dist/
 
 ### 2. Configuração do Vite (vite.config.ts)
 - Adicionado `base: '/tereziadmin/'` para que assets sejam carregados corretamente
@@ -63,12 +63,12 @@ location ^~ /tereziadmin {
 
 ## Comandos para Rebuild (quando necessário)
 ```bash
-cd /root/pilot-atendimento/admin-panel
+cd /root/chat-bot-pref/admin-panel
 npm run build
 
 # Copiar para o diretório web
 rm -rf /var/www/tereziadmin/*
-cp -r /root/pilot-atendimento/admin-panel/dist/* /var/www/tereziadmin/
+cp -r /root/chat-bot-pref/admin-panel/dist/* /var/www/tereziadmin/
 chown -R www-data:www-data /var/www/tereziadmin
 
 # Recarregar nginx

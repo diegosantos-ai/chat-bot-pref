@@ -20,7 +20,7 @@ if ! command -v gh &> /dev/null; then
     echo "Após instalar, autentique com: gh auth login"
     echo ""
     echo "Alternativamente, execute via interface web:"
-    echo "  https://github.com/diegosantos-ai/pilot-atendimento/actions/workflows/cleanup_branches.yml"
+    echo "  https://github.com/diegosantos-ai/chat-bot-pref/actions/workflows/cleanup_branches.yml"
     exit 1
 fi
 
@@ -51,15 +51,15 @@ echo "🚀 Iniciando workflow..."
 
 # Executar workflow
 gh workflow run cleanup_branches.yml \
-    --repo diegosantos-ai/pilot-atendimento \
+    --repo diegosantos-ai/chat-bot-pref \
     --field confirm=CONFIRM
 
 echo ""
 echo "✅ Workflow iniciado com sucesso!"
 echo ""
 echo "Acompanhe o progresso em:"
-echo "  https://github.com/diegosantos-ai/pilot-atendimento/actions"
+echo "  https://github.com/diegosantos-ai/chat-bot-pref/actions"
 echo ""
 echo "Ou via CLI:"
-echo "  gh run list --workflow=cleanup_branches.yml --repo diegosantos-ai/pilot-atendimento"
-echo "  gh run watch <run-id> --repo diegosantos-ai/pilot-atendimento"
+echo "  gh run list --workflow=cleanup_branches.yml --repo diegosantos-ai/chat-bot-pref"
+echo "  gh run watch <run-id> --repo diegosantos-ai/chat-bot-pref"

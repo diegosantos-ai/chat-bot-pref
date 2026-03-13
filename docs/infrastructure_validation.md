@@ -61,7 +61,7 @@ O script valida a presença das seguintes variáveis:
 
 **Variáveis Opcionais** (com valores padrão):
 - `CHROMA_PERSIST_DIR` - Diretório ChromaDB (padrão: `./chroma_data`)
-- `RAG_BASE_ID` - ID da base RAG (padrão: `BA-RAG-PILOTO-2026.01.v1`)
+- `RAG_BASE_ID` - ID da base RAG (padrão: `default`)
 - `GEMINI_MODEL` - Modelo Gemini (padrão: `gemini-2.0-flash`)
 - `ENV` - Ambiente de execução (padrão: `dev`)
 - `DEBUG` - Modo debug (padrão: `False`)

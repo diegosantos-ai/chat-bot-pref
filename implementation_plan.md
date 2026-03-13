@@ -58,9 +58,9 @@ As principais mudanças são:
 ## Proposed Changes
 
 ### 1. Ingestão de Conteúdo (RAG Base)
-Atualização completa dos arquivos Markdown na pasta `base/` com o conteúdo rico extraído de `docs/estudo.md`.
+Atualização completa dos arquivos Markdown na pasta `data/knowledge_base/default/` com o conteúdo rico extraído de `docs/estudo.md`.
 
-#### [base/BA-RAG-PILOTO-2026.01.v1/items](file:///c:/Users/santo/pilot-atendimento/base/BA-RAG-PILOTO-2026.01.v1/items)
+#### [data/knowledge_base/default/items](data/knowledge_base/default/items)
 *   #### [MODIFY] `0001_horarios.md`
     *   *Adicionar*: Tabela de horários de ônibus (Expresso {client_name}) e atualização de horários de secretarias.
 *   #### [MODIFY] `0002_contatos.md`
@@ -75,7 +75,7 @@ Atualização completa dos arquivos Markdown na pasta `base/` com o conteúdo ri
 ### 2. Engenharia de Prompts e Persona
 Ajuste nos prompts do sistema para alinhar tom de voz e regras de negócio.
 
-#### [prompts/v1](file:///c:/Users/santo/pilot-atendimento/prompts/v1)
+#### [prompts/v1](prompts/v1)
 *   #### [MODIFY] `system.txt`
     *   *Adicionar*: Instrução de "Linguagem Simples".
     *   *Adicionar*: Identidade "Sou uma IA em treinamento".
@@ -94,13 +94,13 @@ Ajuste nos prompts do sistema para alinhar tom de voz e regras de negócio.
 ### 3. Protocolos de Segurança (Policy Guard)
 Implementação Hardcoded (Python) ou via Prompts Específicos para os temas sensíveis.
 
-#### [prompts/v1](file:///c:/Users/santo/pilot-atendimento/prompts/v1)
+#### [prompts/v1](prompts/v1)
 *   #### [NEW] `crisis_suicide.txt`
     *   *Conteúdo*: Script do CVV/SAMU (Seção 5.1).
 *   #### [NEW] `crisis_violence.txt`
     *   *Conteúdo*: Script de Violência 180/190 (Seção 5.2).
 
-#### [app/policy_guard](file:///c:/Users/santo/pilot-atendimento/app/policy_guard)
+#### [app/policy_guard](app/policy_guard)
 *   #### [MODIFY] `service.py`
     *   *Lógica*: Detectar intents/keywords de crise e retornar os prompts estáticos acima *antes* de chamar o LLM.
 

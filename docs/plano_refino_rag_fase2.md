@@ -37,7 +37,7 @@
 - [ ] **Empatia/Reclamações:** Script para lidar com frustração e redirecionar para Ouvidoria.
 
 ## 2. Ações Técnicas
-- [ ] **Ingestão:** Reexecutar `python -m app.rag.ingest data/knowledge_base/BA-RAG-PILOTO-2026.01.v1`.
+- [ ] **Ingestão:** Reexecutar `python -m app.rag.ingest data/knowledge_base/default`.
 - [ ] **Validação:** Rodar `python scripts/run_validation_test.py` com foco nas perguntas de zeladoria e saúde que falhavam.
 
 ## 3. Matriz de Contatos Consolidada

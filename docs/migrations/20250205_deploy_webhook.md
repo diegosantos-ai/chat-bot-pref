@@ -79,7 +79,7 @@ curl -X POST https://nexobasis.com.br/tereziapi/updateAPI \
 
 Se necessário reverter:
 1. SSH no servidor
-2. `cd /root/pilot-atendimento && git checkout <commit_anterior>`
+2. `cd /root/chat-bot-pref && git checkout <commit_anterior>`
 3. `sudo systemctl restart terezia-api`
 
 ## Segurança

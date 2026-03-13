@@ -57,7 +57,7 @@ EMBEDDING_MAX_RETRIES=3
 
 1. Atualizar o `.env` do servidor com as novas variaveis (ou manter defaults).
 2. Se trocar `EMBEDDING_PROVIDER` ou modelo, reingerir a base:
-   - `python -m app.rag.ingest data/knowledge_base/BA-RAG-PILOTO-2026.01.v1 --force`
+   - `python -m app.rag.ingest data/knowledge_base/default --force`
 3. Reiniciar a API:
    - `sudo systemctl restart terezia-api`
 4. Validar:

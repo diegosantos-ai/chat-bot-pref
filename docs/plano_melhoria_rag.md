@@ -68,8 +68,8 @@ Entrega esperada:
 
 Checklist:
 - [x] Revisar documentos faltantes (saude/PSF, tributos, horarios) - Criados docs de Emergência e Zeladoria.
-- [x] Padronizar titulos e tags nos arquivos `base/BA-RAG-PILOTO-2026.01.v1/items` - Manifesto atualizado.
-- [x] Reingestar base: `python -m app.rag.ingest base/BA-RAG-PILOTO-2026.01.v1`.
+- [x] Padronizar titulos e tags nos arquivos `base/default/items` - Manifesto atualizado.
+- [x] Reingestar base: `python -m app.rag.ingest base/default`.
 
 Entrega esperada:
 - Mais respostas de sucesso e menos fallback por `no_docs_found` (Validado: reduziu de 33% para 26% no teste de regressão).

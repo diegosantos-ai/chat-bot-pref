@@ -41,6 +41,7 @@ log_error() {
 # ========================================
 log_info "Iniciando instalação do Loki + Promtail..."
 log_info "Diretório do projeto: $PROJECT_DIR"
+DEFAULT_NETWORK="${CHATBOT_NETWORK:-chat-bot-pref_default}"
 
 # Verificar Docker
 cd "$LOGGING_DIR"
@@ -58,8 +59,8 @@ fi
 log_success "Docker e Docker Compose encontrados"
 
 # Verificar se a rede existe
-if ! docker network ls | grep -q "pilot-atendimento_default"; then
-    log_warning "Rede pilot-atendimento_default não encontrada"
+if ! docker network ls | grep -q "$DEFAULT_NETWORK"; then
+    log_warning "Rede $DEFAULT_NETWORK não encontrada"
     log_info "Verificando se Grafana está rodando..."
     
     if docker ps | grep -q "terezia-grafana"; then
@@ -67,7 +68,7 @@ if ! docker network ls | grep -q "pilot-atendimento_default"; then
         NETWORK=$(docker inspect terezia-grafana --format='{{range $k, $v := .NetworkSettings.Networks}}{{$k}}{{end}}' 2>/dev/null || echo "")
         if [ -n "$NETWORK" ]; then
             log_info "Usando rede existente: $NETWORK"
-            sed -i "s/pilot-atendimento_default/$NETWORK/g" docker-compose-loki.yml
+            export CHATBOT_NETWORK="$NETWORK"
         else
             log_error "Não foi possível detectar a rede do Grafana"
             exit 1
@@ -77,7 +78,7 @@ if ! docker network ls | grep -q "pilot-atendimento_default"; then
         exit 1
     fi
 else
-    log_success "Rede pilot-atendimento_default encontrada"
+    log_success "Rede $DEFAULT_NETWORK encontrada"
 fi
 
 # Verificar permissões nos logs
@@ -169,7 +170,7 @@ if [ -f "$PROJECT_DIR/dashboards/terezia-logs-dashboard.json" ]; then
     log_success "Dashboard encontrado"
     
     # Copiar para diretório de provisioning do Grafana
-    GRAFANA_DASHBOARD_DIR="/var/lib/docker/volumes/pilot-atendimento_grafana_data/_data/dashboards"
+    GRAFANA_DASHBOARD_DIR="${GRAFANA_DASHBOARD_DIR:-/var/lib/docker/volumes/chat-bot-pref_grafana_data/_data/dashboards}"
     if [ -d "$GRAFANA_DASHBOARD_DIR" ]; then
         cp "$PROJECT_DIR/dashboards/terezia-logs-dashboard.json" "$GRAFANA_DASHBOARD_DIR/"
         log_success "Dashboard copiado para Grafana"

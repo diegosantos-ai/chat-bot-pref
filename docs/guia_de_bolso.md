@@ -1,4 +1,4 @@
-# Guia de Bolso (Windows) - {bot_name} / pilot-atendimento
+# Guia de Bolso (Windows) - {bot_name} / chat-bot-pref
 
 Este guia ajuda a **rodar e acessar** a API + observabilidade (DB/Grafana) mesmo para quem nunca viu o projeto.
 
@@ -13,7 +13,7 @@ Este guia ajuda a **rodar e acessar** a API + observabilidade (DB/Grafana) mesmo
 ### 0.2 Abrir o projeto
 No PowerShell:
 ```powershell
-cd C:\Users\santo\pilot-atendimento
+cd C:\Users\santo\chat-bot-pref
 ```
 
 ### 0.3 Criar/usar o ambiente virtual do projeto

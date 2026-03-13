@@ -1,7 +1,7 @@
 # Relatorio Executivo e Tecnico - Execucao/Observabilidade
 
 Data: 2026-01-19  
-Projeto: {bot_name} (pilot-atendimento)
+Projeto: {bot_name} (chat-bot-pref)
 
 ## 1) Resumo Executivo
 

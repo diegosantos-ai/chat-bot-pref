@@ -37,7 +37,7 @@ Este guia explica como fazer o deploy do {bot_name} em produção para que o web
 ## Estrutura de Arquivos
 
 ```
-pilot-atendimento/
+chat-bot-pref/
 ├── docker-compose.yml    # Orquestração dos containers
 ├── Dockerfile            # Build da imagem da API
 ├── Caddyfile            # Configuração do reverse proxy (HTTPS)
@@ -64,7 +64,7 @@ pilot-atendimento/
 
 ```powershell
 # Navegar para o diretório do projeto
-cd C:\Users\santo\pilot-atendimento
+cd C:\Users\santo\chat-bot-pref
 
 # Copiar template de variáveis
 Copy-Item .env.prod.example .env
@@ -142,8 +142,8 @@ ssh usuario@ip-da-vps
 
 ```bash
 # Clonar repositório
-git clone https://github.com/seu-usuario/pilot-atendimento.git
-cd pilot-atendimento
+git clone https://github.com/seu-usuario/chat-bot-pref.git
+cd chat-bot-pref
 
 # Configurar variáveis
 cp .env.prod.example .env
@@ -179,7 +179,7 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=/home/usuario/pilot-atendimento
+WorkingDirectory=/home/usuario/chat-bot-pref
 ExecStart=/usr/bin/docker-compose up -d
 ExecStop=/usr/bin/docker-compose down
 

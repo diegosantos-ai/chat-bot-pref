@@ -100,7 +100,7 @@ GEMINI_TEMPERATURE = 0.3
 GEMINI_MAX_TOKENS = 1024
 
 # RAG
-RAG_BASE_ID = "BA-RAG-PILOTO-2026.01.v1"
+RAG_BASE_ID = "default"
 RAG_TOP_K = 5
 RAG_MIN_SCORE = 0.3
 
@@ -113,7 +113,7 @@ META_API_VERSION = "v19.0"
 ```
 
 ## 📚 Base de Conhecimento RAG
-**Localização**: `base/BA-RAG-PILOTO-2026.01.v1/items/`
+**Localização**: `base/default/items/`
 
 **Documentos**:
 - `0001_horarios.md` - Horários de atendimento, secretarias, ônibus

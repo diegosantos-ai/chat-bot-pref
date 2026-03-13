@@ -23,7 +23,7 @@ Se você editar um arquivo Markdown na pasta `data/knowledge_base`, rode este co
 
 **Comando:**
 ```powershell
-python -m app.rag.ingest data/knowledge_base/BA-RAG-PILOTO-2026.01.v1
+python -m app.rag.ingest data/knowledge_base/default
 ```
 
 ## 3. Testes Automatizados (Unitários)

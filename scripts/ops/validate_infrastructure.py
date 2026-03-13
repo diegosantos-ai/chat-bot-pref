@@ -21,7 +21,7 @@ import importlib.util
 
 # Ajuste de sys.path para permitir imports após migração de scripts
 SCRIPT_DIR = Path(__file__).parent.resolve()
-ROOT_DIR = SCRIPT_DIR.parent.parent  # pilot-atendimento/
+ROOT_DIR = SCRIPT_DIR.parent.parent  # chat-bot-pref/
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 

@@ -3,7 +3,7 @@ set -euo pipefail
 # Ingest a RAG base into Chroma
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON="$ROOT_DIR/.venv/bin/python"
-BASE_PATH=${1:-base/BA-RAG-PILOTO-2026.01.v1}
+BASE_PATH=${1:-data/knowledge_base/default}
 FORCE_FLAG=${2:-}
 
 if [ ! -x "$PYTHON" ]; then

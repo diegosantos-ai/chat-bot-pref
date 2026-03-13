@@ -109,7 +109,7 @@ export const rag = {
   deleteDocument: (docId: string) =>
     api.delete('/rag/documents/' + docId),
 
-  ingest: (basePath: string = 'data/knowledge_base/BA-RAG-PILOTO-2026.01.v1', force: boolean = false) =>
+  ingest: (basePath?: string, force: boolean = false) =>
     api.post('/rag/ingest', { base_path: basePath, force }),
 };
 

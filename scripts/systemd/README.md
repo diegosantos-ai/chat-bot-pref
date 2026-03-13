@@ -39,10 +39,10 @@ Script para configurar automaticamente os serviços systemd.
 
 ```bash
 # Torne o script executável
-chmod +x /root/pilot-atendimento/scripts/systemd/setup_systemd.sh
+chmod +x /root/chat-bot-pref/scripts/systemd/setup_systemd.sh
 
 # Execute o script de configuração (requer sudo)
-sudo bash /root/pilot-atendimento/scripts/systemd/setup_systemd.sh
+sudo bash /root/chat-bot-pref/scripts/systemd/setup_systemd.sh
 ```
 
 ### Comandos Manuais
@@ -51,7 +51,7 @@ Se preferir configurar manualmente:
 
 ```bash
 # Copiar arquivos de serviço
-sudo cp /root/pilot-atendimento/scripts/systemd/*.service /etc/systemd/system/
+sudo cp /root/chat-bot-pref/scripts/systemd/*.service /etc/systemd/system/
 
 # Recarregar daemon
 sudo systemctl daemon-reload
@@ -135,7 +135,7 @@ sudo systemctl disable terezia-grafana
 
 3. Teste a execução manual:
    ```bash
-   cd /root/pilot-atendimento
+   cd /root/chat-bot-pref
    source venv/bin/activate
    uvicorn app.main:app --host 0.0.0.0 --port 8000
    ```
@@ -146,10 +146,10 @@ Se receber erros de permissão:
 
 ```bash
 # Verifique as permissões do diretório
-sudo chown -R root:root /root/pilot-atendimento
+sudo chown -R root:root /root/chat-bot-pref
 
 # Verifique permissões do venv
-sudo chmod -R 755 /root/pilot-atendimento/venv
+sudo chmod -R 755 /root/chat-bot-pref/venv
 ```
 
 ### Docker não está rodando

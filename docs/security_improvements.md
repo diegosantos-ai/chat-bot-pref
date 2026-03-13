@@ -247,7 +247,7 @@ app.add_middleware(
 ### Passo 1: Instalar Dependências
 
 ```bash
-cd pilot-atendimento
+cd chat-bot-pref
 pip install slowapi tenacity boto3
 ```
 

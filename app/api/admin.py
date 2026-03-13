@@ -182,7 +182,7 @@ class DocumentInfo(BaseModel):
 
 
 class IngestRequest(BaseModel):
-    base_path: str = "data/knowledge_base/BA-RAG-PILOTO-2026.01.v1"
+    base_path: Optional[str] = None
     force: bool = False
 
 
@@ -515,9 +515,7 @@ async def rag_documents(current_user: dict = Depends(require_admin)):
 
     try:
         # Carregar manifest
-        base_path = (
-            Path(settings.BASE_DIR) / "data/knowledge_base/BA-RAG-PILOTO-2026.01.v1"
-        )
+        base_path = _get_base_path()
         manifest = load_manifest(base_path)
 
         documents = []
@@ -547,7 +545,7 @@ async def rag_documents(current_user: dict = Depends(require_admin)):
 
 
 def _get_base_path() -> Path:
-    return Path(settings.BASE_DIR) / "data/knowledge_base/BA-RAG-PILOTO-2026.01.v1"
+    return Path(settings.BASE_DIR) / "data" / "knowledge_base" / settings.RAG_BASE_ID
 
 
 def _load_manifest_with_path(base_path: Path) -> dict:
@@ -735,7 +733,11 @@ async def rag_ingest(
     """Executa ingestion da base de conhecimento."""
 
     try:
-        base_path = Path(settings.BASE_DIR) / request.base_path
+        base_path = (
+            Path(settings.BASE_DIR) / request.base_path
+            if request.base_path
+            else _get_base_path()
+        )
         result = ingest_base(base_path, force=request.force)
 
         return {

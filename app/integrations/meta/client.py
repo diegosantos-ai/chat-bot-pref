@@ -326,7 +326,7 @@ class MetaClient:
         Example:
             >>> profile = await client.get_user_profile("17841413792837146")
             >>> print(profile)
-            {'username': 'prefeitura_sto', 'name': 'Prefeitura STO', 'profile_picture_url': 'https://...'}
+            {'username': 'perfil_exemplo', 'name': 'Perfil Exemplo', 'profile_picture_url': 'https://...'}
         """
         # Para Instagram, usamos a API do Instagram
         # Para Facebook, usamos a Graph API

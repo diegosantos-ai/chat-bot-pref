@@ -7,9 +7,8 @@ A centralização de logs está **ativa e funcionando**!
 ## 📊 Acesso
 
 **URL do Grafana:** https://nexobasis.com.br/grafana  
-**Usuário:** admin  
-**Senha:** admin24052014
-
+**Usuário:** <usuario>  
+**Senha:** <senha>
 **Explorar Logs:** https://nexobasis.com.br/grafana/explore
 
 ---
@@ -93,7 +92,7 @@ docker logs -f terezia-loki
 docker logs -f terezia-promtail
 
 # Reiniciar
-cd /root/pilot-atendimento/logging
+cd /root/chat-bot-pref/logging
 docker compose -f docker-compose-loki.yml restart
 
 # Parar
@@ -105,9 +104,9 @@ docker compose -f docker-compose-loki.yml down
 ## ⚙️ Configuração
 
 **Arquivos:**
-- `/root/pilot-atendimento/logging/loki-config.yml` - Configuração do Loki
-- `/root/pilot-atendimento/logging/promtail-config.yml` - Configuração do Promtail
-- `/root/pilot-atendimento/logging/docker-compose-loki.yml` - Docker Compose
+- `/root/chat-bot-pref/logging/loki-config.yml` - Configuração do Loki
+- `/root/chat-bot-pref/logging/promtail-config.yml` - Configuração do Promtail
+- `/root/chat-bot-pref/logging/docker-compose-loki.yml` - Docker Compose
 
 **Retenção:** 7 dias (logs antigos são automaticamente removidos)
 
@@ -134,7 +133,7 @@ docker restart terezia-loki
 ### Dashboard não aparece?
 O dashboard pode ser importado manualmente:
 1. Grafana → Dashboards → Import
-2. Upload JSON: `/root/pilot-atendimento/dashboards/terezia-logs-dashboard.json`
+2. Upload JSON: `/root/chat-bot-pref/dashboards/terezia-logs-dashboard.json`
 
 ---
 
@@ -160,4 +159,4 @@ O dashboard pode ser importado manualmente:
 Para problemas ou dúvidas, verifique:
 1. Logs do Loki: `docker logs terezia-loki`
 2. Logs do Promtail: `docker logs terezia-promtail`
-3. Configurações em `/root/pilot-atendimento/logging/`
+3. Configurações em `/root/chat-bot-pref/logging/`

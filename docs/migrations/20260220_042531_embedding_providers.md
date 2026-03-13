@@ -60,10 +60,10 @@ Cada provedor usa uma **collection ChromaDB separada** porque vetores de modelos
 diferentes são incompatíveis. O nome da collection é derivado do base name + sufixo:
 
 ```
-rag_ba_rag_piloto_2026_01_v1          → default
-rag_ba_rag_piloto_2026_01_v1_gemini   → gemini
-rag_ba_rag_piloto_2026_01_v1_openai   → openai
-rag_ba_rag_piloto_2026_01_v1_qwen     → qwen
+default_knowledge_base          → default
+default_knowledge_base_gemini   → gemini
+default_knowledge_base_openai   → openai
+default_knowledge_base_qwen     → qwen
 ```
 
 > **Importante:** Ao trocar de `EMBEDDING_PROVIDER`, é necessário **re-ingerir** os
@@ -78,7 +78,7 @@ rag_ba_rag_piloto_2026_01_v1_qwen     → qwen
 EMBEDDING_PROVIDER=gemini  # ou openai, qwen
 
 # 2. Execute a ingestão
-python -m app.rag.ingest data/knowledge_base/BA-RAG-PILOTO-2026.01.v1 --force
+python -m app.rag.ingest data/knowledge_base/default --force
 
 # 3. Valide a ingestão
 python -m app.rag.retriever 'qual o horário de atendimento?'

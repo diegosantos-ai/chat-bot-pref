@@ -87,8 +87,9 @@ Regras:
 
 - cada tenant usa uma collection própria no Chroma
 - o nome da collection deriva do `tenant_id`
+- a collection de base documental é separada do histórico de conversa
 - o fluxo consulta primeiro a collection do tenant ativo
-- o fluxo grava a mensagem atual na collection do mesmo tenant após responder
+- o chat não grava automaticamente a conversa como base RAG
 
 ### Auditoria
 
@@ -101,7 +102,7 @@ data/runtime/audit/<tenant_id>/<session_id>.jsonl
 Cada request atual grava três eventos:
 
 - `chat_request_received`
-- `chat_retrieval_completed`
+- `chat_retrieval_completed` ou `chat_retrieval_unavailable`
 - `chat_response_generated`
 
 ## 6. Falhas controladas
@@ -113,6 +114,7 @@ Comportamentos esperados hoje:
 - webhook sem `tenant_id` e sem `page_id`: `400 tenant_id obrigatório ou page_id configurado no webhook`
 - webhook com `page_id` sem mapeamento: `400 tenant_id não resolvido para page_id informado`
 - webhook com `tenant_id` divergente do `page_id` mapeado: `400 tenant_id divergente do page_id informado`
+- chat sem base documental ingerida: resposta controlada com mensagem explícita do estado da base
 - sem `tenant_id` no contexto interno: erro estrutural do serviço
 
 ## 7. Limites atuais
@@ -121,7 +123,7 @@ Este contrato ainda não cobre:
 
 - persistência relacional
 - webhook Meta específico
-- RAG completo com base documental externa
+- upload binário de documentos
 - auditoria em banco
 - regras multi-canal avançadas
 

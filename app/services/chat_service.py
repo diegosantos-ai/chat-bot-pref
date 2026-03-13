@@ -6,11 +6,11 @@ from app.contracts.dto import (
     ChatExchangeRecord,
     ChatRequest,
     ChatResponse,
+    RagQueryRequest,
 )
+from app.services.rag_service import RagService
 from app.storage.audit_repository import FileAuditRepository
 from app.storage.chat_repository import FileChatRepository
-from app.storage.chroma_repository import RetrievedContext
-from app.storage.chroma_repository import TenantChromaRepository
 from app.tenant_context import require_tenant
 
 
@@ -19,11 +19,11 @@ class ChatService:
         self,
         repository: FileChatRepository | None = None,
         audit_repository: FileAuditRepository | None = None,
-        knowledge_repository: TenantChromaRepository | None = None,
+        rag_service: RagService | None = None,
     ) -> None:
         self.repository = repository or FileChatRepository()
         self.audit_repository = audit_repository or FileAuditRepository()
-        self.knowledge_repository = knowledge_repository or TenantChromaRepository()
+        self.rag_service = rag_service or RagService()
 
     async def process(self, chat_request: ChatRequest) -> ChatResponse:
         tenant_id = await self._resolve_active_tenant()
@@ -43,17 +43,46 @@ class ChatService:
             )
         )
 
-        retrieved_contexts = self.knowledge_repository.query_context(
-            tenant_id=tenant_id,
-            query_text=chat_request.message,
-            limit=1,
+        rag_response = self.rag_service.query(
+            RagQueryRequest(
+                tenant_id=tenant_id,
+                query=chat_request.message,
+                top_k=1,
+                min_score=0.1,
+            )
         )
+
+        if rag_response.status == "ready":
+            retrieval_event_type = "chat_retrieval_completed"
+            response_message = (
+                f"Fluxo mínimo ativo para o tenant '{tenant_id}'. "
+                f"Contexto recuperado: {rag_response.chunks[0].text}"
+            )
+            retrieval_payload = {
+                "channel": chat_request.channel,
+                "collection_name": rag_response.params_used.collection,
+                "retrieved_count": str(rag_response.total_chunks),
+                "top_document_id": rag_response.chunks[0].id,
+                "top_excerpt": self._truncate(rag_response.chunks[0].text),
+                "status": rag_response.status,
+            }
+        else:
+            retrieval_event_type = "chat_retrieval_unavailable"
+            response_message = rag_response.message
+            retrieval_payload = {
+                "channel": chat_request.channel,
+                "collection_name": rag_response.params_used.collection,
+                "retrieved_count": "0",
+                "top_document_id": "",
+                "top_excerpt": "",
+                "status": rag_response.status,
+            }
 
         response = ChatResponse(
             request_id=request_id,
             session_id=session_id,
             tenant_id=tenant_id,
-            message=self._build_response_message(tenant_id, retrieved_contexts),
+            message=response_message,
             channel=chat_request.channel,
         )
 
@@ -62,14 +91,8 @@ class ChatService:
                 request_id=response.request_id,
                 tenant_id=tenant_id,
                 session_id=session_id,
-                event_type="chat_retrieval_completed",
-                payload={
-                    "channel": chat_request.channel,
-                    "collection_name": self.knowledge_repository.collection_name(tenant_id),
-                    "retrieved_count": str(len(retrieved_contexts)),
-                    "top_document_id": retrieved_contexts[0].document_id if retrieved_contexts else "",
-                    "top_excerpt": self._format_context_excerpt(retrieved_contexts),
-                },
+                event_type=retrieval_event_type,
+                payload=retrieval_payload,
             )
         )
 
@@ -82,7 +105,6 @@ class ChatService:
             assistant_message=response.message,
         )
         self.repository.append_exchange(exchange_record)
-        self.knowledge_repository.upsert_exchange(exchange_record)
 
         self.audit_repository.append_event(
             AuditEventRecord(
@@ -102,21 +124,8 @@ class ChatService:
         await asyncio.sleep(0)
         return require_tenant()
 
-    def _build_response_message(
-        self,
-        tenant_id: str,
-        retrieved_contexts: list[RetrievedContext],
-    ) -> str:
-        message = f"Fluxo mínimo ativo para o tenant '{tenant_id}'."
-        excerpt = self._format_context_excerpt(retrieved_contexts)
-        if excerpt:
-            return f"{message} Contexto recuperado: {excerpt}"
-        return message
-
-    def _format_context_excerpt(self, retrieved_contexts: list[RetrievedContext]) -> str:
-        if not retrieved_contexts:
-            return ""
-        excerpt = retrieved_contexts[0].content.replace("\n", " ").strip()
-        if len(excerpt) <= 160:
-            return excerpt
-        return f"{excerpt[:157]}..."
+    def _truncate(self, text: str) -> str:
+        normalized = text.replace("\n", " ").strip()
+        if len(normalized) <= 160:
+            return normalized
+        return f"{normalized[:157]}..."

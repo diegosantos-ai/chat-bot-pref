@@ -3,9 +3,11 @@ from fastapi.testclient import TestClient
 from app.api import webhook as webhook_api
 from app.main import app
 from app.services.chat_service import ChatService
+from app.services.rag_service import RagService
 from app.storage.audit_repository import FileAuditRepository
 from app.storage.chat_repository import FileChatRepository
 from app.storage.chroma_repository import TenantChromaRepository
+from app.storage.document_repository import FileDocumentRepository
 from app.tenant_resolver import TenantResolver
 
 client = TestClient(app)
@@ -13,9 +15,12 @@ client = TestClient(app)
 
 def _build_service(tmp_path) -> ChatService:
     return ChatService(
-        repository=FileChatRepository(base_dir=tmp_path),
-        audit_repository=FileAuditRepository(base_dir=tmp_path),
-        knowledge_repository=TenantChromaRepository(base_dir=tmp_path / "chroma"),
+        repository=FileChatRepository(base_dir=tmp_path / "runtime"),
+        audit_repository=FileAuditRepository(base_dir=tmp_path / "runtime"),
+        rag_service=RagService(
+            document_repository=FileDocumentRepository(base_dir=tmp_path / "knowledge"),
+            chroma_repository=TenantChromaRepository(base_dir=tmp_path / "chroma"),
+        ),
     )
 
 

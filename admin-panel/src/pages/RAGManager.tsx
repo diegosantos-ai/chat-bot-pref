@@ -1,19 +1,27 @@
-import { useState, useEffect } from 'react';
-import { X, Save, Plus, Trash2, FileText, Loader2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { X, Save, Plus, Trash2, FileText, Loader2, RotateCcw } from 'lucide-react';
 import MDEditor from '@uiw/react-md-editor';
 import { rag } from '../services/api';
 import { Button } from '../components/Button';
+import { Input } from '../components/Input';
 import type { DocumentInfo, DocumentContent } from '../types';
 import styles from './RAGManager.module.css';
 
 export default function RAGManager() {
+  const [tenantId, setTenantId] = useState('');
   const [documents, setDocuments] = useState<DocumentInfo[]>([]);
-  const [baseId, setBaseId] = useState('');
-  const [version, setVersion] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [collectionName, setCollectionName] = useState('');
+  const [sourceDir, setSourceDir] = useState('');
+  const [chunksCount, setChunksCount] = useState(0);
+  const [documentsCount, setDocumentsCount] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [lastIngestedAt, setLastIngestedAt] = useState('');
+  const [loading, setLoading] = useState(false);
   const [ingesting, setIngesting] = useState(false);
+  const [resetting, setResetting] = useState(false);
   const [ingestMessage, setIngestMessage] = useState('');
-  
+  const [loadingError, setLoadingError] = useState('');
+
   const [editingDoc, setEditingDoc] = useState<DocumentContent | null>(null);
   const [isNewDoc, setIsNewDoc] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -23,28 +31,56 @@ export default function RAGManager() {
   const [newIntents, setNewIntents] = useState('');
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (!tenantId.trim()) {
+      setDocuments([]);
+      setCollectionName('');
+      setSourceDir('');
+      setChunksCount(0);
+      setDocumentsCount(0);
+      setReady(false);
+      setLastIngestedAt('');
+      setLoading(false);
+      setLoadingError('');
+      return;
+    }
+    fetchData(tenantId.trim());
+  }, [tenantId]);
 
-  const fetchData = async () => {
+  const fetchData = async (currentTenantId: string) => {
+    setLoading(true);
+    setLoadingError('');
     try {
-      const docsRes = await rag.documents();
+      const [docsRes, statusRes] = await Promise.all([
+        rag.documents(currentTenantId),
+        rag.status(currentTenantId),
+      ]);
       setDocuments(docsRes.data.documents);
-      setBaseId(docsRes.data.base_id);
-      setVersion(docsRes.data.version);
-    } catch (err) {
+      setCollectionName(docsRes.data.collection_name);
+      setSourceDir(docsRes.data.source_dir);
+      setDocumentsCount(docsRes.data.documents_count);
+      setChunksCount(statusRes.data.chunks_count);
+      setReady(statusRes.data.ready);
+      setLastIngestedAt(statusRes.data.last_ingested_at || '');
+      setIngestMessage(statusRes.data.message);
+    } catch (err: unknown) {
       console.error('Failed to fetch data:', err);
+      setLoadingError('Não foi possível carregar o estado do tenant informado.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleIngest = async (force: boolean = false) => {
+  const handleIngest = async (resetCollection: boolean) => {
+    if (!tenantId.trim()) {
+      setIngestMessage('tenant_id obrigatório');
+      return;
+    }
     setIngesting(true);
     setIngestMessage('');
     try {
-      const response = await rag.ingest(undefined, force);
+      const response = await rag.ingest(tenantId.trim(), resetCollection);
       setIngestMessage(response.data.message);
+      await fetchData(tenantId.trim());
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { detail?: string } } };
@@ -57,9 +93,33 @@ export default function RAGManager() {
     }
   };
 
-  const handleEdit = async (docId: string) => {
+  const handleReset = async () => {
+    if (!tenantId.trim()) {
+      setIngestMessage('tenant_id obrigatório');
+      return;
+    }
+    setResetting(true);
+    setIngestMessage('');
     try {
-      const response = await rag.document(docId);
+      const response = await rag.reset(tenantId.trim(), false);
+      setIngestMessage(response.data.message);
+      await fetchData(tenantId.trim());
+    } catch (err: unknown) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { detail?: string } } };
+        setIngestMessage(axiosError.response?.data?.detail || 'Erro ao executar reset');
+      } else {
+        setIngestMessage('Erro ao executar reset');
+      }
+    } finally {
+      setResetting(false);
+    }
+  };
+
+  const handleEdit = async (docId: string) => {
+    if (!tenantId.trim()) return;
+    try {
+      const response = await rag.document(tenantId.trim(), docId);
       setEditingDoc(response.data);
       setIsNewDoc(false);
     } catch (err) {
@@ -68,22 +128,31 @@ export default function RAGManager() {
   };
 
   const handleDelete = async (docId: string) => {
+    if (!tenantId.trim()) {
+      setIngestMessage('tenant_id obrigatório');
+      return;
+    }
     if (!confirm('Tem certeza que deseja excluir este documento?')) return;
     try {
-      await rag.deleteDocument(docId);
-      fetchData();
+      await rag.deleteDocument(tenantId.trim(), docId);
+      await fetchData(tenantId.trim());
     } catch (err) {
       console.error('Failed to delete document:', err);
     }
   };
 
   const handleSave = async () => {
+    if (!tenantId.trim()) {
+      setIngestMessage('tenant_id obrigatório');
+      return;
+    }
     if (!editingDoc && !isNewDoc) return;
-    
+
     setSaving(true);
     try {
       if (isNewDoc) {
         await rag.createDocument({
+          tenant_id: tenantId.trim(),
           title: newTitle,
           content: newContent,
           keywords: newKeywords.split(',').map(k => k.trim()).filter(Boolean),
@@ -91,6 +160,7 @@ export default function RAGManager() {
         });
       } else if (editingDoc) {
         await rag.updateDocument(editingDoc.id, {
+          tenant_id: tenantId.trim(),
           title: editingDoc.title,
           content: editingDoc.content,
           keywords: editingDoc.keywords,
@@ -103,7 +173,7 @@ export default function RAGManager() {
       setNewContent('');
       setNewKeywords('');
       setNewIntents('');
-      fetchData();
+      await fetchData(tenantId.trim());
     } catch (err) {
       console.error('Failed to save document:', err);
     } finally {
@@ -125,18 +195,13 @@ export default function RAGManager() {
     setIsNewDoc(false);
   };
 
-  if (loading) {
-    return <div className={styles.loading}>Carregando...</div>;
-  }
-
   return (
     <div className={styles.container}>
       <header className={styles.header}>
         <h1>RAG Manager</h1>
-        <p className={styles.subtitle}>Gerencie a base de conhecimento</p>
+        <p className={styles.subtitle}>Gerencie documentos e ingestão por tenant</p>
       </header>
 
-      {/* Editor Modal */}
       {(editingDoc || isNewDoc) && (
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
@@ -146,8 +211,13 @@ export default function RAGManager() {
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className={styles.modalBody}>
+              <div className={styles.formGroup}>
+                <label>Tenant</label>
+                <Input value={tenantId} disabled />
+              </div>
+
               <div className={styles.formGroup}>
                 <label>Título</label>
                 {isNewDoc ? (
@@ -167,7 +237,7 @@ export default function RAGManager() {
                   />
                 )}
               </div>
-              
+
               <div className={styles.formGroup} data-color-mode="dark">
                 <label>Conteúdo (Markdown)</label>
                 <div className={styles.editorWrapper}>
@@ -185,7 +255,7 @@ export default function RAGManager() {
                   />
                 </div>
               </div>
-              
+
               <div className={styles.formRow}>
                 <div className={styles.formGroup}>
                   <label>Keywords (separadas por vírgula)</label>
@@ -197,7 +267,7 @@ export default function RAGManager() {
                     className={styles.input}
                   />
                 </div>
-                
+
                 <div className={styles.formGroup}>
                   <label>Intents (separados por vírgula)</label>
                   <input
@@ -210,7 +280,7 @@ export default function RAGManager() {
                 </div>
               </div>
             </div>
-            
+
             <div className={styles.modalFooter}>
               <Button variant="secondary" onClick={handleClose}>Cancelar</Button>
               <Button onClick={handleSave} isLoading={saving}>
@@ -222,39 +292,67 @@ export default function RAGManager() {
         </div>
       )}
 
-      {/* Base Info */}
+      <section className={styles.section}>
+        <div className={styles.tenantBar}>
+          <Input
+            label="Tenant ID"
+            value={tenantId}
+            onChange={(e) => setTenantId(e.target.value)}
+            placeholder="prefeitura-demo"
+          />
+          <div className={styles.tenantHint}>
+            O fluxo de ingestão da base nova exige `tenant_id` explícito.
+          </div>
+        </div>
+      </section>
+
       <section className={styles.section}>
         <div className={styles.baseInfo}>
           <div className={styles.baseMeta}>
             <FileText size={20} />
             <div>
-              <h3>{baseId}</h3>
-              <span>Versão {version}</span>
+              <h3>{collectionName || 'Sem tenant selecionado'}</h3>
+              <span>{sourceDir || 'Informe um tenant para carregar a base.'}</span>
             </div>
           </div>
           <div className={styles.actions}>
-            <Button variant="primary" onClick={handleNew}>
+            <Button variant="primary" onClick={handleNew} disabled={!tenantId.trim()}>
               <Plus size={16} />
               Novo Documento
             </Button>
-            <Button variant="secondary" onClick={() => handleIngest(false)} isLoading={ingesting}>
+            <Button variant="secondary" onClick={() => handleIngest(true)} isLoading={ingesting} disabled={!tenantId.trim()}>
               <Loader2 size={16} />
-              Re-ingest
+              Ingerir
             </Button>
-            <Button variant="secondary" onClick={() => handleIngest(true)} isLoading={ingesting}>
-              Force Re-ingest
+            <Button variant="secondary" onClick={handleReset} isLoading={resetting} disabled={!tenantId.trim()}>
+              <RotateCcw size={16} />
+              Resetar Collection
             </Button>
           </div>
         </div>
-        
-        {ingestMessage && (
-          <div className={styles.ingestMessage}>{ingestMessage}</div>
-        )}
+
+        <div className={styles.statusMeta}>
+          <span className={ready ? styles.statusReady : styles.statusPending}>
+            {ready ? 'Base pronta' : 'Base pendente'}
+          </span>
+          <span>{documentsCount} documento(s)</span>
+          <span>{chunksCount} chunk(s)</span>
+          <span>{lastIngestedAt ? `Última ingestão: ${new Date(lastIngestedAt).toLocaleString()}` : 'Nenhuma ingestão executada'}</span>
+        </div>
+
+        {loading && <div className={styles.ingestMessage}>Carregando estado do tenant...</div>}
+        {loadingError && <div className={styles.ingestMessage}>{loadingError}</div>}
+        {ingestMessage && <div className={styles.ingestMessage}>{ingestMessage}</div>}
       </section>
 
-      {/* Documents List */}
       <section className={styles.section}>
         <h2>Documentos ({documents.length})</h2>
+        {!tenantId.trim() && (
+          <div className={styles.emptyState}>Informe um tenant para listar documentos.</div>
+        )}
+        {tenantId.trim() && documents.length === 0 && !loading && (
+          <div className={styles.emptyState}>Nenhum documento cadastrado para este tenant.</div>
+        )}
         <div className={styles.docsList}>
           {documents.map((doc) => (
             <div key={doc.id} className={styles.docCard}>

@@ -1,335 +1,301 @@
-"""
-Contratos de Dados (DTOs) — Pilot Atendimento MVE
-==================================================
-Versão: v1.2
-Escopo: MVE_PILOT
-Status: EXPANDIDO para Fase 3 (Auditoria E2E)
-
-Define os objetos de entrada e saída da API.
-Inclui modelos de auditoria para testes E2E.
-"""
-
+from datetime import datetime, timezone
+from typing import Any
 from typing import Optional
-from datetime import datetime
 from uuid import uuid4
-from pydantic import BaseModel, Field
 
-from app.contracts.enums import (
-    Intent,
-    Decision,
-    ResponseType,
-    PolicyDecision,
-    PolicyReason,
-    FallbackReason,
-    Channel,
-    SurfaceType,
-    AuditEventType,
-)
+from pydantic import BaseModel, Field, field_validator
 
 
-# ========================================
-# DTOs de Entrada (Normalizado)
-# ========================================
+def _normalize_optional_identifier(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    normalized = str(value).strip()
+    if not normalized:
+        return None
+    return normalized
 
 
-class NormalizedInboundEvent(BaseModel):
-    """
-    Evento de entrada normalizado.
-    Usado internamente após parsing do webhook Meta ou web widget.
-    """
+def _normalize_required_text(value: Any, field_name: str) -> str:
+    normalized = str(value).strip()
+    if not normalized:
+        raise ValueError(f"{field_name} obrigatória")
+    return normalized
 
-    # Identificação
-    external_message_id: str = Field(
-        ..., description="ID único da mensagem na plataforma (idempotência)"
-    )
-    session_id: str = Field(
-        ...,
-        description="ID da sessão (gerado: {channel}:{thread_id} ou {channel}:{post_id}:{author})",
-    )
 
-    # Canal e superfície
-    channel: Channel = Field(..., description="Canal de origem")
-    surface_type: SurfaceType = Field(
-        ..., description="Tipo de superfície (inbox/public_comment)"
-    )
-
-    # Conteúdo
-    text: str = Field(
-        default="",
-        max_length=2000,
-        description="Texto da mensagem (pode ser vazio se só mídia)",
-    )
-    has_media: bool = Field(default=False, description="Indica se há anexos/mídia")
-
-    # IDs da plataforma (DM)
-    thread_id: Optional[str] = Field(
-        default=None, description="ID do thread de DM (Instagram/Facebook)"
-    )
-    page_id: Optional[str] = Field(
-        default=None,
-        description="ID da página/conta Meta que originou a entry do webhook",
-    )
-
-    # IDs da plataforma (Comentários)
-    post_id: Optional[str] = Field(
-        default=None, description="ID do post (para comentários)"
-    )
-    comment_id: Optional[str] = Field(default=None, description="ID do comentário")
-    parent_comment_id: Optional[str] = Field(
-        default=None, description="ID do comentário pai (se for resposta)"
-    )
-
-    # Autor
-    author_platform_id: str = Field(
-        ..., description="ID do usuário na plataforma (não é PII)"
-    )
+def _normalize_string_list(value: Any) -> list[str]:
+    if value is None:
+        return []
+    if isinstance(value, list):
+        items = value
+    else:
+        items = str(value).split(",")
+    normalized_items: list[str] = []
+    for item in items:
+        normalized = str(item).strip()
+        if normalized and normalized not in normalized_items:
+            normalized_items.append(normalized)
+    return normalized_items
 
 
 class ChatRequest(BaseModel):
-    """
-    Requisição de chat do usuário.
-    Usado pelo web widget e como base para processamento.
-    """
-
-    session_id: str = Field(
-        ...,
-        description="Identificador único da sessão de conversa",
-        examples=["sess_abc123", "instagram_dm:123456789"],
-    )
-    message: str = Field(
-        ...,
-        min_length=1,
-        max_length=2000,
-        description="Mensagem do usuário",
-        examples=["Qual o horário de funcionamento?"],
-    )
-
-    # Campos opcionais para canais externos
-    channel: Channel = Field(default=Channel.WEB_WIDGET, description="Canal de origem")
-    surface_type: SurfaceType = Field(
-        default=SurfaceType.INBOX, description="Tipo de superfície"
-    )
-    external_message_id: Optional[str] = Field(
-        default=None, description="ID externo para idempotência"
-    )
     tenant_id: Optional[str] = Field(
         default=None,
-        description="Identificador explícito do tenant para fluxos de chat direto",
-        examples=["prefeitura_nova_esperanca"],
+        description="Tenant explicito do request. Obrigatorio para o chat direto.",
     )
+    session_id: Optional[str] = None
+    message: str = Field(..., min_length=1, max_length=2000)
+    channel: str = "web"
 
-    # Campos para comentários públicos
-    post_id: Optional[str] = Field(
-        default=None, description="ID do post (para comentários)"
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+    @field_validator("message", mode="before")
+    @classmethod
+    def normalize_message(cls, value: str) -> str:
+        return _normalize_required_text(value, "message")
+
+
+class WebhookChatRequest(BaseModel):
+    tenant_id: Optional[str] = Field(
+        default=None,
+        description="Tenant explicito do webhook. Se ausente, deve ser resolvido por page_id.",
     )
-    comment_id: Optional[str] = Field(default=None, description="ID do comentário")
+    page_id: Optional[str] = Field(
+        default=None,
+        description="Identificador externo usado para resolver o tenant no webhook.",
+    )
+    session_id: Optional[str] = None
+    message: str = Field(..., min_length=1, max_length=2000)
+    channel: str = "webhook"
 
+    @field_validator("tenant_id", "page_id", mode="before")
+    @classmethod
+    def normalize_identifiers(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
 
-# ========================================
-# DTOs de Saída
-# ========================================
+    @field_validator("message", mode="before")
+    @classmethod
+    def normalize_message(cls, value: str) -> str:
+        return _normalize_required_text(value, "message")
 
 
 class ChatResponse(BaseModel):
-    """Resposta do chatbot para o usuário."""
-
-    session_id: str = Field(..., description="Identificador da sessão")
-    message: str = Field(..., description="Resposta do bot")
-    intent: Intent = Field(..., description="Intenção classificada do usuário")
-    decision: Decision = Field(..., description="Decisão tomada pelo orquestrador")
-    response_type: ResponseType = Field(..., description="Tipo da resposta entregue")
-    base_id: Optional[str] = Field(
-        default=None,
-        description="ID da base RAG utilizada (quando aplicável)",
-        examples=["default"],
-    )
-
-    # Campos para canais externos
-    channel: Channel = Field(default=Channel.WEB_WIDGET, description="Canal de origem")
-    surface_type: SurfaceType = Field(
-        default=SurfaceType.INBOX, description="Tipo de superfície"
-    )
-
-    # Campos de auditoria
-    docs_found: Optional[bool] = Field(
-        default=None, description="Se RAG encontrou documentos"
-    )
-    fallback_used: bool = Field(default=False, description="Se usou fallback")
-    sources: list[str] = Field(
-        default_factory=list, description="Fontes usadas na resposta"
-    )
-    fallback_reason: Optional[FallbackReason] = Field(
-        default=None, description="Motivo do fallback, se aplicável"
-    )
-
-
-# ========================================
-# DTOs de Auditoria (Pipeline Events)
-# ========================================
-
-
-class ClassifierResult(BaseModel):
-    """Resultado da classificação de intent."""
-
-    intent: Intent
-    confidence: float = Field(ge=0.0, le=1.0)
-    raw_output: Optional[str] = None
-
-
-class PolicyPreResult(BaseModel):
-    """Resultado da avaliação de policy PRÉ-processamento."""
-
-    policy_decision: PolicyDecision
-    reason: PolicyReason = PolicyReason.OK
-    allowed_content: Optional[str] = None  # ex: "contact_or_location_only"
-    details: Optional[dict] = None
-
-
-class PolicyPostResult(BaseModel):
-    """Resultado da avaliação de policy PÓS-processamento."""
-
-    no_clinical_advice: bool = True
-    content_validated: bool = True
-    details: Optional[dict] = None
-
-
-class RAGRetrieveResult(BaseModel):
-    """Resultado da busca RAG."""
-
-    base_id: str
-    query_id: str
-    query_text_hash: str
-    k: int
-    docs_count: int
-    docs_found: bool
-    doc_ids: list[str] = Field(default_factory=list)
-    source_refs: list[str] = Field(default_factory=list)
-    best_score: float = 0.0
-
-
-class ResponseSelectedResult(BaseModel):
-    """Resultado da seleção de resposta."""
-
-    template: str  # ex: "rag_answer.txt", "public_ack.txt"
-    decision: Decision
-    response_type: ResponseType
-    fallback_reason: Optional[FallbackReason] = None
-
-
-class MessageSentResult(BaseModel):
-    """Resultado do envio de mensagem."""
-
-    surface: SurfaceType
-    channel: Channel
-    message_length: int
-    sent_at: datetime = Field(default_factory=datetime.utcnow)
-
-
-class PublicAckResult(BaseModel):
-    """Resultado de ACK público (controle de não-repetição)."""
-
-    choice_id: str  # ex: "ack_v1", "ack_v2"
-    thread_id: Optional[str] = None
-    post_id: Optional[str] = None
-
-
-# ========================================
-# Evento de Auditoria Unificado
-# ========================================
-
-
-class AuditEvent(BaseModel):
-    """
-    Evento de auditoria unificado.
-    Cada etapa do pipeline gera um evento desse tipo.
-    """
-
     request_id: str = Field(default_factory=lambda: str(uuid4()))
-    event_type: AuditEventType
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
-    data: dict = Field(default_factory=dict)
-
-
-# ========================================
-# Contexto de Request (Estado do Pipeline)
-# ========================================
-
-
-class RequestContext(BaseModel):
-    """
-    Contexto completo de um request através do pipeline.
-    Acumula eventos de auditoria para persistência.
-    """
-
-    # Identificadores
-    request_id: str = Field(default_factory=lambda: str(uuid4()))
-    external_message_id: Optional[str] = None
     session_id: str
-    tenant_id: Optional[str] = None
+    tenant_id: str
+    message: str
+    channel: str = "web"
 
-    # Input
-    surface: SurfaceType
-    channel: Channel
+
+class ChatExchangeRecord(BaseModel):
+    request_id: str
+    tenant_id: str
+    session_id: str
+    channel: str
     user_message: str
+    assistant_message: str
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    # Thread info (para controle de ACK)
-    thread_id: Optional[str] = None
-    post_id: Optional[str] = None
-    comment_id: Optional[str] = None
 
-    # NLP - Análise de linguagem
-    user_formality: Optional[str] = None  # formal, neutral, informal, very_informal
-    sentiment: Optional[str] = (
-        None  # very_positive, positive, neutral, negative, very_negative
-    )
-    emotion: Optional[str] = None  # joy, gratitude, anxiety, frustration, etc.
-    needs_empathy: bool = False  # Se usuário precisa de resposta empática
-    is_vulnerable: bool = (
-        False  # Se é usuário vulnerável (gestante confusa, idoso, etc.)
-    )
-    tone_suggestion: Optional[str] = None  # Sugestão de tom para resposta
-    expanded_query: Optional[str] = None  # Query expandida com sinônimos
+class AuditEventRecord(BaseModel):
+    request_id: str
+    tenant_id: str
+    session_id: str
+    event_type: str
+    payload: dict[str, str]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
-    # Resultados do pipeline (preenchidos progressivamente)
-    classifier_result: Optional[ClassifierResult] = None
-    policy_pre: Optional[PolicyPreResult] = None
-    rag_retrieve: Optional[RAGRetrieveResult] = None
-    policy_post: Optional[PolicyPostResult] = None
-    response_selected: Optional[ResponseSelectedResult] = None
-    message_sent: Optional[MessageSentResult] = None
-    public_ack: Optional[PublicAckResult] = None
 
-    # Campos finais consolidados
-    intent: Optional[Intent] = None
-    confidence: Optional[float] = None
-    policy_decision_pre: Optional[PolicyDecision] = None
-    final_decision: Optional[Decision] = None
-    response_type: Optional[ResponseType] = None
-    response_message: Optional[str] = None
-    base_id: Optional[str] = None
-    docs_found: Optional[bool] = None
-    fallback_used: bool = False
+class RagDocumentCreateRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    title: str = Field(..., min_length=1, max_length=200)
+    content: str = Field(..., min_length=1, max_length=20000)
+    keywords: list[str] = Field(default_factory=list)
+    intents: list[str] = Field(default_factory=list)
 
-    # Eventos de auditoria
-    audit_events: list[AuditEvent] = Field(default_factory=list)
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
 
-    def add_event(self, event_type: AuditEventType, data: dict) -> None:
-        """Adiciona um evento de auditoria."""
-        self.audit_events.append(
-            AuditEvent(
-                request_id=self.request_id,
-                event_type=event_type,
-                data=data,
-            )
-        )
+    @field_validator("title", "content", mode="before")
+    @classmethod
+    def normalize_required_fields(cls, value: str, info) -> str:
+        return _normalize_required_text(value, info.field_name)
 
-    def get_event(self, event_type: AuditEventType) -> Optional[AuditEvent]:
-        """Retorna o primeiro evento do tipo especificado."""
-        for event in self.audit_events:
-            if event.event_type == event_type:
-                return event
-        return None
+    @field_validator("keywords", "intents", mode="before")
+    @classmethod
+    def normalize_tags(cls, value: Any) -> list[str]:
+        return _normalize_string_list(value)
 
-    def has_event(self, event_type: AuditEventType) -> bool:
-        """Verifica se existe evento do tipo especificado."""
-        return self.get_event(event_type) is not None
+
+class RagDocumentUpdateRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    title: Optional[str] = Field(default=None, min_length=1, max_length=200)
+    content: Optional[str] = Field(default=None, min_length=1, max_length=20000)
+    keywords: Optional[list[str]] = None
+    intents: Optional[list[str]] = None
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+    @field_validator("title", "content", mode="before")
+    @classmethod
+    def normalize_optional_fields(cls, value: Optional[str], info) -> Optional[str]:
+        if value is None:
+            return None
+        return _normalize_required_text(value, info.field_name)
+
+    @field_validator("keywords", "intents", mode="before")
+    @classmethod
+    def normalize_optional_tags(cls, value: Any) -> Optional[list[str]]:
+        if value is None:
+            return None
+        return _normalize_string_list(value)
+
+
+class RagDocumentRecord(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    tenant_id: str
+    title: str
+    content: str
+    keywords: list[str] = Field(default_factory=list)
+    intents: list[str] = Field(default_factory=list)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class RagDocumentSummary(BaseModel):
+    id: str
+    tenant_id: str
+    title: str
+    file: str
+    tags: list[str]
+    intents: list[str]
+    updated_at: datetime
+
+
+class RagDocumentContent(BaseModel):
+    id: str
+    tenant_id: str
+    title: str
+    file: str
+    content: str
+    keywords: list[str]
+    intents: list[str]
+    created_at: datetime
+    updated_at: datetime
+
+
+class RagDocumentListResponse(BaseModel):
+    tenant_id: str
+    source_dir: str
+    collection_name: str
+    ready: bool
+    documents_count: int
+    chunks_count: int
+    last_ingested_at: Optional[datetime] = None
+    documents: list[RagDocumentSummary]
+
+
+class RagIngestRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    reset_collection: bool = True
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+
+class RagIngestResponse(BaseModel):
+    tenant_id: str
+    collection_name: str
+    source_dir: str
+    documents_count: int
+    chunks_count: int
+    ready: bool
+    reset_collection: bool
+    last_ingested_at: Optional[datetime] = None
+    message: str
+
+
+class RagResetRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    purge_documents: bool = False
+    remove_legacy_collections: bool = True
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+
+class RagResetResponse(BaseModel):
+    tenant_id: str
+    collection_name: str
+    removed_collections: list[str]
+    removed_documents_count: int
+    source_dir: str
+    message: str
+
+
+class RagStatusResponse(BaseModel):
+    tenant_id: str
+    collection_name: str
+    source_dir: str
+    documents_count: int
+    chunks_count: int
+    ready: bool
+    last_ingested_at: Optional[datetime] = None
+    message: str
+
+
+class RagQueryRequest(BaseModel):
+    tenant_id: Optional[str] = None
+    query: str = Field(..., min_length=1, max_length=2000)
+    min_score: float = Field(default=0.0, ge=0.0, le=1.0)
+    top_k: int = Field(default=5, ge=1, le=20)
+    boost_enabled: bool = False
+
+    @field_validator("tenant_id", mode="before")
+    @classmethod
+    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+    @field_validator("query", mode="before")
+    @classmethod
+    def normalize_query(cls, value: str) -> str:
+        return _normalize_required_text(value, "query")
+
+
+class RagRetrievedChunk(BaseModel):
+    id: str
+    text: str
+    source: str
+    title: str
+    section: str
+    score: float
+    tags: list[str]
+
+
+class RagQueryParamsUsed(BaseModel):
+    min_score: float
+    top_k: int
+    boost_enabled: bool
+    collection: str
+
+
+class RagQueryResponse(BaseModel):
+    tenant_id: str
+    query: str
+    status: str
+    message: str
+    chunks: list[RagRetrievedChunk]
+    total_chunks: int
+    best_score: float
+    params_used: RagQueryParamsUsed

@@ -1,0 +1,122 @@
+{
+  "env": "prod",
+  "base_url": "http://127.0.0.1:8000",
+  "tenant_id": "prefeitura-vila-serena",
+  "tenant_manifest": "tenants/prefeitura-vila-serena/tenant.json",
+  "container_name": "chat-pref-api",
+  "total_steps": 12,
+  "successes": 12,
+  "failures": 0,
+  "status": "passed",
+  "results": [
+    {
+      "nome": "Bundle do tenant demonstrativo",
+      "ok": true,
+      "explicacao": "Confirma nome, identidade, configuracao, escopo e estrutura inicial do tenant ficticio.",
+      "detalhes": "Tenant: prefeitura-vila-serena\nCliente: Prefeitura Municipal de Vila Serena\nCriterios aprovados: 5/5\n- [OK] nome do tenant definido e padronizado | tenant_id=prefeitura-vila-serena | client_name=Prefeitura Municipal de Vila Serena | bot_name=Atende Vila Serena\n- [OK] identidade textual institucional criada | README=README.md | municipio=Vila Serena | voz=Clara, objetiva, cordial e estritamente informativa.\n- [OK] configuracao do tenant criada sem hardcodes | manifest=tenant.json | knowledge_manifest=knowledge_base/manifest.json | documents_dir=knowledge_base/documents | knowledge_manifest_tenant=prefeitura-vila-serena\n- [OK] escopo do assistente documentado | role=Assistente digital institucional para orientacoes gerais sobre servicos, canais de atendimento e informacoes publicas da Prefeitura Municipal de Vila Serena. | covered_topics=4 | out_of_scope=5\n- [OK] estrutura inicial do tenant preparada para ingest | documents=3 | dir=knowledge_base/documents | tenant_match=True | listed_documents=3"
+    },
+    {
+      "nome": "Subida do ambiente",
+      "ok": true,
+      "explicacao": "Os containers foram criados/inicializados com sucesso.",
+      "detalhes": "#1 [internal] load local bake definitions\n#1 reading from stdin 626B done\n#1 DONE 0.0s\n\n#2 [internal] load build definition from Dockerfile\n#2 transferring dockerfile: 776B done\n#2 DONE 0.0s\n\n#3 [internal] load metadata for docker.io/library/python:3.12-slim\n#3 DONE 1.8s\n\n#4 [internal] load .dockerignore\n#4 transferring context: 420B done\n#4 DONE 0.0s\n\n#5 [1/9] FROM docker.io/library/python:3.12-slim@sha256:ccc7089399c8bb65dd1fb3ed6d55efa538a3f5e7fca3f5988ac3b5b87e593bf0\n#5 resolve docker.io/library/python:3.12-slim@sha256:ccc7089399c8bb65dd1fb3ed6d55efa538a3f5e7fca3f5988ac3b5b87e593bf0 0.0s done\n#5 DONE 0.0s\n\n#6 [internal] load build context\n#6 transferring context: 19.68kB 0.0s done\n#6 DONE 0.0s\n\n#7 [4/9] RUN pip install --upgrade pip && pip install -r requirements.txt\n#7 CACHED\n\n#8 [6/9] COPY scripts ./scripts\n#8 CACHED\n\n#9 [3/9] COPY requirements.txt .\n#9 CACHED\n\n#10 [2/9] WORKDIR /app\n#10 CACHED\n\n#11 [7/9] COPY tenants ./tenants\n#11 CACHED\n\n#12 [5/9] COPY app ./app\n#12 CACHED\n\n#13 [8/9] COPY .env.example ./.env.example\n#13 CACHED\n\n#14 [9/9] RUN mkdir -p /app/data/runtime /app/data/knowledge_base /app/data/chroma\n#14 CACHED\n\n#15 exporting to image\n#15 exporting layers done\n#15 exporting manifest sha256:8a731d5cfb5452c7eb0ef255fe62bc512f6339e5de0d024fa1074c09f410cfec done\n#15 exporting config sha256:715c30cc25c204c45ac38ebe76c03b98c6ea627d4171841ce7098ec478526774 done\n#15 exporting attestation manifest sha256:96c37ed400df7bd782e36a58d3f1e3ff4fa0b44a9cce4f17bb8b6620e65c3499\n#15 exporting attestation manifest sha256:96c37ed400df7bd782e36a58d3f1e3ff4fa0b44a9cce4f17bb8b6620e65c3499 0.0s done\n#15 exporting manifest list sha256:c278446d3c4712c51739c8ccce6d01220b5a63dc67927ee31fff0c26a6328b37 0.0s done\n#15 naming to docker.io/library/chat-bot-pref-chat-pref-api:latest done\n#15 unpacking to docker.io/library/chat-bot-pref-chat-pref-api:latest 0.0s done\n#15 DONE 0.1s\n\n#16 resolving provenance for metadata file\n#16 DONE 0.0s"
+    },
+    {
+      "nome": "Healthcheck do container",
+      "ok": true,
+      "explicacao": "A API ficou saudável dentro do tempo esperado.",
+      "detalhes": "Container: chat-pref-api | Health: healthy"
+    },
+    {
+      "nome": "GET /",
+      "ok": true,
+      "explicacao": "Confirma que a API está no ar e responde metadados básicos.",
+      "detalhes": "{\n  \"message\": \"Chat Pref API ativa.\",\n  \"env\": \"prod\",\n  \"version\": \"0.1.0\",\n  \"docs\": \"/docs\"\n}"
+    },
+    {
+      "nome": "GET /health",
+      "ok": true,
+      "explicacao": "Confirma que o backend reporta estado saudável para uso operacional.",
+      "detalhes": "{\n  \"status\": \"healthy\"\n}"
+    },
+    {
+      "nome": "RAG vazio",
+      "ok": true,
+      "explicacao": "Confirma que o sistema trata explicitamente a ausência de base documental.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-vila-serena\",\n  \"collection_name\": \"chat_pref_docs__prefeitura_vila_serena\",\n  \"source_dir\": \"/app/data/knowledge_base/prefeitura-vila-serena/documents\",\n  \"documents_count\": 0,\n  \"chunks_count\": 0,\n  \"ready\": false,\n  \"last_ingested_at\": null,\n  \"message\": \"Base de conhecimento do tenant 'prefeitura-vila-serena' ainda não possui documentos.\"\n}"
+    },
+    {
+      "nome": "Criação da base documental",
+      "ok": true,
+      "explicacao": "Cria os documentos iniciais do tenant para validar ingest e retrieval.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-vila-serena\",\n  \"documents_created\": 3,\n  \"titles\": [\n    \"Escopo Informativo do Atende Vila Serena\",\n    \"Identidade Institucional de Vila Serena\",\n    \"Limites Operacionais e Disclaimer do Atende Vila Serena\"\n  ],\n  \"responses\": [\n    {\n      \"id\": \"1f1a4ff6-05ba-43eb-8624-20f23cddfaf2\",\n      \"tenant_id\": \"prefeitura-vila-serena\",\n      \"title\": \"Escopo Informativo do Atende Vila Serena\",\n      \"file\": \"1f1a4ff6-05ba-43eb-8624-20f23cddfaf2.json\",\n      \"content\": \"O Atende Vila Serena orienta o publico sobre horarios de atendimento, canais oficiais, documentos basicos exigidos e informacoes publicas sobre servicos municipais. Seu escopo e informativo e foi desenhado para apoiar a comunicacao inicial com a prefeitura ficticia.\\n\\nO assistente pode explicar, por exemplo, onde procurar atendimento, quais documentos basicos costumam ser solicitados e quando o cidadao deve buscar o canal humano da administracao. Ele nao substitui servidores, nao toma decisao administrativa e nao consulta dados pessoais.\",\n      \"keywords\": [\n        \"escopo\",\n        \"atendimento\",\n        \"orientacao\",\n        \"servicos\"\n      ],\n      \"intents\": [\n        \"INFO_REQUEST\",\n        \"SCOPE_INFO\"\n      ],\n      \"created_at\": \"2026-03-13T22:30:36.257686Z\",\n      \"updated_at\": \"2026-03-13T22:30:36.257689Z\"\n    },\n    {\n      \"id\": \"235af867-7f4e-4f79-9be0-4204072fcd7e\",\n      \"tenant_id\": \"prefeitura-vila-serena\",\n      \"title\": \"Identidade Institucional de Vila Serena\",\n      \"file\": \"235af867-7f4e-4f79-9be0-4204072fcd7e.json\",\n      \"content\": \"A Prefeitura Municipal de Vila Serena e uma entidade ficticia criada para demonstracao tecnica do Chat Pref. Sua identidade institucional foi desenhada para representar uma prefeitura plausivel, com linguagem administrativa clara e sem referencia a dados reais.\\n\\nO Atende Vila Serena e o nome oficial do assistente digital institucional deste tenant. Ele deve responder com tom cordial, objetivo e estritamente informativo, sempre priorizando orientacoes gerais e canais oficiais.\",\n      \"keywords\": [\n        \"identidade\",\n        \"institucional\",\n        \"prefeitura\",\n        \"assistente\"\n      ],\n      \"intents\": [\n        \"INFO_REQUEST\",\n        \"INSTITUTIONAL_INFO\"\n      ],\n      \"created_at\": \"2026-03-13T22:30:36.259832Z\",\n      \"updated_at\": \"2026-03-13T22:30:36.259834Z\"\n    },\n    {\n      \"id\": \"10288741-a436-4dae-a045-54e56f3aa2ee\",\n      \"tenant_id\": \"prefeitura-vila-serena\",\n      \"title\": \"Limites Operacionais e Disclaimer do Atende Vila Serena\",\n      \"file\": \"10288741-a436-4dae-a045-54e56f3aa2ee.json\",\n      \"content\": \"O Atende Vila Serena fornece apenas informacoes gerais e nao substitui atendimento humano, protocolo oficial ou avaliacao tecnica da Prefeitura Municipal de Vila Serena. Sempre que a demanda depender de analise individual, documentos oficiais ou decisao administrativa, o usuario deve ser direcionado aos canais formais.\\n\\nO assistente nao emite protocolo, nao agenda atendimento, nao acessa processos pessoais e nao confirma resultados administrativos. Em casos sensiveis, urgentes ou com dados pessoais, a orientacao correta e procurar diretamente os canais institucionais da prefeitura.\",\n      \"keywords\": [\n        \"limites\",\n        \"disclaimer\",\n        \"protocolo\",\n        \"atendimento\"\n      ],\n      \"intents\": [\n        \"INFO_REQUEST\",\n        \"DISCLAIMER\"\n      ],\n      \"created_at\": \"2026-03-13T22:30:36.262117Z\",\n      \"updated_at\": \"2026-03-13T22:30:36.262121Z\"\n    }\n  ]\n}"
+    },
+    {
+      "nome": "Ingest da base",
+      "ok": true,
+      "explicacao": "Transforma o documento salvo em chunks recuperáveis no RAG.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-vila-serena\",\n  \"collection_name\": \"chat_pref_docs__prefeitura_vila_serena\",\n  \"source_dir\": \"/app/data/knowledge_base/prefeitura-vila-serena/documents\",\n  \"documents_count\": 3,\n  \"chunks_count\": 6,\n  \"ready\": true,\n  \"reset_collection\": true,\n  \"last_ingested_at\": \"2026-03-13T22:30:36.313440Z\",\n  \"message\": \"Ingestão concluída para o tenant 'prefeitura-vila-serena' com 3 documento(s) e 6 chunk(s).\"\n}"
+    },
+    {
+      "nome": "Consulta direta ao RAG",
+      "ok": true,
+      "explicacao": "Valida que a recuperação semântica encontra contexto útil para a pergunta.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-vila-serena\",\n  \"query\": \"O assistente emite protocolo?\",\n  \"status\": \"ready\",\n  \"message\": \"Recuperados 5 chunks para o tenant 'prefeitura-vila-serena'.\",\n  \"chunks\": [\n    {\n      \"id\": \"10288741-a436-4dae-a045-54e56f3aa2ee:section-2\",\n      \"text\": \"O assistente nao emite protocolo, nao agenda atendimento, nao acessa processos pessoais e nao confirma resultados administrativos. Em casos sensiveis, urgentes ou com dados pessoais, a orientacao correta e procurar diretamente os canais institucionais da prefeitura.\",\n      \"source\": \"10288741-a436-4dae-a045-54e56f3aa2ee.json\",\n      \"title\": \"Limites Operacionais e Disclaimer do Atende Vila Serena\",\n      \"section\": \"section-2\",\n      \"score\": 0.8563,\n      \"tags\": [\n        \"limites\",\n        \"disclaimer\",\n        \"protocolo\",\n        \"atendimento\",\n        \"INFO_REQUEST\",\n        \"DISCLAIMER\"\n      ]\n    },\n    {\n      \"id\": \"1f1a4ff6-05ba-43eb-8624-20f23cddfaf2:section-2\",\n      \"text\": \"O assistente pode explicar, por exemplo, onde procurar atendimento, quais documentos basicos costumam ser solicitados e quando o cidadao deve buscar o canal humano da administracao. Ele nao substitui servidores, nao toma decisao administrativa e nao consulta dados pessoais.\",\n      \"source\": \"1f1a4ff6-05ba-43eb-8624-20f23cddfaf2.json\",\n      \"title\": \"Escopo Informativo do Atende Vila Serena\",\n      \"section\": \"section-2\",\n      \"score\": 0.4747,\n      \"tags\": [\n        \"escopo\",\n        \"atendimento\",\n        \"orientacao\",\n        \"servicos\",\n        \"INFO_REQUEST\",\n        \"SCOPE_INFO\"\n      ]\n    },\n    {\n      \"id\": \"235af867-7f4e-4f79-9be0-4204072fcd7e:section-2\",\n      \"text\": \"O Atende Vila Serena e o nome oficial do assistente digital institucional deste tenant. Ele deve responder com tom cordial, objetivo e estritamente informativo, sempre priorizando orientacoes gerais e canais oficiais.\",\n      \"source\": \"235af867-7f4e-4f79-9be0-4204072fcd7e.json\",\n      \"title\": \"Identidade Institucional de Vila Serena\",\n      \"section\": \"section-2\",\n      \"score\": 0.4718,\n      \"tags\": [\n        \"identidade\",\n        \"institucional\",\n        \"prefeitura\",\n        \"assistente\",\n        \"INFO_REQUEST\",\n        \"INSTITUTIONAL_INFO\"\n      ]\n    },\n    {\n      \"id\": \"10288741-a436-4dae-a045-54e56f3aa2ee:section-1\",\n      \"text\": \"O Atende Vila Serena fornece apenas informacoes gerais e nao substitui atendimento humano, protocolo oficial ou avaliacao tecnica da Prefeitura Municipal de Vila Serena. Sempre que a demanda depender de analise individual, documentos oficiais ou decisao administrativa, o usuario deve ser direcionado aos canais formais.\",\n      \"source\": \"10288741-a436-4dae-a045-54e56f3aa2ee.json\",\n      \"title\": \"Limites Operacionais e Disclaimer do Atende Vila Serena\",\n      \"section\": \"section-1\",\n      \"score\": 0.4667,\n      \"tags\": [\n        \"limites\",\n        \"disclaimer\",\n        \"protocolo\",\n        \"atendimento\",\n        \"INFO_REQUEST\",\n        \"DISCLAIMER\"\n      ]\n    },\n    {\n      \"id\": \"1f1a4ff6-05ba-43eb-8624-20f23cddfaf2:section-1\",\n      \"text\": \"O Atende Vila Serena orienta o publico sobre horarios de atendimento, canais oficiais, documentos basicos exigidos e informacoes publicas sobre servicos municipais. Seu escopo e informativo e foi desenhado para apoiar a comunicacao inicial com a prefeitura ficticia.\",\n      \"source\": \"1f1a4ff6-05ba-43eb-8624-20f23cddfaf2.json\",\n      \"title\": \"Escopo Informativo do Atende Vila Serena\",\n      \"section\": \"section-1\",\n      \"score\": 0.2875,\n      \"tags\": [\n        \"escopo\",\n        \"atendimento\",\n        \"orientacao\",\n        \"servicos\",\n        \"INFO_REQUEST\",\n        \"SCOPE_INFO\"\n      ]\n    }\n  ],\n  \"total_chunks\": 5,\n  \"best_score\": 0.8563,\n  \"params_used\": {\n    \"min_score\": 0.0,\n    \"top_k\": 5,\n    \"boost_enabled\": false,\n    \"collection\": \"chat_pref_docs__prefeitura_vila_serena\"\n  }\n}"
+    },
+    {
+      "nome": "Consulta no /api/chat",
+      "ok": true,
+      "explicacao": "Valida o fluxo principal de atendimento usando tenant e contexto recuperado.",
+      "detalhes": "{\n  \"request_id\": \"9c9683d9-38b6-4fa3-95f9-b9f0ea070295\",\n  \"session_id\": \"ae1c6e9f-19ab-4cc6-ad81-e4fd25494487\",\n  \"tenant_id\": \"prefeitura-vila-serena\",\n  \"message\": \"Fluxo mínimo ativo para o tenant 'prefeitura-vila-serena'. Contexto recuperado: O assistente nao emite protocolo, nao agenda atendimento, nao acessa processos pessoais e nao confirma resultados administrativos. Em casos sensiveis, urgentes ou com dados pessoais, a orientacao correta e procurar diretamente os canais institucionais da prefeitura.\",\n  \"channel\": \"web\"\n}"
+    },
+    {
+      "nome": "Reset da base",
+      "ok": true,
+      "explicacao": "Limpa a collection e os documentos do tenant de teste.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-vila-serena\",\n  \"collection_name\": \"chat_pref_docs__prefeitura_vila_serena\",\n  \"removed_collections\": [\n    \"chat_pref_docs__prefeitura_vila_serena\"\n  ],\n  \"removed_documents_count\": 3,\n  \"source_dir\": \"/app/data/knowledge_base/prefeitura-vila-serena/documents\",\n  \"message\": \"Reset concluído para o tenant 'prefeitura-vila-serena'. Collections removidas: 1. Documentos removidos: 3.\"\n}"
+    },
+    {
+      "nome": "Encerramento do ambiente",
+      "ok": true,
+      "explicacao": "Finaliza os containers e remove volumes do teste.",
+      "detalhes": "Container chat-pref-api Stopping \n Container chat-pref-api Stopped \n Container chat-pref-api Removing \n Container chat-pref-api Removed \n Volume chat-bot-pref_chat_pref_data Removing \n Network chat-bot-pref_default Removing \n Volume chat-bot-pref_chat_pref_data Removed \n Network chat-bot-pref_default Removed"
+    }
+  ],
+  "managerial_report": {
+    "phase": "Fase 7 - Construcao do Tenant Demonstrativo Ficticio",
+    "tenant_id": "prefeitura-vila-serena",
+    "client_name": "Prefeitura Municipal de Vila Serena",
+    "status": "passed",
+    "criteria_total": 5,
+    "criteria_passed": 5,
+    "criteria_failed": 0,
+    "executive_summary": "Tenant demonstrativo coerente e pronto para ingest.",
+    "criteria": [
+      {
+        "criterion": "nome do tenant definido e padronizado",
+        "ok": true,
+        "evidence": "tenant_id=prefeitura-vila-serena | client_name=Prefeitura Municipal de Vila Serena | bot_name=Atende Vila Serena"
+      },
+      {
+        "criterion": "identidade textual institucional criada",
+        "ok": true,
+        "evidence": "README=README.md | municipio=Vila Serena | voz=Clara, objetiva, cordial e estritamente informativa."
+      },
+      {
+        "criterion": "configuracao do tenant criada sem hardcodes",
+        "ok": true,
+        "evidence": "manifest=tenant.json | knowledge_manifest=knowledge_base/manifest.json | documents_dir=knowledge_base/documents | knowledge_manifest_tenant=prefeitura-vila-serena"
+      },
+      {
+        "criterion": "escopo do assistente documentado",
+        "ok": true,
+        "evidence": "role=Assistente digital institucional para orientacoes gerais sobre servicos, canais de atendimento e informacoes publicas da Prefeitura Municipal de Vila Serena. | covered_topics=4 | out_of_scope=5"
+      },
+      {
+        "criterion": "estrutura inicial do tenant preparada para ingest",
+        "ok": true,
+        "evidence": "documents=3 | dir=knowledge_base/documents | tenant_match=True | listed_documents=3"
+      }
+    ]
+  }
+}

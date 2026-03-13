@@ -21,11 +21,11 @@ export interface RAGConfig {
 }
 
 export interface RAGQueryRequest {
+  tenant_id: string;
   query: string;
   min_score: number;
   top_k: number;
   boost_enabled: boolean;
-  collection?: string;
 }
 
 export interface RetrievedChunk {
@@ -39,7 +39,10 @@ export interface RetrievedChunk {
 }
 
 export interface RAGQueryResponse {
+  tenant_id: string;
   query: string;
+  status: string;
+  message: string;
   chunks: RetrievedChunk[];
   total_chunks: number;
   best_score: number;
@@ -53,19 +56,67 @@ export interface RAGQueryResponse {
 
 export interface DocumentInfo {
   id: string;
+  tenant_id: string;
   title: string;
   file: string;
   tags: string[];
   intents: string[];
+  updated_at: string;
 }
 
 export interface DocumentContent {
   id: string;
+  tenant_id: string;
   title: string;
   file: string;
   content: string;
   keywords: string[];
   intents: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RAGDocumentsResponse {
+  tenant_id: string;
+  source_dir: string;
+  collection_name: string;
+  ready: boolean;
+  documents_count: number;
+  chunks_count: number;
+  last_ingested_at?: string | null;
+  documents: DocumentInfo[];
+}
+
+export interface RAGStatusResponse {
+  tenant_id: string;
+  collection_name: string;
+  source_dir: string;
+  documents_count: number;
+  chunks_count: number;
+  ready: boolean;
+  last_ingested_at?: string | null;
+  message: string;
+}
+
+export interface RAGIngestResponse {
+  tenant_id: string;
+  collection_name: string;
+  source_dir: string;
+  documents_count: number;
+  chunks_count: number;
+  ready: boolean;
+  reset_collection: boolean;
+  last_ingested_at?: string | null;
+  message: string;
+}
+
+export interface RAGResetResponse {
+  tenant_id: string;
+  collection_name: string;
+  removed_collections: string[];
+  removed_documents_count: number;
+  source_dir: string;
+  message: string;
 }
 
 export interface DashboardStats {

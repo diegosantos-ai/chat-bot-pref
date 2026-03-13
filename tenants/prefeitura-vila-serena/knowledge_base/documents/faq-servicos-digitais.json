@@ -1,0 +1,16 @@
+{
+  "id": "faq-servicos-digitais",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "FAQ de Servicos Digitais e Procedimentos Informativos",
+  "content": "Perguntas frequentes sobre servicos digitais incluem emissao de segunda via do IPTU, consulta a canais oficiais e orientacao inicial para protocolo administrativo. O portal www.vilaserena.gov.exemplo concentra os links institucionais informativos divulgados pela prefeitura.\n\nO Atende Vila Serena pode orientar sobre documentos basicos, horarios e setores, mas nao substitui autenticacao em servicos com dados pessoais. Sempre que a demanda exigir comprovacao individual, emissao oficial ou acompanhamento de processo, o usuario deve procurar o portal autenticado ou atendimento humano da prefeitura.",
+  "keywords": [
+    "faq",
+    "portal",
+    "servicos-digitais",
+    "orientacao"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "FAQ"
+  ]
+}

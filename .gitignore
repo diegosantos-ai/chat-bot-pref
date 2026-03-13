@@ -116,6 +116,9 @@ build/
 *.bak
 *.orig
 _chatgpt_snapshot/
+data/runtime/
+data/chroma/
+data/knowledge_base/
 
 # OS generated files
 .AppleDouble

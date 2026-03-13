@@ -1,0 +1,16 @@
+{
+  "id": "servico-matricula-escolar",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Matricula e Transferencia na Rede Municipal",
+  "content": "A matricula inicial e a transferencia para a rede municipal podem ser solicitadas na secretaria escolar da unidade pretendida ou na Central da Educacao, durante o calendario divulgado pela prefeitura. A campanha principal de matricula ocorre no inicio do ano letivo, com janela complementar para transferencia quando houver vaga.\n\nOs documentos mais comuns para matricula sao certidao de nascimento do aluno, comprovante de endereco, documento do responsavel e historico escolar ou declaracao da escola de origem. A confirmacao da vaga depende da etapa de ensino, disponibilidade na unidade e conferencia documental.",
+  "keywords": [
+    "educacao",
+    "matricula",
+    "transferencia",
+    "escola"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

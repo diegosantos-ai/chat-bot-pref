@@ -1,0 +1,52 @@
+{
+  "tenant_id": "prefeitura-vila-serena",
+  "version": "1.1.0",
+  "description": "Base documental ficticia da Prefeitura Municipal de Vila Serena para demonstracao de ingest e retrieval.",
+  "retrieval_checks_file": "knowledge_base/retrieval_checks.json",
+  "document_groups": [
+    {
+      "group": "institucional",
+      "documents": [
+        "tenant-identidade-institucional.json",
+        "tenant-escopo-assistente.json",
+        "tenant-limites-disclaimer.json"
+      ]
+    },
+    {
+      "group": "atendimento",
+      "documents": [
+        "atendimento-canais-oficiais.json",
+        "protocolo-geral-documentos-basicos.json"
+      ]
+    },
+    {
+      "group": "servicos",
+      "documents": [
+        "servico-alvara-funcionamento.json",
+        "servico-iptu-certidoes.json",
+        "servico-ubs-vacinacao.json",
+        "servico-matricula-escolar.json",
+        "servico-coleta-entulho.json"
+      ]
+    },
+    {
+      "group": "faq",
+      "documents": [
+        "faq-servicos-digitais.json"
+      ]
+    }
+  ],
+  "documents": [
+    "atendimento-canais-oficiais.json",
+    "faq-servicos-digitais.json",
+    "protocolo-geral-documentos-basicos.json",
+    "servico-alvara-funcionamento.json",
+    "servico-coleta-entulho.json",
+    "servico-iptu-certidoes.json",
+    "servico-matricula-escolar.json",
+    "servico-ubs-vacinacao.json",
+    "tenant-identidade-institucional.json",
+    "tenant-escopo-assistente.json",
+    "tenant-limites-disclaimer.json"
+  ]
+}

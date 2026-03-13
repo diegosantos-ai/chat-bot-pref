@@ -1,36 +1,120 @@
 # Copilot Instructions
 
 ## Fonte de verdade
-- Leia primeiro `AGENTS.md`, `docs/contexto.md`, `docs/arquitetura.md` e `docs/planejamento_fases.md`.
-- Leia o `README.md` da raiz como referencia principal.
-- Use `.github/agents/`, `.ai/skills/` e `.ai/workflows/` como camada ativa de governanca de agentes.
-- Trate `.agent_legacy/` apenas como referencia historica congelada.
 
-## Escopo atual
-- O projeto esta em refatoracao controlada para consolidar arquitetura FastAPI + RAG + multi-tenant.
-- `tenant_id` e contrato arquitetural explicito. Nao introduza fallback silencioso.
-- Prioridade atual: diagnostico, sanitizacao do runtime, consolidacao do fluxo de tenant, preparo para demo e validacao.
+Leia nesta ordem:
 
-## Guardrails de alteracao
-- Mantenha mudancas minimas, rastreaveis e ligadas a uma fase/task do planejamento.
-- Nao altere runtime sem necessidade direta da task.
-- Nao versiona credenciais reais, `.env` real ou tokens em areas ativas.
-- Nao use `.agent_legacy/` como base para novos arquivos sem filtragem explicita do que e reaproveitavel.
-- Se a mudanca afetar arquitetura, tenant, ingest, Docker, GitHub Actions ou AWS/Terraform, atualize a documentacao correspondente.
+1. `AGENTS.md`
+2. `README.md`
+3. `docs/contexto.md`
+4. `docs/arquitetura.md`
+5. `docs/planejamento_fases.md`
 
-## Areas principais
-- `app/`: backend FastAPI, orchestrator, RAG, auditoria, tenant context/resolver.
-- `db/`: schema e migrations.
-- `scripts/`: utilitarios operacionais.
-- `admin-panel/` e `nexo-admin/`: interfaces auxiliares.
-- `.github/workflows/`: CI/CD.
-- `.ai/`: skills e workflows operacionais para agentes.
+Se a task tocar as Fases 9 a 12, leia tambem:
 
-## Validacao minima
-- Use apenas validacoes coerentes com a task.
-- Exemplos comuns:
-  - `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`
-  - `pytest`
-  - `docker compose config`
-  - buscas por hardcodes e residuos historicos com `rg`
-- Sempre registre o que foi alterado, como validou, estado atual e proximo passo.
+6. `docs/guardrail_rastreavel.md`
+7. `docs/genai_com_metodo.md`
+
+Se a task tocar as Fases 10 a 12, consulte tambem:
+
+8. `docs/matriz_cenarios_validacao.md`
+9. `docs/rubrica_qualidade_resposta.md`
+
+Use `.github/agents/`, `.ai/skills/` e `.ai/workflows/` como camada ativa de governança.
+
+## Estado atual do projeto
+
+O runtime ativo atual é uma base mínima reconstruída, mas já validada além do chat direto.
+
+Escopo implementado:
+
+- FastAPI mínimo
+- `GET /`
+- `GET /health`
+- `POST /api/chat`
+- `POST /api/webhook`
+- `GET /api/rag/status`
+- `POST /api/rag/documents`
+- `POST /api/rag/ingest`
+- `POST /api/rag/query`
+- `POST /api/rag/reset`
+- `tenant_id` explícito no chat direto
+- contexto de tenant por request
+- persistência local por tenant
+- auditoria mínima por tenant
+- RAG tenant-aware com ingest limpa
+- tenant demonstrativo e base documental fictícia
+- Docker funcional
+- smoke tests e retrieval checks
+
+Não assuma como ativos no runtime atual:
+
+- canal Telegram ponta a ponta
+- composição generativa ativa com provedor LLM
+- `policy_pre` e `policy_post`
+- `PolicyDecision` e `AuditEvent` versionado
+- logs estruturados
+- `/metrics`
+- traces com OpenTelemetry
+- painel/admin no caminho crítico
+- banco relacional como dependência operacional
+- CI e deploy em nuvem como parte do runtime da branch
+
+## Guardrails de alteração
+
+- mantenha mudanças mínimas e ligadas a uma fase/task
+- não trate arquitetura futura como se já estivesse implementada
+- não reintroduza arquivos, termos ou estruturas históricas removidas
+- `tenant_id` é contrato explícito, não detalhe opcional
+- preserve o contrato mínimo de `request_id` nos fluxos que já o expõem
+- não versione `.env` real nem segredos
+- se a alteração impactar arquitetura, tenant, RAG, guardrails, Docker ou operação, atualize a documentação correspondente
+- nas Fases 9 a 12, siga `docs/guardrail_rastreavel.md` e `docs/genai_com_metodo.md` como referência de contrato
+
+## Áreas ativas principais
+
+- `app/main.py`
+- `app/settings.py`
+- `app/api/`
+- `app/contracts/`
+- `app/services/`
+- `app/storage/`
+- `app/tenant_context.py`
+- `app/tenant_resolver.py`
+- `scripts/`
+- `tenants/`
+- `docs/`
+- `tests/`
+- `docker-compose.yml`
+- `docker-compose.local.yml`
+
+## Áreas fora do caminho crítico atual
+
+Diretórios como `admin-api/`, `admin-panel/`, `db/`, `panel/`, `prompts/`, `logging/`, `dashboards/`, `grafana/` e afins não devem ser assumidos como parte do runtime mínimo validado sem confirmação explícita da task.
+
+## Validação mínima recomendada
+
+Use apenas validações coerentes com a task. Exemplos:
+
+- `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`
+- `.venv/bin/python -m pytest tests -q`
+- `docker compose -f docker-compose.yml config`
+- `docker compose -f docker-compose.yml up -d --build`
+- `curl http://localhost:8000/`
+- `curl http://localhost:8000/health`
+- `curl -X POST http://localhost:8000/api/chat -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
+- `curl -X POST http://localhost:8000/api/webhook -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
+- `curl "http://localhost:8000/api/rag/status?tenant_id=prefeitura-demo"`
+- `.venv/bin/python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase8`
+
+## Forma de trabalho
+
+- explique o bloco antes de mudanças maiores
+- faça o menor corte que produza valor real
+- valide imediatamente depois
+- diferencie explicitamente o que ja existe no runtime, o que e contrato planejado e o que e apenas stack-alvo
+- feche cada tarefa informando:
+  - arquivos alterados
+  - validação executada
+  - status atual
+  - próximo passo

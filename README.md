@@ -23,7 +23,7 @@ O projeto foi estruturado para demonstrar, de forma prática:
 
 - backend modular com **FastAPI**
 - arquitetura **tenant-aware**
-- pipeline de atendimento com **classificação, policy guard e RAG**
+- pipeline de atendimento com **RAG validado** e evolução planejada para **guardrails rastreáveis**
 - **auditoria** e **rastreabilidade**
 - execução local reproduzível com **Docker**
 - demonstração funcional com **tenant fictício**
@@ -31,6 +31,8 @@ O projeto foi estruturado para demonstrar, de forma prática:
 - evolução para **CI/CD** e **deploy em AWS com Terraform**
 
 O foco atual é transformar uma base funcional, mas heterogênea, em uma plataforma **coerente, demonstrável e tecnicamente defensável**.
+
+O objetivo final da demonstração é provar **GenAI com método**, e não apenas RAG com isolamento por tenant.
 
 ---
 
@@ -78,12 +80,12 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 
 ### Incluído
 - API backend em FastAPI
-- pipeline de processamento com classificação, policy guard e RAG
+- pipeline de processamento tenant-aware com RAG validado e evolução planejada para guardrails rastreáveis
 - arquitetura multi-tenant em consolidação
-- auditoria e métricas operacionais
+- auditoria mínima operacional e evidências de validação
 - Docker e ambiente local reproduzível
 - tenant fictício demonstrativo
-- canal de demonstração via Telegram
+- preparação do canal de demonstração via Telegram
 - geração de evidências de funcionamento
 - preparação para CI/CD com GitHub Actions
 - preparação para deploy em AWS com Terraform
@@ -100,6 +102,8 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 ---
 
 ## Tecnologias Utilizadas
+
+Na branch de desenvolvimento, esta secao mantem a **stack-alvo do projeto**. O runtime ativo atual e mais enxuto e esta descrito em [docs/arquitetura.md](docs/arquitetura.md).
 
 ### Backend
 - Python 3.11+
@@ -140,6 +144,8 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 
 A arquitetura do projeto foi estruturada para suportar um fluxo de atendimento institucional com IA, separando responsabilidades entre entrada HTTP, orquestração, recuperação semântica, políticas de segurança, persistência e operação.
 
+> Esta secao resume a arquitetura-alvo do case. O runtime ativo hoje esta documentado em [docs/arquitetura.md](docs/arquitetura.md) e permanece menor do que a stack-alvo listada aqui.
+
 ### Componentes principais
 
 | Componente | Função |
@@ -161,6 +167,8 @@ A arquitetura do projeto foi estruturada para suportar um fluxo de atendimento i
 ---
 
 ## Fluxo do Atendimento
+
+O fluxo abaixo representa a direcao do pipeline completo do case. Na base ativa atual, o runtime validado opera um nucleo menor com chat, resolucao de tenant, retrieval por tenant e auditoria minima.
 
 ### Fluxo resumido
 1. A aplicação recebe uma mensagem via endpoint interno ou canal externo.
@@ -220,9 +228,8 @@ chat-bot-pref/
 ├── docker-compose.local.yml
 ├── Dockerfile
 ├── AGENTS.md
-├── contexto.md
-├── arquitetura.md
-└── planejamento-trello.md
+├── tenants/
+└── artifacts/
 ````
 
 ---
@@ -251,9 +258,11 @@ chat-bot-pref/
 
 ### Documentação
 
-* `contexto.md`: estado atual do projeto
-* `arquitetura.md`: arquitetura real
-* `planejamento-trello.md`: fases, tasks e execução
+* `docs/contexto.md`: estado atual do projeto
+* `docs/arquitetura.md`: arquitetura real
+* `docs/planejamento_fases.md`: fases, tasks e execução
+* `docs/guardrail_rastreavel.md`: eixo transversal de correlação e guardrails
+* `docs/genai_com_metodo.md`: definição operacional do requisito do case
 * `AGENTS.md`: governança de agentes e regras operacionais
 
 ---
@@ -262,26 +271,34 @@ chat-bot-pref/
 
 O projeto está em **refatoração estrutural com foco em demonstração funcional**.
 
+Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
+
+**Fase ativa na branch:** Fase 9 — Operacionalização do chat via Telegram.
+**Status da fase na branch:** iniciada na branch de trabalho.
+**Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
+
 ### Já existe
 
 * backend funcional em FastAPI
-* pipeline com classificação, policy guard e RAG
-* integração inicial com canais externos
-* auditoria e métricas
-* documentação técnica relevante
-* base de observabilidade e suporte operacional
+* contrato explícito de `tenant_id` no chat e no webhook mínimo
+* persistência local e auditoria mínima por tenant
+* RAG tenant-aware com ingest limpa por tenant
+* documentação técnica alinhada ao runtime mínimo
+* tenant fictício demonstrativo versionado
+* base documental fictícia do tenant demonstrativo
+* ambiente local reproduzível com Docker e smoke tests
 
 ### Em andamento
 
-* saneamento do legado mono-tenant
-* consolidação do contrato de `tenant_id`
-* reset da base RAG
-* containerização e ambiente local reproduzível
-* tenant fictício demonstrativo
-* canal real de demonstração via Telegram
+* operacionalização do canal de demonstração via Telegram
+* incorporação do eixo Guardrail Rastreável nas Fases 9 a 12
+* consolidação da trilha correlacionada entre request, tenant, canal e auditoria
 
 ### Próxima direção
 
+* composição generativa controlada sobre contexto recuperado
+* guardrails rastreáveis com `PolicyDecision`, `reason_codes` e evidências por `request_id`
+* observabilidade aplicada com logs estruturados, métricas e traces
 * CI com GitHub Actions
 * deploy mínimo em AWS com Terraform
 * fechamento do case com evidências de operação
@@ -306,7 +323,7 @@ O projeto está organizado em blocos contínuos:
 * Fase 7 — Construção do tenant demonstrativo fictício
 * Fase 8 — Construção da base documental fictícia e ingest limpa
 * Fase 9 — Operacionalização do chat via Telegram
-* Fase 10 — Validação funcional, guardrails e evidências
+* Fase 10 — Composição generativa, guardrails e evidências
 * Fase 11 — Observabilidade aplicada e fechamento técnico do case
 
 ### Bloco C — Engenharia de entrega
@@ -390,6 +407,8 @@ Comandos simples devem ser suficientes para:
 
 > O detalhamento do ambiente local deve refletir o estado real do `Dockerfile` e do `docker-compose` vigente.
 
+Na fase atual, o bootstrap mínimo validado do backend está descrito em [docs/bootstrap_local.md](docs/bootstrap_local.md).
+
 ---
 
 ## Tenant Fictício Demonstrativo
@@ -444,12 +463,14 @@ Ele funciona como **canal demonstrativo** para validar:
 
 O projeto deve oferecer visibilidade mínima sobre o fluxo do atendimento.
 
+Na base ativa atual, a evidência já validada é a auditoria mínima por tenant em arquivo. Logs estruturados, métricas expostas e traces correlacionados entram como evolução planejada das Fases 10 e 11.
+
 ### Evidências esperadas
 
 * logs estruturados
 * eventos de auditoria
 * métricas básicas expostas
-* trilha request → classificação → retrieval → resposta
+* trilha request → policy_pre → retrieval → compose → policy_post → resposta
 * prints e registros da demonstração
 * matriz de cenários validados
 

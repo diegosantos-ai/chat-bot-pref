@@ -1,0 +1,16 @@
+{
+  "id": "tenant-escopo-assistente",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Escopo Informativo do Atende Vila Serena",
+  "content": "O Atende Vila Serena orienta o publico sobre horarios de atendimento, canais oficiais, documentos basicos exigidos e informacoes publicas sobre servicos municipais. Seu escopo e informativo e foi desenhado para apoiar a comunicacao inicial com a prefeitura ficticia.\n\nO assistente pode explicar, por exemplo, onde procurar atendimento, quais documentos basicos costumam ser solicitados e quando o cidadao deve buscar o canal humano da administracao. Ele nao substitui servidores, nao toma decisao administrativa e nao consulta dados pessoais.",
+  "keywords": [
+    "escopo",
+    "atendimento",
+    "orientacao",
+    "servicos"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SCOPE_INFO"
+  ]
+}

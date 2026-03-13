@@ -1,65 +1,8 @@
-# Chat Pref - ambiente local com API principal, admin API e painel web.
-
 services:
   chat-pref-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
     container_name: chat-pref-api-dev
-    ports:
-      - "8101:8000"
-    volumes:
-      - ./prompts:/app/prompts:ro
-      - ./data/knowledge_base:/app/data/knowledge_base:ro
     env_file:
-      - .env
+      - .env.compose
     environment:
-      - ENV=dev
-      - DEBUG=true
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - chat-pref-local
-
-  admin-api:
-    build:
-      context: ./nexo-admin
-      dockerfile: Dockerfile
-    container_name: chat-pref-admin-api
-    ports:
-      - "8093:8000"
-    volumes:
-      - ./nexo-admin/uploads:/app/uploads
-    env_file:
-      - ./nexo-admin/.env
-    environment:
-      - DEBUG=true
-      - FRONTEND_URL=http://localhost:8080 # Para o CORS
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    networks:
-      - chat-pref-local
-
-  admin-panel:
-    build:
-      context: ./admin-panel
-      dockerfile: Dockerfile
-      args:
-        - VITE_API_URL=http://localhost:8093
-    container_name: chat-pref-admin-panel
-    ports:
-      - "8080:80"
-    depends_on:
-      - admin-api
-    networks:
-      - chat-pref-local
-
-networks:
-  chat-pref-local:
-    driver: bridge
+      ENV: dev
+      DEBUG: true

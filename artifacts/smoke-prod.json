@@ -1,0 +1,78 @@
+{
+  "env": "prod",
+  "base_url": "http://127.0.0.1:8000",
+  "tenant_id": "prefeitura-demo",
+  "container_name": "chat-pref-api",
+  "total_steps": 11,
+  "successes": 11,
+  "failures": 0,
+  "status": "passed",
+  "results": [
+    {
+      "nome": "Subida do ambiente",
+      "ok": true,
+      "explicacao": "Os containers foram criados/inicializados com sucesso.",
+      "detalhes": "#1 [internal] load local bake definitions\n#1 reading from stdin 626B done\n#1 DONE 0.0s\n\n#2 [internal] load build definition from Dockerfile\n#2 transferring dockerfile:\n#2 transferring dockerfile: 753B done\n#2 DONE 0.0s\n\n#3 [auth] library/python:pull token for registry-1.docker.io\n#3 DONE 0.0s\n\n#4 [internal] load metadata for docker.io/library/python:3.12-slim\n#4 DONE 1.6s\n\n#5 [internal] load .dockerignore\n#5 transferring context: 420B done\n#5 DONE 0.0s\n\n#6 [1/8] FROM docker.io/library/python:3.12-slim@sha256:ccc7089399c8bb65dd1fb3ed6d55efa538a3f5e7fca3f5988ac3b5b87e593bf0\n#6 resolve docker.io/library/python:3.12-slim@sha256:ccc7089399c8bb65dd1fb3ed6d55efa538a3f5e7fca3f5988ac3b5b87e593bf0 0.0s done\n#6 DONE 0.0s\n\n#7 [internal] load build context\n#7 transferring context: 18.12kB 0.0s done\n#7 DONE 0.0s\n\n#8 [6/8] COPY scripts ./scripts\n#8 CACHED\n\n#9 [4/8] RUN pip install --upgrade pip && pip install -r requirements.txt\n#9 CACHED\n\n#10 [7/8] COPY .env.example ./.env.example\n#10 CACHED\n\n#11 [2/8] WORKDIR /app\n#11 CACHED\n\n#12 [5/8] COPY app ./app\n#12 CACHED\n\n#13 [3/8] COPY requirements.txt .\n#13 CACHED\n\n#14 [8/8] RUN mkdir -p /app/data/runtime /app/data/knowledge_base /app/data/chroma\n#14 CACHED\n\n#15 exporting to image\n#15 exporting layers done\n#15 exporting manifest sha256:5955b9c2759d5d1987441efb7d7d6b7b3424cad832b6bfc42b0483299ba4e717 done\n#15 exporting config sha256:f1016bc8ed8610c547e3f08b0a6e88b27ee8e1fbdf33af6f71d1240fd18185c5 done\n#15 exporting attestation manifest sha256:7bbeb718dcc2be4b82244fe3a488c171a858399c17f411c33f92ccf51e3076df\n#15 exporting attestation manifest sha256:7bbeb718dcc2be4b82244fe3a488c171a858399c17f411c33f92ccf51e3076df 0.0s done\n#15 exporting manifest list sha256:fc0384611d69622d15e2ee9ecb9364004010698df810f92e0d0c523a505d5622 0.0s done\n#15 naming to docker.io/library/chat-bot-pref-chat-pref-api:latest done\n#15 unpacking to docker.io/library/chat-bot-pref-chat-pref-api:latest 0.0s done\n#15 DONE 0.1s\n\n#16 resolving provenance for metadata file\n#16 DONE 0.0s"
+    },
+    {
+      "nome": "Healthcheck do container",
+      "ok": true,
+      "explicacao": "A API ficou saudável dentro do tempo esperado.",
+      "detalhes": "Container: chat-pref-api | Health: healthy"
+    },
+    {
+      "nome": "GET /",
+      "ok": true,
+      "explicacao": "Confirma que a API está no ar e responde metadados básicos.",
+      "detalhes": "{\n  \"message\": \"Chat Pref API ativa.\",\n  \"env\": \"prod\",\n  \"version\": \"0.1.0\",\n  \"docs\": \"/docs\"\n}"
+    },
+    {
+      "nome": "GET /health",
+      "ok": true,
+      "explicacao": "Confirma que o backend reporta estado saudável para uso operacional.",
+      "detalhes": "{\n  \"status\": \"healthy\"\n}"
+    },
+    {
+      "nome": "RAG vazio",
+      "ok": true,
+      "explicacao": "Confirma que o sistema trata explicitamente a ausência de base documental.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-demo\",\n  \"collection_name\": \"chat_pref_docs__prefeitura_demo\",\n  \"source_dir\": \"/app/data/knowledge_base/prefeitura-demo/documents\",\n  \"documents_count\": 0,\n  \"chunks_count\": 0,\n  \"ready\": false,\n  \"last_ingested_at\": null,\n  \"message\": \"Base de conhecimento do tenant 'prefeitura-demo' ainda não possui documentos.\"\n}"
+    },
+    {
+      "nome": "Criação de documento",
+      "ok": true,
+      "explicacao": "Cria uma base mínima de conhecimento para validar ingest e retrieval.",
+      "detalhes": "{\n  \"id\": \"3bfacb4b-0db8-439f-aa41-cbffb32ecec2\",\n  \"tenant_id\": \"prefeitura-demo\",\n  \"title\": \"Atendimento Alvara\",\n  \"file\": \"3bfacb4b-0db8-439f-aa41-cbffb32ecec2.json\",\n  \"content\": \"O setor de alvara atende das 8h as 17h.\\n\\nDocumentos podem ser protocolados ate as 16h.\",\n  \"keywords\": [\n    \"alvara\",\n    \"horario\"\n  ],\n  \"intents\": [\n    \"INFO_REQUEST\"\n  ],\n  \"created_at\": \"2026-03-13T22:02:07.352877Z\",\n  \"updated_at\": \"2026-03-13T22:02:07.352880Z\"\n}"
+    },
+    {
+      "nome": "Ingest da base",
+      "ok": true,
+      "explicacao": "Transforma o documento salvo em chunks recuperáveis no RAG.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-demo\",\n  \"collection_name\": \"chat_pref_docs__prefeitura_demo\",\n  \"source_dir\": \"/app/data/knowledge_base/prefeitura-demo/documents\",\n  \"documents_count\": 1,\n  \"chunks_count\": 2,\n  \"ready\": true,\n  \"reset_collection\": true,\n  \"last_ingested_at\": \"2026-03-13T22:02:07.394942Z\",\n  \"message\": \"Ingestão concluída para o tenant 'prefeitura-demo' com 1 documento(s) e 2 chunk(s).\"\n}"
+    },
+    {
+      "nome": "Consulta direta ao RAG",
+      "ok": true,
+      "explicacao": "Valida que a recuperação semântica encontra contexto útil para a pergunta.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-demo\",\n  \"query\": \"horario do alvara\",\n  \"status\": \"ready\",\n  \"message\": \"Recuperados 2 chunks para o tenant 'prefeitura-demo'.\",\n  \"chunks\": [\n    {\n      \"id\": \"3bfacb4b-0db8-439f-aa41-cbffb32ecec2:section-1\",\n      \"text\": \"O setor de alvara atende das 8h as 17h.\",\n      \"source\": \"3bfacb4b-0db8-439f-aa41-cbffb32ecec2.json\",\n      \"title\": \"Atendimento Alvara\",\n      \"section\": \"section-1\",\n      \"score\": 0.3456,\n      \"tags\": [\n        \"alvara\",\n        \"horario\",\n        \"INFO_REQUEST\"\n      ]\n    },\n    {\n      \"id\": \"3bfacb4b-0db8-439f-aa41-cbffb32ecec2:section-2\",\n      \"text\": \"Documentos podem ser protocolados ate as 16h.\",\n      \"source\": \"3bfacb4b-0db8-439f-aa41-cbffb32ecec2.json\",\n      \"title\": \"Atendimento Alvara\",\n      \"section\": \"section-2\",\n      \"score\": 0.0833,\n      \"tags\": [\n        \"alvara\",\n        \"horario\",\n        \"INFO_REQUEST\"\n      ]\n    }\n  ],\n  \"total_chunks\": 2,\n  \"best_score\": 0.3456,\n  \"params_used\": {\n    \"min_score\": 0.0,\n    \"top_k\": 5,\n    \"boost_enabled\": false,\n    \"collection\": \"chat_pref_docs__prefeitura_demo\"\n  }\n}"
+    },
+    {
+      "nome": "Consulta no /api/chat",
+      "ok": true,
+      "explicacao": "Valida o fluxo principal de atendimento usando tenant e contexto recuperado.",
+      "detalhes": "{\n  \"request_id\": \"c1cb908b-d09a-433f-abda-f5a771f23d5a\",\n  \"session_id\": \"940b8c98-9f67-4fc9-8f99-36f3e643ebb8\",\n  \"tenant_id\": \"prefeitura-demo\",\n  \"message\": \"Fluxo mínimo ativo para o tenant 'prefeitura-demo'. Contexto recuperado: O setor de alvara atende das 8h as 17h.\",\n  \"channel\": \"web\"\n}"
+    },
+    {
+      "nome": "Reset da base",
+      "ok": true,
+      "explicacao": "Limpa a collection e os documentos do tenant de teste.",
+      "detalhes": "{\n  \"tenant_id\": \"prefeitura-demo\",\n  \"collection_name\": \"chat_pref_docs__prefeitura_demo\",\n  \"removed_collections\": [\n    \"chat_pref_docs__prefeitura_demo\"\n  ],\n  \"removed_documents_count\": 1,\n  \"source_dir\": \"/app/data/knowledge_base/prefeitura-demo/documents\",\n  \"message\": \"Reset concluído para o tenant 'prefeitura-demo'. Collections removidas: 1. Documentos removidos: 1.\"\n}"
+    },
+    {
+      "nome": "Encerramento do ambiente",
+      "ok": true,
+      "explicacao": "Finaliza os containers e remove volumes do teste.",
+      "detalhes": "Container chat-pref-api Stopping \n Container chat-pref-api Stopped \n Container chat-pref-api Removing \n Container chat-pref-api Removed \n Volume chat-bot-pref_chat_pref_data Removing \n Network chat-bot-pref_default Removing \n Volume chat-bot-pref_chat_pref_data Removed \n Network chat-bot-pref_default Removed"
+    }
+  ]
+}

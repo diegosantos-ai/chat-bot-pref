@@ -1,0 +1,78 @@
+{
+  "checks": [
+    {
+      "id": "horario-central-atendimento",
+      "question": "Qual o horario da Central de Atendimento ao Cidadao?",
+      "expected_title_contains": "Central de Atendimento Presencial e Canais Oficiais",
+      "expected_terms": [
+        "segunda a sexta",
+        "8h as 17h"
+      ]
+    },
+    {
+      "id": "documentos-protocolo-geral",
+      "question": "Quais documentos basicos para protocolo geral presencial?",
+      "expected_title_contains": "Protocolo Geral e Documentos Basicos",
+      "expected_terms": [
+        "documento com foto",
+        "comprovante de endereco"
+      ]
+    },
+    {
+      "id": "alvara-baixo-risco",
+      "question": "Como solicitar alvara para comercio de baixo risco?",
+      "expected_title_contains": "Alvara de Funcionamento para Comercio de Baixo Risco",
+      "expected_terms": [
+        "sala do empreendedor"
+      ]
+    },
+    {
+      "id": "segunda-via-iptu",
+      "question": "Onde consigo a segunda via do IPTU?",
+      "expected_title_contains": "IPTU e Certidoes Imobiliarias",
+      "expected_terms": [
+        "segunda via do iptu",
+        "setor de tributacao"
+      ]
+    },
+    {
+      "id": "vacinacao-ubs",
+      "question": "Qual o horario da sala de vacinacao da UBS?",
+      "expected_title_contains": "Atendimento da UBS Jardim Sereno e Sala de Vacinacao",
+      "expected_terms": [
+        "sala de vacinacao",
+        "8h as 16h"
+      ]
+    },
+    {
+      "id": "matricula-rede-municipal",
+      "question": "Como funciona a matricula ou transferencia na rede municipal?",
+      "expected_title_contains": "Matricula e Transferencia na Rede Municipal",
+      "expected_terms": [
+        "historico escolar",
+        "documento do responsavel"
+      ]
+    },
+    {
+      "id": "coleta-entulho",
+      "question": "Como solicitar coleta de entulho?",
+      "expected_title_contains": "Coleta Seletiva e Recolhimento de Entulho",
+      "expected_terms": [
+        "agendamento",
+        "1 metro cubico"
+      ]
+    },
+    {
+      "id": "assistente-emite-protocolo",
+      "question": "O Atende Vila Serena emite protocolo oficial?",
+      "expected_title_contains": "Limites Operacionais e Disclaimer do Atende Vila Serena",
+      "expected_terms": [
+        "nao substitui atendimento humano"
+      ],
+      "chat_expected_terms": [
+        "nao substitui atendimento humano"
+      ],
+      "use_in_chat": true
+    }
+  ]
+}

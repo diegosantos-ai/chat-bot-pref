@@ -6,8 +6,11 @@ import type {
   ConfigResponse,
   RAGQueryRequest,
   RAGQueryResponse,
-  DocumentInfo,
   DocumentContent,
+  RAGDocumentsResponse,
+  RAGStatusResponse,
+  RAGIngestResponse,
+  RAGResetResponse,
   AuditEvent,
   Conversa,
   ValidationResult,
@@ -31,6 +34,7 @@ import type {
 } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api/admin';
+const RAG_API_BASE = import.meta.env.VITE_RAG_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -39,24 +43,36 @@ const api = axios.create({
   },
 });
 
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
+const ragApi = axios.create({
+  baseURL: RAG_API_BASE,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/admin/login';
+function attachInterceptors(instance: typeof api) {
+  instance.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return Promise.reject(error);
-  }
-);
+    return config;
+  });
+
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/admin/login';
+      }
+      return Promise.reject(error);
+    }
+  );
+}
+
+attachInterceptors(api);
+attachInterceptors(ragApi);
 
 export const auth = {
   login: (data: LoginRequest) =>
@@ -84,33 +100,48 @@ export const config = {
 
 export const rag = {
   query: (data: RAGQueryRequest) =>
-    api.post<RAGQueryResponse>('/rag/query', data),
+    ragApi.post<RAGQueryResponse>('/rag/query', data),
 
-  documents: () =>
-    api.get<{ base_id: string; version: string; documents: DocumentInfo[] }>('/rag/documents'),
+  status: (tenantId: string) =>
+    ragApi.get<RAGStatusResponse>('/rag/status', { params: { tenant_id: tenantId } }),
 
-  document: (docId: string) =>
-    api.get<DocumentContent>('/rag/documents/' + docId),
+  documents: (tenantId: string) =>
+    ragApi.get<RAGDocumentsResponse>('/rag/documents', { params: { tenant_id: tenantId } }),
+
+  document: (tenantId: string, docId: string) =>
+    ragApi.get<DocumentContent>('/rag/documents/' + docId, { params: { tenant_id: tenantId } }),
 
   createDocument: (data: {
+    tenant_id: string;
     title: string;
     content: string;
     keywords: string[];
     intents: string[];
-  }) => api.post('/rag/documents', data),
+  }) => ragApi.post<DocumentContent>('/rag/documents', data),
 
   updateDocument: (docId: string, data: {
+    tenant_id: string;
     title?: string;
     content?: string;
     keywords?: string[];
     intents?: string[];
-  }) => api.put('/rag/documents/' + docId, data),
+  }) => ragApi.put<DocumentContent>('/rag/documents/' + docId, data),
 
-  deleteDocument: (docId: string) =>
-    api.delete('/rag/documents/' + docId),
+  deleteDocument: (tenantId: string, docId: string) =>
+    ragApi.delete('/rag/documents/' + docId, { params: { tenant_id: tenantId } }),
 
-  ingest: (basePath?: string, force: boolean = false) =>
-    api.post('/rag/ingest', { base_path: basePath, force }),
+  ingest: (tenantId: string, resetCollection: boolean = true) =>
+    ragApi.post<RAGIngestResponse>('/rag/ingest', {
+      tenant_id: tenantId,
+      reset_collection: resetCollection,
+    }),
+
+  reset: (tenantId: string, purgeDocuments: boolean = false) =>
+    ragApi.post<RAGResetResponse>('/rag/reset', {
+      tenant_id: tenantId,
+      purge_documents: purgeDocuments,
+      remove_legacy_collections: true,
+    }),
 };
 
 export const logs = {

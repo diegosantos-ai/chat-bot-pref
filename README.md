@@ -1,196 +1,526 @@
-# Nexo Basis Governador — White-Label SaaS de Chatbot Municipal
+# Chat Pref  
+### Plataforma de Atendimento Municipal com IA, RAG e Arquitetura Tenant-Aware
 
-Plataforma **multi-tenant** de atendimento ao cidadão via Instagram e Facebook, projetada para prefeituras brasileiras. Cada cliente (prefeitura) opera em isolamento completo de dados, com base de conhecimento própria (RAG) e identidade visual customizada.
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Auditoria%20%26%20Dados-4169E1?logo=postgresql&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-RAG-7B61FF)
+![Docker](https://img.shields.io/badge/Docker-Execu%C3%A7%C3%A3o%20Local-2496ED?logo=docker&logoColor=white)
+![Telegram](https://img.shields.io/badge/Telegram-Canal%20de%20Demo-26A5E4?logo=telegram&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?logo=githubactions&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-Infra%20as%20Code-844FBA?logo=terraform&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-Deploy%20Target-FF9900?logo=amazonaws&logoColor=white)
 
-Caráter estritamente informativo: não agenda consultas, não concede isenções, não toma decisões administrativas. O assistente sempre se identifica como IA.
-
----
-
-## Status do Projeto
-
-| Fase | Descrição | Status | Conclusão |
-|------|-----------|--------|-----------|
-| **Fase 1** | Adequação de Infraestrutura & Networking Compartilhado | ✅ Completa | 05/03/2026 |
-| **Fase 2** | Fundação Multi-Tenant (RLS PostgreSQL + Collections ChromaDB) | ✅ Completa | 05/03/2026 |
-| **Fase 3** | Middleware de Roteamento de Tenant (Webhook Router) | 🔄 Em andamento | — |
-| **Fase 4** | Operação, Automação RAG & Demo Tenant | ⏳ Pendente | — |
+> Plataforma de atendimento digital para prefeituras, projetada para combinar **IA aplicada**, **recuperação semântica com RAG**, **guardrails**, **auditoria**, **observabilidade** e **isolamento por tenant**.
 
 ---
 
-## Arquitetura
+## Visão Geral
 
-O sistema opera como **um contêiner** conectado à rede compartilhada `infra_nexo-network`, sem hospedar bancos de dados próprios.
+O **Chat Pref** é uma plataforma de atendimento institucional com IA, construída para servir como base de um assistente virtual para prefeituras.
 
-```
-Cidadão (Meta IG/FB)
-        │
-        ▼
-  Traefik (Ingress / TLS)      ← infra/ compartilhado
-        │
-        ▼
- nexo-gov-api :8101             ← este repositório
-   ├── TenantMiddleware          (resolve Page ID → tenant_id via contextvars)
-   ├── FastAPI Webhook Router    (POST /webhook/meta)
-   ├── RAGRetriever              ({tenant_id}_knowledge_base)
-   └── AuditRepository          (SET LOCAL app.tenant_id → RLS ativa)
-        │                 │
-        ▼                 ▼
-  nexo-postgres:5432   nexo-chromadb:8000   ← infra/ compartilhado (RLS)
-```
+O projeto foi estruturado para demonstrar, de forma prática:
 
-### Estratégia Multi-Tenant
-- **PostgreSQL**: Row-Level Security via `SET LOCAL app.tenant_id`. Nenhuma query vaza dados entre prefeituras.
-- **ChromaDB**: Collections isoladas por tenant (`{tenant_id}_knowledge_base`). Drop da collection = direito ao esquecimento (LGPD).
-- **FastAPI**: `contextvars` propaga o `tenant_id` sem passar em cada função.
+- backend modular com **FastAPI**
+- arquitetura **tenant-aware**
+- pipeline de atendimento com **classificação, policy guard e RAG**
+- **auditoria** e **rastreabilidade**
+- execução local reproduzível com **Docker**
+- demonstração funcional com **tenant fictício**
+- canal real de operação via **Telegram**
+- evolução para **CI/CD** e **deploy em AWS com Terraform**
+
+O foco atual é transformar uma base funcional, mas heterogênea, em uma plataforma **coerente, demonstrável e tecnicamente defensável**.
 
 ---
 
-## Stack
+## Objetivo Principal
 
-| Camada | Tecnologia |
-|--------|-----------|
-| **API** | Python 3.11+, FastAPI, Pydantic, Uvicorn |
-| **LLM** | Google Gemini 2.0 Flash (via `GEMINI_API_KEY`) |
-| **Vector Store** | ChromaDB (HTTP Client → `nexo-chromadb`) |
-| **Banco** | PostgreSQL 15+ com RLS (→ `nexo-postgres`) |
-| **Cache** | Redis (→ `nexo-redis`) |
-| **Proxy / TLS** | Traefik (gerenciado pela `infra/`) |
-| **Container** | Docker (porta host: `8101`) |
+Construir e refatorar uma plataforma de atendimento municipal com IA que demonstre, de forma prática:
 
----
-
-## Quickstart (Dev Local)
-
-> **Pré-requisito:** A rede `infra_nexo-network` deve estar ativa (`docker network ls`). Consulte o repositório `infra/` para subir os serviços compartilhados.
-
-### 1. Ambiente
-```bash
-cp .env.example .env
-# Preencha: GEMINI_API_KEY, DATABASE_URL (→ nexo-postgres), CHROMA_URL, REDIS_URL
-```
-
-### 2. Dependências
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Banco de Dados
-```bash
-# Schema base (se banco novo)
-psql -f db/schema.sql
-
-# Migration multi-tenant (RLS)
-psql -f db/migrations/001_multi_tenant_rls.sql
-```
-
-### 4. Rodar API
-```bash
-python -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-```
-
-### 5. Docker (produção)
-```bash
-docker-compose up -d --build
-# API disponível em localhost:8101
-```
+- arquitetura backend organizada
+- uso responsável de IA com escopo controlado
+- recuperação semântica com RAG
+- isolamento por tenant
+- rastreabilidade e auditoria
+- observabilidade mínima útil
+- operação reproduzível
+- maturidade de engenharia para evolução com CI/CD e infraestrutura como código
 
 ---
 
-## Variáveis de Ambiente Essenciais
+## Case do Projeto
 
-| Variável | Descrição |
-|----------|-----------|
-| `GEMINI_API_KEY` | Chave Google Gemini |
-| `DATABASE_URL` | `postgresql://user:pass@nexo-postgres:5432/core_saas_gov` |
-| `CHROMA_URL` | `http://nexo-chromadb:8000` |
-| `REDIS_URL` | `redis://nexo-redis:6379` |
-| `EMBEDDING_PROVIDER` | `default` \| `openai` \| `gemini` \| `qwen` |
-| `OPENROUTER_API_KEY` | Necessário para providers externos |
+Este projeto nasceu como um sistema de atendimento institucional com foco em prefeitura, inicialmente orientado a um único contexto operacional.
 
----
+Com a evolução da arquitetura, o objetivo passou a ser:
 
-## Endpoints Principais
+- eliminar legado mono-tenant
+- consolidar o uso explícito de `tenant_id`
+- remover hardcodes e dependências históricas
+- resetar a base RAG para uma estrutura limpa
+- criar um **tenant fictício demonstrativo**
+- operar o sistema em um canal real de conversa
+- gerar evidências técnicas de funcionamento
 
-| Método | Rota | Descrição |
-|--------|------|-----------|
-| `GET` | `/health` | Health check |
-| `POST` | `/webhook/meta` | Entrada de eventos Instagram/Facebook |
-| `POST` | `/api/chat` | Chat direto (web widget) |
-| `GET` | `/analytics/summary` | Dashboard de auditoria |
-| `GET` | `/metrics` | Prometheus metrics |
+O case final busca demonstrar uma plataforma de IA aplicada ao setor público com:
 
----
-
-## Arquivos de Especificação
-
-| Arquivo | Descrição |
-|---------|-----------|
-| `white-label-project/design.md` | Arquitetura alvo e diagramas de fluxo |
-| `white-label-project/requirements.md` | Requisitos funcionais e não-funcionais |
-| `white-label-project/task.md` | Plano de implementação faseado |
-| `progresso.md` | Rastreamento de sessões e marcos |
-| `PORTS.md` | Registro de alocação de portas da stack |
-| `GUIA_INFRA.md` | Guia de integração com a infra compartilhada |
-| `docs/deploy_guide.md` | Guia de deploy em VPS |
-| `docs/runbook.md` | Operação e resolução de incidentes |
+- backend modular
+- RAG funcional
+- guardrails
+- auditoria
+- tenant-aware
+- demonstração operacional real
 
 ---
 
-## Estrutura de Diretórios
+## Escopo Atual
 
-```
+### Incluído
+- API backend em FastAPI
+- pipeline de processamento com classificação, policy guard e RAG
+- arquitetura multi-tenant em consolidação
+- auditoria e métricas operacionais
+- Docker e ambiente local reproduzível
+- tenant fictício demonstrativo
+- canal de demonstração via Telegram
+- geração de evidências de funcionamento
+- preparação para CI/CD com GitHub Actions
+- preparação para deploy em AWS com Terraform
+
+### Não incluído neste momento
+- produto enterprise finalizado
+- billing/metering comercial
+- múltiplos tenants em produção simultânea
+- autenticação complexa de usuários finais
+- painel administrativo completo por tenant
+- benchmark acadêmico avançado de modelos
+- arquitetura distribuída complexa em nuvem
+
+---
+
+## Tecnologias Utilizadas
+
+### Backend
+- Python 3.11+
+- FastAPI
+- Pydantic
+- Uvicorn
+- asyncpg
+
+### IA / RAG
+- Google Gemini
+- ChromaDB
+- Retrieval-Augmented Generation
+- query expansion
+- guardrails por política
+
+### Persistência e Infra
+- PostgreSQL
+- Redis
+- Docker
+- Docker Compose
+
+### Operação e Observabilidade
+- Prometheus
+- Grafana
+- Loki
+- logs estruturados
+- auditoria de pipeline
+
+### Automação e Entrega
+- GitHub Actions
+- Terraform
+- AWS
+- scripts operacionais em Python e Bash
+
+---
+
+## Arquitetura da Solução
+
+A arquitetura do projeto foi estruturada para suportar um fluxo de atendimento institucional com IA, separando responsabilidades entre entrada HTTP, orquestração, recuperação semântica, políticas de segurança, persistência e operação.
+
+### Componentes principais
+
+| Componente | Função |
+|---|---|
+| `app/main.py` | inicialização da aplicação FastAPI |
+| `app/api/` | endpoints HTTP e webhooks |
+| `app/orchestrator/service.py` | coordenação do pipeline principal |
+| `app/classifier/service.py` | classificação de intenção |
+| `app/policy_guard/service.py` | guardrails e validações |
+| `app/rag/retriever.py` | recuperação semântica |
+| `app/rag/composer.py` | geração de resposta contextual |
+| `app/audit/` | auditoria e rastreabilidade |
+| `app/tenant_context.py` | contexto assíncrono de tenant |
+| `app/tenant_resolver.py` | resolução de tenant |
+| `admin-panel/` | interface administrativa |
+| `db/` | schema e migrations |
+| `logging/`, `dashboards/`, `grafana/` | observabilidade |
+
+---
+
+## Fluxo do Atendimento
+
+### Fluxo resumido
+1. A aplicação recebe uma mensagem via endpoint interno ou canal externo.
+2. O sistema resolve ou injeta o contexto de `tenant_id`.
+3. A mensagem é normalizada, classificada e avaliada pelo `policy_guard`.
+4. Se permitida, a consulta segue para retrieval RAG e composição da resposta.
+5. A resposta é validada, registrada em auditoria e devolvida ao canal.
+6. Logs, métricas e evidências podem ser coletados para análise operacional.
+
+### Etapas principais do pipeline
+- normalização de texto
+- análise de formalidade e sentimento
+- classificação de intent
+- policy PRE
+- query expansion
+- retrieval
+- composição via LLM
+- policy POST
+- resposta final
+- auditoria e métricas
+
+---
+
+## Estrutura Atual do Projeto
+
+```text
+chat-bot-pref/
 ├── app/
-│   ├── api/              # Routers FastAPI
-│   ├── audit/            # Repository asyncpg (RLS-aware)
-│   ├── rag/              # Retriever, Ingest, Embeddings
-│   ├── tenant_context.py # contextvars para isolamento de tenant
-│   └── settings.py       # Configurações (pydantic-settings)
+│   ├── api/
+│   ├── audit/
+│   ├── channels/
+│   ├── classifier/
+│   ├── contracts/
+│   ├── integrations/
+│   ├── nlp/
+│   ├── orchestrator/
+│   ├── policy_guard/
+│   ├── prompts/
+│   ├── rag/
+│   ├── repositories/
+│   ├── services/
+│   ├── main.py
+│   ├── settings.py
+│   ├── tenant_context.py
+│   └── tenant_resolver.py
+├── admin-panel/
 ├── db/
-│   ├── schema.sql        # Schema base
-│   └── migrations/       # Migrations versionadas
-│       └── 001_multi_tenant_rls.sql
-├── data/knowledge_base/  # Bases RAG (por tenant)
-├── white-label-project/  # Especificações do produto
-└── docker-compose.yml    # Apenas nexo-gov-api (sem DBs locais)
+│   ├── migrations/
+│   └── schema.sql
+├── docs/
+├── dashboards/
+├── logging/
+├── grafana/
+├── scripts/
+├── tests/
+├── docker-compose.yml
+├── docker-compose.local.yml
+├── Dockerfile
+├── AGENTS.md
+├── contexto.md
+├── arquitetura.md
+└── planejamento-trello.md
+````
+
+---
+
+## Responsabilidade dos Diretórios e Arquivos
+
+### Backend
+
+* `app/`: núcleo da aplicação
+* `app/api/`: endpoints e entradas do sistema
+* `app/orchestrator/`: pipeline principal
+* `app/rag/`: recuperação e composição contextual
+* `app/policy_guard/`: proteção e limites do comportamento
+* `app/audit/`: eventos e trilha de decisão
+* `app/services/`: serviços auxiliares
+
+### Dados e Banco
+
+* `db/`: modelagem relacional e migrations
+* `data/`: bases e artefatos de apoio, quando aplicável
+
+### Operação
+
+* `logging/`, `dashboards/`, `grafana/`: observabilidade
+* `scripts/`: utilitários, setup, validação e operação
+
+### Documentação
+
+* `contexto.md`: estado atual do projeto
+* `arquitetura.md`: arquitetura real
+* `planejamento-trello.md`: fases, tasks e execução
+* `AGENTS.md`: governança de agentes e regras operacionais
+
+---
+
+## Status Atual do Projeto
+
+O projeto está em **refatoração estrutural com foco em demonstração funcional**.
+
+### Já existe
+
+* backend funcional em FastAPI
+* pipeline com classificação, policy guard e RAG
+* integração inicial com canais externos
+* auditoria e métricas
+* documentação técnica relevante
+* base de observabilidade e suporte operacional
+
+### Em andamento
+
+* saneamento do legado mono-tenant
+* consolidação do contrato de `tenant_id`
+* reset da base RAG
+* containerização e ambiente local reproduzível
+* tenant fictício demonstrativo
+* canal real de demonstração via Telegram
+
+### Próxima direção
+
+* CI com GitHub Actions
+* deploy mínimo em AWS com Terraform
+* fechamento do case com evidências de operação
+
+---
+
+## Planejamento Macro por Fases
+
+O projeto está organizado em blocos contínuos:
+
+### Bloco A — Refatoração estrutural
+
+* Fase 1 — Diagnóstico e inventário do legado
+* Fase 2 — Sanitização funcional do runtime
+* Fase 3 — Consolidação do contrato multi-tenant
+* Fase 4 — Reset da base RAG e reingestão limpa
+* Fase 5 — Containerização e ambiente local reproduzível
+* Fase 6 — Validação estrutural da base refatorada
+
+### Bloco B — Demonstração funcional
+
+* Fase 7 — Construção do tenant demonstrativo fictício
+* Fase 8 — Construção da base documental fictícia e ingest limpa
+* Fase 9 — Operacionalização do chat via Telegram
+* Fase 10 — Validação funcional, guardrails e evidências
+* Fase 11 — Observabilidade aplicada e fechamento técnico do case
+
+### Bloco C — Engenharia de entrega
+
+* Fase 12 — Automação de qualidade com GitHub Actions
+* Fase 13 — Infraestrutura como código e deploy em AWS
+* Fase 14 — Alinhamento final entre arquitetura, operação e documentação
+
+---
+
+## Critério de Aceite do Projeto
+
+O projeto será considerado bem-sucedido quando for possível demonstrar, com evidências reais:
+
+* backend operacional
+* tenant demonstrativo funcional
+* RAG respondendo com base documental própria
+* guardrails e fallback funcionando
+* logs, auditoria e métricas disponíveis
+* execução local reproduzível com Docker
+* pipeline de qualidade automatizada com GitHub Actions
+* deploy mínimo em AWS provisionado com Terraform
+* documentação coerente com a realidade do sistema
+
+---
+
+## Fluxo Operacional Recomendado
+
+Toda mudança importante deve seguir esta lógica:
+
+**entender → planejar → isolar → implementar → validar → registrar → encerrar**
+
+### Antes de alterar
+
+* revisar `contexto.md`
+* revisar `arquitetura.md`
+* localizar a fase e task no planejamento
+* validar o estado atual do repositório
+* definir a forma de validação
+
+### Durante a alteração
+
+* manter mudanças pequenas e rastreáveis
+* evitar refatorações laterais não planejadas
+* tratar `tenant_id` como contrato explícito
+* não esconder erro estrutural com fallback silencioso
+
+### Depois da alteração
+
+* validar tecnicamente
+* revisar o diff
+* registrar evidência
+* atualizar documentação correspondente, quando necessário
+
+---
+
+## Execução Local com Docker
+
+O projeto deve operar localmente de forma reproduzível com Docker e Docker Compose.
+
+### Objetivo do ambiente local
+
+Permitir:
+
+* subir backend e dependências principais
+* testar endpoints críticos
+* validar fluxo de tenant
+* executar ingest
+* operar tenant fictício demonstrativo
+* testar o canal Telegram
+
+### Resultado esperado
+
+Comandos simples devem ser suficientes para:
+
+* iniciar a aplicação
+* verificar `/health`
+* validar `/api/chat`
+* observar logs e métricas
+* reproduzir o fluxo de demonstração
+
+> O detalhamento do ambiente local deve refletir o estado real do `Dockerfile` e do `docker-compose` vigente.
+
+---
+
+## Tenant Fictício Demonstrativo
+
+O projeto será demonstrado com **uma prefeitura fictícia**, criada exclusivamente para evidenciar a plataforma.
+
+### Objetivo do tenant fictício
+
+* demonstrar isolamento por tenant
+* operar uma base RAG própria
+* evitar uso de dados reais
+* permitir cenários de validação controlados
+* sustentar a narrativa técnica do case
+
+### Características esperadas
+
+* identidade institucional neutra
+* escopo estritamente informativo
+* documentos fictícios plausíveis
+* configuração isolada
+* disclaimers e limites claros
+
+---
+
+## Canal de Demonstração via Telegram
+
+O Telegram será usado como **canal de demonstração operacional** do núcleo da plataforma.
+
+### Por que Telegram
+
+* integração mais simples
+* testes rápidos
+* conversa real com o backend
+* boa evidência de funcionamento ponta a ponta
+
+### Papel no projeto
+
+O Telegram não representa o produto final obrigatório.
+Ele funciona como **canal demonstrativo** para validar:
+
+* entrada de mensagem
+* resolução de tenant
+* pipeline de atendimento
+* retrieval
+* resposta
+* auditoria
+* logs e evidências
+
+---
+
+## Observabilidade, Auditoria e Evidências
+
+O projeto deve oferecer visibilidade mínima sobre o fluxo do atendimento.
+
+### Evidências esperadas
+
+* logs estruturados
+* eventos de auditoria
+* métricas básicas expostas
+* trilha request → classificação → retrieval → resposta
+* prints e registros da demonstração
+* matriz de cenários validados
+
+### Valor desta camada
+
+A observabilidade não existe apenas para operação; ela também serve para:
+
+* provar funcionamento
+* gerar material de portfólio
+* sustentar explicação técnica em entrevista
+* aumentar confiança no comportamento do sistema
+
+---
+
+## CI/CD e Próximos Passos de Infraestrutura
+
+Após a estabilização da demonstração funcional, o projeto evolui para uma trilha de entrega mais madura.
+
+### GitHub Actions
+
+A pipeline deve automatizar, no mínimo:
+
+* lint
+* testes
+* validações críticas
+* build Docker
+* varredura de termos proibidos e resíduos históricos
+
+### AWS + Terraform
+
+A proposta é provisionar uma infraestrutura mínima e explicável, com foco em:
+
+* reprodutibilidade
+* baixo custo
+* deploy simples
+* operação clara
+
+A recomendação atual é privilegiar uma arquitetura enxuta, suficiente para demonstrar entrega real sem inflar a complexidade do case.
+
+---
+
+## Próximos Passos
+
+### Curto prazo
+
+* concluir a refatoração estrutural
+* consolidar Docker e ambiente local
+* estabilizar `tenant_id` nos fluxos críticos
+* resetar e reingestar a base RAG
+
+### Médio prazo
+
+* criar tenant fictício
+* carregar base documental de demonstração
+* colocar o chat para operar via Telegram
+* executar cenários de validação e gerar evidências
+
+### Próximo nível
+
+* automatizar qualidade com GitHub Actions
+* publicar demonstração em AWS com Terraform
+* consolidar o case final para portfólio e entrevista
+
+---
+
+## Autor
+
+**Diego Santos**
+Engenharia de Dados, Automação, Backend e IA Aplicada
+
+Projeto desenvolvido como case técnico de arquitetura, refatoração, operação e demonstração de uma plataforma de atendimento municipal com IA.
+
 ```
-
----
-
-## Changelog
-
-### v2.0.0 (05/03/2026) — Refatoração SaaS Multi-Tenant
-- Arquitetura migrada de monolítico single-tenant para **multi-tenant isolado**.
-- PostgreSQL com **Row-Level Security** (`001_multi_tenant_rls.sql`) e tabela `tenants`.
-- ChromaDB migrado de `PersistentClient` local para **HttpClient** centralizado (`nexo-chromadb`).
-- Novo módulo `app/tenant_context.py` com `contextvars` para propagação assíncrona de tenant.
-- `audit/repository.py`: injeção automática de `SET LOCAL app.tenant_id` em cada conexão.
-- `rag/retriever.py`: collections dinâmicas por tenant (`{tenant_id}_knowledge_base`).
-- `docker-compose.yml`: removido Caddy e Grafana; API conectada à `infra_nexo-network` na porta `8101`.
-
-### v0.7.2 (20/02/2026) — Embeddings Semânticos (OpenRouter)
-- Robustez com batch, retry/backoff e timeout configuráveis.
-- Seleção de modelo por provedor e override global via env vars.
-
-### v0.7.0 (03/02/2026) — Schema DB & Analytics
-- Schema completo em `db/schema.sql` com tipos ENUM e índices.
-- Queries e views SQL (`analytics/v1/`).
-- Anonimização LGPD com `usuarios_anonimos`.
-
-### v0.4.0 (15/01/2026) — Integração Meta API
-- Webhook unificado `POST /webhook/meta` com verificação de assinatura HMAC.
-- Pipeline completo validado: Webhook → Classifier → RAG → Resposta → Auditoria.
-
----
-
-## Compliance & Segurança
-
-- **LGPD**: Coleta mínima. Direito ao Esquecimento via `DROP COLLECTION` por tenant.
-- **RLS**: Isolamento de dados garantido na camada de banco, independente do app.
-- **Policy Guard**: Protocolos de crise (suicídio/violência) com respostas estáticas.
-- **Disclaimer**: Obrigatório em todas as respostas. O assistente se identifica como IA.
-
----
-
-## Licença
-
-Projeto Nexo Basis — Uso interno. © 2026
+```

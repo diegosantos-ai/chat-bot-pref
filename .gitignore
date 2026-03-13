@@ -182,6 +182,10 @@ service_account.json
 # agents
 *agents.agents
 *.agents
+.agent/
+.agent_legacy/credentials/*.json
+.github/agents/*.local.agent.md
+.ai/**/*.local.md
 .agent/agents/backend-specialist.md
 .agent/ARCHITECTURE.md
 .agent/mcp_config.json

@@ -10,8 +10,8 @@ from io import StringIO
 from unittest.mock import patch
 
 # Adiciona o diretório dos scripts ao path para permitir a importação
-# Caminho relativo: ../.agent/scripts
-SCRIPT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.agent', 'scripts'))
+# Caminho relativo: ../.agent_legacy/scripts
+SCRIPT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '.agent_legacy', 'scripts'))
 sys.path.append(SCRIPT_PATH)
 
 class TestVerifyAllFix(unittest.TestCase):
@@ -70,7 +70,7 @@ class TestVerifyAllFix(unittest.TestCase):
                     with patch('builtins.print'): # Silencia output
                         verify_all.main()
                 except SystemExit as e:
-                    if e.code != 0:
+                    if e.code == 2:
                         self.fail(f"Argparse rejeitou argumentos válidos. Exit code: {e.code}")
                 except Exception:
                     # Sucesso: O script tentou rodar a lógica (e falhou por falta de rede/arquivos reais),

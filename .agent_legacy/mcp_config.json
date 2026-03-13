@@ -1,0 +1,109 @@
+{
+    "mcp_servers": {
+        "antigravity-agents": {
+            "type": "local_python",
+            "command": "python3",
+            "args": [
+                "/path/to/start_mcp_server.py"
+            ],
+            "env": {
+                "PYTHONUNBUFFERED": "1",
+                "MCP_SERVER_PORT": "8086",
+                "API_HOST": "localhost",
+                "API_PORT": "8085"
+            },
+            "capabilities": {
+                "resources": true,
+                "tools": true,
+                "sampling": true
+            }
+        },
+        "context7": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@upstash/context7-mcp",
+                "--api-key",
+                "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"
+            ]
+        },
+        "shadcn": {
+            "command": "npx",
+            "args": [
+                "shadcn@latest",
+                "mcp"
+            ]
+        }
+    },
+    "model_config": {
+        "default_model": "gemini-3.1-pro",
+        "available_models": [
+            "gemini-3.1-pro",
+            "gemini-2.0-pro",
+            "gemini-1.0-pro"
+        ]
+    },
+    "services": {
+        "antigravity_api": {
+            "type": "rest_api",
+            "host": "localhost",
+            "port": 8085,
+            "enabled": true,
+            "description": "Antigravity API (docker: 8085:8080)"
+        },
+        "postgres_pgvector": {
+            "type": "database",
+            "engine": "postgresql",
+            "host": "localhost",
+            "port": 5435,
+            "user": "antigravity",
+            "password": "antigravity",
+            "database": "antigravity",
+            "enabled": true,
+            "extensions": [
+                "pgvector"
+            ],
+            "description": "PostgreSQL com pgvector (docker: 5435:5432)"
+        },
+        "mlflow": {
+            "type": "ml_tracking",
+            "host": "localhost",
+            "port": 5000,
+            "enabled": true,
+            "description": "MLflow tracking server (docker: 5000:5000)"
+        },
+        "nexo_postgres": {
+            "type": "database",
+            "engine": "postgresql",
+            "host": "localhost",
+            "port": 5434,
+            "user": "agentes",
+            "password": "pand2405",
+            "database": "agentes_nexobasis",
+            "enabled": true,
+            "description": "PostgreSQL Nexo Basis (docker: 5434:5432)"
+        },
+        "nexo_chromadb": {
+            "type": "vector_db",
+            "host": "localhost",
+            "port": 8000,
+            "enabled": true,
+            "description": "ChromaDB Nexo Basis (docker: 8000:8000)"
+        }
+    },
+    "logging": {
+        "level": "INFO",
+        "format": "json",
+        "file": "logs/mcp_server.log"
+    },
+    "timeouts": {
+        "connection": 30,
+        "request": 60,
+        "database": 45
+    },
+    "integrations": {
+        "enable_mlflow_tracking": true,
+        "enable_vector_store_sync": true,
+        "enable_api_gateway": true
+    }
+}

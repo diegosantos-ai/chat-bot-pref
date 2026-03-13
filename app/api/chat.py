@@ -16,6 +16,6 @@ async def chat(chat_request: ChatRequest) -> ChatResponse:
 
     set_tenant(chat_request.tenant_id)
     try:
-        return chat_service.process(chat_request)
+        return await chat_service.process(chat_request)
     finally:
         clear_tenant()

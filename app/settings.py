@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     DATA_DIR: str = "data/runtime"
+    CHROMA_DIR: str = "data/chroma"
+    CHROMA_COLLECTION_PREFIX: str = "chat_pref"
+    WEBHOOK_PAGE_TENANT_MAP: dict[str, str] = Field(default_factory=dict)
     CORS_ORIGINS: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",
@@ -48,6 +51,41 @@ class Settings(BaseSettings):
         if normalized in {"0", "false", "no", "off", "release", "prod", "production"}:
             return False
         raise ValueError("DEBUG deve ser booleano ou um alias reconhecido.")
+
+    @field_validator("WEBHOOK_PAGE_TENANT_MAP", mode="before")
+    @classmethod
+    def parse_string_dict(cls, value: Any) -> dict[str, str]:
+        if isinstance(value, dict):
+            return {
+                str(key).strip(): str(item).strip()
+                for key, item in value.items()
+                if str(key).strip() and str(item).strip()
+            }
+        if value is None:
+            return {}
+        text = str(value).strip()
+        if not text:
+            return {}
+        if text.startswith("{"):
+            parsed = json.loads(text)
+            if not isinstance(parsed, dict):
+                raise ValueError("Valor JSON deve ser um objeto.")
+            return {
+                str(key).strip(): str(item).strip()
+                for key, item in parsed.items()
+                if str(key).strip() and str(item).strip()
+            }
+
+        pairs: dict[str, str] = {}
+        for chunk in text.split(","):
+            key, separator, item = chunk.partition("=")
+            if not separator:
+                raise ValueError("WEBHOOK_PAGE_TENANT_MAP deve usar o formato page_id=tenant_id.")
+            normalized_key = key.strip()
+            normalized_item = item.strip()
+            if normalized_key and normalized_item:
+                pairs[normalized_key] = normalized_item
+        return pairs
 
     @field_validator("CORS_ORIGINS", "ALLOWED_HOSTS", mode="before")
     @classmethod

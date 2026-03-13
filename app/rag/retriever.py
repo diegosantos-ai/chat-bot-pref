@@ -135,18 +135,12 @@ class RAGRetriever:
 
     def _resolve_base_path(self) -> Path:
         """
-        Resolve local knowledge base path for auto-ingest.
-
-        Tries current path layout first, then legacy layout.
+        Resolve local knowledge base path for tooling that still depends on base_path.
         """
-        candidates = [
-            Path(settings.BASE_DIR) / "data" / "knowledge_base" / settings.RAG_BASE_ID,
-            Path(settings.BASE_DIR) / "base" / settings.RAG_BASE_ID,  # legacy
-        ]
-        for path in candidates:
-            if path.exists():
-                return path
-        return candidates[0]
+        if not settings.RAG_BASE_ID:
+            raise ValueError("RAG_BASE_ID nao configurado.")
+
+        return Path(settings.BASE_DIR) / "data" / "knowledge_base" / settings.RAG_BASE_ID
 
     def _get_tenant_collection_name(self) -> str:
         """Resolve o nome da collection baseado no tenant ativo."""
@@ -172,16 +166,15 @@ class RAGRetriever:
             msg = str(exc).lower()
             if "does not exist" not in msg:
                 raise
-            # Collection ainda não existe: cria vazia (ingest ocorrerá via pipeline noturno)
             logger.warning(
-                "Collection %s não encontrada para tenant=%s. Criando vazia.",
+                "Collection %s nao encontrada para tenant=%s.",
                 collection_name,
                 tenant_context.get_tenant(),
             )
-            create_kwargs = {"name": collection_name, "metadata": {"hnsw:space": "cosine"}}
-            if embedding_fn is not None:
-                create_kwargs["embedding_function"] = embedding_fn
-            return client.get_or_create_collection(**create_kwargs)
+            raise RuntimeError(
+                f"Collection RAG ausente para tenant '{tenant_context.get_tenant()}': "
+                f"{collection_name}"
+            ) from exc
 
     async def retrieve(
         self,

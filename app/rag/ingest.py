@@ -12,6 +12,7 @@ import json
 import re
 from pathlib import Path
 from typing import Generator, Optional
+from urllib.parse import urlparse
 
 import chromadb
 from chromadb.config import Settings
@@ -134,14 +135,20 @@ def load_manifest(base_path: Path) -> dict:
 
 
 def get_chroma_client() -> chromadb.ClientAPI:
-    """Retorna cliente ChromaDB configurado (HTTP, apontando para nexo-chromadb na rede compartilhada)."""
+    """Retorna cliente HTTP do ChromaDB a partir de `CHROMA_URL`."""
     from app.settings import settings as app_settings
-    host_url = app_settings.CHROMA_URL  # ex: http://nexo-chromadb:8000
-    # Extrair host e port da URL
-    url_without_protocol = host_url.replace("http://", "").replace("https://", "")
-    parts = url_without_protocol.split(":")
-    host = parts[0]
-    port = int(parts[1]) if len(parts) > 1 else 8000
+
+    if not app_settings.CHROMA_URL:
+        raise ValueError("CHROMA_URL nao configurado.")
+
+    parsed = urlparse(app_settings.CHROMA_URL)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        raise ValueError(
+            "CHROMA_URL invalido. Use o formato http://host:porta ou https://host:porta."
+        )
+
+    host = parsed.hostname
+    port = parsed.port or (443 if parsed.scheme == "https" else 8000)
     return chromadb.HttpClient(
         host=host,
         port=port,
@@ -243,7 +250,7 @@ def ingest_base(
     Ingere uma base de conhecimento completa no ChromaDB.
 
     Args:
-        base_path: Caminho para a pasta da base (ex: data/knowledge_base/default)
+        base_path: Caminho para a pasta da base (ex: data/knowledge_base/<base_id>)
         force: Se True, reprocessa mesmo se hash nao mudou
         embedding_provider: Provedor de embedding ("default", "gemini", "openai", "qwen")
 
@@ -331,7 +338,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Uso: python -m app.rag.ingest <caminho_base>")
-        print("Exemplo: python -m app.rag.ingest data/knowledge_base/default")
+        print("Exemplo: python -m app.rag.ingest data/knowledge_base/<base_id>")
         sys.exit(1)
 
     base_path = sys.argv[1]

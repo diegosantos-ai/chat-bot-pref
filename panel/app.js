@@ -1,5 +1,5 @@
 /**
- * Nexo Prefa — SPA Router & App Init
+ * Chat Pref — SPA Router & App Init
  * Manages view switching, tenant loading, and global state.
  */
 

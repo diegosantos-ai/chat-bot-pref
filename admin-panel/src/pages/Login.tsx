@@ -19,7 +19,7 @@ export default function Login() {
 
     try {
       await login(username, password);
-      window.location.href = '/tereziadmin/';
+      window.location.href = '/admin/';
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { detail?: string } } };
@@ -41,7 +41,7 @@ export default function Login() {
       <div className={styles.card}>
         <div className={styles.logo}>
           <Bot size={48} strokeWidth={1.5} />
-          <h1>Nexo Admin</h1>
+          <h1>Chat Pref Admin</h1>
           <span className={styles.badge}>Admin Panel</span>
         </div>
 

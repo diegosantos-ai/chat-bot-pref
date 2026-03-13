@@ -56,7 +56,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <aside className={`${styles.sidebar} ${sidebarOpen ? styles.open : ''}`}>
         <div className={styles.sidebarHeader}>
           <Bot size={28} strokeWidth={1.5} />
-          <span className={styles.brand}>Nexo Admin</span>
+          <span className={styles.brand}>Chat Pref Admin</span>
           <span className={styles.adminBadge}>Admin</span>
         </div>
 

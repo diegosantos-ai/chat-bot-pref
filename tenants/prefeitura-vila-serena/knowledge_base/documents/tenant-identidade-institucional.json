@@ -1,0 +1,16 @@
+{
+  "id": "tenant-identidade-institucional",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Identidade Institucional de Vila Serena",
+  "content": "A Prefeitura Municipal de Vila Serena e uma entidade ficticia criada para demonstracao tecnica do Chat Pref. Sua identidade institucional foi desenhada para representar uma prefeitura plausivel, com linguagem administrativa clara e sem referencia a dados reais.\n\nO Atende Vila Serena e o nome oficial do assistente digital institucional deste tenant. Ele deve responder com tom cordial, objetivo e estritamente informativo, sempre priorizando orientacoes gerais e canais oficiais.",
+  "keywords": [
+    "identidade",
+    "institucional",
+    "prefeitura",
+    "assistente"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "INSTITUTIONAL_INFO"
+  ]
+}

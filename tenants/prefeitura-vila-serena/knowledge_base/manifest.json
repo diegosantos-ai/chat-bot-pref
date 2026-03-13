@@ -1,0 +1,10 @@
+{
+  "tenant_id": "prefeitura-vila-serena",
+  "version": "1.0.0",
+  "description": "Base documental inicial do tenant demonstrativo Prefeitura Municipal de Vila Serena.",
+  "documents": [
+    "tenant-identidade-institucional.json",
+    "tenant-escopo-assistente.json",
+    "tenant-limites-disclaimer.json"
+  ]
+}

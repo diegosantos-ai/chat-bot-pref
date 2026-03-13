@@ -11,6 +11,7 @@ Exemplos:
     python scripts/smoke_tests.py --env prod --json
     python scripts/smoke_tests.py --env prod --json-out artifacts/smoke-prod.json
     python scripts/smoke_tests.py --env dev --json --json-out artifacts/smoke-dev.json
+    python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json
 
 Requisitos:
     - Docker e Docker Compose disponíveis
@@ -30,9 +31,13 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from app.services.demo_tenant_service import DemoTenantService
+
 
 BASE_URL: str = "http://127.0.0.1:8000"
-TENANT_ID: str = "prefeitura-demo"
+DEFAULT_TENANT_ID: str = "prefeitura-demo"
 TIMEOUT_SECONDS: int = 10
 HEALTH_WAIT_SECONDS: int = 60
 
@@ -58,9 +63,12 @@ class TestContext:
     env: str
     compose_files: list[str]
     container_name: str
+    tenant_id: str
+    tenant_manifest: str | None = None
     print_json: bool = False
     json_out: str | None = None
     results: list[TestResult] = field(default_factory=list)
+    managerial_report: dict[str, Any] | None = None
 
     def add_result(self, result: TestResult) -> None:
         """
@@ -197,6 +205,44 @@ def record_step(
     )
 
 
+def _bundle_service(context: TestContext) -> DemoTenantService:
+    if not context.tenant_manifest:
+        raise RuntimeError("tenant_manifest não informado.")
+    return DemoTenantService()
+
+
+def validate_tenant_bundle(context: TestContext) -> None:
+    """
+    Valida o bundle versionado do tenant demonstrativo e gera relatorio gerencial.
+    """
+    if not context.tenant_manifest:
+        return
+
+    service = _bundle_service(context)
+    report = service.build_managerial_report(context.tenant_manifest)
+    context.managerial_report = report
+
+    ok = report["status"] == "passed"
+    details_lines = [
+        f"Tenant: {report['tenant_id']}",
+        f"Cliente: {report['client_name']}",
+        f"Criterios aprovados: {report['criteria_passed']}/{report['criteria_total']}",
+    ]
+    for criterion in report["criteria"]:
+        status = "OK" if criterion["ok"] else "ERR"
+        details_lines.append(f"- [{status}] {criterion['criterion']} | {criterion['evidence']}")
+
+    record_step(
+        context=context,
+        nome="Bundle do tenant demonstrativo",
+        ok=ok,
+        explicacao="Confirma nome, identidade, configuracao, escopo e estrutura inicial do tenant ficticio.",
+        detalhes="\n".join(details_lines),
+    )
+    if not ok:
+        raise RuntimeError("Bundle do tenant demonstrativo invalido.")
+
+
 def docker_up(context: TestContext) -> None:
     """
     Sobe o ambiente Docker.
@@ -297,7 +343,7 @@ def test_rag_empty(context: TestContext) -> None:
     """
     Valida comportamento sem base carregada.
     """
-    status, payload = http_request("GET", f"/api/rag/status?tenant_id={TENANT_ID}")
+    status, payload = http_request("GET", f"/api/rag/status?tenant_id={context.tenant_id}")
     ok = (
         status == 200
         and isinstance(payload, dict)
@@ -318,30 +364,63 @@ def test_rag_empty(context: TestContext) -> None:
 
 def create_document(context: TestContext) -> None:
     """
-    Cria documento de teste.
+    Cria a base documental de teste.
     """
-    payload = {
-        "tenant_id": TENANT_ID,
-        "title": "Atendimento Alvara",
-        "content": (
-            "O setor de alvara atende das 8h as 17h.\n\n"
-            "Documentos podem ser protocolados ate as 16h."
-        ),
-        "keywords": ["alvara", "horario"],
-        "intents": ["INFO_REQUEST"],
-    }
-    status, response = http_request("POST", "/api/rag/documents", payload)
-    ok = status in {200, 201} and isinstance(response, dict) and response.get("tenant_id") == TENANT_ID
+    payloads: list[dict[str, Any]]
+    if context.tenant_manifest:
+        service = _bundle_service(context)
+        payloads = [
+            {
+                "tenant_id": context.tenant_id,
+                "title": document.title,
+                "content": document.content,
+                "keywords": document.keywords,
+                "intents": document.intents,
+            }
+            for document in service.list_source_documents(context.tenant_manifest)
+        ]
+    else:
+        payloads = [
+            {
+                "tenant_id": context.tenant_id,
+                "title": "Atendimento Alvara",
+                "content": (
+                    "O setor de alvara atende das 8h as 17h.\n\n"
+                    "Documentos podem ser protocolados ate as 16h."
+                ),
+                "keywords": ["alvara", "horario"],
+                "intents": ["INFO_REQUEST"],
+            }
+        ]
+
+    responses: list[dict[str, Any] | str] = []
+    ok = True
+    for payload in payloads:
+        status, response = http_request("POST", "/api/rag/documents", payload)
+        responses.append(response)
+        if not (
+            status in {200, 201}
+            and isinstance(response, dict)
+            and response.get("tenant_id") == context.tenant_id
+        ):
+            ok = False
 
     record_step(
         context=context,
-        nome="Criação de documento",
+        nome="Criação da base documental",
         ok=ok,
-        explicacao="Cria uma base mínima de conhecimento para validar ingest e retrieval.",
-        detalhes=pretty_json(response),
+        explicacao="Cria os documentos iniciais do tenant para validar ingest e retrieval.",
+        detalhes=pretty_json(
+            {
+                "tenant_id": context.tenant_id,
+                "documents_created": len(payloads),
+                "titles": [payload["title"] for payload in payloads],
+                "responses": responses,
+            }
+        ),
     )
     if not ok:
-        raise RuntimeError("Falha ao criar documento.")
+        raise RuntimeError("Falha ao criar a base documental.")
 
 
 def ingest_documents(context: TestContext) -> None:
@@ -349,7 +428,7 @@ def ingest_documents(context: TestContext) -> None:
     Executa ingest do tenant.
     """
     payload = {
-        "tenant_id": TENANT_ID,
+        "tenant_id": context.tenant_id,
         "reset_collection": True,
     }
     status, response = http_request("POST", "/api/rag/ingest", payload)
@@ -377,8 +456,12 @@ def query_rag(context: TestContext) -> None:
     Consulta diretamente o RAG.
     """
     payload = {
-        "tenant_id": TENANT_ID,
-        "query": "horario do alvara",
+        "tenant_id": context.tenant_id,
+        "query": (
+            "O assistente emite protocolo?"
+            if context.tenant_manifest
+            else "horario do alvara"
+        ),
     }
     status, response = http_request("POST", "/api/rag/query", payload)
     ok = (
@@ -404,14 +487,18 @@ def query_chat(context: TestContext) -> None:
     Consulta o endpoint principal de chat.
     """
     payload = {
-        "tenant_id": TENANT_ID,
-        "message": "Qual o horario do alvara?",
+        "tenant_id": context.tenant_id,
+        "message": (
+            "O assistente emite protocolo?"
+            if context.tenant_manifest
+            else "Qual o horario do alvara?"
+        ),
     }
     status, response = http_request("POST", "/api/chat", payload)
     ok = (
         status == 200
         and isinstance(response, dict)
-        and response.get("tenant_id") == TENANT_ID
+        and response.get("tenant_id") == context.tenant_id
         and isinstance(response.get("message"), str)
         and len(response["message"]) > 0
     )
@@ -432,7 +519,7 @@ def reset_rag(context: TestContext) -> None:
     Reseta a base do tenant.
     """
     payload = {
-        "tenant_id": TENANT_ID,
+        "tenant_id": context.tenant_id,
         "purge_documents": True,
         "remove_legacy_collections": True,
     }
@@ -488,13 +575,15 @@ def build_summary(context: TestContext) -> dict[str, Any]:
     return {
         "env": context.env,
         "base_url": BASE_URL,
-        "tenant_id": TENANT_ID,
+        "tenant_id": context.tenant_id,
+        "tenant_manifest": context.tenant_manifest,
         "container_name": context.container_name,
         "total_steps": total,
         "successes": success,
         "failures": failed,
         "status": "passed" if failed == 0 else "failed",
         "results": [asdict(result) for result in context.results],
+        "managerial_report": context.managerial_report,
     }
 
 
@@ -518,6 +607,19 @@ def print_summary(context: TestContext) -> dict[str, Any]:
     print(f"Sucessos: {summary['successes']}")
     print(f"Falhas: {summary['failures']}")
     print()
+
+    if summary["managerial_report"]:
+        report = summary["managerial_report"]
+        print("RELATORIO GERENCIAL")
+        print(f"Fase: {report['phase']}")
+        print(f"Tenant: {report['tenant_id']}")
+        print(f"Status: {report['status']}")
+        print(f"Criterios aprovados: {report['criteria_passed']}/{report['criteria_total']}")
+        for criterion in report["criteria"]:
+            icon = "OK " if criterion["ok"] else "ERR"
+            print(f"- [{icon}] {criterion['criterion']}")
+            print(f"  Evidencia: {criterion['evidence']}")
+        print()
 
     if summary["status"] == "passed":
         print("Resultado geral: ✅ SMOKE TEST APROVADO")
@@ -570,6 +672,8 @@ def build_context(args: argparse.Namespace) -> TestContext:
             env=args.env,
             compose_files=["docker-compose.yml"],
             container_name="chat-pref-api",
+            tenant_id=args.tenant_id,
+            tenant_manifest=args.tenant_manifest,
             print_json=args.json,
             json_out=args.json_out,
         )
@@ -578,6 +682,8 @@ def build_context(args: argparse.Namespace) -> TestContext:
         env=args.env,
         compose_files=["docker-compose.yml", "docker-compose.local.yml"],
         container_name="chat-pref-api-dev",
+        tenant_id=args.tenant_id,
+        tenant_manifest=args.tenant_manifest,
         print_json=args.json,
         json_out=args.json_out,
     )
@@ -608,6 +714,18 @@ def parse_args() -> argparse.Namespace:
         default=None,
         help="Salva o resumo final em um arquivo JSON.",
     )
+    parser.add_argument(
+        "--tenant-id",
+        type=str,
+        default=DEFAULT_TENANT_ID,
+        help="Tenant usado no fluxo ponta a ponta.",
+    )
+    parser.add_argument(
+        "--tenant-manifest",
+        type=str,
+        default=None,
+        help="Caminho do bundle versionado do tenant demonstrativo para validar e materializar no smoke.",
+    )
     return parser.parse_args()
 
 
@@ -622,6 +740,7 @@ def main() -> int:
     context = build_context(args)
 
     try:
+        validate_tenant_bundle(context)
         docker_up(context)
         wait_for_health(context)
         test_root(context)

@@ -59,6 +59,15 @@ Resultado esperado:
 
 Use um tenant de exemplo apenas para teste local, como `prefeitura-demo`.
 
+O tenant demonstrativo oficial desta fase e `prefeitura-vila-serena`. Para materializar o bundle versionado no runtime local antes de testar fora do Docker:
+
+```bash
+.venv/bin/python scripts/bootstrap_demo_tenant.py \
+  --manifest tenants/prefeitura-vila-serena/tenant.json \
+  --purge-documents \
+  --ingest
+```
+
 ### 1. Validar estado inicial sem base
 
 ```bash

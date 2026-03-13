@@ -9,7 +9,7 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -59,6 +59,7 @@ async def admin_key_guard(request: Request, call_next):
     if (
         path.startswith("/static")
         or path in OPEN_PATHS
+        or request.method == "OPTIONS"
         or DEBUG
     ):
         return await call_next(request)
@@ -120,4 +121,4 @@ async def spa_shell(full_path: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8093, reload=DEBUG)
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)), reload=DEBUG)

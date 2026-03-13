@@ -21,8 +21,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const username = localStorage.getItem('username');
     const role = localStorage.getItem('role');
     const expiresIn = localStorage.getItem('expires_in');
-    
+
     if (token && username && role) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser({
         token,
         username,
@@ -36,12 +37,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     const response = await auth.login({ username, password });
     const data = response.data;
-    
+
     localStorage.setItem('token', data.token);
     localStorage.setItem('username', data.username);
     localStorage.setItem('role', data.role);
     localStorage.setItem('expires_in', data.expires_in.toString());
-    
+
     setUser(data);
   };
 
@@ -68,6 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {

@@ -22,7 +22,7 @@ from uuid import uuid4
 
 logger = logging.getLogger(__name__)
 
-from app.contracts.enums import (
+from app.contracts.enums import (  # noqa: E402
     Intent,
     Decision,
     ResponseType,
@@ -33,7 +33,7 @@ from app.contracts.enums import (
     Channel,
     AuditEventType,
 )
-from app.contracts.dto import (
+from app.contracts.dto import (  # noqa: E402
     ChatRequest,
     ChatResponse,
     RequestContext,
@@ -43,26 +43,26 @@ from app.contracts.dto import (
     MessageSentResult,
     PublicAckResult,
 )
-from app.classifier.service import ClassifierService, get_classifier
-from app.policy_guard.service import PolicyGuardService, get_policy_guard
-from app.rag.retriever import RAGRetriever, get_retriever
-from app.rag.composer import RAGComposer, get_composer
-from app.prompts import load_prompt, get_public_ack
-from app.settings import settings
-from app.services.mailer import mailer
-from app.repositories.meta_user_profile_repository import meta_user_profile_repository
-from app.integrations.meta.client import get_meta_client
-from app.models.meta_user_profile import MetaUserProfileCreate
+from app.classifier.service import ClassifierService, get_classifier  # noqa: E402
+from app.policy_guard.service import PolicyGuardService, get_policy_guard  # noqa: E402
+from app.rag.retriever import RAGRetriever, get_retriever  # noqa: E402
+from app.rag.composer import RAGComposer, get_composer  # noqa: E402
+from app.prompts import load_prompt, get_public_ack  # noqa: E402
+from app.settings import settings  # noqa: E402
+from app.services.mailer import mailer  # noqa: E402
+from app.repositories.meta_user_profile_repository import meta_user_profile_repository  # noqa: E402
+from app.integrations.meta.client import get_meta_client  # noqa: E402
+from app.models.meta_user_profile import MetaUserProfileCreate  # noqa: E402
 
 # NLP - Análise de sentimentos e expansão de queries
-from app.nlp.sentiment import analyze_sentiment
-from app.nlp.query_expander import expand_query
-from app.nlp.normalizer import normalize_text, detect_formality_level
+from app.nlp.sentiment import analyze_sentiment  # noqa: E402
+from app.nlp.query_expander import expand_query  # noqa: E402
+from app.nlp.normalizer import normalize_text, detect_formality_level  # noqa: E402
 
 # Analytics - Coleta de dados para melhorar RAG
-from app.analytics import QueryAnalytics
-from app.audit.repository import audit_repository
-from app.audit.models import AuditEventCreate, RAGQueryCreate, ConversaCreate
+from app.analytics import QueryAnalytics  # noqa: E402
+from app.audit.repository import audit_repository  # noqa: E402
+from app.audit.models import AuditEventCreate, RAGQueryCreate, ConversaCreate  # noqa: E402
 
 
 # Cache de último ACK por thread (memória simples para MVP)
@@ -232,6 +232,14 @@ class OrchestratorService:
         # HUMAN_HANDOFF: escalate
         if classifier_result.intent == Intent.HUMAN_HANDOFF:
             return self._build_escalate_response(ctx)
+
+        # IPTU MOCK: resposta mockada
+        if classifier_result.intent == Intent.TRANSACTIONAL_IPTU:
+            return self._build_iptu_response(ctx)
+
+        # TICKET MOCK: resposta mockada
+        if classifier_result.intent == Intent.TRANSACTIONAL_TICKET:
+            return self._build_ticket_response(ctx)
 
         # ========================================
         # 5. EXECUTAR RAG (com query expandida)
@@ -651,12 +659,102 @@ class OrchestratorService:
             surface_type=ctx.surface,
         ), ctx
 
+    def _build_iptu_response(
+        self, ctx: RequestContext
+    ) -> tuple[ChatResponse, RequestContext]:
+        """Constrói resposta de mock para IPTU."""
+        import re
+        texto_limpo = re.sub(r'\D', '', ctx.user_message)
+        
+        if len(texto_limpo) == 11:
+            message = "Aqui está a 2ª via do seu IPTU referente ao CPF informado:\n📎 [Clique aqui para baixar o PDF simulado](https://nexo-prefa-assets.s3.amazonaws.com/iptu-mock.pdf)"
+        else:
+            message = "Para acessar a 2ª via do IPTU, por favor digite o seu CPF (somente números)."
+
+        ctx.final_decision = Decision.ANSWER_DIRECT
+        ctx.response_type = ResponseType.SUCCESS
+
+        ctx.response_selected = ResponseSelectedResult(
+            template="iptu_mock",
+            decision=Decision.ANSWER_DIRECT,
+            response_type=ResponseType.SUCCESS,
+        )
+
+        ctx.add_event(
+            AuditEventType.RESPONSE_SELECTED,
+            {
+                "template": "iptu_mock",
+                "decision": Decision.ANSWER_DIRECT.value,
+            },
+        )
+
+        self._add_message_sent_event(ctx, message)
+        ctx.response_message = message
+        asyncio.create_task(self._persist_audit(ctx))
+
+        return ChatResponse(
+            session_id=ctx.session_id,
+            message=message,
+            intent=Intent.TRANSACTIONAL_IPTU,
+            decision=Decision.ANSWER_DIRECT,
+            response_type=ResponseType.SUCCESS,
+            channel=ctx.channel,
+            surface_type=ctx.surface,
+        ), ctx
+
+    def _build_ticket_response(
+        self, ctx: RequestContext
+    ) -> tuple[ChatResponse, RequestContext]:
+        """Constrói resposta de mock para Abertura de Chamado (Zeladoria)."""
+        import random
+        # Generates a random protocol number e.g. 2026-8A3F9
+        parts = ["A", "B", "C", "D", "E", "F", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+        protocol_suffix = "".join(random.choices(parts, k=5))
+        protocol_number = f"2026-{protocol_suffix}"
+
+        message = (
+            "✅ Recebi a sua solicitação. Obrigado por nos avisar!\n\n"
+            f"O seu chamado foi aberto na Secretaria de Zeladoria sob o protocolo *{protocol_number}*.\n"
+            "Nossa equipe tem até 48 horas úteis para realizar a vistoria no local indicado.\n\n"
+            "Qualquer atualização será enviada por aqui."
+        )
+
+        ctx.final_decision = Decision.ANSWER_DIRECT
+        ctx.response_type = ResponseType.SUCCESS
+
+        ctx.response_selected = ResponseSelectedResult(
+            template="ticket_mock",
+            decision=Decision.ANSWER_DIRECT,
+            response_type=ResponseType.SUCCESS,
+        )
+
+        ctx.add_event(
+            AuditEventType.RESPONSE_SELECTED,
+            {
+                "template": "ticket_mock",
+                "decision": Decision.ANSWER_DIRECT.value,
+            },
+        )
+
+        self._add_message_sent_event(ctx, message)
+        ctx.response_message = message
+        asyncio.create_task(self._persist_audit(ctx))
+
+        return ChatResponse(
+            session_id=ctx.session_id,
+            message=message,
+            intent=Intent.TRANSACTIONAL_TICKET,
+            decision=Decision.ANSWER_DIRECT,
+            response_type=ResponseType.SUCCESS,
+            channel=ctx.channel,
+            surface_type=ctx.surface,
+        ), ctx
+
     async def _execute_hybrid_web_fallback(self, ctx: RequestContext, reason: FallbackReason) -> Optional[tuple[ChatResponse, RequestContext]]:
         """Tenta responder à pergunta raspando o site de fallback."""
         import os
         import re
         from google import genai
-        from google.genai.errors import APIError
         from app.scraper.service import get_scraper_service
         
         try:

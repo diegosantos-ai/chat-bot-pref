@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from . import get_db
 
 router = APIRouter()

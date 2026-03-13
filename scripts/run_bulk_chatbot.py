@@ -217,20 +217,7 @@ def instantiate_template(tmpl: str, idx: int) -> str:
 
 def gen_message(idx: int) -> str:
     # Weighted category selection to match distribution in plan
-    cats = list(TEMPLATES.keys())
-    weights = [
-        40,
-        30,
-        10,
-        10,
-        10,
-        8,
-        8,
-        5,
-        3,
-        3,
-        13,
-    ]  # len mismatch; we'll normalize by mapping
+    list(TEMPLATES.keys())
     # create a simple distribution map prioritizing common categories
     pool = (
         ["info"] * 40

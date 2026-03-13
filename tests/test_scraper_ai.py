@@ -46,7 +46,7 @@ async def test_scraper_ai():
     scraper = ScraperService()
     
     try:
-        print(f"[+] Fazendo scraping da página...")
+        print("[+] Fazendo scraping da página...")
         print("[+] Isso pode levar alguns segundos, aguarde...\n")
         
         result = await scraper.preview_url(url)

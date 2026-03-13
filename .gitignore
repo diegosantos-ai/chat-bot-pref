@@ -358,3 +358,4 @@ scripts/verify_features.py
 .agent/skills/database-design/scripts/schema_validator.py
 .agent/scripts/session_manager.py
 .agent/scripts/auto_preview.py
+tmp/marketingskills

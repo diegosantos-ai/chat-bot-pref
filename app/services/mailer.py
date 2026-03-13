@@ -46,7 +46,7 @@ class Mailer:
         if user_name and user_name != user_contact:
             contact_display = f"{user_name} ({user_contact})"
 
-        subject = f"[{bot_name}] Ticket Escalado - {contact_display}"
+        subject = f"[{bot_name}] Ticket Escalado - {contact_display}"  # noqa: F821
 
         body = f"""
         <h2>Solicitação Escalada</h2>
@@ -65,7 +65,7 @@ class Mailer:
         <hr>
         <p><i>Este é um email automático. Por favor, entre em contato com o cidadão.</i></p>
         <p><i>Para responder via Instagram/Facebook, procure pelo usuário: {user_contact}</i></p>
-        """
+        """  # noqa: F821
 
         msg = MIMEMultipart()
         msg["From"] = self.user

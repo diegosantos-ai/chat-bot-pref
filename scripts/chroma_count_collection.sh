@@ -3,7 +3,7 @@ set -euo pipefail
 # Count chunks in a Chroma collection
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PYTHON="$ROOT_DIR/.venv/bin/python"
-COLLECTION=${1:-rag_ba_rag_piloto_2026_01_v1}
+COLLECTION=${1:-default_knowledge_base}
 
 if [ ! -x "$PYTHON" ]; then
   echo "ERROR: python venv not found at $PYTHON" >&2

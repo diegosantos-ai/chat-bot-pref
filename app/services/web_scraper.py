@@ -4,13 +4,16 @@ from bs4 import BeautifulSoup
 from typing import Optional
 from urllib.parse import urljoin
 
+from app.settings import settings
+
 logger = logging.getLogger(__name__)
 
 class WebScraper:
-    BASE_URL = "https://santatereza.pr.gov.br"
+    BASE_URL = ""
     SEARCH_PATH = "/busca/"
     
-    def __init__(self):
+    def __init__(self, base_url: Optional[str] = None):
+        self.base_url = (base_url or settings.FALLBACK_TARGET_URL or self.BASE_URL).strip()
         self.headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
@@ -38,7 +41,7 @@ class WebScraper:
             if not title:
                 continue
 
-            href = urljoin(self.BASE_URL, link.get("href") or fallback_url)
+            href = urljoin(self.base_url, link.get("href") or fallback_url)
             if excerpt:
                 results.append(f"**{title}**\n{excerpt}\n([Fonte]({href}))")
             else:
@@ -57,7 +60,11 @@ class WebScraper:
         if not normalized_query:
             return None
 
-        search_url = urljoin(self.BASE_URL, self.SEARCH_PATH)
+        if not self.base_url:
+            logger.warning("Fallback web scraper sem URL base configurada")
+            return None
+
+        search_url = urljoin(self.base_url, self.SEARCH_PATH)
         
         try:
             logger.info("Scraping busca: %s", search_url)

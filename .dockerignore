@@ -10,3 +10,9 @@ chroma_data
 analytics/v1/queries.jsonl
 analytics/v1/report.csv
 *.db
+
+# Pastas pesadas de ambiente
+venv/
+node_modules/
+admin-panel/node_modules/
+nexo-admin/venv/

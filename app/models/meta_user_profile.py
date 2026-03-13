@@ -1,6 +1,6 @@
 """
-Modelo de Cache de Perfis Meta — Pilot Atendimento MVE
-=======================================================
+Modelo de Cache de Perfis Meta
+==============================
 Versão: v1.0
 Escopo: Cache de perfis Instagram/Facebook
 
@@ -33,7 +33,7 @@ class MetaUserProfile(BaseModel):
     username: Optional[str] = Field(
         None,
         description="Username/handle do usuário",
-        examples=["prefeitura_sto", "joaodasilva"],
+        examples=["perfil_oficial", "joaodasilva"],
     )
     name: Optional[str] = Field(
         None,
@@ -57,7 +57,7 @@ class MetaUserProfile(BaseModel):
             "example": {
                 "platform_user_id": "17841413792837146",
                 "platform": "instagram",
-                "username": "prefeitura_sto",
+                "username": "perfil_oficial",
                 "name": "Prefeitura de {client_name}",
                 "profile_picture_url": "https://instagram.com/...",
                 "created_at": "2026-02-14T22:00:00Z",

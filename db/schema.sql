@@ -118,7 +118,7 @@ CREATE TABLE audit_events (
     motivo_fallback     fallback_reason_type,               -- Motivo do fallback
 
     -- RAG
-    id_base             VARCHAR(64),                        -- Ex: BA-RAG-PILOTO-2026.01.v1
+    id_base             VARCHAR(64),                        -- Ex: default
 
     -- Modelo/LLM
     modelo              VARCHAR(64),                        -- Ex: gemini-2.0-flash
@@ -161,7 +161,7 @@ CREATE TABLE rag_queries (
     id_requisicao       UUID NOT NULL,                  -- FK para audit_events
 
     -- Base de conhecimento
-    id_base             VARCHAR(64),                    -- Ex: BA-RAG-PILOTO-2026.01.v1 (redundância útil)
+    id_base             VARCHAR(64),                    -- Ex: default (redundância útil)
 
     -- Superfície (para análise de modo de resposta)
     tipo_superficie     surface_type,                   -- inbox ou public_comment

@@ -43,7 +43,7 @@ export default function RAGManager() {
     setIngesting(true);
     setIngestMessage('');
     try {
-      const response = await rag.ingest('data/knowledge_base/BA-RAG-PILOTO-2026.01.v1', force);
+      const response = await rag.ingest(undefined, force);
       setIngestMessage(response.data.message);
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {

@@ -25,7 +25,7 @@ def check_postgres_connection():
     try:
         env = os.environ.copy()
         env["PGPASSWORD"] = "pandora"
-        result = subprocess.run(
+        subprocess.run(
             [
                 "psql",
                 "-h",
@@ -155,7 +155,7 @@ def import_dashboard(session: requests.Session, grafana_url: str):
     """Importa o dashboard oficial do {bot_name}."""
     print("📊 Importando dashboard...")
 
-    dashboard_path = Path("/root/pilot-atendimento/grafana/dashboard_terezia.json")
+    dashboard_path = Path(__file__).resolve().parent.parent / "grafana" / "dashboard_terezia.json"
     if not dashboard_path.exists():
         print(f"❌ Dashboard não encontrado em {dashboard_path}")
         return False

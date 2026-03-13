@@ -1,26 +1,21 @@
-from uuid import uuid4
-
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
+from fastapi import HTTPException
 
 from app.contracts.dto import ChatRequest, ChatResponse
+from app.services.chat_service import ChatService
+from app.tenant_context import clear_tenant, set_tenant
 
 router = APIRouter(prefix="/api", tags=["Chat"])
+chat_service = ChatService()
 
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(chat_request: ChatRequest) -> ChatResponse:
-    if not chat_request.tenant_id or not chat_request.tenant_id.strip():
+    if chat_request.tenant_id is None:
         raise HTTPException(status_code=400, detail="tenant_id obrigatório")
 
-    if not chat_request.message.strip():
-        raise HTTPException(status_code=400, detail="message obrigatória")
-
-    session_id = chat_request.session_id or str(uuid4())
-    tenant_id = chat_request.tenant_id.strip()
-
-    return ChatResponse(
-        session_id=session_id,
-        tenant_id=tenant_id,
-        message=f"Fluxo mínimo ativo para o tenant '{tenant_id}'.",
-        channel=chat_request.channel,
-    )
+    set_tenant(chat_request.tenant_id)
+    try:
+        return chat_service.process(chat_request)
+    finally:
+        clear_tenant()

@@ -1,168 +1,147 @@
 # AGENTS.md
 
-## 1. Propósito deste arquivo
+## 1. Propósito
+
 Este arquivo define as regras operacionais para agentes de IA que atuam neste repositório.
 
-Ele **não** é changelog, não é documentação completa de arquitetura e não substitui os documentos de contexto do projeto.
+Ele não substitui:
 
-A função deste arquivo é orientar como agentes devem:
-- entender o projeto
-- planejar alterações
-- executar mudanças com segurança
-- validar resultados
-- manter coerência entre código, runtime e documentação
+- `README.md`
+- `docs/contexto.md`
+- `docs/arquitetura.md`
+- `docs/planejamento_fases.md`
 
----
+Sua função é orientar como agentes devem ler o projeto, planejar mudanças, executar alterações e validar resultados.
 
 ## 2. Objetivo atual do projeto
-Este repositório mantém a evolução do **Chat Pref**, uma plataforma de atendimento digital com IA aplicada ao setor público, com foco em:
 
-- backend FastAPI
-- arquitetura tenant-aware
-- RAG com base documental por tenant
-- guardrails e auditoria
-- operação local reproduzível com Docker
-- demonstração funcional via tenant fictício
-- canal real de demonstração via Telegram
-- observabilidade, CI/CD e futura publicação em AWS com Terraform
+O projeto está em reconstrução controlada sobre uma base mínima.
 
-O objetivo atual não é expandir escopo indiscriminadamente.  
-O foco é **refatorar, estabilizar, operacionalizar e demonstrar** o sistema com clareza arquitetural e evidências reais.
+O runtime ativo atual tem foco em:
 
----
+- FastAPI mínimo
+- contrato explícito de `tenant_id`
+- contexto de tenant por request
+- persistência mínima por tenant
+- auditoria mínima por tenant
+- execução local e via Docker
 
-## 3. Documentos obrigatórios antes de qualquer alteração
-Antes de propor ou executar mudanças, o agente deve ler os arquivos abaixo:
+Webhook, RAG, painel administrativo, integrações externas e persistência mais robusta ainda não fazem parte do núcleo validado atual.
 
-- `contexto.md`
-- `arquitetura.md`
-- `planejamento_fases.md` ou documento equivalente de planejamento por fases
+## 3. Documentos obrigatórios antes de alterar
+
+Antes de propor ou executar mudanças, o agente deve ler:
+
 - `README.md`
+- `docs/contexto.md`
+- `docs/arquitetura.md`
+- `docs/planejamento_fases.md`
 
-Se a alteração impactar uma fase específica, o agente deve identificar:
+Se a alteração estiver ligada a uma fase específica, o agente deve identificar:
+
 - fase atual
 - task relacionada
 - critério de aceite
 - forma de validação
 
----
+## 4. Fonte de verdade
 
-## 4. Fonte de verdade por tipo de assunto
-- **Contexto do projeto:** `contexto.md`
-- **Arquitetura real:** `arquitetura.md`
-- **Planejamento e execução:** `planejamento-trello.md`
-- **Setup e uso geral:** `README.md`
-- **Instruções do Copilot:** `.github/copilot-instructions.md`
-- **Perfis especializados de agente:** `.github/agents/`
-- **Skills reutilizáveis:** `.ai/skills/`
-- **Workflows operacionais:** `.ai/workflows/`
+- contexto do projeto: `docs/contexto.md`
+- arquitetura real: `docs/arquitetura.md`
+- planejamento por fases: `docs/planejamento_fases.md`
+- setup e uso atual: `README.md`
+- instruções do Copilot: `.github/copilot-instructions.md`
+- agentes especializados: `.github/agents/`
+- skills e workflows: `.ai/`
 
-Este arquivo deve permanecer curto e estável.
+## 5. Regras obrigatórias
 
----
+### Antes de alterar
 
-## 5. Regras obrigatórias para agentes
-
-### 5.1. Antes de alterar qualquer coisa
 O agente deve:
-1. identificar a fase e a task relacionadas
+
+1. identificar a fase e a task
 2. entender o impacto da mudança
 3. listar arquivos ou áreas afetadas
 4. definir como a alteração será validada
 5. evitar mudanças paralelas fora do escopo
 
-### 5.2. Durante a alteração
-O agente deve:
-- fazer mudanças mínimas e rastreáveis
-- preservar o comportamento funcional sempre que possível
-- evitar refatorações oportunistas fora da task
-- preferir configuração explícita a default implícito
-- tratar `tenant_id` como contrato arquitetural, não como detalhe incidental
+### Durante a alteração
 
-### 5.3. Depois da alteração
+O agente deve:
+
+- fazer mudanças mínimas e rastreáveis
+- preservar o comportamento funcional que já foi validado
+- preferir contrato explícito a fallback implícito
+- tratar `tenant_id` como contrato arquitetural
+- evitar reintroduzir estrutura ou naming removidos
+
+### Depois da alteração
+
 O agente deve registrar:
+
 - o que foi alterado
 - como validou
 - o estado atual
 - o próximo passo lógico
 
----
-
 ## 6. O que agentes nunca devem fazer
-Agentes **não devem**:
 
-- introduzir hardcodes de path, domínio, base ou tenant
+Agentes não devem:
+
+- introduzir hardcodes de tenant, path, domínio ou base
 - criar fallback silencioso para `tenant_id`
-- mascarar erro estrutural com comportamento “neutro”
-- alterar documentação para prometer algo ainda não validado
-- editar ou criar credenciais reais no repositório
+- documentar RAG, webhook, painel ou integrações como ativas se ainda não estiverem implementadas na base atual
+- reintroduzir resíduos históricos removidos do repositório
+- editar ou criar credenciais reais
 - manter segredos em arquivos versionados
-- modificar várias frentes ao mesmo tempo sem necessidade
-- expandir o escopo do projeto sem relação com a fase atual
-- tratar a demo como produto final enterprise
-- reintroduzir identidade, contatos ou resíduos históricos do projeto legado
-
----
+- expandir o escopo sem relação com a fase atual
 
 ## 7. Regras específicas do projeto
 
-### 7.1. Multi-tenant
+### Multi-tenant
+
 - `tenant_id` deve ser explícito nos fluxos críticos
-- nenhuma operação crítica deve depender de tenant implícito
-- RAG, auditoria e persistência devem respeitar o contexto de tenant
-- ausência de tenant deve gerar erro controlado ou tratamento explícito
+- ausência de tenant deve gerar erro controlado
+- contexto, persistência e auditoria devem respeitar segregação por tenant
 
-### 7.2. RAG
-- não usar base legada ou collection hardcoded
-- ingest deve ser tenant-aware
-- ausência de base deve ser tratada de forma segura e rastreável
-- respostas devem respeitar escopo institucional e contexto recuperado
+### Persistência atual
 
-### 7.3. Demo
-- a prefeitura demonstrativa deve ser fictícia
-- os dados devem ser fictícios e plausíveis
-- o escopo do assistente é estritamente informativo
-- Telegram é canal de demonstração, não produto final obrigatório
+- o runtime atual usa persistência local em arquivo
+- histórico e auditoria são segregados por tenant
+- qualquer evolução de storage deve preservar esse contrato lógico
 
-### 7.4. Docker / CI / AWS
-- ambiente local deve ser reproduzível com Docker
-- CI deve validar o que já é confiável, sem teatro
-- AWS/Terraform devem seguir arquitetura mínima e explicável
-- não criar infraestrutura excessiva para um case demonstrativo
+### Docker
 
----
+- o ambiente local deve continuar simples e reproduzível
+- não inflar o Compose com serviços ainda não necessários
 
-## 8. Convenções de trabalho para agentes
+### Documentação
 
-### 8.1. Estrutura de saída esperada ao final de uma tarefa
-Toda resposta operacional do agente deve terminar com algo equivalente a:
+- toda documentação deve refletir o estado real do código
+- arquitetura desejada futura deve ser marcada como futura, não como presente
+
+## 8. Estrutura de saída esperada
+
+Toda resposta operacional do agente deve terminar com:
 
 - arquivos alterados
 - validação executada
 - status atual
 - próximo passo
 
-### 8.2. Se houver bloqueio
+## 9. Se houver bloqueio
+
 O agente deve informar:
+
 - onde está o bloqueio
 - por que ele existe
 - qual dependência falta
-- qual menor próximo passo possível continua válido
+- qual o menor próximo passo ainda válido
 
-### 8.3. Se a mudança for estrutural
-Sempre atualizar os documentos correspondentes quando houver impacto real em:
-- arquitetura
-- contrato de tenant
-- ingest
-- Docker
-- GitHub Actions
-- Terraform/AWS
-- fluxo operacional da demo
+## 10. Estrutura recomendada de agentes
 
----
-
-## 9. Estrutura recomendada de agentes neste repositório
-Os agentes ativos deste projeto devem ser poucos e com função clara:
+Os agentes ativos do projeto devem continuar poucos e claros:
 
 - `backend-architect.agent.md`
 - `rag-ml.agent.md`
@@ -170,47 +149,28 @@ Os agentes ativos deste projeto devem ser poucos e com função clara:
 - `qa-validation.agent.md`
 - `docs-operator.agent.md`
 
-Não criar novos agentes sem necessidade real.
+## 11. Estratégia mínima de validação
 
----
-
-## 10. Estratégia de validação mínima
 Toda alteração relevante deve indicar pelo menos uma destas validações:
 
-- subida do backend
-- validação de endpoints principais
+- startup do backend
+- validação de `/`, `/health` e `/api/chat`
 - validação do fluxo de tenant
-- validação do retrieval/RAG
-- validação da demo via Telegram
-- validação de logs/métricas
-- build Docker
-- execução de testes automatizados
-- execução da pipeline de CI
-
----
-
-## 11. Segurança e segredos
-Nunca manter no repositório:
-- `.env` real
-- tokens de API
-- credenciais OAuth reais
-- chaves privadas
-- arquivos de credenciais em áreas ativas do projeto
-
-Se forem encontrados arquivos desse tipo:
-- remover da estrutura ativa
-- sugerir rotação de segredo
-- substituir por exemplo seguro, quando necessário
-
----
+- validação da persistência por tenant
+- validação da auditoria por tenant
+- `pytest`
+- `docker compose config`
+- `docker compose up`
 
 ## 12. Regra final
+
 Este projeto deve evoluir com:
+
 - menos improviso
 - mais contrato
-- menos agente genérico
+- menos herança implícita
 - mais evidência
-- menos contexto espalhado
-- mais governança por arquivos claros e versionados
+- menos promessa
+- mais coerência entre código, runtime e documentação
 
-Se houver conflito entre “fazer rápido” e “manter o sistema explicável”, a prioridade é manter o sistema explicável.
+Se houver conflito entre fazer rápido e manter o sistema explicável, a prioridade é manter o sistema explicável.

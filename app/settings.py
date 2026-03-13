@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
+    DATA_DIR: str = "data/runtime"
     CORS_ORIGINS: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",

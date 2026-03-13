@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react';
 import { Trash2, Edit2, Zap, Tag, FileText, Folder } from 'lucide-react';
 import { boosts } from '../services/api';
@@ -27,7 +28,7 @@ export default function BoostsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editingBoost, setEditingBoost] = useState<BoostConfig | null>(null);
   const [showTemplates, setShowTemplates] = useState(false);
-  
+
   const [formData, setFormData] = useState<BoostConfigCreate>({
     nome: '',
     tipo: 'sigla',
@@ -40,6 +41,7 @@ export default function BoostsPage() {
   useEffect(() => {
     loadBoosts();
     loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadBoosts = async () => {
@@ -48,7 +50,7 @@ export default function BoostsPage() {
       if (filterTipo) params.tipo = filterTipo;
       if (filterAtivo === 'true') params.ativo = true;
       if (filterAtivo === 'false') params.ativo = false;
-      
+
       const response = await boosts.list(params);
       setBoostsList(response.data);
     } catch (err) {
@@ -171,8 +173,8 @@ export default function BoostsPage() {
 
       <div className={styles.toolbar}>
         <div className={styles.filters}>
-          <select 
-            value={filterTipo} 
+          <select
+            value={filterTipo}
             onChange={(e) => { setFilterTipo(e.target.value); loadBoosts(); }}
             className={styles.select}
           >
@@ -181,9 +183,9 @@ export default function BoostsPage() {
             <option value="palavra_chave">Palavras-chave</option>
             <option value="categoria">Categorias</option>
           </select>
-          
-          <select 
-            value={filterAtivo} 
+
+          <select
+            value={filterAtivo}
             onChange={(e) => { setFilterAtivo(e.target.value); loadBoosts(); }}
             className={styles.select}
           >
@@ -211,8 +213,8 @@ export default function BoostsPage() {
           <h3>Siglas Disponíveis (clique para adicionar)</h3>
           <div className={styles.templatesList}>
             {templates.map((t) => (
-              <button 
-                key={t.sigla} 
+              <button
+                key={t.sigla}
                 className={styles.templateTag}
                 onClick={() => handleQuickAdd(t)}
               >
@@ -232,9 +234,9 @@ export default function BoostsPage() {
               <h2><Tag size={18} /> Siglas ({siglas.length})</h2>
               <div className={styles.list}>
                 {siglas.map((boost) => (
-                  <BoostCard 
-                    key={boost.id} 
-                    boost={boost} 
+                  <BoostCard
+                    key={boost.id}
+                    boost={boost}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onToggle={handleToggle}
@@ -249,9 +251,9 @@ export default function BoostsPage() {
               <h2><FileText size={18} /> Palavras-chave ({palavras.length})</h2>
               <div className={styles.list}>
                 {palavras.map((boost) => (
-                  <BoostCard 
-                    key={boost.id} 
-                    boost={boost} 
+                  <BoostCard
+                    key={boost.id}
+                    boost={boost}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onToggle={handleToggle}
@@ -266,9 +268,9 @@ export default function BoostsPage() {
               <h2><Folder size={18} /> Categorias ({categorias.length})</h2>
               <div className={styles.list}>
                 {categorias.map((boost) => (
-                  <BoostCard 
-                    key={boost.id} 
-                    boost={boost} 
+                  <BoostCard
+                    key={boost.id}
+                    boost={boost}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
                     onToggle={handleToggle}
@@ -293,7 +295,7 @@ export default function BoostsPage() {
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
                 <label>Tipo</label>
-                <select 
+                <select
                   value={formData.tipo}
                   onChange={(e) => setFormData({ ...formData, tipo: e.target.value as any })}
                   className={styles.select}
@@ -317,11 +319,11 @@ export default function BoostsPage() {
                 value={formData.valor}
                 onChange={(e) => setFormData({ ...formData, valor: e.target.value })}
                 placeholder={
-                  formData.tipo === 'sigla' 
-                    ? 'REFIS' 
+                  formData.tipo === 'sigla'
+                    ? 'REFIS'
                     : formData.tipo === 'palavra_chave'
-                    ? 'vacina, covid, imunização'
-                    : 'saude, educacao'
+                      ? 'vacina, covid, imunização'
+                      : 'saude, educacao'
                 }
                 required
               />
@@ -376,14 +378,14 @@ export default function BoostsPage() {
   );
 }
 
-function BoostCard({ 
-  boost, 
-  onEdit, 
-  onDelete, 
-  onToggle 
-}: { 
-  boost: BoostConfig; 
-  onEdit: (b: BoostConfig) => void; 
+function BoostCard({
+  boost,
+  onEdit,
+  onDelete,
+  onToggle
+}: {
+  boost: BoostConfig;
+  onEdit: (b: BoostConfig) => void;
   onDelete: (id: string) => void;
   onToggle: (b: BoostConfig) => void;
 }) {
@@ -406,7 +408,7 @@ function BoostCard({
         </div>
       </div>
       <div className={styles.cardActions}>
-        <button 
+        <button
           className={`${styles.toggleBtn} ${boost.ativo ? styles.active : ''}`}
           onClick={() => onToggle(boost)}
           title={boost.ativo ? 'Desativar' : 'Ativar'}

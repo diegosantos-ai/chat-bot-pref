@@ -10,6 +10,8 @@ import Logs from './pages/Logs';
 import Ops from './pages/Ops';
 import Scrap from './pages/Scrap';
 import Boosts from './pages/Boosts';
+import Alerts from './pages/Alerts';
+import Tickets from './pages/Tickets';
 import './styles/globals.css';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -17,10 +19,10 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         height: '100vh',
         color: '#737373'
       }}>
@@ -50,6 +52,8 @@ function App() {
           <Route path="/ops" element={<ProtectedRoute><Ops /></ProtectedRoute>} />
           <Route path="/scrap" element={<ProtectedRoute><Scrap /></ProtectedRoute>} />
           <Route path="/boosts" element={<ProtectedRoute><Boosts /></ProtectedRoute>} />
+          <Route path="/alerts" element={<ProtectedRoute><Alerts /></ProtectedRoute>} />
+          <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

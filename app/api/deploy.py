@@ -5,7 +5,11 @@ Endpoint para deploy automático via CI/CD.
 Executa git fetch, git pull e reinicia o serviço terezia-api.
 """
 
+from pathlib import Path
+import sys
+
 from fastapi import APIRouter, HTTPException, Request, Header
+
 from app.settings import settings
 import subprocess
 import logging
@@ -13,6 +17,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["Deploy"])
+WORK_DIR = str(Path(__file__).resolve().parents[2])
 
 
 def get_git_hash(work_dir: str) -> str:
@@ -69,7 +74,7 @@ async def trigger_deploy(
     client_ip = request.client.host if request.client else "unknown"
     logger.info(f"Deploy autorizado de {client_ip}")
 
-    work_dir = "/root/pilot-atendimento"
+    work_dir = WORK_DIR
     results = {"steps": []}
 
     # Capturar hash ANTES do pull
@@ -139,11 +144,7 @@ async def trigger_deploy(
 
         # 4. Instalar dependências do requirements.txt
         pip_result = subprocess.run(
-            [
-                "bash",
-                "-c",
-                "source venv/bin/activate && pip install -r requirements.txt",
-            ],
+            [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"],
             cwd=work_dir,
             capture_output=True,
             text=True,

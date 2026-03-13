@@ -9,9 +9,25 @@ echo "=========================================="
 # Criar diretório para serviços
 mkdir -p /etc/systemd/system/terezia
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+if [ -x "$PROJECT_DIR/.venv/bin/uvicorn" ]; then
+	VENV_BIN="$PROJECT_DIR/.venv/bin"
+elif [ -x "$PROJECT_DIR/venv/bin/uvicorn" ]; then
+	VENV_BIN="$PROJECT_DIR/venv/bin"
+else
+	echo "❌ Ambiente virtual não encontrado em $PROJECT_DIR/.venv ou $PROJECT_DIR/venv"
+	exit 1
+fi
+
+echo "📁 Projeto detectado em: $PROJECT_DIR"
+echo "🐍 Venv detectado em: $VENV_BIN"
+
 # Copiar arquivos de serviço
-cp /root/pilot-atendimento/scripts/systemd/terezia-api.service /etc/systemd/system/terezia/terezia-api.service
-cp /root/pilot-atendimento/scripts/systemd/terezia-grafana.service /etc/systemd/system/terezia/terezia-grafana.service
+sed -e "s|__PROJECT_DIR__|$PROJECT_DIR|g" -e "s|__VENV_BIN__|$VENV_BIN|g" \
+	"$SCRIPT_DIR/terezia-api.service" > /etc/systemd/system/terezia/terezia-api.service
+sed -e "s|__PROJECT_DIR__|$PROJECT_DIR|g" \
+	"$SCRIPT_DIR/terezia-grafana.service" > /etc/systemd/system/terezia/terezia-grafana.service
 
 # Criar symlinks para ativação
 ln -sf /etc/systemd/system/terezia/terezia-api.service /etc/systemd/system/terezia-api.service

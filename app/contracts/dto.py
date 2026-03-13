@@ -132,7 +132,7 @@ class ChatResponse(BaseModel):
     base_id: Optional[str] = Field(
         default=None,
         description="ID da base RAG utilizada (quando aplicável)",
-        examples=["BA-RAG-PILOTO-2026.01.v1"],
+        examples=["default"],
     )
 
     # Campos para canais externos

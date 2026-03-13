@@ -510,7 +510,7 @@ class TestABComparisonUnit:
 
     def test_provider_isolation_via_collection_name(self):
         """Verifica que cada provedor usa collection isolada."""
-        base = "rag_ba_rag_piloto_2026_01_v1"
+        base = "default_knowledge_base"
 
         names = {
             p: get_collection_name(base, p.value) for p in EmbeddingProvider

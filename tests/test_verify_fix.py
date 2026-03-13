@@ -59,8 +59,8 @@ class TestVerifyAllFix(unittest.TestCase):
         try:
             import verify_all
             
-            # Simula: python verify_all.py pilot-atendimento --url http://localhost:8000
-            test_args = ['verify_all.py', 'pilot-atendimento', '--url', 'http://localhost:8000']
+            # Simula: python verify_all.py chat-bot-pref --url http://localhost:8000
+            test_args = ['verify_all.py', 'chat-bot-pref', '--url', 'http://localhost:8000']
             
             with patch.object(sys, 'argv', test_args):
                 # Mockamos a função interna de lógica (se soubéssemos o nome) ou requests

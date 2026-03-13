@@ -6,11 +6,13 @@ Import all {bot_name} dashboards to Grafana
 import json
 import sys
 import requests
+from pathlib import Path
 
 GRAFANA_URL = "http://localhost:3001"
 GRAFANA_USER = "admin"
-GRAFANA_PASS = "admin24052014"
-DASHBOARDS_DIR = "/root/pilot-atendimento/dashboards"
+GRAFANA_PASS = ""
+PROJECT_DIR = Path(__file__).resolve().parent.parent
+DASHBOARDS_DIR = str(PROJECT_DIR / "dashboards")
 
 # Dashboards to import
 DASHBOARDS = [
@@ -107,7 +109,7 @@ def main():
     # Get or create folder
     print("📁 Configurando pasta de dashboards...")
     FOLDER_ID = get_or_create_folder()
-    print(f"✅ Pasta '{bot_name} Services' pronta (ID: {FOLDER_ID})")
+    print(f"✅ Pasta '{bot_name} Services' pronta (ID: {FOLDER_ID})")  # noqa: F821
     print()
 
     # Import dashboards

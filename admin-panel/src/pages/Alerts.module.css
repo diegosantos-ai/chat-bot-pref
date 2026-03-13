@@ -1,0 +1,191 @@
+.container {
+    max-width: 1000px;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.header {
+    margin-bottom: 32px;
+}
+
+.header h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.panel {
+    background: var(--bg-secondary);
+    border: 2px solid var(--border-subtle);
+    padding: 24px;
+}
+
+.panel h2 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+    width: 100%;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-default);
+    color: var(--text-primary);
+    padding: 12px;
+    font-family: var(--font-sans);
+    font-size: 0.9375rem;
+    transition: border-color 0.2s;
+    border-radius: 0;
+    /* Brutalism */
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
+.formGroup textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.helperText {
+    display: block;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.submitBtn {
+    background: var(--accent-primary);
+    color: #000;
+    border: none;
+    padding: 14px 24px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.submitBtn:hover {
+    background: var(--accent-hover, #ff8c00);
+}
+
+.submitBtn:active {
+    transform: scale(0.98);
+}
+
+.submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Phone Preview */
+.phonePreview {
+    border: 2px solid var(--border-default);
+    background: #000;
+    max-width: 300px;
+    margin: 0 auto;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    height: 500px;
+    display: flex;
+    flex-direction: column;
+}
+
+.phoneHeader {
+    background: #111;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #222;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    background: var(--bg-tertiary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.phoneTitle {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.phoneBody {
+    flex: 1;
+    padding: 16px;
+    background: #0a0a0a;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.messageBubble {
+    background: #262626;
+    padding: 12px 16px;
+    border-radius: 12px 12px 12px 0;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: #fff;
+    white-space: pre-wrap;
+    max-width: 90%;
+}
+
+.emptyState {
+    color: #555;
+    text-align: center;
+    font-size: 0.8125rem;
+    margin-bottom: auto;
+    margin-top: auto;
+}

@@ -2,10 +2,12 @@
 import subprocess
 import json
 import sys
+import os
 
 proj_num = 2
 owner = 'diegosantos-ai'
-repo = 'diegosantos-ai/pilot-atendimento'
+repo = os.environ.get('GH_REPO', 'diegosantos-ai/chat-bot-pref')
+repo_name = repo.split('/')[-1]
 
 def gh(cmd):
     full = ['gh'] + cmd
@@ -43,7 +45,7 @@ for issue in issues:
     num = issue.get('number')
     title = issue.get('title')
     print('\nProcessing issue', num, title)
-    q = f'query {{ repository(owner:"{owner}", name:"pilot-atendimento") {{ issue(number: {num}) {{ id }} }} }}'
+    q = f'query {{ repository(owner:"{owner}", name:"{repo_name}") {{ issue(number: {num}) {{ id }} }} }}'
     out = gh(['api','graphql','-f', f'query={q}'])
     if not out:
         print('Failed to fetch issue node id')

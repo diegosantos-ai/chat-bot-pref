@@ -10,7 +10,7 @@ Este documento serve como a fonte central de verdade e contexto para o desenvolv
 - Mantenha este documento atualizado com todas as mudanças.
 - O servidor de produção usa Linux (Amazon Linux 2023) e scripts devem ser compatíveis.
 
-### Última Atualização: 2026-02-20
+### Última Atualização: 2026-03-13
 **Migração 1:** Melhorias no RAG para Redução de Fallbacks ([detalhes](docs/migrations/20260214_140000_melhorias_rag_fallbacks.md))
 - Thresholds RAG: RAG_MIN_SCORE=0.30, RAG_TOP_K=5
 - CHUNK_OVERLAP aumentado para 150
@@ -31,6 +31,13 @@ Este documento serve como a fonte central de verdade e contexto para o desenvolv
 - Embeddings via OpenRouter com batch/retry/timeout configuráveis
 - Metadados de `embedding_provider` e `embedding_model` registrados em collection/chunks
 - Auto-ingest do retriever ajustado para `data/knowledge_base/...` com fallback legado
+
+**Migração 4:** Sanitização da Base para Portfólio ([detalhes](docs/migrations/20260313_210000_sanitizacao_base_portfolio.md))
+- Removidos hardcodes de paths legados no deploy/admin/systemd/logging
+- Base RAG redefinida para `data/knowledge_base/default` com manifest vazio
+- Scripts operacionais ajustados para descoberta dinâmica de projeto/venv/rede
+- Artefatos e datasets legados removidos para iniciar base limpa
+- Diretórios `.venv/` e `venv/` removidos do versionamento
 
 ## 1. Visão Geral do Projeto
 **Nome**: {bot_name}
@@ -91,13 +98,13 @@ Quando o atendimento humano for necessário, utilizar estes contatos oficiais:
 *   `README.md`: Detalhes técnicos, setup, e status de desenvolvimento.
 *   `app/policy_guard/service.py`: Implementação dos guardrails de segurança.
 *   `app/rag/timestamp.py`: Utilitários para tratamento temporal e validação de datas.
-*   `data/knowledge_base/BA-RAG-PILOTO-****`: Diretório contendo os documentos markdown ingeridos pelo RAG.
+*   `data/knowledge_base/default/`: Diretório base para documentos markdown ingeridos pelo RAG.
 *   `docs/apoio_faq.md`: Material de apoio com FAQs detalhados por cluster (Educação, Saúde, Tributos).
 
 ## 7. Estrutura de Diretórios e Arquivos Principais
 
 ```
-pilot-atendimento/
+chat-bot-pref/
 ├── app/                          # Aplicação principal
 │   ├── __init__.py
 │   ├── main.py                   # FastAPI application entry point
@@ -156,7 +163,7 @@ pilot-atendimento/
 │   └── crisis_violence.txt      # Crise: violência
 ├── data/                        # Dados estáticos
 │   └── knowledge_base/          # Base de conhecimento RAG
-│       └── BA-RAG-PILOTO-2026.01.v1/
+│       └── default/
 │           ├── manifest.json    # Metadados da base
 │           └── items/           # Documentos markdown
 │               ├── 0001_horarios.md
@@ -366,8 +373,8 @@ USER_HASH_SALT: str = ""
 CHROMA_PERSIST_DIR: str = "./chroma_data"
 
 # RAG
-RAG_BASE_ID: str = "BA-RAG-PILOTO-2026.01.v1"
-RAG_COLLECTION_NAME: str = "rag_ba_rag_piloto_2026_01_v1"
+RAG_BASE_ID: str = "default"
+RAG_COLLECTION_NAME: str = "default_knowledge_base"
 RAG_TOP_K: int = 5
 RAG_MIN_SCORE: float = 0.30
 
@@ -476,7 +483,7 @@ ADMIN_API_KEY: str = ""
 
 ## 11. Base de Conhecimento RAG
 
-**Estrutura** (`data/knowledge_base/BA-RAG-PILOTO-2026.01.v1/`):
+**Estrutura** (`data/knowledge_base/default/`):
 - `manifest.json`: Metadados da base
 - `items/`: Documentos markdown ingeridos
 
@@ -559,7 +566,7 @@ ADMIN_API_KEY: str = ""
 
 **Versionamento**:
 - Sistema de prompts versionado (prompts/v1/)
-- Base de conhecimento versionada (BA-RAG-PILOTO-2026.01.v1)
+- Base de conhecimento versionada (default)
 - Schema do banco versionado (v1.1)
 - **Versão piloto congelada (v1.0)**: Contratos, enums e prompts bloqueados para manter estabilidade durante os testes
 

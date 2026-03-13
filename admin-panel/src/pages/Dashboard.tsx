@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { 
-  MessageSquare, 
-  CheckCircle, 
-  AlertTriangle, 
+import {
+  MessageSquare,
+  CheckCircle,
+  AlertTriangle,
   XCircle,
   TrendingUp,
   Clock
@@ -69,7 +69,7 @@ export default function Dashboard() {
     <div className={styles.container}>
       <header className={styles.header}>
         <h1>Dashboard</h1>
-        <p className={styles.subtitle}>Visão geral do assistente {bot_name}</p>
+        <p className={styles.subtitle}>Visão geral do sistema de atendimento Nexo</p>
       </header>
 
       {/* Status Cards */}
@@ -112,10 +112,10 @@ export default function Dashboard() {
                 <div key={intent} className={styles.distributionItem}>
                   <span className={styles.distLabel}>{intent}</span>
                   <div className={styles.distBar}>
-                    <div 
+                    <div
                       className={styles.distBarFill}
-                      style={{ 
-                        width: `${(count / (stats?.total_conversas || 1)) * 100}%` 
+                      style={{
+                        width: `${(count / (stats?.total_conversas || 1)) * 100}%`
                       }}
                     />
                   </div>
@@ -137,9 +137,9 @@ export default function Dashboard() {
                 <div key={channel} className={styles.distributionItem}>
                   <span className={styles.distLabel}>{channel}</span>
                   <div className={styles.distBar}>
-                    <div 
+                    <div
                       className={styles.distBarFill}
-                      style={{ 
+                      style={{
                         width: `${(count / (stats?.total_conversas || 1)) * 100}%`,
                         background: 'var(--accent-primary)'
                       }}
@@ -152,6 +152,32 @@ export default function Dashboard() {
           ) : (
             <p className={styles.empty}>Nenhum dado disponível</p>
           )}
+        </section>
+
+        {/* Sentiment Analysis (Mock for GTM) */}
+        <section className={styles.distributionCard} style={{ borderColor: 'var(--accent-primary)', borderWidth: '2px' }}>
+          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <span style={{ color: 'var(--accent-primary)' }}>■</span> Termômetro do Cidadão (Demo)
+          </h3>
+          <div className={styles.distributionList}>
+            {Object.entries({ 'Satisfeito': 78, 'Neutro': 15, 'Irritado': 7 }).map(([sentiment, count]) => (
+              <div key={sentiment} className={styles.distributionItem}>
+                <span className={styles.distLabel}>{sentiment}</span>
+                <div className={styles.distBar} style={{ borderRadius: '0' }}>
+                  <div
+                    className={styles.distBarFill}
+                    style={{
+                      width: `${count}%`,
+                      borderRadius: '0',
+                      background: sentiment === 'Satisfeito' ? 'var(--success)' :
+                        sentiment === 'Irritado' ? 'var(--error)' : 'var(--warning)'
+                    }}
+                  />
+                </div>
+                <span className={styles.distValue}>{count}%</span>
+              </div>
+            ))}
+          </div>
         </section>
       </div>
 

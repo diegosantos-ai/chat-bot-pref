@@ -14,10 +14,12 @@ import os
 import asyncio
 import argparse
 
+bot_name = "Nexo Prefa"
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-import asyncpg
-from app.settings import settings
+import asyncpg  # noqa: E402
+from app.settings import settings  # noqa: E402
 
 
 async def delete_user(username: str, force: bool = False) -> bool:
@@ -161,8 +163,6 @@ def main():
             sys.exit(1)
         
         asyncio.run(delete_user(username, force=False))
-    else:
-        parser.print_help()
 
 
 if __name__ == "__main__":

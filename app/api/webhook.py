@@ -18,7 +18,7 @@ import logging
 import hashlib
 import hmac
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict
 
 import asyncpg
 from fastapi import APIRouter, Request, Response, HTTPException, BackgroundTasks
@@ -29,7 +29,6 @@ from app.orchestrator.service import get_orchestrator
 from app.settings import settings
 from app import tenant_context
 from app.tenant_resolver import resolve_tenant
-from app.audit.repository import audit_repository
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +96,6 @@ async def _process_event(
     orchestrator = get_orchestrator()
 
     from app.contracts.dto import ChatRequest
-    from app.contracts.enums import Channel
     from datetime import datetime
 
     chat_request = ChatRequest(

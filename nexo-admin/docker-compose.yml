@@ -1,0 +1,34 @@
+version: '3.8'
+
+# Nexo Admin — Superadmin Interface
+# Porta reservada: 8093:8000 (PORTS.md)
+# Domino: admin.nexobasis.tech
+
+services:
+  nexo-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nexo-admin
+    restart: always
+    ports:
+      - "8093:8000"
+    env_file:
+      - .env
+    environment:
+      - DEBUG=false
+    volumes:
+      - ./uploads:/app/uploads
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - infra-network
+
+networks:
+  infra-network:
+    external: true
+    name: infra_nexo-network

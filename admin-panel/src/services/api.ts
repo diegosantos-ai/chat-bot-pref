@@ -1,7 +1,7 @@
 import axios from 'axios';
-import type { 
-  LoginRequest, 
-  LoginResponse, 
+import type {
+  LoginRequest,
+  LoginResponse,
   DashboardStats,
   ConfigResponse,
   RAGQueryRequest,
@@ -30,7 +30,7 @@ import type {
   BoostTemplate
 } from '../types';
 
-const API_BASE = '/tereziapi/tereziadmin';
+const API_BASE = import.meta.env.VITE_API_URL || '/tereziapi/tereziadmin';
 
 const api = axios.create({
   baseURL: API_BASE,
@@ -59,17 +59,17 @@ api.interceptors.response.use(
 );
 
 export const auth = {
-  login: (data: LoginRequest) => 
+  login: (data: LoginRequest) =>
     api.post<LoginResponse>('/auth/login', data),
 };
 
 export const dashboard = {
-  stats: () => 
+  stats: () =>
     api.get<DashboardStats>('/dashboard/stats'),
 };
 
 export const config = {
-  get: () => 
+  get: () =>
     api.get<ConfigResponse>('/config'),
   saveRagConfig: (data: {
     min_score: number;
@@ -83,33 +83,33 @@ export const config = {
 };
 
 export const rag = {
-  query: (data: RAGQueryRequest) => 
+  query: (data: RAGQueryRequest) =>
     api.post<RAGQueryResponse>('/rag/query', data),
-  
-  documents: () => 
+
+  documents: () =>
     api.get<{ base_id: string; version: string; documents: DocumentInfo[] }>('/rag/documents'),
-  
-  document: (docId: string) => 
+
+  document: (docId: string) =>
     api.get<DocumentContent>('/rag/documents/' + docId),
-  
+
   createDocument: (data: {
     title: string;
     content: string;
     keywords: string[];
     intents: string[];
   }) => api.post('/rag/documents', data),
-  
+
   updateDocument: (docId: string, data: {
     title?: string;
     content?: string;
     keywords?: string[];
     intents?: string[];
   }) => api.put('/rag/documents/' + docId, data),
-  
-  deleteDocument: (docId: string) => 
+
+  deleteDocument: (docId: string) =>
     api.delete('/rag/documents/' + docId),
-  
-  ingest: (basePath: string = 'data/knowledge_base/BA-RAG-PILOTO-2026.01.v1', force: boolean = false) =>
+
+  ingest: (basePath?: string, force: boolean = false) =>
     api.post('/rag/ingest', { base_path: basePath, force }),
 };
 
@@ -123,7 +123,7 @@ export const logs = {
     limit?: number;
     offset?: number;
   }) => api.get<{ events: AuditEvent[]; count: number }>('/logs/events', { params }),
-  
+
   conversas: (params: {
     data_inicio?: string;
     data_fim?: string;
@@ -137,7 +137,7 @@ export const logs = {
 };
 
 export const ops = {
-  validate: () => 
+  validate: () =>
     api.post<ValidationResult>('/ops/validate'),
 };
 
@@ -146,56 +146,56 @@ export const scrap = {
     list: () => api.get<ScrapConfig[]>('/scrap/configs'),
     get: (id: string) => api.get<ScrapConfig>('/scrap/configs/' + id),
     create: (data: ScrapConfigCreate) => api.post<ScrapConfig>('/scrap/configs', data),
-    update: (id: string, data: Partial<ScrapConfigCreate> & { ativo?: boolean }) => 
+    update: (id: string, data: Partial<ScrapConfigCreate> & { ativo?: boolean }) =>
       api.put<ScrapConfig>('/scrap/configs/' + id, data),
     delete: (id: string) => api.delete('/scrap/configs/' + id),
   },
-  
+
   preview: (data: ScrapPreviewRequest) => api.post<ScrapPreviewResponse>('/scrap/preview', data),
-  
+
   previewInteractive: (url: string) => api.post<ScrapInteractivePreviewResponse>('/scrap/preview/interactive', { url }),
-  
-  previewLink: (url: string, baseUrl: string = '') => 
+
+  previewLink: (url: string, baseUrl: string = '') =>
     api.post<ScrapLinkPreviewResponse>('/scrap/preview/link', { url, base_url: baseUrl }),
-  
-  execute: (configId: string, data: ScrapExecuteRequest) => 
+
+  execute: (configId: string, data: ScrapExecuteRequest) =>
     api.post<ScrapExecuteResponse>('/scrap/execute/' + configId, data),
-  
+
   schedules: {
-    list: (configId?: string) => 
+    list: (configId?: string) =>
       api.get<ScrapSchedule[]>('/scrap/schedules', { params: { config_id: configId } }),
     create: (data: ScrapScheduleCreate) => api.post<ScrapSchedule>('/scrap/schedules', data),
-    update: (id: string, enabled: boolean) => 
+    update: (id: string, enabled: boolean) =>
       api.put<ScrapSchedule>('/scrap/schedules/' + id, { enabled }),
     delete: (id: string) => api.delete('/scrap/schedules/' + id),
   },
-  
+
   results: {
-    list: (configId?: string, limit: number = 20) => 
+    list: (configId?: string, limit: number = 20) =>
       api.get<ScrapResult[]>('/scrap/results', { params: { config_id: configId, limit } }),
     get: (id: string) => api.get<ScrapResult>('/scrap/results/' + id),
   },
-  
-  toRag: (data: ConvertToRAGRequest) => 
+
+  toRag: (data: ConvertToRAGRequest) =>
     api.post<ConvertToRAGResponse>('/scrap/results/' + data.result_id + '/to-rag', data),
 };
 
 export const boosts = {
   list: (params?: { tipo?: string; ativo?: boolean }) =>
     api.get<BoostConfig[]>('/admin/boosts', { params }),
-  
+
   create: (data: BoostConfigCreate) =>
     api.post<BoostConfig>('/admin/boosts', data),
-  
+
   update: (id: string, data: BoostConfigUpdate) =>
     api.put<BoostConfig>('/admin/boosts/' + id, data),
-  
+
   delete: (id: string) =>
     api.delete('/admin/boosts/' + id),
-  
+
   templates: () =>
     api.get<BoostTemplate[]>('/admin/boosts/templates'),
-  
+
   import: () =>
     api.post<{ imported: number; skipped: number }>('/admin/boosts/import'),
 };

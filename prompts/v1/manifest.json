@@ -1,7 +1,7 @@
 {
   "version": "PROMPTS-2026.01.v1",
   "created_at": "2026-01-11",
-  "author": "Equipe Prefeitura STO",
+  "author": "Equipe Projeto Portfolio",
   "scope": "MVE_PILOT",
   "frozen_for_pilot": true,
   "description": "Prompts do Atendimento Digital da Prefeitura de {client_name}",

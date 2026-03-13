@@ -51,7 +51,7 @@ COMMENT ON COLUMN meta_user_profiles.platform IS
 'Plataforma de origem: instagram ou facebook';
 
 COMMENT ON COLUMN meta_user_profiles.username IS 
-'Username/handle do usuário (ex: @prefeitura_sto)';
+'Username/handle do usuário (ex: @perfil_oficial)';
 
 COMMENT ON COLUMN meta_user_profiles.name IS 
 'Nome completo do perfil';

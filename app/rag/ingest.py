@@ -243,7 +243,7 @@ def ingest_base(
     Ingere uma base de conhecimento completa no ChromaDB.
 
     Args:
-        base_path: Caminho para a pasta da base (ex: base/BA-RAG-PILOTO-2026.01.v1)
+        base_path: Caminho para a pasta da base (ex: data/knowledge_base/default)
         force: Se True, reprocessa mesmo se hash nao mudou
         embedding_provider: Provedor de embedding ("default", "gemini", "openai", "qwen")
 
@@ -331,7 +331,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) < 2:
         print("Uso: python -m app.rag.ingest <caminho_base>")
-        print("Exemplo: python -m app.rag.ingest base/BA-RAG-PILOTO-2026.01.v1")
+        print("Exemplo: python -m app.rag.ingest data/knowledge_base/default")
         sys.exit(1)
 
     base_path = sys.argv[1]

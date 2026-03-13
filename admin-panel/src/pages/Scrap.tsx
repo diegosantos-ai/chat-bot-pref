@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect, useCallback } from 'react';
 import {
   ReactFlow,
@@ -13,8 +14,8 @@ import {
 import type { Connection, Node, Edge, NodeTypes } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { scrap } from '../services/api';
-import type { 
-  ScrapConfig, 
+import type {
+  ScrapConfig,
   ScrapExecuteResponse,
   ScrapResult,
   ScrapSchedule
@@ -48,8 +49,8 @@ const nodeStyles: React.CSSProperties = {
 
 function SourceNode({ data, selected }: { data: ScrapNodeData; selected?: boolean }) {
   return (
-    <div style={{ 
-      ...nodeStyles, 
+    <div style={{
+      ...nodeStyles,
       border: selected ? '2px solid #a78bfa' : '1px solid #333',
       background: '#1a1a2e'
     }}>
@@ -62,8 +63,8 @@ function SourceNode({ data, selected }: { data: ScrapNodeData; selected?: boolea
 
 function ListNode({ data, selected }: { data: ScrapNodeData; selected?: boolean }) {
   return (
-    <div style={{ 
-      ...nodeStyles, 
+    <div style={{
+      ...nodeStyles,
       border: selected ? '2px solid #a78bfa' : '1px solid #333',
       background: '#1a2a1a'
     }}>
@@ -79,8 +80,8 @@ function ListNode({ data, selected }: { data: ScrapNodeData; selected?: boolean 
 
 function ItemNode({ data, selected }: { data: ScrapNodeData; selected?: boolean }) {
   return (
-    <div style={{ 
-      ...nodeStyles, 
+    <div style={{
+      ...nodeStyles,
       border: selected ? '2px solid #a78bfa' : '1px solid #333',
       background: '#2a1a2a'
     }}>
@@ -101,8 +102,8 @@ function ItemNode({ data, selected }: { data: ScrapNodeData; selected?: boolean 
 
 function DetailNode({ data, selected }: { data: ScrapNodeData; selected?: boolean }) {
   return (
-    <div style={{ 
-      ...nodeStyles, 
+    <div style={{
+      ...nodeStyles,
       border: selected ? '2px solid #a78bfa' : '1px solid #333',
       background: '#1a2a2a'
     }}>
@@ -151,7 +152,7 @@ export default function ScrapPage() {
       id,
       type,
       position: { x: 250 + Math.random() * 200, y: 100 + nodes.length * 120 },
-      data: { 
+      data: {
         label: type.charAt(0).toUpperCase() + type.slice(1),
         url: type === 'source' ? 'https://...' : undefined,
         listSelector: type === 'list' ? '.lista > li' : undefined,
@@ -193,7 +194,7 @@ export default function ScrapPage() {
 
   const handleSaveConfig = async () => {
     if (!configName) return;
-    
+
     const workflow: any = {
       nodes: nodes.map(n => ({
         id: n.id,
@@ -267,7 +268,7 @@ export default function ScrapPage() {
       loadSchedules();
       loadResults();
       setConfigName(selectedConfig.nome);
-      
+
       if ((selectedConfig as any).workflow?.nodes) {
         const wf = (selectedConfig as any).workflow;
         const flowNodes: Node[] = (wf.nodes || []).map((n: any) => ({
@@ -295,6 +296,7 @@ export default function ScrapPage() {
         setEdges(flowEdges);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedConfig]);
 
   const handleInteractivePreview = async () => {
@@ -426,7 +428,7 @@ export default function ScrapPage() {
                       <Button variant="secondary" onClick={deleteSelectedNode}>🗑️ Excluir</Button>
                     )}
                   </div>
-                  
+
                   {selectedNode.type === 'source' && (
                     <>
                       <Input
@@ -537,7 +539,7 @@ export default function ScrapPage() {
                               <option value="image">Img</option>
                               <option value="attribute">Attr</option>
                             </select>
-                            <button 
+                            <button
                               onClick={() => {
                                 const newFields = ((selectedNode.data.fields as any[]) || []).filter((_, idx) => idx !== i);
                                 updateSelectedNode('fields', newFields);
@@ -546,8 +548,8 @@ export default function ScrapPage() {
                             >✕</button>
                           </div>
                         ))}
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           onClick={() => updateSelectedNode('fields', [...((selectedNode.data.fields as any[]) || []), { name: '', selector: '', type: 'text' }])}
                         >
                           + Campo
@@ -600,7 +602,7 @@ export default function ScrapPage() {
                               <option value="image">Img</option>
                               <option value="attribute">Attr</option>
                             </select>
-                            <button 
+                            <button
                               onClick={() => {
                                 const newFields = ((selectedNode.data.fields as any[]) || []).filter((_, idx) => idx !== i);
                                 updateSelectedNode('fields', newFields);
@@ -609,8 +611,8 @@ export default function ScrapPage() {
                             >✕</button>
                           </div>
                         ))}
-                        <Button 
-                          variant="secondary" 
+                        <Button
+                          variant="secondary"
                           onClick={() => updateSelectedNode('fields', [...((selectedNode.data.fields as any[]) || []), { name: '', selector: '', type: 'text' }])}
                         >
                           + Campo
@@ -630,7 +632,7 @@ export default function ScrapPage() {
                   <div className={styles.interactiveContent}>
                     <div className={styles.interactivePreview}>
                       {interactiveData?.interactive_html ? (
-                        <div 
+                        <div
                           className={styles.clickablePreview}
                           dangerouslySetInnerHTML={{ __html: interactiveData.interactive_html }}
                           onClick={(e) => {
@@ -640,7 +642,7 @@ export default function ScrapPage() {
                               el = el.parentElement;
                             }
                             if (!el || !selectedNode) return;
-                            
+
                             const selector = el.getAttribute('data-scrap-selector');
                             if (selectedNode.type === 'list') {
                               updateSelectedNode('listSelector', selector);
@@ -719,8 +721,8 @@ export default function ScrapPage() {
                       {schedule.interval_minutes && <span> a cada {schedule.interval_minutes} min</span>}
                     </div>
                     <label className={styles.checkbox}>
-                      <input 
-                        type="checkbox" 
+                      <input
+                        type="checkbox"
                         checked={schedule.enabled}
                         onChange={async () => {
                           await scrap.schedules.update(schedule.id, !schedule.enabled);

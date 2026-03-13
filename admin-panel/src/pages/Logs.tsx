@@ -20,6 +20,7 @@ export default function Logs() {
 
   useEffect(() => {
     fetchLogs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, filters]);
 
   const fetchLogs = async () => {
@@ -137,7 +138,7 @@ export default function Logs() {
                   </td>
                   <td>{conv.intencao}</td>
                   <td>
-                    <span 
+                    <span
                       className={styles.status}
                       style={{ color: getStatusColor(conv.tipo_resposta) }}
                     >
@@ -145,15 +146,15 @@ export default function Logs() {
                     </span>
                   </td>
                   <td className={styles.message} title={conv.mensagem_usuario}>
-                    {conv.mensagem_usuario.length > 50 
-                      ? conv.mensagem_usuario.slice(0, 50) + '...' 
+                    {conv.mensagem_usuario.length > 50
+                      ? conv.mensagem_usuario.slice(0, 50) + '...'
                       : conv.mensagem_usuario}
                   </td>
                   <td className={styles.message} title={conv.mensagem_resposta || ''}>
-                    {conv.mensagem_resposta 
-                      ? (conv.mensagem_resposta.length > 50 
-                          ? conv.mensagem_resposta.slice(0, 50) + '...' 
-                          : conv.mensagem_resposta)
+                    {conv.mensagem_resposta
+                      ? (conv.mensagem_resposta.length > 50
+                        ? conv.mensagem_resposta.slice(0, 50) + '...'
+                        : conv.mensagem_resposta)
                       : '-'}
                   </td>
                 </tr>
@@ -169,15 +170,15 @@ export default function Logs() {
           Mostrando {page * limit + 1}-{Math.min((page + 1) * limit, total)} de {total}
         </span>
         <div className={styles.pageButtons}>
-          <button 
-            onClick={() => setPage(p => p - 1)} 
+          <button
+            onClick={() => setPage(p => p - 1)}
             disabled={page === 0}
           >
             <ChevronLeft size={18} />
           </button>
           <span>{page + 1} / {totalPages || 1}</span>
-          <button 
-            onClick={() => setPage(p => p + 1)} 
+          <button
+            onClick={() => setPage(p => p + 1)}
             disabled={page >= totalPages - 1}
           >
             <ChevronRight size={18} />

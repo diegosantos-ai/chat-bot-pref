@@ -2,7 +2,7 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Request
-from fastapi.responses import Response, RedirectResponse
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.staticfiles import StaticFiles

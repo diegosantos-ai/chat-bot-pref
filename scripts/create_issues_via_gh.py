@@ -75,7 +75,7 @@ def create_issue_via_gh(repo: str, title: str, body: str, labels: List[str], mil
         tf.write(body)
         tf_path = tf.name
     cmd = ['gh', 'issue', 'create', '--repo', repo, '--title', title, '--body-file', tf_path]
-    for l in labels:
+    for l in labels:  # noqa: E741
         cmd += ['--label', l]
     if milestone:
         cmd += ['--milestone', milestone]

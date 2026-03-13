@@ -69,7 +69,7 @@ async def test_scraper():
             inicio = max(0, idx - 60)
             fim = min(len(texto_limpo), idx + len(termo) + 60)
             contexto = texto_limpo[inicio:fim]
-            print(f"\nContexto da primeira ocorrência:")
+            print("\nContexto da primeira ocorrência:")
             print(f"\"...{contexto.strip()}...\"")
         else:
             print(f"\n❌ O termo '{termo}' NÃO foi encontrado na página atual.")

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexo Admin — Superadmin</title>
+    <meta name="description" content="Superadmin panel for the Nexo Basis SaaS platform.">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23EA580C'/><text y='24' x='4' font-size='18' fill='white' font-family='monospace'>A</text></svg>">
+</head>
+
+<body>
+
+    <!-- ============ LOGIN SCREEN ============ -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <div class="login-logo">NB_<span class="login-badge">ADMIN</span></div>
+            <p class="login-sub">NEXO BASIS — SUPERADMIN</p>
+            <form id="login-form" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="key-input">CHAVE DE ACESSO</label>
+                    <input id="key-input" class="form-input" type="password" placeholder="Digite sua Admin API Key"
+                        autocomplete="current-password" aria-label="Admin API Key">
+                </div>
+                <p id="login-error" class="login-error" style="display:none">Chave inválida — verifique ADMIN_API_KEY
+                </p>
+                <button type="submit" class="btn btn-primary btn-mono btn-block btn-lg">
+                    ENTRAR NO ADMIN ▶
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============ ADMIN SHELL ============ -->
+    <div id="admin-shell" class="shell" style="display:none">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" role="navigation" aria-label="Admin Navigation">
+            <div class="sidebar__logo">
+                <div class="sidebar__logo-mark">NB_<span class="admin-badge">ADMIN</span></div>
+                <div class="sidebar__logo-name">Nexo Basis</div>
+            </div>
+
+            <nav class="sidebar__nav">
+                <div class="nav-item active" data-view="tenants">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <rect x="2" y="7" width="20" height="14" rx="2" />
+                        <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+                    </svg>
+                    Tenants
+                </div>
+                <div class="nav-item" data-view="contracts">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    Contratos
+                    <span class="nav-item__badge" id="badge-contracts" style="display:none">!</span>
+                </div>
+                <div class="nav-item" data-view="credentials">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                        <path d="M7 11V7a5 5 0 0110 0v4" />
+                    </svg>
+                    Credenciais Meta
+                </div>
+                <div class="sidebar__divider"></div>
+                <div class="nav-item" data-view="rag">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <ellipse cx="12" cy="5" rx="9" ry="3" />
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+                    </svg>
+                    Base RAG
+                </div>
+                <div class="nav-item" data-view="jobs">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M23 21v-2a4 4 0 00-3-3.87m-4-12a4 4 0 010 7.75" />
+                    </svg>
+                    Jobs Noturnos
+                    <span class="nav-item__badge" id="badge-jobs" style="display:none">!</span>
+                </div>
+                <div class="sidebar__divider"></div>
+                <div class="nav-item" data-view="logs">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <line x1="8" y1="6" x2="21" y2="6" />
+                        <line x1="8" y1="12" x2="21" y2="12" />
+                        <line x1="8" y1="18" x2="21" y2="18" />
+                        <line x1="3" y1="6" x2="3.01" y2="6" />
+                        <line x1="3" y1="12" x2="3.01" y2="12" />
+                        <line x1="3" y1="18" x2="3.01" y2="18" />
+                    </svg>
+                    Logs & Auditoria
+                </div>
+                <div class="nav-item" data-view="health">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                    Health & Métricas
+                </div>
+                <div class="nav-item" data-view="config">
+                    <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        aria-hidden="true">
+                        <circle cx="12" cy="12" r="3" />
+                        <path
+                            d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M17 12h3M4 12H1M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 17v3M12 4V1" />
+                    </svg>
+                    Sistema
+                </div>
+            </nav>
+
+            <div class="sidebar__footer">
+                <span class="sidebar__version" id="footer-version">nexo-admin v1.0.0</span>
+                <button class="btn btn-ghost" id="btn-logout"
+                    style="margin-top:8px;width:100%;font-family:var(--font-mono);font-size:11px;padding:4px">SAIR</button>
+            </div>
+        </aside>
+
+        <!-- HEADER -->
+        <header class="header admin-header" role="banner">
+            <h1 class="header__title" id="header-title">Tenants</h1>
+            <span class="header__sub admin-header__label">SUPERADMIN</span>
+        </header>
+
+        <!-- MAIN -->
+        <main class="main" id="main-content" role="main"></main>
+
+    </div>
+
+    <!-- Views -->
+    <script src="/static/views/tenants.js"></script>
+    <script src="/static/views/contracts.js"></script>
+    <script src="/static/views/credentials.js"></script>
+    <script src="/static/views/rag.js"></script>
+    <script src="/static/views/jobs.js"></script>
+    <script src="/static/views/logs.js"></script>
+    <script src="/static/views/health.js"></script>
+    <script src="/static/views/config.js"></script>
+    <!-- SPA Router -->
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

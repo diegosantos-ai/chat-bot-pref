@@ -30,38 +30,37 @@ Hoje a base ja possui:
 - contrato explicito de `tenant_id`
 - `request_id` no fluxo de chat
 - RAG tenant-aware
-- auditoria minima por tenant
+- composicao generativa minima com adaptador isolado
+- `PolicyDecision` e auditoria `audit.v1`
+- prompts e politica textual versionados
+- fallback controlado e cenarios validados
 - tenant demonstrativo e base documental controlada
 - smoke tests e retrieval checks
 
 Hoje a base ainda nao possui:
 
-- composicao generativa ativa com provedor LLM
-- `PolicyDecision`
-- `AuditEvent` versionado
-- prompts e politicas versionados
-- `policy_pre` e `policy_post`
 - logs estruturados
 - metricas em `/metrics`
 - traces com OpenTelemetry
-- regressao automatica de comportamento
+- regressao automatica de comportamento em CI
+- provedor LLM externo real validado como default reproduzivel
 
 ## 4. Checklist do requisito
 
 | Dimensao | Estado atual | Fechamento previsto |
 | --- | --- | --- |
-| Pipeline explicito | parcial | Fases 9 a 11 |
-| Composicao generativa controlada | nao implementado | Fase 10 |
-| Separacao retrieval / policy / compose / response | parcial | Fase 10 |
-| Guardrails pre e post | nao implementado | Fase 10 |
-| Fallback controlado | parcial | Fases 10 e 12 |
-| Avaliacao por cenarios | parcial | Fases 10 e 12 |
-| Auditoria de comportamento | parcial | Fase 10 |
+| Pipeline explicito | implementado no nucleo atual | Fases 10 a 11 |
+| Composicao generativa controlada | implementado no corte minimo da Fase 10 | Fase 10 |
+| Separacao retrieval / policy / compose / response | implementado no corte minimo da Fase 10 | Fase 10 |
+| Guardrails pre e post | implementado no corte minimo da Fase 10 | Fase 10 |
+| Fallback controlado | implementado no nucleo atual | Fases 10 e 12 |
+| Avaliacao por cenarios | implementado localmente na Fase 10 | Fases 10 e 12 |
+| Auditoria de comportamento | implementado no nucleo atual | Fase 10 |
 | Rastreabilidade ponta a ponta | parcial | Fases 9 a 11 |
-| Versionamento de prompt / policy / config | nao implementado | Fase 10 |
-| Criterios objetivos de qualidade | nao implementado | Fase 10 |
-| Regressao de comportamento | nao implementado | Fase 12 |
-| Aderencia ao escopo institucional | parcial | Fases 10 e 12 |
+| Versionamento de prompt / policy / config | implementado no corte minimo da Fase 10 | Fase 10 |
+| Criterios objetivos de qualidade | implementado localmente na Fase 10 | Fase 10 |
+| Regressao de comportamento | parcial | Fase 12 |
+| Aderencia ao escopo institucional | implementado no corte minimo da Fase 10 | Fases 10 e 12 |
 | Tenant-awareness no fluxo de IA | implementado no nucleo atual | Fases 9 a 10 |
 | Observabilidade util | nao implementado | Fase 11 |
 | Fechamento de evidencias do case | parcial | Fases 11 a 14 |
@@ -85,10 +84,10 @@ Hoje a base ainda nao possui:
 
 ### Fase 10
 
-- introduzir composicao generativa controlada
-- versionar prompt, policy e schema de auditoria
-- executar guardrails com `reason_codes`
-- validar cenarios e qualidade das respostas
+- composicao generativa controlada introduzida
+- prompt, policy e schema de auditoria versionados
+- guardrails com `reason_codes` ativos
+- cenarios e qualidade das respostas validados no smoke e nos testes
 
 ### Fase 11
 

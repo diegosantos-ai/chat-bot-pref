@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from fastapi import HTTPException
+from fastapi import APIRouter, Header, HTTPException, Response
 
 from app.contracts.dto import ChatRequest, ChatResponse
 from app.services.chat_service import ChatService
@@ -10,12 +9,18 @@ chat_service = ChatService()
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(chat_request: ChatRequest) -> ChatResponse:
+async def chat(
+    chat_request: ChatRequest,
+    response: Response,
+    request_id: str | None = Header(default=None, alias="X-Request-ID"),
+) -> ChatResponse:
     if chat_request.tenant_id is None:
         raise HTTPException(status_code=400, detail="tenant_id obrigatório")
 
     set_tenant(chat_request.tenant_id)
     try:
-        return await chat_service.process(chat_request)
+        chat_response = await chat_service.process(chat_request, request_id=request_id)
+        response.headers["X-Request-ID"] = chat_response.request_id
+        return chat_response
     finally:
         clear_tenant()

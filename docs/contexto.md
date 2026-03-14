@@ -6,7 +6,7 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 9 — Operacionalizacao do chat via Telegram
+- **Fase ativa:** Fase 10 — Composicao Generativa, Guardrails e Evidencias
 - **Status da fase atual:** concluida e validada na branch de trabalho
 - **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
 
@@ -17,7 +17,9 @@ O projeto existe para demonstrar uma plataforma de atendimento institucional com
 - backend organizado em FastAPI
 - contrato multi-tenant explicito
 - base RAG segregada por tenant
-- auditoria minima util
+- composicao generativa minima controlada
+- guardrails executaveis com `reason_codes`
+- auditoria versionada util
 - demonstracao funcional com tenant ficticio
 - evolucao planejada para guardrails, observabilidade, CI e deploy
 
@@ -46,8 +48,13 @@ Capacidades atualmente validadas:
 - `tenant_context` por request
 - resolucao minima de tenant no webhook
 - integracao demonstrativa do Telegram com o mesmo fluxo do chat
+- adaptador LLM isolado com composicao generativa minima
+- prompts base, fallback e politica textual versionados
+- `PolicyDecision` ativo em `policy_pre` e `policy_post`
+- auditoria `audit.v1` com `event_id`, `channel` e `policy_decision`
+- `X-Request-ID` aceito em `POST /api/chat` e `POST /api/webhook`
 - historico de chat em arquivo por tenant
-- auditoria minima em arquivo por tenant
+- auditoria versionada em arquivo por tenant
 - base documental e retrieval por tenant em Chroma
 - tenant demonstrativo `prefeitura-vila-serena`
 - ambiente local reproduzivel com Docker e smoke tests
@@ -58,14 +65,17 @@ Hoje o projeto ja demonstra metodo real em:
 
 - RAG tenant-aware
 - contrato multi-tenant
-- auditoria minima
+- composicao generativa minima com prompt versionado
+- guardrails executaveis com `PolicyDecision`
+- auditoria versionada com correlacao por `request_id`
 - validacao operacional com testes e smoke
 
 O principal gap para `GenAI com metodo` ainda e:
 
-- ausencia de composicao generativa ativa e governada
-- ausencia de guardrails executaveis com `reason_codes`
 - ausencia de observabilidade do pipeline completo
+- ausencia de logs estruturados, `/metrics` e traces
+- ausencia de regressao automatizada em CI
+- ausencia de validacao reproduzivel com provedor LLM externo real
 
 As Fases 9 a 12 foram redefinidas para fechar esse gap de forma incremental e rastreavel.
 
@@ -89,12 +99,12 @@ Bloco demonstrativo ja concluido:
 
 Os itens abaixo continuam sendo direcao futura, nao comportamento presente do runtime:
 
-- orchestrator, classifier e policy guard como pipeline ativo do backend
-- auditoria versionada com `PolicyDecision`
+- orchestrator e classifier como pipeline ativo do backend
 - logs estruturados no runtime
 - endpoint `/metrics`
 - traces com OpenTelemetry
-- bot Telegram operando com token real e webhook publico em ambiente externo
+- bot Telegram operando com webhook publico estavel como parte do bootstrap reproduzivel
+- provedor LLM externo real validado como default do runtime
 - painel admin como servico validado no ambiente local
 - CI executando validacoes no GitHub Actions
 - deploy em AWS provisionado por Terraform
@@ -110,14 +120,21 @@ Entregas validadas na branch:
 - auditoria correlacionada com `request_id`, `tenant_id`, `chat_id`, `message_id` e `update_id`
 - smoke local validando o canal em `dry_run`
 
-### Fases 10 a 12
+### Fase 10
+
+Entregas validadas na branch:
+
+- adaptador LLM isolado com `LLM_PROVIDER=mock` como default e suporte opcional a `gemini`
+- composicao controlada usando contexto recuperado, tenant profile e prompts versionados
+- `policy_pre` e `policy_post` com `reason_codes`
+- `PolicyDecision` padronizado e `AuditEventRecord` versionado em `audit.v1`
+- cenarios normais, fora de escopo, baixa confianca, transacional e risco validados
+- evidencias correlacionadas por `request_id` no smoke e nos testes
+
+### Fases 11 e 12
 
 Direcao aprovada:
 
-- introduzir a camada generativa minima controlada
-- introduzir guardrails rastreaveis sem criar nova macrofase
-- padronizar `PolicyDecision`
-- versionar o schema de auditoria
 - correlacionar logs, auditoria e traces
 - automatizar regressao desses contratos em CI
 
@@ -147,10 +164,10 @@ Referencia normativa desse eixo:
 
 O proximo ciclo sera considerado bem encaminhado quando:
 
-- a composicao generativa minima entrar sem quebrar o contrato multi-tenant
-- `PolicyDecision` e auditoria versionada surgirem com evidencias por `request_id`
+- logs estruturados e metricas surgirem sem quebrar o contrato multi-tenant
+- a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response` ficar observavel
 - a documentacao-base continuar separando claramente presente e planejado
-- a Fase 10 introduzir GenAI controlada sem regredir o runtime validado
+- a Fase 11 acrescentar observabilidade sem regredir o runtime validado
 
 ## 10. Forma de validacao
 

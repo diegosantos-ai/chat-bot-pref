@@ -1,5 +1,4 @@
-from fastapi import APIRouter
-from fastapi import HTTPException
+from fastapi import APIRouter, Header, HTTPException, Response
 
 from app.contracts.dto import ChatRequest, ChatResponse, WebhookChatRequest
 from app.services.chat_service import ChatService
@@ -12,7 +11,11 @@ tenant_resolver = TenantResolver()
 
 
 @router.post("/webhook", response_model=ChatResponse)
-async def webhook_chat(webhook_request: WebhookChatRequest) -> ChatResponse:
+async def webhook_chat(
+    webhook_request: WebhookChatRequest,
+    response: Response,
+    request_id: str | None = Header(default=None, alias="X-Request-ID"),
+) -> ChatResponse:
     try:
         resolved_tenant = tenant_resolver.resolve_webhook_tenant(
             tenant_id=webhook_request.tenant_id,
@@ -29,6 +32,8 @@ async def webhook_chat(webhook_request: WebhookChatRequest) -> ChatResponse:
             message=webhook_request.message,
             channel=webhook_request.channel,
         )
-        return await chat_service.process(chat_request)
+        chat_response = await chat_service.process(chat_request, request_id=request_id)
+        response.headers["X-Request-ID"] = chat_response.request_id
+        return chat_response
     finally:
         clear_tenant()

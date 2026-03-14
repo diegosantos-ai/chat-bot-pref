@@ -6,7 +6,7 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 10 — Composicao Generativa, Guardrails e Evidencias
+- **Fase ativa:** Fase 11 — Observabilidade Aplicada e Fechamento Tecnico do Case
 - **Status da fase atual:** concluida e validada na branch de trabalho
 - **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
 
@@ -21,7 +21,7 @@ O projeto existe para demonstrar uma plataforma de atendimento institucional com
 - guardrails executaveis com `reason_codes`
 - auditoria versionada util
 - demonstracao funcional com tenant ficticio
-- evolucao planejada para guardrails, observabilidade, CI e deploy
+- evolucao planejada para CI e deploy
 
 O valor do case esta em provar arquitetura, refatoracao controlada, explicabilidade operacional e capacidade de evolucao.
 
@@ -55,6 +55,9 @@ Capacidades atualmente validadas:
 - `X-Request-ID` aceito em `POST /api/chat` e `POST /api/webhook`
 - historico de chat em arquivo por tenant
 - auditoria versionada em arquivo por tenant
+- logs estruturados persistidos por `request_id`
+- metricas minimas expostas em `/metrics`
+- traces OpenTelemetry persistidos por `request_id`
 - base documental e retrieval por tenant em Chroma
 - tenant demonstrativo `prefeitura-vila-serena`
 - ambiente local reproduzivel com Docker e smoke tests
@@ -72,10 +75,9 @@ Hoje o projeto ja demonstra metodo real em:
 
 O principal gap para `GenAI com metodo` ainda e:
 
-- ausencia de observabilidade do pipeline completo
-- ausencia de logs estruturados, `/metrics` e traces
 - ausencia de regressao automatizada em CI
 - ausencia de validacao reproduzivel com provedor LLM externo real
+- ausencia de automacao de evidencias no pipeline de entrega
 
 As Fases 9 a 12 foram redefinidas para fechar esse gap de forma incremental e rastreavel.
 
@@ -100,9 +102,6 @@ Bloco demonstrativo ja concluido:
 Os itens abaixo continuam sendo direcao futura, nao comportamento presente do runtime:
 
 - orchestrator e classifier como pipeline ativo do backend
-- logs estruturados no runtime
-- endpoint `/metrics`
-- traces com OpenTelemetry
 - bot Telegram operando com webhook publico estavel como parte do bootstrap reproduzivel
 - provedor LLM externo real validado como default do runtime
 - painel admin como servico validado no ambiente local
@@ -131,12 +130,23 @@ Entregas validadas na branch:
 - cenarios normais, fora de escopo, baixa confianca, transacional e risco validados
 - evidencias correlacionadas por `request_id` no smoke e nos testes
 
-### Fases 11 e 12
+### Fase 11
+
+Entregas validadas na branch:
+
+- logs estruturados persistidos e acessiveis por `request_id`
+- metricas minimas expostas em `/metrics`
+- traces OpenTelemetry persistidos por `request_id`
+- trilha observavel `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
+- correlacao consistente entre auditoria, logs e traces no smoke `prod` e `dev`
+
+### Fase 12
 
 Direcao aprovada:
 
-- correlacionar logs, auditoria e traces
 - automatizar regressao desses contratos em CI
+- validar schema da auditoria e a presenca de campos obrigatorios
+- bloquear regressao relevante de comportamento e rastreabilidade
 
 Referencia normativa desse eixo:
 
@@ -164,19 +174,20 @@ Referencia normativa desse eixo:
 
 O proximo ciclo sera considerado bem encaminhado quando:
 
-- logs estruturados e metricas surgirem sem quebrar o contrato multi-tenant
-- a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response` ficar observavel
+- a regressao automatizada preservar logs, metricas, traces e auditoria
+- o schema `audit.v1` e os `reason_codes` passarem a bloquear regressao em CI
 - a documentacao-base continuar separando claramente presente e planejado
-- a Fase 11 acrescentar observabilidade sem regredir o runtime validado
 
 ## 10. Forma de validacao
 
-Validacoes minimas esperadas nesta etapa documental:
+Validacoes minimas esperadas nesta etapa:
 
 - leitura cruzada de `README.md`, `docs/contexto.md`, `docs/arquitetura.md` e `docs/planejamento_fases.md`
 - coerencia entre estado do runtime e descricoes dos documentos
 - ausencia de declaracao indevida de features ainda nao implementadas
 - alinhamento das Fases 9 a 12 com `docs/guardrail_rastreavel.md`
+- `pytest`
+- smoke `prod` e `dev` da fase ativa
 
 ## 11. Observacoes de continuidade
 
@@ -184,3 +195,4 @@ Validacoes minimas esperadas nesta etapa documental:
 - o `README.md` deve manter a espinha dorsal do case e sinalizar fase/status
 - `docs/arquitetura.md` deve continuar como fonte de verdade do runtime ativo
 - toda evolucao futura deve priorizar contrato, evidencia e coerencia entre codigo e documentacao
+- a narrativa legivel do case pode ser mantida em `docs/diario_bordo.md` e `docs/evidencias_case.md` sem inflar os documentos-base

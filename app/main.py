@@ -4,9 +4,13 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.chat import router as chat_router
 from app.api.health import router as health_router
+from app.api.metrics import router as metrics_router
 from app.api.rag import router as rag_router
 from app.api.telegram import router as telegram_router
 from app.api.webhook import router as webhook_router
+from app.observability.logging import configure_structured_logging
+from app.observability.middleware import RequestObservabilityMiddleware
+from app.observability.tracing import configure_tracing
 from app.settings import settings
 
 app = FastAPI(
@@ -28,7 +32,13 @@ app.add_middleware(
     allowed_hosts=settings.ALLOWED_HOSTS,
 )
 
+app.add_middleware(RequestObservabilityMiddleware)
+
+configure_structured_logging()
+configure_tracing()
+
 app.include_router(health_router)
+app.include_router(metrics_router)
 app.include_router(chat_router)
 app.include_router(rag_router)
 app.include_router(webhook_router)

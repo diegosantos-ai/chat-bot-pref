@@ -14,6 +14,7 @@ Exemplos:
     python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase8
     python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase9
     python scripts/smoke_tests.py --env prod --runtime-mode reuse --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase10
+    python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase11
 
 Requisitos:
     - Docker e Docker Compose disponíveis
@@ -143,6 +144,10 @@ class TestContext:
     audit_validation: dict[str, Any] | None = None
     scope_validation: dict[str, Any] | None = None
     phase10_scenario_results: list[dict[str, Any]] = field(default_factory=list)
+    metrics_validation: dict[str, Any] | None = None
+    structured_log_validation: dict[str, Any] | None = None
+    trace_validation: dict[str, Any] | None = None
+    observability_correlation_validation: dict[str, Any] | None = None
 
     def add_result(self, result: TestResult) -> None:
         """
@@ -275,6 +280,75 @@ def load_audit_lines_from_container(
         if line.strip():
             lines.append(json.loads(line))
     return lines
+
+
+def load_trace_lines_from_container(
+    context: TestContext,
+    *,
+    tenant_id: str,
+    request_id: str,
+) -> list[dict[str, Any]]:
+    trace_path = f"/app/data/runtime/traces/{tenant_id}/{request_id}.jsonl"
+    result = run_command(
+        [
+            "docker",
+            "exec",
+            context.container_name,
+            "python",
+            "-c",
+            (
+                "from pathlib import Path; "
+                f"path = Path({trace_path!r}); "
+                "print(path.read_text(encoding='utf-8') if path.exists() else '')"
+            ),
+        ],
+        check=False,
+    )
+    lines: list[dict[str, Any]] = []
+    for line in result.stdout.strip().splitlines():
+        if line.strip():
+            lines.append(json.loads(line))
+    return lines
+
+
+def load_structured_logs_from_container(
+    context: TestContext,
+    *,
+    tenant_id: str,
+    request_id: str,
+) -> list[dict[str, Any]]:
+    log_paths = [
+        f"/app/data/runtime/logs/system/{request_id}.jsonl",
+        f"/app/data/runtime/logs/{tenant_id}/{request_id}.jsonl",
+    ]
+    result = run_command(
+        [
+            "docker",
+            "exec",
+            context.container_name,
+            "sh",
+            "-lc",
+            " ; ".join(
+                [
+                    f"if [ -f '{path}' ]; then cat '{path}'; fi"
+                    for path in log_paths
+                ]
+            ),
+        ],
+        check=False,
+    )
+    parsed_lines: list[dict[str, Any]] = []
+    for line in result.stdout.splitlines():
+        normalized = line.strip()
+        if not normalized.startswith("{") or request_id not in normalized:
+            continue
+        try:
+            payload = json.loads(normalized)
+        except json.JSONDecodeError:
+            continue
+        if payload.get("request_id") == request_id:
+            parsed_lines.append(payload)
+    return parsed_lines
 
 
 def score_phase10_rubric(
@@ -444,6 +518,36 @@ def _build_phase_report(context: TestContext) -> dict[str, Any] | None:
                 },
             },
         )
+    if context.phase_report == "fase11":
+        return service.build_phase11_managerial_report(
+            context.tenant_manifest,
+            runtime_validation={
+                "structured_log_validation": context.structured_log_validation or {
+                    "ok": False,
+                    "evidence": "logs estruturados nao validados",
+                },
+                "metrics_validation": context.metrics_validation or {
+                    "ok": False,
+                    "evidence": "metricas nao validadas",
+                },
+                "trace_validation": context.trace_validation or {
+                    "ok": False,
+                    "evidence": "traces nao validados",
+                },
+                "observability_correlation_validation": context.observability_correlation_validation or {
+                    "ok": False,
+                    "evidence": "correlacao entre auditoria, logs e traces nao validada",
+                },
+                "audit_validation": context.audit_validation or {
+                    "ok": False,
+                    "evidence": "audit trail correlacionado nao validado",
+                },
+                "scope_validation": context.scope_validation or {
+                    "ok": False,
+                    "evidence": "aderencia ao escopo institucional nao validada",
+                },
+            },
+        )
 
     return service.build_managerial_report(context.tenant_manifest)
 
@@ -456,7 +560,7 @@ def validate_tenant_bundle(context: TestContext) -> None:
         return
 
     service = _bundle_service(context)
-    if context.phase_report in {"fase8", "fase10"}:
+    if context.phase_report in {"fase8", "fase10", "fase11"}:
         report = service.validate_knowledge_base_bundle(context.tenant_manifest)
         nome = "Bundle da base documental"
         explicacao = (
@@ -782,7 +886,7 @@ def validate_controlled_retrievals(context: TestContext) -> None:
     """
     Executa perguntas controladas de retrieval definidas no bundle da fase.
     """
-    if context.phase_report not in {"fase8", "fase10"} or not context.tenant_manifest:
+    if context.phase_report not in {"fase8", "fase10", "fase11"} or not context.tenant_manifest:
         return
 
     checks = _controlled_checks(context)
@@ -868,7 +972,7 @@ def query_chat(context: TestContext) -> None:
             if context.phase_report == "fase8" and chat_check is not None
             else (
                 "Qual o horario da sala de vacinacao da UBS?"
-                if context.phase_report == "fase10" and context.tenant_manifest
+                if context.phase_report in {"fase10", "fase11"} and context.tenant_manifest
                 else (
                 "O assistente emite protocolo?"
                 if context.tenant_manifest
@@ -904,7 +1008,7 @@ def validate_phase10_scenarios(context: TestContext) -> None:
     """
     Executa os cenarios controlados da Fase 10 e consolida rubricas, policy e auditoria.
     """
-    if context.phase_report != "fase10":
+    if context.phase_report not in {"fase10", "fase11"}:
         return
 
     scenario_results: list[dict[str, Any]] = []
@@ -917,7 +1021,7 @@ def validate_phase10_scenarios(context: TestContext) -> None:
     policy_ok = True
 
     for scenario in PHASE10_SCENARIOS:
-        expected_request_id = f"phase10-{scenario['id'].lower()}"
+        expected_request_id = f"{context.phase_report}-{scenario['id'].lower()}"
         status, response = http_request(
             "POST",
             "/api/chat",
@@ -1059,9 +1163,9 @@ def validate_phase10_scenarios(context: TestContext) -> None:
 
     record_step(
         context=context,
-        nome="Cenarios controlados da Fase 10",
-        ok=passed == total,
-        explicacao="Valida composicao generativa, guardrails, fallback, rubricas e auditoria correlacionada.",
+            nome="Cenarios controlados da Fase 10",
+            ok=passed == total,
+            explicacao="Valida composicao generativa, guardrails, fallback, rubricas e auditoria correlacionada.",
         detalhes=pretty_json(
             {
                 "passed": passed,
@@ -1072,6 +1176,106 @@ def validate_phase10_scenarios(context: TestContext) -> None:
     )
     if passed != total:
         raise RuntimeError("Falha nos cenarios controlados da Fase 10.")
+
+
+def validate_phase11_observability(context: TestContext) -> None:
+    """
+    Valida logs estruturados, metrics e traces correlacionados do fluxo observavel.
+    """
+    if context.phase_report != "fase11":
+        return
+
+    scenario = next((item for item in context.phase10_scenario_results if item["id"] == "SCN-01"), None)
+    if scenario is None:
+        raise RuntimeError("Cenario SCN-01 nao disponivel para validar a observabilidade da Fase 11.")
+
+    request_id = str(scenario["request_id"])
+    trace_lines = load_trace_lines_from_container(
+        context,
+        tenant_id=context.tenant_id,
+        request_id=request_id,
+    )
+    log_lines = load_structured_logs_from_container(
+        context,
+        tenant_id=context.tenant_id,
+        request_id=request_id,
+    )
+    metrics_status, metrics_response = http_request("GET", "/metrics")
+
+    trace_names = [line.get("name", "") for line in trace_lines]
+    required_spans = {"http.request", "chat.process", "policy_pre", "retrieval", "compose", "policy_post", "response"}
+    trace_ok = required_spans.issubset(set(trace_names))
+
+    log_event_names = {line.get("event_name", "") for line in log_lines}
+    required_log_events = {
+        "http.request.started",
+        "http.request.completed",
+        "chat.process.started",
+        "chat.process.completed",
+        "audit.event.persisted",
+    }
+    logs_ok = required_log_events.issubset(log_event_names)
+    logs_correlated = bool(log_lines) and all(
+        line.get("request_id") == request_id
+        for line in log_lines
+        if line.get("event_name") in required_log_events
+    ) and any(
+        line.get("tenant_id") == context.tenant_id
+        for line in log_lines
+    )
+
+    metrics_text = metrics_response if isinstance(metrics_response, str) else pretty_json(metrics_response)
+    metric_names = [
+        "chatpref_chat_requests_total",
+        "chatpref_policy_decisions_total",
+        "chatpref_retrieval_total",
+        "chatpref_llm_compositions_total",
+        "chatpref_llm_compose_latency_seconds",
+    ]
+    metrics_ok = metrics_status == 200 and all(metric_name in metrics_text for metric_name in metric_names)
+
+    audit_ok = bool(context.audit_validation and context.audit_validation.get("ok"))
+    trace_correlated = bool(trace_lines) and all(
+        line.get("request_id") == request_id and line.get("tenant_id") == context.tenant_id
+        for line in trace_lines
+    )
+
+    context.structured_log_validation = {
+        "ok": logs_ok and logs_correlated,
+        "evidence": f"logs={len(log_lines)} | required_events={sorted(required_log_events)}",
+    }
+    context.metrics_validation = {
+        "ok": metrics_ok,
+        "evidence": f"metrics_status={metrics_status} | metric_names={metric_names}",
+    }
+    context.trace_validation = {
+        "ok": trace_ok and trace_correlated,
+        "evidence": f"spans={trace_names}",
+    }
+    context.observability_correlation_validation = {
+        "ok": logs_correlated and trace_correlated and audit_ok,
+        "evidence": (
+            f"request_id={request_id} | logs_correlated={logs_correlated} | "
+            f"traces_correlated={trace_correlated} | audit_correlated={audit_ok}"
+        ),
+    }
+
+    record_step(
+        context=context,
+        nome="Observabilidade aplicada da Fase 11",
+        ok=logs_ok and logs_correlated and metrics_ok and trace_ok and trace_correlated and audit_ok,
+        explicacao="Valida logs estruturados, metricas Prometheus e spans OpenTelemetry correlacionados ao audit trail.",
+        detalhes=pretty_json(
+            {
+                "request_id": request_id,
+                "trace_names": trace_names,
+                "structured_logs": log_lines,
+                "metrics_checked": metric_names,
+            }
+        ),
+    )
+    if not (logs_ok and logs_correlated and metrics_ok and trace_ok and trace_correlated and audit_ok):
+        raise RuntimeError("Falha na validacao de observabilidade da Fase 11.")
 
 
 def query_telegram(context: TestContext) -> None:
@@ -1346,6 +1550,8 @@ def print_summary(context: TestContext) -> dict[str, Any]:
             print("ingeriu a base ficticia, respondeu no fluxo principal e validou o canal Telegram com auditoria correlacionada.")
         elif context.phase_report == "fase10":
             print("ingeriu a base ficticia, validou composicao controlada, guardrails rastreaveis e cenarios com request_id correlacionado.")
+        elif context.phase_report == "fase11":
+            print("ingeriu a base ficticia, validou guardrails, logs estruturados, metricas e traces correlacionados por request_id.")
         else:
             print("ingeriu documento, recuperou contexto e respondeu no fluxo principal.")
     else:
@@ -1457,7 +1663,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--phase-report",
-        choices=["fase7", "fase8", "fase9", "fase10"],
+        choices=["fase7", "fase8", "fase9", "fase10", "fase11"],
         default="fase7",
         help="Fase cujos criterios de aceite devem ser consolidados no relatorio gerencial.",
     )
@@ -1500,6 +1706,7 @@ def main() -> int:
         query_chat(context)
         query_telegram(context)
         validate_phase10_scenarios(context)
+        validate_phase11_observability(context)
         reset_rag(context)
         return_code = 0
     except Exception as exc:

@@ -2,9 +2,9 @@
 
 ## 1. Objetivo
 
-Esta matriz define o conjunto minimo de cenarios que deve orientar as Fases 10 a 12.
+Esta matriz define o conjunto minimo de cenarios que orienta as Fases 10 a 12.
 
-Ela nao declara que esses cenarios ja estao automatizados hoje. Ela define o contrato que a implementacao devera cumprir.
+Ela define o contrato que a implementacao deve cumprir e registra a cobertura atual do projeto.
 
 ## 2. Evidencias minimas esperadas
 
@@ -38,8 +38,27 @@ Cada execucao relevante deve permitir conferir:
 - cada cenario deve ter pelo menos uma evidencia em auditoria e uma evidencia no comportamento observavel
 - cenarios aprovados nao substituem a rubrica de qualidade; eles a complementam
 
-## 5. Uso por fase
+## 5. Cobertura atual
 
-- Fase 10: definicao e validacao manual/semiautomatica da matriz
+Cobertura ja automatizada localmente:
+
+- `SCN-01`
+- `SCN-02`
+- `SCN-04`
+- `SCN-05`
+- `SCN-06`
+
+Cobertura ja validada por teste automatizado fora do smoke:
+
+- `SCN-03` via fluxo de chat sem base carregada
+
+Cobertura ainda pendente de cenario dedicado:
+
+- `SCN-07`
+- `SCN-08`
+
+## 6. Uso por fase
+
+- Fase 10: definicao e validacao automatizada local dos cenarios principais
 - Fase 11: correlacao da matriz com logs, metricas e traces
 - Fase 12: automacao dos cenarios criticos em CI

@@ -12,11 +12,13 @@ Endpoints atuais:
 
 - `POST /api/chat`
 - `POST /api/webhook`
+- `POST /api/telegram/webhook`
 
 Regra:
 
 - no chat direto, `tenant_id` é obrigatório no payload
 - no webhook, o tenant pode chegar explicitamente ou ser resolvido por `page_id`
+- no Telegram, o tenant é resolvido por `TELEGRAM_DEFAULT_TENANT_ID` ou `TELEGRAM_CHAT_TENANT_MAP`
 
 Exemplo de chat direto:
 
@@ -36,12 +38,29 @@ Exemplo de webhook com resolução por `page_id`:
 }
 ```
 
+Exemplo de update Telegram:
+
+```json
+{
+  "update_id": "900001",
+  "message": {
+    "message_id": "700001",
+    "chat": {
+      "id": "55119990001",
+      "type": "private"
+    },
+    "text": "Qual o horario do alvara?"
+  }
+}
+```
+
 ## 3. Normalização
 
 No contrato atual:
 
 - `tenant_id` é `strip()` antes do uso
 - `page_id` é `strip()` antes da resolução no webhook
+- `chat_id`, `message_id` e `update_id` do Telegram são normalizados como string
 - `tenant_id` vazio é tratado como ausente
 - `message` é `strip()` antes do uso
 - `message` vazia gera erro de validação
@@ -53,15 +72,17 @@ O fluxo atual usa `contextvars` para tenant:
 1. o endpoint recebe a requisição
 2. o chat direto usa o `tenant_id` recebido no payload
 3. o webhook resolve o tenant por `tenant_id` explícito ou `page_id -> tenant_id`
-4. injeta o tenant no `tenant_context`
-5. chama o `ChatService`
-6. limpa o contexto no `finally`
+4. o Telegram resolve o tenant por `TELEGRAM_DEFAULT_TENANT_ID` ou `TELEGRAM_CHAT_TENANT_MAP`
+5. injeta o tenant no `tenant_context`
+6. chama o `ChatService`
+7. limpa o contexto no `finally`
 
 Regras operacionais:
 
 - o serviço não deve depender de tenant implícito fora do contexto
 - o `ChatService` confirma o tenant após uma fronteira assíncrona antes de processar o request
 - o webhook não usa tenant default silencioso
+- o Telegram só usa tenant default quando ele estiver explicitamente configurado em settings
 
 ## 5. Persistência
 
@@ -105,6 +126,18 @@ Cada request atual grava três eventos:
 - `chat_retrieval_completed` ou `chat_retrieval_unavailable`
 - `chat_response_generated`
 
+No canal Telegram, o mesmo request ainda registra:
+
+- `telegram_update_received`
+- `telegram_message_delivery` ou `telegram_message_delivery_failed`
+
+Payloads do Telegram devem carregar, no minimo:
+
+- `telegram_chat_id`
+- `telegram_message_id`
+- `telegram_update_id`
+- `channel=telegram`
+
 ## 6. Falhas controladas
 
 Comportamentos esperados hoje:
@@ -114,6 +147,8 @@ Comportamentos esperados hoje:
 - webhook sem `tenant_id` e sem `page_id`: `400 tenant_id obrigatório ou page_id configurado no webhook`
 - webhook com `page_id` sem mapeamento: `400 tenant_id não resolvido para page_id informado`
 - webhook com `tenant_id` divergente do `page_id` mapeado: `400 tenant_id divergente do page_id informado`
+- Telegram sem tenant resolvido por settings: `400 tenant_id nao resolvido para o chat do Telegram`
+- Telegram com secret inválido: `403 Invalid telegram secret`
 - chat sem base documental ingerida: resposta controlada com mensagem explícita do estado da base
 - sem `tenant_id` no contexto interno: erro estrutural do serviço
 
@@ -123,6 +158,7 @@ Este contrato ainda não cobre:
 
 - persistência relacional
 - webhook Meta específico
+- bot Telegram com token real e webhook público
 - upload binário de documentos
 - auditoria em banco
 - regras multi-canal avançadas
@@ -138,3 +174,4 @@ Toda evolução futura deve manter estas propriedades:
 - segregação de persistência por tenant
 - segregação de retrieval por tenant
 - rastreabilidade mínima associada ao tenant
+- correlação mínima por `request_id`, `tenant_id`, `channel` e identificadores do Telegram quando o canal estiver em uso

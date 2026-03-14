@@ -68,6 +68,7 @@ class DemoTenantScope(BaseModel):
 class DemoTenantChannels(BaseModel):
     web_chat_enabled: bool = True
     webhook_page_id: str | None = None
+    telegram_enabled: bool = False
 
     @field_validator("webhook_page_id", mode="before")
     @classmethod
@@ -455,6 +456,72 @@ class DemoTenantService:
                 "Base documental ficticia pronta e retrieval controlado validado."
                 if passed == total
                 else "Base documental ficticia ainda possui pendencias de estrutura ou retrieval."
+            ),
+            "criteria": criteria,
+        }
+
+    def build_phase9_managerial_report(
+        self,
+        manifest_path: str | Path,
+        runtime_validation: dict[str, Any],
+    ) -> dict[str, Any]:
+        validation = self.validate_bundle(manifest_path)
+        manifest = self.load_manifest(manifest_path)
+
+        criteria = [
+            {
+                "criterion": "bot Telegram configurado para o tenant demonstrativo",
+                "ok": bool(manifest.channels.telegram_enabled),
+                "evidence": (
+                    f"tenant_id={manifest.tenant_id} | "
+                    f"telegram_enabled={manifest.channels.telegram_enabled}"
+                ),
+            },
+            {
+                "criterion": "integracao backend ↔ Telegram implementada",
+                "ok": bool(runtime_validation.get("telegram_webhook_validation", {}).get("ok")),
+                "evidence": str(
+                    runtime_validation.get("telegram_webhook_validation", {}).get("evidence", "")
+                ),
+            },
+            {
+                "criterion": "tenant demonstrativo acessivel via Telegram",
+                "ok": bool(runtime_validation.get("telegram_tenant_validation", {}).get("ok")),
+                "evidence": str(
+                    runtime_validation.get("telegram_tenant_validation", {}).get("evidence", "")
+                ),
+            },
+            {
+                "criterion": "mensagens simples respondidas corretamente",
+                "ok": bool(runtime_validation.get("telegram_message_validation", {}).get("ok")),
+                "evidence": str(
+                    runtime_validation.get("telegram_message_validation", {}).get("evidence", "")
+                ),
+            },
+            {
+                "criterion": "logs e auditoria registram as interacoes com correlacao minima",
+                "ok": bool(runtime_validation.get("telegram_audit_validation", {}).get("ok")),
+                "evidence": str(
+                    runtime_validation.get("telegram_audit_validation", {}).get("evidence", "")
+                ),
+            },
+        ]
+
+        passed = sum(1 for item in criteria if item["ok"])
+        total = len(criteria)
+
+        return {
+            "phase": "Fase 9 - Operacionalizacao do Chat via Telegram",
+            "tenant_id": validation["tenant_id"],
+            "client_name": validation["client_name"],
+            "status": "passed" if passed == total else "failed",
+            "criteria_total": total,
+            "criteria_passed": passed,
+            "criteria_failed": total - passed,
+            "executive_summary": (
+                "Canal Telegram integrado ao fluxo principal do tenant demonstrativo."
+                if passed == total
+                else "Canal Telegram ainda possui pendencias de integracao ou rastreabilidade."
             ),
             "criteria": criteria,
         }

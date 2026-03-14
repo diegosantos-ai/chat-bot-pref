@@ -3,7 +3,7 @@ from typing import Any
 from typing import Optional
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 def _normalize_optional_identifier(value: Optional[str]) -> Optional[str]:
@@ -299,3 +299,91 @@ class RagQueryResponse(BaseModel):
     total_chunks: int
     best_score: float
     params_used: RagQueryParamsUsed
+
+
+class TelegramUser(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str
+    is_bot: Optional[bool] = None
+    first_name: Optional[str] = None
+    username: Optional[str] = None
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def normalize_id(cls, value: Any) -> str:
+        return _normalize_required_text(value, "id")
+
+    @field_validator("first_name", "username", mode="before")
+    @classmethod
+    def normalize_optional_fields(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+
+class TelegramChat(BaseModel):
+    id: str
+    type: str = "private"
+    title: Optional[str] = None
+    username: Optional[str] = None
+
+    @field_validator("id", mode="before")
+    @classmethod
+    def normalize_id(cls, value: Any) -> str:
+        return _normalize_required_text(value, "id")
+
+    @field_validator("type", mode="before")
+    @classmethod
+    def normalize_type(cls, value: Any) -> str:
+        return _normalize_required_text(value or "private", "type")
+
+    @field_validator("title", "username", mode="before")
+    @classmethod
+    def normalize_optional_fields(cls, value: Optional[str]) -> Optional[str]:
+        return _normalize_optional_identifier(value)
+
+
+class TelegramMessage(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    message_id: str
+    date: Optional[int] = None
+    chat: TelegramChat
+    from_user: Optional[TelegramUser] = Field(default=None, alias="from")
+    text: Optional[str] = None
+
+    @field_validator("message_id", mode="before")
+    @classmethod
+    def normalize_message_id(cls, value: Any) -> str:
+        return _normalize_required_text(value, "message_id")
+
+    @field_validator("text", mode="before")
+    @classmethod
+    def normalize_optional_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        return _normalize_required_text(value, "text")
+
+
+class TelegramWebhookRequest(BaseModel):
+    update_id: str
+    message: Optional[TelegramMessage] = None
+    edited_message: Optional[TelegramMessage] = None
+
+    @field_validator("update_id", mode="before")
+    @classmethod
+    def normalize_update_id(cls, value: Any) -> str:
+        return _normalize_required_text(value, "update_id")
+
+
+class TelegramWebhookResponse(BaseModel):
+    ok: bool = True
+    status: str
+    request_id: Optional[str] = None
+    tenant_id: Optional[str] = None
+    session_id: Optional[str] = None
+    channel: str = "telegram"
+    update_id: str
+    chat_id: Optional[str] = None
+    inbound_message_id: Optional[str] = None
+    outbound_status: Optional[str] = None
+    detail: Optional[str] = None

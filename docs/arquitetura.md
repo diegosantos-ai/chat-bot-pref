@@ -28,6 +28,7 @@ Rotas ativas no `app/main.py`:
 - `GET /health`
 - `POST /api/chat`
 - `POST /api/webhook`
+- `POST /api/telegram/webhook`
 - `GET /api/rag/status`
 - `POST /api/rag/documents`
 - `POST /api/rag/ingest`
@@ -41,9 +42,11 @@ Rotas ativas no `app/main.py`:
 | `app/main.py` | bootstrap do FastAPI e registro dos routers ativos |
 | `app/api/chat.py` | entrada HTTP do chat direto com `tenant_id` explicito |
 | `app/api/webhook.py` | entrada HTTP do webhook minimo com resolucao controlada de tenant |
+| `app/api/telegram.py` | webhook demonstrativo do Telegram com validacao de secret e reaproveitamento do chat |
 | `app/api/rag.py` | operacoes de documentos, ingest, query, status e reset do RAG |
 | `app/api/health.py` | endpoints de raiz e healthcheck |
 | `app/services/chat_service.py` | fluxo principal atual de chat, retrieval e auditoria minima |
+| `app/services/telegram_service.py` | resolucao do tenant no canal Telegram, envio de resposta e auditoria correlacionada |
 | `app/services/rag_service.py` | operacoes do RAG por tenant |
 | `app/services/demo_tenant_service.py` | validacao e bootstrap do tenant demonstrativo |
 | `app/tenant_context.py` | injecao, leitura e limpeza do tenant no fluxo por request |
@@ -73,6 +76,15 @@ Rotas ativas no `app/main.py`:
 3. o endpoint injeta o tenant no contexto
 4. o fluxo reaproveita o mesmo `ChatService`
 5. a resposta volta em HTTP com o mesmo contrato funcional do chat
+
+### Telegram demonstrativo
+
+1. `POST /api/telegram/webhook` recebe um update do Telegram
+2. o endpoint valida o secret do webhook quando configurado
+3. o tenant e resolvido por `TELEGRAM_DEFAULT_TENANT_ID` ou `TELEGRAM_CHAT_TENANT_MAP`
+4. o fluxo reaproveita o mesmo `ChatService` do chat direto com `channel="telegram"`
+5. a resposta e entregue por cliente Telegram em modo `api`, `dry_run` ou `disabled`
+6. a auditoria registra `telegram_update_received` e `telegram_message_delivery`
 
 ## 5. Persistencia ativa
 
@@ -110,6 +122,7 @@ Campos atuais do `AuditEventRecord`:
 - `tenant_id` e obrigatorio nos fluxos criticos
 - ausencia de tenant gera erro controlado
 - webhook nao usa tenant default silencioso
+- Telegram nao usa tenant silencioso fora de `TELEGRAM_DEFAULT_TENANT_ID` ou `TELEGRAM_CHAT_TENANT_MAP`
 - persistencia e retrieval devem respeitar segregacao por tenant
 - `request_id` ja existe no fluxo de chat e na auditoria minima
 - o runtime atual continua usando persistencia local em arquivo
@@ -124,6 +137,7 @@ Os itens abaixo podem existir como narrativa do case, artefato antigo ou objetiv
 - `app/audit/` como modulo-fonte ativo
 - analytics e deploy como routers ativos
 - webhook Meta especifico como canal validado
+- bot Telegram em webhook publico com token real fora do ambiente local
 - pipeline completo de logs estruturados, Prometheus, Grafana e Loki
 - PostgreSQL e Redis como dependencias operacionais do runtime atual
 

@@ -6,7 +6,7 @@ Criar uma base documental ficticia, pequena e bem estruturada, e executar a inge
 
 ## Estrutura criada
 
-A base documental versionada do tenant agora possui 11 documentos organizados em quatro grupos:
+A base documental versionada do tenant agora possui 14 documentos organizados em quatro grupos:
 
 - institucional
 - atendimento
@@ -22,7 +22,10 @@ Documentos adicionados nesta fase:
 - `servico-ubs-vacinacao.json`
 - `servico-matricula-escolar.json`
 - `servico-coleta-entulho.json`
+- `servico-cadunico-cras.json`
 - `faq-servicos-digitais.json`
+- `servico-iluminacao-publica.json`
+- `servico-nota-fiscal-avulsa.json`
 
 O manifesto da base fica em `tenants/prefeitura-vila-serena/knowledge_base/manifest.json` e as perguntas controladas de retrieval ficam em `tenants/prefeitura-vila-serena/knowledge_base/retrieval_checks.json`.
 
@@ -42,10 +45,10 @@ A base cobre os principais temas definidos para a prefeitura ficticia:
 
 ## Criterios de aceite
 
-- documentos ficticios criados e organizados: 11 documentos versionados e listados no manifesto
-- base cobre os principais temas da prefeitura ficticia: 4 grupos documentais e 8 perguntas controladas
+- documentos ficticios criados e organizados: 14 documentos versionados e listados no manifesto
+- base cobre os principais temas da prefeitura ficticia: 4 grupos documentais e 11 perguntas controladas
 - ingest executada sem acoplamento legado: bundle materializado por script explicito e ingest executada no tenant correto
-- retrieval retorna contexto util para perguntas controladas: 8/8 checks aprovados no smoke
+- retrieval retorna contexto util para perguntas controladas: 11/11 checks aprovados no smoke e nos testes
 - ausencia de base e tratada de forma controlada antes da ingest: `RAG vazio` validado no inicio do smoke
 
 ## Validacao executada

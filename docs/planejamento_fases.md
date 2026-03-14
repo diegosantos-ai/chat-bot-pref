@@ -576,6 +576,7 @@ Projeto coerente, retomável, explicável e pronto para apresentação profissio
 
 ### Observações
 Esta é a fase de acabamento técnico e narrativo. Ela não substitui validação; ela organiza o que já foi comprovado.
+A promoção de `develop` para `main` deve ocorrer via Pull Request, usando a revisão final desta fase como evidência de coerência entre código, runtime e documentação.
 
 #### Tasks — Fase 14
 

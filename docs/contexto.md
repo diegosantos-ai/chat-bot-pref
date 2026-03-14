@@ -6,9 +6,9 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 13 — Infraestrutura como Codigo e Deploy em AWS
-- **Status da fase atual:** concluida e validada na branch de trabalho
-- **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
+- **Fase ativa:** Fase 14 — Alinhamento Final entre Arquitetura, Operacao e Documentacao
+- **Status da fase atual:** implementada e validada na branch de trabalho; aguardando fechamento
+- **Eixo transversal aprovado:** Guardrail Rastreavel distribuido nas Fases 9 a 12 e consolidado ate a Fase 14
 
 ## 2. Objetivo do projeto
 
@@ -62,6 +62,8 @@ Capacidades atualmente validadas:
 - tenant demonstrativo `prefeitura-vila-serena`
 - ambiente local reproduzivel com Docker e smoke tests
 - deploy remoto minimo validado em AWS com EC2 unica, Docker e Terraform
+- endpoint HTTPS publico estavel no ambiente remoto demonstrativo
+- bot Telegram com webhook HTTPS ativo no ambiente remoto demonstrativo
 
 ### Diagnostico executivo da base
 
@@ -77,9 +79,10 @@ Hoje o projeto ja demonstra metodo real em:
 O principal gap para `GenAI com metodo` ainda e:
 
 - ausencia de validacao reproduzivel com provedor LLM externo real
-- ausencia de automacao de evidencias no pipeline de entrega
+- ausencia de bot Telegram publico como parte do bootstrap reproduzivel sem secrets externos
+- ausencia de endurecimento do deploy remoto com dominio proprio, secrets gerenciados e CD completo
 
-As Fases 9 a 12 foram redefinidas para fechar esse gap de forma incremental e rastreavel.
+As Fases 9 a 13 fecharam o nucleo minimo desse requisito de forma incremental e rastreavel. A Fase 14 organiza a narrativa final sem ampliar o runtime.
 
 ## 4. O que ja foi estabilizado
 
@@ -102,7 +105,7 @@ Bloco demonstrativo ja concluido:
 Os itens abaixo continuam sendo direcao futura, nao comportamento presente do runtime:
 
 - orchestrator e classifier como pipeline ativo do backend
-- bot Telegram operando com webhook publico estavel como parte do bootstrap reproduzivel
+- bot Telegram operando como parte do bootstrap reproduzivel sem secrets externos
 - provedor LLM externo real validado como default do runtime
 - painel admin como servico validado no ambiente local
 
@@ -116,6 +119,7 @@ Entregas validadas na branch:
 - reutilizacao do mesmo `ChatService` do chat direto
 - auditoria correlacionada com `request_id`, `tenant_id`, `chat_id`, `message_id` e `update_id`
 - smoke local validando o canal em `dry_run`
+- webhook HTTPS publico ativo no ambiente remoto demonstrativo
 
 ### Fase 10
 
@@ -157,9 +161,10 @@ Entregas validadas na branch:
 - stack minima em `infra/terraform/aws/minimal` validada com `terraform fmt`, `init`, `validate`, `plan` e `apply`
 - infraestrutura provisionada com VPC dedicada, subnet publica, Security Group, role SSM, EC2 unica e Elastic IP
 - deploy remoto reproduzivel via `user_data` e `scripts/deploy_aws_instance.sh`
+- proxy HTTPS publico via Caddy com hostname `sslip.io` derivado do Elastic IP
 - tenant demonstrativo bootstrapped na instancia com ingest limpa da base institucional
 - validacao remota aprovada em `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
-- nenhuma credencial nova obrigatoria para o corte atual do deploy; `LLM_PROVIDER=mock` e Telegram seguem em modo controlado
+- webhook HTTPS do Telegram ativo no ambiente remoto demonstrativo quando `TELEGRAM_BOT_TOKEN` e `TELEGRAM_WEBHOOK_SECRET` sao fornecidos fora do repositorio
 
 Referencia normativa desse eixo:
 
@@ -189,7 +194,8 @@ O proximo ciclo sera considerado bem encaminhado quando:
 
 - README, contexto, arquitetura, diario e evidencias contarem a mesma historia da branch
 - o deploy minimo remoto permanecer alinhado aos contratos de `request_id`, `tenant_id` e observabilidade
-- a preparacao da Fase 14 organizar o case final sem inflar promessa tecnica
+- o checklist final de `GenAI com metodo` estiver consolidado com `claim -> evidencia -> artefato`
+- o PR `develop -> main` refletir com clareza o estado real do case
 
 ## 10. Forma de validacao
 
@@ -198,9 +204,11 @@ Validacoes minimas esperadas nesta etapa:
 - leitura cruzada de `README.md`, `docs/contexto.md`, `docs/arquitetura.md` e `docs/planejamento_fases.md`
 - coerencia entre estado do runtime e descricoes dos documentos
 - ausencia de declaracao indevida de features ainda nao implementadas
-- alinhamento das Fases 9 a 12 com `docs/guardrail_rastreavel.md`
+- alinhamento das Fases 9 a 14 com `docs/guardrail_rastreavel.md`
+- `scripts/check_runtime_residues.py`
 - `pytest`
-- smoke `prod` e `dev` da fase ativa
+- `docker compose -f docker-compose.yml config`
+- smoke `prod` e `dev` da Fase 11
 - smoke remoto da Fase 13
 
 ## 11. Observacoes de continuidade
@@ -208,6 +216,6 @@ Validacoes minimas esperadas nesta etapa:
 - a stack-alvo do projeto continua maior do que o runtime ativo da branch
 - o `README.md` deve manter a espinha dorsal do case e sinalizar fase/status
 - `docs/arquitetura.md` deve continuar como fonte de verdade do runtime ativo
-- o deploy minimo em AWS ja foi validado na branch, mas ainda sem dominio proprio, HTTPS ou CD completo
+- o deploy minimo em AWS ja foi validado na branch com HTTPS publico, mas ainda sem dominio proprio, secrets gerenciados ou CD completo
 - toda evolucao futura deve priorizar contrato, evidencia e coerencia entre codigo e documentacao
 - a narrativa legivel do case pode ser mantida em `docs/diario_bordo.md` e `docs/evidencias_case.md` sem inflar os documentos-base

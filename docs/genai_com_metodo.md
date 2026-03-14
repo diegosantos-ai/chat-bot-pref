@@ -37,6 +37,9 @@ Hoje a base ja possui:
 - tenant demonstrativo e base documental controlada
 - smoke tests e retrieval checks
 - workflow de CI versionado com regressao automatizada localmente validada
+- deploy remoto minimo validado em AWS com smoke publico e endpoint HTTPS estavel
+- bot Telegram com webhook HTTPS ativo no ambiente remoto demonstrativo
+- matriz de evidencias e diario de bordo para leitura por terceiros
 
 Hoje a base ainda nao possui:
 
@@ -64,25 +67,25 @@ Cobertura automatizada em teste fora do smoke:
 - `SENSITIVE_DATA_REQUEST`
 - `PROMPT_INJECTION_SUSPECTED`
 
-## 5. Checklist do requisito
+## 5. Checklist final do requisito
 
-| Dimensao | Estado atual | Fechamento previsto |
-| --- | --- | --- |
-| Pipeline explicito | implementado no nucleo atual | Fases 10 a 11 |
-| Composicao generativa controlada | implementado no corte minimo da Fase 10 | Fase 10 |
-| Separacao retrieval / policy / compose / response | implementado no corte minimo da Fase 10 | Fase 10 |
-| Guardrails pre e post | implementado no corte minimo da Fase 10 | Fase 10 |
-| Fallback controlado | implementado no nucleo atual | Fases 10 e 12 |
-| Avaliacao por cenarios | implementado com smoke e testes automatizados | Fases 10 e 12 |
-| Auditoria de comportamento | implementado com cobertura inicial de cenarios | Fases 10 a 11 |
-| Rastreabilidade ponta a ponta | parcial | Fases 9 a 11 |
-| Versionamento de prompt / policy / config | implementado no corte minimo da Fase 10 | Fase 10 |
-| Criterios objetivos de qualidade | parcial com rubrica automatizada local e checks objetivos em CI | Fases 10 e 12 |
-| Regressao de comportamento | implementado com workflow versionado e testes bloqueantes | Fase 12 |
-| Aderencia ao escopo institucional | implementado no corte minimo da Fase 10 | Fases 10 e 12 |
-| Tenant-awareness no fluxo de IA | implementado no nucleo atual | Fases 9 a 10 |
-| Observabilidade util | implementado no corte minimo da Fase 11 | Fase 11 |
-| Fechamento de evidencias do case | parcial | Fases 11 a 14 |
+| Dimensao | Status final na branch | Evidencia principal | Artefato |
+| --- | --- | --- | --- |
+| Pipeline explicito | atende | `ChatService` com `policy_pre -> retrieval -> compose -> policy_post -> response` | `docs/arquitetura.md` |
+| Composicao generativa controlada | atende | adaptador LLM isolado com prompts versionados | `docs/fase_10_composicao_generativa.md` |
+| Separacao retrieval / policy / compose / response | atende | servicos e contratos separados no runtime | `docs/arquitetura.md` |
+| Guardrails pre e post | atende | `PolicyDecision` e `reason_codes` ativos | `docs/guardrail_rastreavel.md` |
+| Fallback controlado | atende | cenarios `NO_KNOWLEDGE_BASE`, fora de escopo e baixa confianca | `docs/matriz_cenarios_validacao.md` |
+| Avaliacao por cenarios | atende | smoke e testes cobrindo cenarios normais e de risco | `docs/matriz_cenarios_validacao.md` |
+| Auditoria de comportamento | atende | `audit.v1` e eventos correlacionados por request | `docs/guardrail_rastreavel.md` |
+| Rastreabilidade ponta a ponta | atende | logs, metricas e traces com o mesmo `request_id` | `docs/fase_11_observabilidade_aplicada.md` |
+| Versionamento de prompt / policy / config | atende | versoes explicitas de prompt base, fallback e policy | `docs/guardrail_rastreavel.md` |
+| Criterios objetivos de qualidade | atende em corte minimo | rubrica de qualidade e checks objetivos no workflow | `docs/rubrica_qualidade_resposta.md` |
+| Regressao de comportamento | atende | workflow de CI e testes bloqueantes | `docs/fase_12_github_actions.md` |
+| Aderencia ao escopo institucional | atende | tenant profile, prompts e cenarios controlados | `docs/fase_10_composicao_generativa.md` |
+| Tenant-awareness no fluxo de IA | atende | chat, webhook, Telegram, auditoria e RAG por tenant | `docs/arquitetura.md` |
+| Observabilidade util | atende | `/metrics`, logs e traces persistidos | `docs/fase_11_observabilidade_aplicada.md` |
+| Fechamento de evidencias do case | atende | diario, matriz de evidencias e smoke remoto | `docs/evidencias_case.md` |
 
 ## 6. Relacao entre os blocos do sistema
 
@@ -124,12 +127,34 @@ Cobertura automatizada em teste fora do smoke:
 - preservar esses contratos no deploy
 - fechar a narrativa final do case com `claim -> evidencia -> artefato`
 
-## 8. Documentos relacionados
+## 8. Limites declarados
+
+O case fecha `GenAI com metodo` em um corte minimo controlado, mas ainda sem vender maturidade inexistente.
+
+Limites assumidos:
+
+- `LLM_PROVIDER=mock` continua sendo o caminho default reproduzivel do runtime
+- o provedor externo real existe como opcional, nao como baseline obrigatorio
+- o Telegram foi validado como canal demonstrativo e possui webhook HTTPS ativo no ambiente remoto, mas esse bootstrap ainda depende de secrets nao versionados
+- o deploy AWS validado e minimo, com HTTPS publico via proxy, mas sem dominio proprio ou CD completo
+
+## 9. Veredito final
+
+Hoje, a branch atende o requisito `GenAI com metodo` no recorte proposto pelo projeto:
+
+- pipeline explicito e tenant-aware
+- composicao generativa controlada
+- guardrails rastreaveis
+- auditoria, observabilidade e regressao automatizada
+- evidencias locais e remotas que sustentam o comportamento declarado
+
+## 10. Documentos relacionados
 
 - `docs/guardrail_rastreavel.md`
 - `docs/matriz_cenarios_validacao.md`
 - `docs/rubrica_qualidade_resposta.md`
 - `docs/planejamento_fases.md`
 - `docs/arquitetura.md`
+- `docs/evidencias_case.md`
 
 Sempre que houver diferenca entre expectativa futura e runtime atual, prevalece o estado real do codigo validado na branch.

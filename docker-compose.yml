@@ -13,5 +13,24 @@ services:
     volumes:
       - chat_pref_data:/app/data
 
+  chat-pref-public:
+    image: caddy:2.10-alpine
+    container_name: chat-pref-public
+    restart: unless-stopped
+    init: true
+    profiles:
+      - public
+    depends_on:
+      - chat-pref-api
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/caddy/Caddyfile.runtime:/etc/caddy/Caddyfile:ro
+      - chat_pref_caddy_data:/data
+      - chat_pref_caddy_config:/config
+
 volumes:
   chat_pref_data:
+  chat_pref_caddy_data:
+  chat_pref_caddy_config:

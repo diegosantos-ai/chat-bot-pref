@@ -12,6 +12,8 @@ tenant_manifest = "tenants/prefeitura-vila-serena/tenant.json"
 
 telemetry_allowed_hosts = ["*"]
 cors_origins            = ["http://localhost:8000"]
+public_https_enabled    = true
+public_base_hostname    = ""
 
 llm_provider            = "mock"
 llm_model               = "mock-compose-v1"

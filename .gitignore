@@ -167,6 +167,7 @@ secrets.yaml
 # Generated files
 *.generated.py
 auto_generated/
+deploy/caddy/Caddyfile.runtime
 
 # Cache
 .cache/

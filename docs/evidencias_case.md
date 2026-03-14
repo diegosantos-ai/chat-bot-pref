@@ -16,6 +16,7 @@ Este documento traduz o projeto em uma matriz simples de `claim -> evidencia -> 
 | O projeto demonstra GenAI controlada | adaptador LLM isolado, prompts versionados, `policy_pre` e `policy_post` | [fase_10_composicao_generativa.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_10_composicao_generativa.md) |
 | O pipeline e rastreavel | `request_id` compartilhado por auditoria, logs e traces | [fase_11_observabilidade_aplicada.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_11_observabilidade_aplicada.md) |
 | O projeto bloqueia regressao relevante em pipeline | workflow de CI versionado com quality gates, build Docker, smoke reduzido e artefato JSON | [fase_12_github_actions.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_12_github_actions.md) |
+| O projeto roda fora da maquina local com deploy reproduzivel | `terraform apply` provisionou EC2 + Docker; smoke remoto aprovou `/`, `/health`, `/metrics` e `POST /api/chat` | [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md) |
 | O projeto ja tem evidencias executaveis | `pytest`, smoke por fase e artefatos JSON versionados | [diario_bordo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/diario_bordo.md) |
 
 ## Exemplo curto de prova tecnica
@@ -42,7 +43,7 @@ Leitura curta recomendada:
 2. [contexto.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/contexto.md)
 3. [arquitetura.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/arquitetura.md)
 4. [diario_bordo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/diario_bordo.md)
-5. [fase_11_observabilidade_aplicada.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_11_observabilidade_aplicada.md)
+5. [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md)
 
 Leitura de prova:
 

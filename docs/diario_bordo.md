@@ -22,6 +22,56 @@ Cada registro abaixo tenta responder quatro perguntas:
 
 ## Linha do tempo
 
+### 2026-03-14 - Fase 13 validada com deploy remoto em AWS
+
+**Marco**
+
+O Chat Pref passou a rodar fora da maquina local em um ambiente minimo na AWS, provisionado com Terraform e validado por smoke remoto.
+
+**Por que isso importa**
+
+Esse foi o ponto em que o case deixou de ser apenas uma demonstracao local e passou a provar entrega real: infraestrutura minima, deploy reproduzivel, ambiente acessivel por IP publico e validacao de comportamento institucional fora da maquina de desenvolvimento.
+
+**Validacao principal**
+
+- `terraform fmt`, `init`, `validate`, `plan` e `apply`
+- stack minima com VPC, subnet publica, Security Group, role SSM, EC2 unica e Elastic IP
+- redeploy remoto via SSM reaproveitando `scripts/deploy_aws_instance.sh`
+- smoke remoto aprovado em `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
+- sessao manual via `aws ssm start-session` validando `health`, metricas e `POST /api/chat` dentro da propria EC2
+
+**Aprendizados de engenharia**
+
+Tres problemas reais apareceram no bootstrap remoto e foram corrigidos na propria fase:
+
+- Amazon Linux 2023 nao expunha `docker-compose-plugin` no `dnf`, exigindo instalacao do Compose v2 por binario
+- adicionar `curl` na lista de pacotes conflitou com `curl-minimal`
+- a EC2 clonou a branch antes da publicacao do pacote da Fase 13 e o bootstrap ainda usava um `--phase-report` nao suportado
+
+Esses ajustes sao parte da evidencia do case, porque mostram diagnostico de causa raiz, correcoes pequenas e rastreaveis e validacao de entrega remota de verdade.
+
+**Leitura operacional da validacao manual**
+
+Na validacao final via SSM, o runtime confirmou:
+
+- `GET /health` retornando `healthy` dentro da instancia
+- metricas `chatpref_*` disponiveis no endpoint local
+- resposta institucional correta para a pergunta sobre horario da sala de vacinacao
+
+Os erros observados nessa sessao nao foram falhas do deploy:
+
+- `git safe.directory` apareceu por protecao de ownership do repositorio na EC2
+- `docker.sock permission denied` apareceu porque os comandos foram executados sem `sudo`
+
+Isso reforca um ponto importante do case: a aplicacao estava funcional; o que apareceu ali foi ergonomia de operacao da sessao administrativa.
+
+**Evidencias**
+
+- [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md)
+- [fase13-remote-smoke.json](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/fase13-remote-smoke.json)
+- [main.tf](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/infra/terraform/aws/minimal/main.tf)
+- [deploy_aws_instance.sh](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/scripts/deploy_aws_instance.sh)
+
 ### 2026-03-14 - Hotfix do build Docker no GitHub Actions
 
 **Marco**

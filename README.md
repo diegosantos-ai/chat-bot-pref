@@ -277,7 +277,7 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
 **Fase ativa na branch:** Fase 13 — Infraestrutura como código e deploy em AWS.
-**Status da fase na branch:** iniciada na branch de trabalho.
+**Status da fase na branch:** concluida e validada na branch de trabalho.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe
@@ -299,15 +299,16 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * base documental fictícia do tenant demonstrativo
 * ambiente local reproduzível com Docker e smoke tests
 * workflow de CI versionado com quality gates, build Docker e smoke reduzido
+* deploy mínimo em AWS provisionado com Terraform e smoke remoto aprovado
 
 ### Em andamento
 
-* consolidação do case final para demonstração profissional
+* fechamento documental da Fase 13 e alinhamento final do case
 
 ### Próxima direção
 
-* deploy mínimo em AWS com Terraform
-* fechamento do case com evidências de operação
+* alinhamento final entre runtime, CI, deploy e documentação
+* fechamento do case com evidências finais de operação
 
 ---
 
@@ -515,14 +516,18 @@ No corte atual, esse workflow nao exige secrets novos. Os secrets `DEPLOY_WEBHOO
 
 ### AWS + Terraform
 
-A proposta é provisionar uma infraestrutura mínima e explicável, com foco em:
+Na branch atual, a Fase 13 já validou um corte mínimo e explicável em AWS `us-east-1`, com:
 
-* reprodutibilidade
-* baixo custo
-* deploy simples
-* operação clara
+* VPC dedicada mínima
+* subnet pública
+* Security Group na porta `8000`
+* perfil IAM com SSM
+* EC2 única
+* Elastic IP
+* bootstrap via `user_data` + `docker compose`
+* smoke remoto aprovado em `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
 
-A recomendação atual é privilegiar uma arquitetura enxuta, suficiente para demonstrar entrega real sem inflar a complexidade do case.
+O recorte continua enxuto de propósito: entrega real, baixo custo e operação explicável antes de domínio, HTTPS, ECS ou backend remoto de Terraform.
 
 ---
 
@@ -531,18 +536,18 @@ A recomendação atual é privilegiar uma arquitetura enxuta, suficiente para de
 ### Curto prazo
 
 * consolidar os artefatos técnicos finais do case
-* preparar o deploy mínimo preservando os contratos de `request_id` e `tenant_id`
+* revisar a documentação principal com o runtime local, CI e deploy remoto contando a mesma história
 * manter a regressão automatizada da branch saudável
 
 ### Médio prazo
 
-* endurecer validações de schema de auditoria e `reason_codes`
-* preparar deploy mínimo preservando os contratos do método
-* publicar a primeira validação remota do workflow no GitHub
+* endurecer a operação remota com secrets, domínio e HTTPS quando isso fizer sentido
+* avaliar a ativação do Telegram sobre a URL pública estável
+* manter os contratos de `request_id`, `tenant_id` e observabilidade no ambiente em nuvem
 
 ### Próximo nível
 
-* publicar demonstração em AWS com Terraform
+* usar Pull Request de `develop` para `main` como trilha oficial de promoção
 * consolidar o case final para portfólio e entrevista
 * fechar o alinhamento final entre runtime, CI e deploy
 

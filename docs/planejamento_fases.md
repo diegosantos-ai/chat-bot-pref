@@ -44,7 +44,7 @@ seguir para a próxima fase.
 - [x] Fase 10 — Composição Generativa, Guardrails e Evidências
 - [x] Fase 11 — Observabilidade Aplicada e Fechamento Técnico do Case
 - [x] Fase 12 — Automação de Qualidade com GitHub Actions
-- [ ] Fase 13 — Infraestrutura como Código e Deploy em AWS
+- [x] Fase 13 — Infraestrutura como Código e Deploy em AWS
 - [ ] Fase 14 — Alinhamento Final entre Arquitetura, Operação e Documentação
 
 

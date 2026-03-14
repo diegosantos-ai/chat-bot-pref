@@ -7,7 +7,7 @@
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
 - **Fase ativa:** Fase 13 — Infraestrutura como Codigo e Deploy em AWS
-- **Status da fase atual:** iniciada na branch de trabalho
+- **Status da fase atual:** concluida e validada na branch de trabalho
 - **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
 
 ## 2. Objetivo do projeto
@@ -21,7 +21,7 @@ O projeto existe para demonstrar uma plataforma de atendimento institucional com
 - guardrails executaveis com `reason_codes`
 - auditoria versionada util
 - demonstracao funcional com tenant ficticio
-- evolucao planejada para CI e deploy
+- evolucao controlada para CI e deploy em nuvem
 
 O valor do case esta em provar arquitetura, refatoracao controlada, explicabilidade operacional e capacidade de evolucao.
 
@@ -61,6 +61,7 @@ Capacidades atualmente validadas:
 - base documental e retrieval por tenant em Chroma
 - tenant demonstrativo `prefeitura-vila-serena`
 - ambiente local reproduzivel com Docker e smoke tests
+- deploy remoto minimo validado em AWS com EC2 unica, Docker e Terraform
 
 ### Diagnostico executivo da base
 
@@ -104,7 +105,6 @@ Os itens abaixo continuam sendo direcao futura, nao comportamento presente do ru
 - bot Telegram operando com webhook publico estavel como parte do bootstrap reproduzivel
 - provedor LLM externo real validado como default do runtime
 - painel admin como servico validado no ambiente local
-- deploy em AWS provisionado por Terraform
 
 ## 6. Fase atual e direcao aprovada
 
@@ -150,6 +150,17 @@ Entregas validadas na branch:
 - regressao automatica de `audit.v1`, `request_id`, `tenant_id` e `reason_codes` em `tests/test_phase12.py`
 - nenhuma credencial nova obrigatoria para o corte atual da CI; deploy continua separado
 
+### Fase 13
+
+Entregas validadas na branch:
+
+- stack minima em `infra/terraform/aws/minimal` validada com `terraform fmt`, `init`, `validate`, `plan` e `apply`
+- infraestrutura provisionada com VPC dedicada, subnet publica, Security Group, role SSM, EC2 unica e Elastic IP
+- deploy remoto reproduzivel via `user_data` e `scripts/deploy_aws_instance.sh`
+- tenant demonstrativo bootstrapped na instancia com ingest limpa da base institucional
+- validacao remota aprovada em `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
+- nenhuma credencial nova obrigatoria para o corte atual do deploy; `LLM_PROVIDER=mock` e Telegram seguem em modo controlado
+
 Referencia normativa desse eixo:
 
 - `docs/guardrail_rastreavel.md`
@@ -176,9 +187,9 @@ Referencia normativa desse eixo:
 
 O proximo ciclo sera considerado bem encaminhado quando:
 
-- a regressao automatizada preservar logs, metricas, traces e auditoria no runner GitHub
-- o schema `audit.v1` e os `reason_codes` permanecerem bloqueando regressao em CI
-- a documentacao-base continuar separando claramente presente e planejado
+- README, contexto, arquitetura, diario e evidencias contarem a mesma historia da branch
+- o deploy minimo remoto permanecer alinhado aos contratos de `request_id`, `tenant_id` e observabilidade
+- a preparacao da Fase 14 organizar o case final sem inflar promessa tecnica
 
 ## 10. Forma de validacao
 
@@ -190,11 +201,13 @@ Validacoes minimas esperadas nesta etapa:
 - alinhamento das Fases 9 a 12 com `docs/guardrail_rastreavel.md`
 - `pytest`
 - smoke `prod` e `dev` da fase ativa
+- smoke remoto da Fase 13
 
 ## 11. Observacoes de continuidade
 
 - a stack-alvo do projeto continua maior do que o runtime ativo da branch
 - o `README.md` deve manter a espinha dorsal do case e sinalizar fase/status
 - `docs/arquitetura.md` deve continuar como fonte de verdade do runtime ativo
+- o deploy minimo em AWS ja foi validado na branch, mas ainda sem dominio proprio, HTTPS ou CD completo
 - toda evolucao futura deve priorizar contrato, evidencia e coerencia entre codigo e documentacao
 - a narrativa legivel do case pode ser mantida em `docs/diario_bordo.md` e `docs/evidencias_case.md` sem inflar os documentos-base

@@ -27,6 +27,7 @@ O runtime ativo e um backend FastAPI minimo, com foco em:
 - retrieval tenant-aware em Chroma
 - tenant demonstrativo versionado
 - execucao local e via Docker
+- deploy remoto minimo validado em AWS com EC2 unica provisionada por Terraform
 
 Rotas ativas no `app/main.py`:
 
@@ -41,6 +42,13 @@ Rotas ativas no `app/main.py`:
 - `POST /api/rag/ingest`
 - `POST /api/rag/query`
 - `POST /api/rag/reset`
+
+Topologia remota validada na Fase 13:
+
+- `infra/terraform/aws/minimal` provisiona VPC, subnet publica, Internet Gateway, route table, Security Group, role SSM, EC2 e Elastic IP
+- `user_data` instala Docker, Compose, Git e Python 3
+- `scripts/deploy_aws_instance.sh` sincroniza a branch, sobe `docker compose` e executa o bootstrap do tenant demonstrativo
+- `scripts/smoke_remote.py` valida `/`, `/health`, `/metrics` e `POST /api/chat` a partir da URL publica do ambiente
 
 ## 3. Componentes ativos do backend
 
@@ -268,6 +276,14 @@ Regras dessa arquitetura-alvo:
 - upload do artefato JSON do smoke no GitHub Actions
 - bloqueio do pipeline em regressao de `audit.v1`, `request_id`, `tenant_id`, `reason_codes` e integridade do audit trail
 
+### Fase 13 — Deploy minimo em AWS
+
+- stack Terraform minima em `infra/terraform/aws/minimal`
+- EC2 unica com Docker e Elastic IP
+- deploy remoto reproduzivel via `user_data` e `scripts/deploy_aws_instance.sh`
+- bootstrap do tenant `prefeitura-vila-serena` na instancia
+- smoke remoto aprovado via `scripts/smoke_remote.py`
+
 ## 10. Validacao arquitetural
 
 Validacoes minimas desta base:
@@ -281,6 +297,7 @@ Validacoes minimas desta base:
 - persistencia por tenant
 - auditoria por tenant
 - smoke local e via Docker
+- smoke remoto do deploy em AWS
 
 ## 11. Regras de manutencao do documento
 

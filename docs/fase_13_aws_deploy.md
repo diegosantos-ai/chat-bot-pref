@@ -95,12 +95,40 @@ Depois do `apply`, use a URL de output da API:
   --json-out artifacts/fase13-remote-smoke.json
 ```
 
+## Resultado validado na branch
+
+Entregas efetivamente validadas:
+
+- `terraform apply` provisionou VPC, subnet publica, Security Group, role SSM, EC2 unica e Elastic IP
+- `user_data` concluiu a instalacao de Docker e Docker Compose na EC2
+- `scripts/deploy_aws_instance.sh` subiu o backend e bootstrapped o tenant `prefeitura-vila-serena`
+- `scripts/smoke_remote.py` aprovou `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
+- o artefato remoto ficou salvo em `artifacts/fase13-remote-smoke.json`
+
+## Ajustes de engenharia feitos durante a fase
+
+Falhas reais encontradas no primeiro bootstrap remoto:
+
+- `docker-compose-plugin` nao existe no `dnf` do Amazon Linux 2023
+- instalar `curl` entrava em conflito com `curl-minimal`
+- a EC2 clonou a branch antes da publicacao dos arquivos da Fase 13
+- o bootstrap remoto ainda usava `--phase-report fase13`, mas `bootstrap_demo_tenant.py` aceita apenas `fase7` e `fase8`
+
+Correcoes aplicadas:
+
+- instalacao do Compose v2 pelo binario oficial em `/usr/local/lib/docker/cli-plugins/docker-compose`
+- remocao do pacote `curl` da install list
+- publicacao da branch e redeploy via AWS SSM
+- ajuste do `scripts/deploy_aws_instance.sh` para bootstrap sem `--phase-report fase13`
+
 ## Validacao local executada nesta branch
 
 - `terraform fmt -recursive`
 - `terraform init -backend=false`
 - `terraform validate`
 - `terraform plan`
+- `terraform apply`
+- `scripts/smoke_remote.py --base-url http://<output>:8000`
 
 O `plan` validou um corte minimo com 11 recursos AWS:
 

@@ -42,10 +42,10 @@ Esse fechamento tira o Telegram da categoria de "demo local controlada" e o leva
 
 **Evidencias**
 
-- [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md)
-- [fase_9_telegram_demo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_9_telegram_demo.md)
-- [fase13-remote-smoke.json](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/fase13-remote-smoke.json)
-- [deploy_aws_instance.sh](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/scripts/deploy_aws_instance.sh)
+- [fase_13_aws_deploy.md](fase_13_aws_deploy.md)
+- [fase_9_telegram_demo.md](fase_9_telegram_demo.md)
+- [fase13-remote-smoke.json](../artifacts/fase13-remote-smoke.json)
+- [deploy_aws_instance.sh](../scripts/deploy_aws_instance.sh)
 
 ### 2026-03-14 - Fase 14 alinhou a narrativa final do case
 

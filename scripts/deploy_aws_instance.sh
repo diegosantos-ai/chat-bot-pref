@@ -64,8 +64,7 @@ log "Bootstrapando tenant demonstrativo"
 docker exec chat-pref-api python scripts/bootstrap_demo_tenant.py \
   --manifest "$TENANT_MANIFEST" \
   --purge-documents \
-  --ingest \
-  --phase-report fase13
+  --ingest
 
 log "Validando health remoto local a instancia"
 python3 - <<PY

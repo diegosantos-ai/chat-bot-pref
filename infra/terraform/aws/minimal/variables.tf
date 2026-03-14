@@ -79,7 +79,7 @@ variable "tenant_manifest" {
 variable "telemetry_allowed_hosts" {
   description = "Hosts confiaveis aceitos pelo runtime em nuvem."
   type        = list(string)
-  default     = ["*"]
+  default     = ["localhost", "127.0.0.1"]
 }
 
 variable "cors_origins" {

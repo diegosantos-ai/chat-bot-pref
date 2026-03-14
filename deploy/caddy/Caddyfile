@@ -1,0 +1,4 @@
+{$PUBLIC_BASE_HOSTNAME} {
+  encode zstd gzip
+  reverse_proxy chat-pref-api:8000
+}

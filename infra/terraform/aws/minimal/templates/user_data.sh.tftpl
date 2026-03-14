@@ -32,6 +32,8 @@ TELEGRAM_API_BASE_URL=https://api.telegram.org
 TELEGRAM_DEFAULT_TENANT_ID=${telegram_default_tenant_id}
 TELEGRAM_CHAT_TENANT_MAP={}
 TELEGRAM_DELIVERY_MODE=${telegram_delivery_mode}
+PUBLIC_HTTPS_ENABLED=${public_https_enabled}
+PUBLIC_BASE_HOSTNAME=${public_base_hostname}
 LLM_PROVIDER=${llm_provider}
 LLM_MODEL=${llm_model}
 LLM_API_KEY=${llm_api_key}
@@ -60,4 +62,6 @@ REPO_URL="${repo_url}" \
 APP_REF="${app_ref}" \
 TENANT_MANIFEST="${tenant_manifest}" \
 SERVICE_PORT="${service_port}" \
+PUBLIC_HTTPS_ENABLED="${public_https_enabled}" \
+PUBLIC_BASE_HOSTNAME="${public_base_hostname}" \
 /bin/bash scripts/deploy_aws_instance.sh

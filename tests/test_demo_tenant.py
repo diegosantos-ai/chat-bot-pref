@@ -24,7 +24,7 @@ def test_demo_tenant_bundle_validation_passes() -> None:
 
     assert validation["status"] == "passed"
     assert validation["tenant_id"] == "prefeitura-vila-serena"
-    assert validation["documents_count"] == 11
+    assert validation["documents_count"] == 14
     assert all(item["ok"] for item in validation["criteria"])
     assert managerial_report["status"] == "passed"
     assert managerial_report["criteria_passed"] == managerial_report["criteria_total"] == 5
@@ -37,9 +37,9 @@ def test_demo_knowledge_base_bundle_validation_passes() -> None:
     retrieval_checks = service.load_retrieval_checks(_manifest_path())
 
     assert validation["status"] == "passed"
-    assert validation["documents_count"] == 11
-    assert validation["retrieval_checks_count"] == 8
-    assert len(retrieval_checks) == 8
+    assert validation["documents_count"] == 14
+    assert validation["retrieval_checks_count"] == 11
+    assert len(retrieval_checks) == 11
     assert all(item["ok"] for item in validation["criteria"])
 
 
@@ -68,13 +68,13 @@ def test_demo_tenant_bootstrap_and_ingest(tmp_path) -> None:
     )
 
     assert summary["tenant_id"] == tenant_id
-    assert summary["documents_count"] == 11
-    assert len(documents) == 11
-    assert ingest_status["documents_count"] == 11
+    assert summary["documents_count"] == 14
+    assert len(documents) == 14
+    assert ingest_status["documents_count"] == 14
     assert "prefeitura-vila-serena/tenant.json" in ingest_status["source_bundle"]
     assert ingest_response.ready is True
-    assert ingest_response.documents_count == 11
-    assert ingest_response.chunks_count >= 18
+    assert ingest_response.documents_count == 14
+    assert ingest_response.chunks_count >= 24
 
 
 def test_demo_phase10_managerial_report_passes() -> None:
@@ -116,7 +116,7 @@ def test_demo_knowledge_base_controlled_retrieval_checks_pass(tmp_path) -> None:
     rag_service.ingest(RagIngestRequest(tenant_id=tenant_id, reset_collection=True))
 
     checks = service.load_retrieval_checks(_manifest_path())
-    assert len(checks) == 8
+    assert len(checks) == 11
 
     for check in checks:
         response = rag_service.query(

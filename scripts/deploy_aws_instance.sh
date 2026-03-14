@@ -21,10 +21,16 @@ build_sslip_hostname() {
 
 read_public_ip_from_imds() {
   local token
-  token="$(curl -fsS -X PUT "http://169.254.169.254/latest/api/token" \
-    -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")"
-  curl -fsS -H "X-aws-ec2-metadata-token: ${token}" \
-    "http://169.254.169.254/latest/meta-data/public-ipv4"
+  token="$(curl -fsS --connect-timeout 2 --max-time 5 -X PUT "http://169.254.169.254/latest/api/token" \
+    -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")" || {
+    log "Falha ao obter token do IMDS (metadata service). Verifique conectividade e politicas de rede." >&2
+    return 1
+  }
+  curl -fsS --connect-timeout 2 --max-time 5 -H "X-aws-ec2-metadata-token: ${token}" \
+    "http://169.254.169.254/latest/meta-data/public-ipv4" || {
+    log "Falha ao ler public-ipv4 do IMDS (metadata service). Verifique conectividade e politicas de rede." >&2
+    return 1
+  }
 }
 
 if ! command -v docker >/dev/null 2>&1; then

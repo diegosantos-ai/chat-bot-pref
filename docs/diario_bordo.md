@@ -68,11 +68,11 @@ Sem esse fechamento, o projeto correria o risco de parecer maior ou menor do que
 
 **Evidencias**
 
-- [README.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/README.md)
-- [contexto.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/contexto.md)
-- [arquitetura.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/arquitetura.md)
-- [genai_com_metodo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/genai_com_metodo.md)
-- [evidencias_case.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/evidencias_case.md)
+- [README.md](../README.md)
+- [contexto.md](contexto.md)
+- [arquitetura.md](arquitetura.md)
+- [genai_com_metodo.md](genai_com_metodo.md)
+- [evidencias_case.md](evidencias_case.md)
 
 ### 2026-03-14 - Fase 13 validada com deploy remoto em AWS
 

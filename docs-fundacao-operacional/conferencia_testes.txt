@@ -1,0 +1,163 @@
+{"detail":"Invalid signature"}(.venv) diegosantos@diegosantos:/media/diegosantos/TOSHIBA EXT/Projetoscurl http://localhost:8000/panel/l http://localhost:8000/panel/
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Pref — Painel de Controle</title>
+  <meta name="description" content="Painel de controle e testes operacionais do tenant.">
+  <link rel="stylesheet" href="/panel/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='24'>NB</text></svg>">
+</head>
+<body>
+  <div class="shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" role="navigation" aria-label="Painel de Controle">
+      <div class="sidebar__logo">
+        <div class="sidebar__logo-mark">CP_</div>
+        <div class="sidebar__logo-name">Chat Pref</div>
+      </div>
+
+      <div class="sidebar__tenant">
+        <span class="sidebar__tenant-label">Tenant Ativo</span>
+        <select class="sidebar__tenant-select" id="tenant-select" aria-label="Selecionar tenant">
+          <option value="">Carregando...</option>
+        </select>
+      </div>
+
+      <nav class="sidebar__nav">
+        <div class="nav-item active" data-view="chat" id="nav-chat">
+          <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Chat Test
+        </div>
+
+        <div class="nav-item" data-view="logs" id="nav-logs">
+          <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Logs
+        </div>
+
+        <div class="nav-item" data-view="config" id="nav-config">
+          <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M17 12h3M4 12H1M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41M12 17v3M12 4V1"/>
+          </svg>
+          Configuração
+        </div>
+
+        <div class="sidebar__divider"></div>
+
+        <div class="nav-item" data-view="rag" id="nav-rag">
+          <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+          </svg>
+          Base RAG
+        </div>
+
+        <div class="nav-item" data-view="health" id="nav-health">
+          <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          Status
+        </div>
+
+        <div class="sidebar__divider"></div>
+
+        <div class="nav-item" data-view="training" id="nav-training">
+          <svg class="nav-item__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
+          Treinamento
+          <span class="nav-item__badge">BETA</span>
+        </div>
+      </nav>
+
+      <div class="sidebar__footer">
+        <span class="sidebar__version">nexo-basis v2.0.0</span>
+      </div>
+    </aside>
+
+    <!-- HEADER -->
+    <header class="header" role="banner">
+      <h1 class="header__title" id="header-title">Chat Test</h1>
+      <span class="header__sub" id="header-tenant">—</span>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main" id="main-content" role="main">
+      <!-- Views injected by app.js -->
+    </main>
+
+  </div>
+
+  <!-- View scripts -->
+  <script src="/panel/views/chat.js"></script>
+  <script src="/panel/views/logs.js"></script>
+  <script src="/panel/views/config.js"></script>
+  <script src="/panel/views/rag.js"></script>
+  <script src="/panel/views/health.js"></script>
+  <script src="/panel/views/training.js"></script>
+
+  <!-- SPA Router (last) -->
+  <script src="/panel/app.js"></script>
+</body>
+</html>
+(.venv) diegosantos@diegosantos:/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref$ curl -i -X POST http://localhost:8000/api/admin/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"teste","password":"teste"}'
+HTTP/1.1 503 Service Unavailable
+date: Fri, 13 Mar 2026 17:46:07 GMT
+server: uvicorn
+content-length: 43
+content-type: application/json
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-xss-protection: 1; mode=block
+content-security-policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'
+
+{"detail":"ADMIN_API_KEY não configurada"}(.venv) diegosantos@diegosantos:/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref$ curl -i -X POST http://localhost:8000/tereziapi/tereziadmin/auth/login \                                                                            curl -i -X POST http://localhost:8000/tereziapi/tereziadmin/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"teste","password":"teste"}'
+HTTP/1.1 404 Not Found
+date: Fri, 13 Mar 2026 17:46:33 GMT
+server: uvicorn
+content-length: 22
+content-type: application/json
+x-content-type-options: nosniff
+x-frame-options: DENY
+x-xss-protection: 1; mode=block
+content-security-policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; script-src 'self' 'unsafe-inline'; connect-src 'self'
+
+{"detail":"Not Found"}(.venv) diegosantos@diegosantos:/media/diegosantos/TOSHIBA EXT/Projetos/Desenvocd admin-panelt-pref$ cd admin-panel
+npm install
+npm run dev
+
+added 3 packages, and audited 382 packages in 3s
+
+179 packages are looking for funding
+  run `npm fund` for details
+
+4 vulnerabilities (1 moderate, 3 high)
+
+To address all issues, run:
+  npm audit fix
+
+Run `npm audit` for details.
+
+> admin-panel@0.0.0 dev
+> vite
+
+
+  VITE v7.3.1  ready in 191 ms
+
+  ➜  Local:   http://localhost:5173/admin/
+  ➜  Network: http://192.168.3.18:5173/admin/
+  ➜  press h + enter to show help

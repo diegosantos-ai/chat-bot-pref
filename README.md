@@ -1,5 +1,5 @@
 # Chat Pref  
-### Plataforma de Atendimento Municipal com IA, RAG e Arquitetura Tenant-Aware
+### Plataforma de Atendimento Municipal com IA, RAG, Arquitetura Tenant-Aware e Evolução em LLMOps
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)
@@ -10,8 +10,11 @@
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF?logo=githubactions&logoColor=white)
 ![Terraform](https://img.shields.io/badge/Terraform-Infra%20as%20Code-844FBA?logo=terraform&logoColor=white)
 ![AWS](https://img.shields.io/badge/AWS-Deploy%20Target-FF9900?logo=amazonaws&logoColor=white)
+![MLflow](https://img.shields.io/badge/MLflow-Experiment%20Tracking-0194E2)
+![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Tracing%20%26%20Observability-6E43FF)
+![Airflow](https://img.shields.io/badge/Airflow-Orquestra%C3%A7%C3%A3o%20Offline-017CEE?logo=apacheairflow&logoColor=white)
 
-> Plataforma de atendimento digital para prefeituras, projetada para combinar **IA aplicada**, **recuperação semântica com RAG**, **guardrails**, **auditoria**, **observabilidade** e **isolamento por tenant**.
+> Plataforma de atendimento digital para prefeituras, projetada para combinar **IA aplicada**, **recuperação semântica com RAG**, **guardrails**, **auditoria**, **observabilidade** e **arquitetura tenant-aware**, evoluindo agora para uma nova fase de **LLMOps, avaliação formal, governança e rastreabilidade experimental**.
 
 ---
 
@@ -30,9 +33,11 @@ O projeto foi estruturado para demonstrar, de forma prática:
 - canal real de operação via **Telegram**, com webhook HTTPS ativo no ambiente remoto demonstrativo
 - evolução para **CI/CD** e **deploy em AWS com Terraform**
 
-O foco atual é transformar uma base funcional, mas heterogênea, em uma plataforma **coerente, demonstrável e tecnicamente defensável**.
+Com a consolidação da **Fundação Operacional**, o projeto entra agora em uma nova etapa: a construção da camada de **LLMOps, avaliação formal, governança e observabilidade avançada**.
 
-O objetivo final da demonstração é provar **GenAI com método**, e não apenas RAG com isolamento por tenant.
+O foco atual deixa de ser apenas a sustentação de uma base funcional e passa a ser a evolução para uma plataforma de IA mais **rastreável, avaliável, governável e tecnicamente demonstrável**.
+
+O objetivo desta nova etapa continua o mesmo em essência: provar **GenAI com método**, agora com uma camada explícita de experimentação, benchmark, versionamento e governança técnica.
 
 ---
 
@@ -103,14 +108,22 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 
 ## Tecnologias Utilizadas
 
-Na branch de desenvolvimento, esta secao mantem a **stack-alvo do projeto**. O runtime ativo atual e mais enxuto e esta descrito em [docs/arquitetura.md](docs/arquitetura.md).
+Na branch de desenvolvimento, esta seção mantém a **stack-alvo do projeto**.
+
+A base já validada da **Fundação Operacional** permanece documentada em:
+
+- `docs-fundacao-operacional/`
+
+A documentação da nova fase de evolução, focada em **LLMOps, avaliação e governança**, passa a ser mantida em:
+
+- `docs-LLMOps/`
 
 ### Backend
 - Python 3.11+
 - FastAPI
 - Pydantic
 - Uvicorn
-- asyncpg
+- PostgreSQL
 
 ### IA / RAG
 - Google Gemini
@@ -129,14 +142,18 @@ Na branch de desenvolvimento, esta secao mantem a **stack-alvo do projeto**. O r
 - Prometheus
 - Grafana
 - Loki
+- OpenTelemetry
 - logs estruturados
 - auditoria de pipeline
 
-### Automação e Entrega
+### Automação, Entrega e LLMOps
 - GitHub Actions
 - Terraform
 - AWS
+- MLflow
+- avaliação formal de RAG
 - scripts operacionais em Python e Bash
+- Airflow como orquestrador offline da fase LLMOps
 
 ---
 
@@ -144,7 +161,7 @@ Na branch de desenvolvimento, esta secao mantem a **stack-alvo do projeto**. O r
 
 A arquitetura do projeto foi estruturada para suportar um fluxo de atendimento institucional com IA, separando responsabilidades entre entrada HTTP, orquestração, recuperação semântica, políticas de segurança, persistência e operação.
 
-> Esta secao resume a arquitetura-alvo do case. O runtime ativo hoje esta documentado em [docs/arquitetura.md](docs/arquitetura.md) e permanece menor do que a stack-alvo listada aqui.
+>> Esta seção resume a arquitetura-alvo do projeto. A base já validada da Fundação Operacional está documentada em `docs-fundacao-operacional/`, enquanto a arquitetura-alvo da nova fase de LLMOps está sendo consolidada em `docs-LLMOps/ARQUITETURA-LLMOps.md`.
 
 ### Componentes principais
 
@@ -218,7 +235,8 @@ chat-bot-pref/
 ├── db/
 │   ├── migrations/
 │   └── schema.sql
-├── docs/
+├── docs-fundacao-operacional/
+├── docs-LLMOps/
 ├── dashboards/
 ├── logging/
 ├── grafana/
@@ -230,10 +248,10 @@ chat-bot-pref/
 ├── AGENTS.md
 ├── tenants/
 └── artifacts/
-````
+```
 
 ---
-
+``
 ## Responsabilidade dos Diretórios e Arquivos
 
 ### Backend
@@ -258,27 +276,41 @@ chat-bot-pref/
 
 ### Documentação
 
-* `docs/contexto.md`: estado atual do projeto
-* `docs/arquitetura.md`: arquitetura real
-* `docs/planejamento_fases.md`: fases, tasks e execução
-* `docs/guardrail_rastreavel.md`: eixo transversal de correlação e guardrails
-* `docs/genai_com_metodo.md`: definição operacional do requisito do case
-* `docs/evidencias_case.md`: matriz curta de `claim -> evidencia -> artefato`
-* `docs/diario_bordo.md`: narrativa técnica da construção e das validações mais importantes
-* `docs/fase_12_github_actions.md`: automação de qualidade, escopo do workflow e matriz de secrets
-* `AGENTS.md`: governança de agentes e regras operacionais
+#### Fundação Operacional
+- `docs-fundacao-operacional/`: documentação histórica e validada da fundação operacional do projeto
+- `docs-fundacao-operacional/contexto.md`: estado consolidado da base anterior
+- `docs-fundacao-operacional/arquitetura.md`: arquitetura real da fundação operacional
+- `docs-fundacao-operacional/planejamento_fases.md`: fases concluídas do ciclo operacional
+- `docs-fundacao-operacional/guardrail_rastreavel.md`: eixo transversal de correlação e guardrails
+- `docs-fundacao-operacional/genai_com_metodo.md`: definição operacional do requisito do case
+- `docs-fundacao-operacional/evidencias_case.md`: matriz curta de `claim -> evidencia -> artefato`
+- `docs-fundacao-operacional/diario_bordo.md`: narrativa técnica da construção e das validações principais
+
+#### Nova fase — LLMOps
+- `docs-LLMOps/README.md`: visão geral da nova fase
+- `docs-LLMOps/CONTEXTO-LLMOps.md`: motivação, objetivo e critérios da fase
+- `docs-LLMOps/ARQUITETURA-LLMOps.md`: arquitetura-alvo da camada de LLMOps
+- `docs-LLMOps/PLANEJAMENTO_LLMOps.md`: planejamento macro da nova fase
+- `docs-LLMOps/adrs/`: decisões arquiteturais da fase
+- `docs-LLMOps/runbooks/`: preparação de ambiente, avaliação de RAG e operação offline
+
+#### Governança
+- `AGENTS.md`: governança de agentes e regras operacionais
 
 ---
 
 ## Status Atual do Projeto
 
-O projeto está **concluído no recorte proposto do case** e validado como demonstração funcional de GenAI aplicada ao contexto institucional.
+O projeto possui uma **Fundação Operacional concluída e validada**, que sustenta o runtime principal do case e a demonstração funcional já comprovada.
 
-Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e resume o estado final já comprovado do runtime.
+Na branch de desenvolvimento, este README passa a cumprir dois papéis:
 
-**Fase mais recente consolidada na branch:** Fase 14 — Alinhamento final entre arquitetura, operação e documentação.
-**Status do pacote final na branch:** concluído e validado localmente, na CI e no deploy remoto.
-**Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
+1. resumir a base já validada da fundação operacional;
+2. posicionar a nova fase de evolução do projeto, focada em **LLMOps, avaliação formal, governança e observabilidade avançada**.
+
+**Base consolidada:** Fundação Operacional concluída e validada localmente, na CI e no deploy remoto.  
+**Nova fase em andamento:** Fase 1 — GenAI com Método: LLMOps, Avaliação e Governança.  
+**Eixo transversal já consolidado:** Guardrail Rastreável distribuído entre as fases finais da fundação operacional.
 
 ### Já existe
 
@@ -301,6 +333,25 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * workflow de CI versionado com quality gates, build Docker e smoke reduzido
 * deploy mínimo em AWS provisionado com Terraform, smoke remoto aprovado e proxy HTTPS público estável por `sslip.io`
 
+### Em evolução na nova fase
+
+* rastreabilidade experimental por tenant
+* versionamento formal de prompts, policies e configurações de RAG
+* benchmark reproduzível por tenant
+* avaliação formal de RAG
+* comparação entre estratégias de retrieval e modelos
+* observabilidade ampliada de qualidade, latência e custo
+* orquestração offline com Airflow
+* monitoramento de deriva semântica
+* documentação viva da camada de LLMOps
+
+### Limites declarados do estado atual
+
+* `LLM_PROVIDER=mock` continua sendo o baseline reproduzível da base operacional
+* a camada de LLMOps está em implantação e ainda não deve ser tratada como plenamente ativa no runtime
+* o Telegram público do ambiente remoto depende de secrets externos não versionados
+* o deploy remoto validado usa `sslip.io`, sem domínio próprio, rotação de secrets ou CD completo
+
 ### Limites declarados do recorte final
 
 * `LLM_PROVIDER=mock` continua sendo o baseline reproduzível do projeto
@@ -317,10 +368,11 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 
 ## Planejamento Macro por Fases
 
-O projeto está organizado em blocos contínuos:
+O projeto passa a ser organizado em dois ciclos complementares:
 
-### Bloco A — Refatoração estrutural
+### Ciclo 0 — Fundação Operacional
 
+#### Bloco A — Refatoração estrutural
 * Fase 1 — Diagnóstico e inventário do legado
 * Fase 2 — Sanitização funcional do runtime
 * Fase 3 — Consolidação do contrato multi-tenant
@@ -328,26 +380,40 @@ O projeto está organizado em blocos contínuos:
 * Fase 5 — Containerização e ambiente local reproduzível
 * Fase 6 — Validação estrutural da base refatorada
 
-### Bloco B — Demonstração funcional
-
+#### Bloco B — Demonstração funcional
 * Fase 7 — Construção do tenant demonstrativo fictício
 * Fase 8 — Construção da base documental fictícia e ingest limpa
 * Fase 9 — Operacionalização do chat via Telegram
 * Fase 10 — Composição generativa, guardrails e evidências
 * Fase 11 — Observabilidade aplicada e fechamento técnico do case
 
-### Bloco C — Engenharia de entrega
-
+#### Bloco C — Engenharia de entrega
 * Fase 12 — Automação de qualidade com GitHub Actions
 * Fase 13 — Infraestrutura como código e deploy em AWS
 * Fase 14 — Alinhamento final entre arquitetura, operação e documentação
 
+### Ciclo 1 — LLMOps, Avaliação e Governança
+
+#### Bloco D — Maturidade de IA
+* Fase 1 — Fundação de LLMOps e rastreabilidade experimental
+* Fase 2 — Versionamento de prompts, policies e configuração de RAG
+* Fase 3 — Dataset de avaliação e benchmark reproduzível
+* Fase 4 — Avaliação formal de RAG com métricas de qualidade
+* Fase 5 — Retrieval híbrido, query rewriting e reranking
+* Fase 6 — Observabilidade de qualidade, latência e custo por tenant
+* Fase 7 — CI de GenAI com regressão de prompt e dry-run experimental
+* Fase 8 — Orquestração offline com Airflow
+* Fase 9 — Deriva semântica e saúde da base vetorial
+* Fase 10 — Multi-LLM, fallback e avaliação comparativa de provedores
+* Fase 11 — Governança, explicabilidade e evidência de decisão
+* Fase 12 — Alinhamento final com a vaga e material de demonstração
 ---
 
 ## Critério de Aceite do Projeto
 
 O projeto será considerado bem-sucedido quando for possível demonstrar, com evidências reais:
 
+### Fundação Operacional
 * backend operacional
 * tenant demonstrativo funcional
 * RAG respondendo com base documental própria
@@ -357,6 +423,17 @@ O projeto será considerado bem-sucedido quando for possível demonstrar, com ev
 * pipeline de qualidade automatizada com GitHub Actions
 * deploy mínimo em AWS provisionado com Terraform
 * documentação coerente com a realidade do sistema
+
+### Nova fase de LLMOps
+* rastreamento experimental por tenant
+* versionamento formal de prompts, policies e configuração de retrieval
+* benchmark reproduzível por tenant
+* métricas formais de qualidade de RAG registradas por experimento
+* comparação estruturada entre estratégias de retrieval e modelos
+* observabilidade de latência, custo e qualidade
+* operação offline organizada para ingestão, avaliação e reindexação
+* critérios para monitorar sinais de degradação semântica
+* documentação coerente para implantação, operação, demonstração e defesa técnica
 
 ---
 
@@ -368,11 +445,11 @@ Toda mudança importante deve seguir esta lógica:
 
 ### Antes de alterar
 
-* revisar `contexto.md`
-* revisar `arquitetura.md`
-* localizar a fase e task no planejamento
+* revisar a documentação do ciclo correspondente
+* localizar a fase e a task no planejamento apropriado
 * validar o estado atual do repositório
 * definir a forma de validação
+* confirmar se a mudança pertence à fundação operacional ou à fase de LLMOps
 
 ### Durante a alteração
 
@@ -380,13 +457,19 @@ Toda mudança importante deve seguir esta lógica:
 * evitar refatorações laterais não planejadas
 * tratar `tenant_id` como contrato explícito
 * não esconder erro estrutural com fallback silencioso
+* preservar a separação entre operação, experimento e orquestração offline
 
 ### Depois da alteração
 
 * validar tecnicamente
 * revisar o diff
 * registrar evidência
-* atualizar documentação correspondente, quando necessário
+* atualizar a documentação correspondente, quando necessário
+
+### Referências de navegação
+
+* Fundação Operacional: `docs-fundacao-operacional/`
+* Nova fase: `docs-LLMOps/`
 
 ---
 
@@ -418,6 +501,8 @@ Comandos simples devem ser suficientes para:
 > O detalhamento do ambiente local deve refletir o estado real do `Dockerfile` e do `docker-compose` vigente.
 
 Na fase atual, o bootstrap mínimo validado do backend está descrito em [docs/bootstrap_local.md](docs/bootstrap_local.md).
+
+A documentação da fundação operacional permanece em `docs-fundacao-operacional/`, enquanto a evolução de ambiente para a fase de LLMOps passa a ser documentada em `docs-LLMOps/runbooks/`.
 
 ---
 
@@ -476,14 +561,27 @@ Na branch atual, esse canal já possui dois modos de operação validados:
 
 ## Observabilidade, Auditoria e Evidências
 
-O projeto deve oferecer visibilidade mínima sobre o fluxo do atendimento.
+O projeto oferece visibilidade mínima sobre o fluxo do atendimento já validado na Fundação Operacional e passa a evoluir, na nova fase, para uma camada mais formal de tracking experimental e avaliação.
 
-Na base ativa atual, a evidência já validada inclui auditoria versionada `audit.v1`, `PolicyDecision`, `reason_codes`, logs estruturados, métricas expostas em `/metrics` e traces correlacionados por `request_id`.
+Na base ativa já validada, a evidência operacional inclui:
+- auditoria versionada `audit.v1`
+- `PolicyDecision`
+- `reason_codes`
+- logs estruturados
+- métricas expostas em `/metrics`
+- traces correlacionados por `request_id`
 
-Para leitura humana mais direta do case, use também:
+Na nova fase, o projeto passa a estruturar também:
+- experiment tracking por tenant
+- benchmark reproduzível
+- avaliação formal de RAG
+- comparação entre versões
+- leitura de deriva semântica
 
-* [docs/evidencias_case.md](docs/evidencias_case.md)
-* [docs/diario_bordo.md](docs/diario_bordo.md)
+Para leitura humana mais direta do case e da nova fase, use também:
+
+* `docs-fundacao-operacional/`
+* `docs-LLMOps/`
 
 ### Evidências esperadas
 
@@ -491,7 +589,9 @@ Para leitura humana mais direta do case, use também:
 * eventos de auditoria
 * métricas básicas expostas
 * trilha request → policy_pre → retrieval → compose → policy_post → resposta
-* prints e registros da demonstração
+* benchmark por tenant
+* métricas experimentais comparáveis
+* artifacts de avaliação
 * matriz de cenários validados
 
 ### Valor desta camada
@@ -502,6 +602,7 @@ A observabilidade não existe apenas para operação; ela também serve para:
 * gerar material de portfólio
 * sustentar explicação técnica em entrevista
 * aumentar confiança no comportamento do sistema
+* apoiar evolução de IA com método
 
 ---
 
@@ -542,22 +643,23 @@ O recorte continua enxuto de propósito: entrega real, baixo custo e operação 
 
 ## Próximos Passos
 
-### Fechamento do fluxo Git
+### Fundação já consolidada
+* preservar a base validada da fundação operacional como referência estável do runtime
+* manter a coerência entre operação local, CI e deploy remoto
 
-* revisar e promover `develop -> main` por Pull Request como trilha oficial de entrega
-* preservar a branch final como referência de trabalho e histórico do encerramento
+### Nova fase — LLMOps
+* preparar ambiente base, ambiente dev e ambiente offline conforme o planejamento
+* introduzir experiment tracking com segregação por tenant
+* formalizar benchmark reproduzível e avaliação de RAG
+* versionar prompts, policies e configurações críticas
+* ampliar observabilidade para qualidade, custo e latência
+* introduzir orquestração offline de ingestão, benchmark e reindexação
+* consolidar material técnico de demonstração orientado à vaga-alvo
 
 ### Evolução opcional de infraestrutura
-
 * endurecer a operação remota com domínio próprio, rotação de secrets e CD
 * manter o Telegram público ativo sobre a URL estável do ambiente remoto
 * preservar os contratos de `request_id`, `tenant_id` e observabilidade no ambiente em nuvem
-
-### Evolução opcional do case
-
-* adicionar um caminho reproduzível com provedor LLM externo real
-* ampliar a documentação pública para portfólio e entrevista sem inflar o README
-* expandir a operação remota apenas se isso mantiver o sistema explicável
 
 ---
 

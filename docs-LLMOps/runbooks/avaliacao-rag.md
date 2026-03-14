@@ -1,0 +1,220 @@
+# avaliacao-rag
+
+## Objetivo
+
+Este runbook descreve como preparar, executar, registrar e revisar a avaliação formal do pipeline RAG na Fase 1 do Chat Pref.
+
+Seu objetivo é padronizar a avaliação de qualidade do sistema, garantindo que mudanças em prompts, policies, retrieval, embeddings ou base vetorial sejam analisadas com benchmark reproduzível, métricas comparáveis e rastreabilidade por tenant.
+
+## Escopo
+
+Este runbook cobre:
+
+- preparação do ambiente de avaliação;
+- pré-condições para execução do benchmark;
+- execução de avaliações formais do pipeline RAG;
+- registro de métricas e artifacts;
+- leitura inicial dos resultados;
+- critérios mínimos de revisão técnica.
+
+Este documento não substitui:
+- a arquitetura da fase;
+- o planejamento macro;
+- a definição do dataset de benchmark;
+- a documentação de tracking experimental.
+
+## Pré-requisitos
+
+Antes de executar qualquer avaliação formal, os seguintes itens devem estar disponíveis:
+
+- ambiente base instalado;
+- ambiente de desenvolvimento instalado;
+- benchmark mínimo definido;
+- convenção de versionamento de prompts, policies e retrieval definida;
+- mecanismo de tracking experimental disponível;
+- tenant de referência claramente identificado;
+- configuração da base vetorial sob avaliação conhecida.
+
+## Dependências
+
+A execução da avaliação formal depende, no mínimo, de:
+
+- `requirements.txt`
+- `requirements-dev.txt`
+
+A instalação dessas dependências deve ocorrer na **Fase 1**, conforme definido em `PLANEJAMENTO_LLMOps.md`.
+
+## Objetos mínimos de avaliação
+
+Toda avaliação formal deve buscar registrar, quando aplicável:
+
+- `tenant_id`
+- `dataset_version`
+- `prompt_version`
+- `policy_version`
+- `retriever_version`
+- `embedding_version`
+- `vectorstore_version`
+- `model_provider`
+- `model_name`
+- parâmetros relevantes de retrieval
+- timestamp da execução
+- identificador do experimento
+- identificador do run
+
+## Tipos de avaliação previstos
+
+### 1. Avaliação de baseline
+Usada para estabelecer a linha de referência inicial da qualidade do pipeline.
+
+### 2. Avaliação comparativa
+Usada para comparar duas ou mais variações de:
+- prompt;
+- retrieval;
+- política;
+- embeddings;
+- base vetorial;
+- modelo.
+
+### 3. Avaliação de regressão
+Usada para verificar se uma mudança degradou comportamento previamente aceito.
+
+### 4. Avaliação por tenant
+Usada para validar impacto local de mudança sobre um tenant específico.
+
+## Fluxo recomendado de execução
+
+### Etapa 1 — Confirmar contexto da avaliação
+Antes da execução, registrar explicitamente:
+
+- qual tenant será avaliado;
+- qual versão de dataset será utilizada;
+- qual hipótese está sendo testada;
+- qual baseline será usada como referência;
+- qual componente está sendo alterado.
+
+### Etapa 2 — Validar o ambiente
+Confirmar que:
+
+- as dependências do ambiente dev estão instaladas;
+- imports de tracking e avaliação funcionam;
+- a base vetorial alvo está acessível;
+- o benchmark está disponível;
+- o contexto experimental está corretamente identificado.
+
+### Etapa 3 — Executar a avaliação
+Executar o benchmark no contexto planejado, preservando:
+
+- isolamento por tenant;
+- identificação da versão dos artefatos;
+- registro das métricas;
+- persistência dos resultados experimentais.
+
+### Etapa 4 — Registrar métricas e artifacts
+Persistir os resultados no sistema de tracking adotado, incluindo métricas e artifacts comparativos.
+
+### Etapa 5 — Revisar os resultados
+Analisar:
+
+- melhoria ou degradação da qualidade;
+- impacto em latência;
+- impacto em custo;
+- aumento de fallback;
+- aumento de retrieval vazio;
+- comportamento inconsistente por cenário.
+
+## Métricas mínimas esperadas
+
+Conforme a maturidade da fase evoluir, a avaliação deve buscar registrar pelo menos:
+
+- `faithfulness`
+- `answer_relevance`
+- métricas de contexto e recuperação
+- latência
+- custo estimado
+- taxa de fallback
+- taxa de retrieval vazio
+
+## Critérios mínimos de leitura
+
+Nenhuma avaliação deve ser considerada suficiente apenas com nota agregada.
+
+A leitura técnica deve considerar:
+
+- comportamento médio;
+- casos com pior desempenho;
+- cenários sensíveis por tenant;
+- impacto da mudança sobre respostas anteriormente estáveis;
+- trade-off entre qualidade, latência e custo.
+
+## Regras de execução
+
+### 1. Sempre comparar com referência
+Nenhuma mudança relevante deve ser avaliada sem baseline.
+
+### 2. Sempre preservar o tenant
+A avaliação deve manter recorte explícito por tenant.
+
+### 3. Sempre versionar o contexto
+Nenhum resultado deve ser aceito sem associação clara a versões de artefatos.
+
+### 4. Sempre registrar hipótese
+Toda avaliação relevante deve responder a uma hipótese concreta, ainda que simples.
+
+### 5. Não promover por percepção
+Mudanças não devem ser promovidas com base apenas em amostragem informal ou percepção subjetiva.
+
+## Evidência mínima esperada
+
+Cada avaliação relevante deve gerar evidência mínima, preferencialmente composta por:
+
+- identificação do tenant;
+- identificação do benchmark;
+- versão dos artefatos avaliados;
+- métricas principais;
+- artifacts comparativos;
+- comentário técnico de leitura inicial;
+- decisão resultante: manter, revisar ou promover.
+
+## Falhas comuns a evitar
+
+- avaliar sem benchmark definido;
+- comparar execuções com versionamento incompleto;
+- misturar tenants em um mesmo resultado;
+- usar métrica agregada como único critério;
+- ignorar custo e latência ao melhorar qualidade;
+- alterar múltiplas variáveis ao mesmo tempo sem controle.
+
+## Saídas possíveis após avaliação
+
+Ao final de uma avaliação, a decisão técnica deve cair em uma das seguintes categorias:
+
+- **promover**  
+  quando houver ganho ou trade-off aceitável sustentado por evidência;
+
+- **manter em observação**  
+  quando houver sinal promissor, mas com evidência ainda insuficiente;
+
+- **revisar**  
+  quando houver resultado inconclusivo ou degradado;
+
+- **reverter**  
+  quando a mudança piorar baseline validada.
+
+## Relação com outros documentos
+
+Este runbook deve ser lido em conjunto com:
+
+- `README.md`
+- `CONTEXTO-LLMOps.md`
+- `ARQUITETURA-LLMOps.md`
+- `PLANEJAMENTO_LLMOps.md`
+
+## Status
+
+Runbook inicial de avaliação formal de RAG definido.
+
+Próximo passo:
+- consolidar benchmark mínimo;
+- integrar tracking experimental;
+- executar baseline inicial da fase.

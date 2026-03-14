@@ -273,8 +273,8 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
-**Fase ativa na branch:** Fase 10 — Composição generativa, guardrails e evidências.
-**Status da fase na branch:** concluída e validada na branch de trabalho.
+**Fase ativa na branch:** Fase 11 — Observabilidade aplicada e fechamento técnico do case.
+**Status da fase na branch:** iniciada na branch de trabalho.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe

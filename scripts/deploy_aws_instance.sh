@@ -75,6 +75,11 @@ fi
 if [ "$PUBLIC_HTTPS_ENABLED" = "true" ] && [ -z "$PUBLIC_BASE_HOSTNAME" ]; then
   log "Derivando hostname publico HTTPS a partir do IP da instancia"
   PUBLIC_BASE_HOSTNAME="$(build_sslip_hostname "$(read_public_ip_from_imds)")"
+  # Garante apenas uma ocorrencia de PUBLIC_BASE_HOSTNAME em .env.compose
+  if [ -f "$APP_DIR/.env.compose" ]; then
+    sed -i.bak '/^PUBLIC_BASE_HOSTNAME=/d' "$APP_DIR/.env.compose" || true
+    rm -f "$APP_DIR/.env.compose.bak"
+  fi
   printf '\nPUBLIC_BASE_HOSTNAME=%s\n' "$PUBLIC_BASE_HOSTNAME" >>"$APP_DIR/.env.compose"
 fi
 

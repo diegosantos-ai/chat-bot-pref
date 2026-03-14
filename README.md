@@ -272,12 +272,12 @@ chat-bot-pref/
 
 ## Status Atual do Projeto
 
-O projeto está em **refatoração estrutural com foco em demonstração funcional**.
+O projeto está **concluído no recorte proposto do case** e validado como demonstração funcional de GenAI aplicada ao contexto institucional.
 
-Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
+Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e resume o estado final já comprovado do runtime.
 
-**Fase ativa na branch:** Fase 14 — Alinhamento final entre arquitetura, operação e documentação.
-**Status da fase na branch:** implementada e validada na branch de trabalho; aguardando fechamento.
+**Fase mais recente consolidada na branch:** Fase 14 — Alinhamento final entre arquitetura, operação e documentação.
+**Status do pacote final na branch:** concluído e validado localmente, na CI e no deploy remoto.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe
@@ -301,15 +301,17 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * workflow de CI versionado com quality gates, build Docker e smoke reduzido
 * deploy mínimo em AWS provisionado com Terraform, smoke remoto aprovado e proxy HTTPS público estável por `sslip.io`
 
-### Em andamento
+### Limites declarados do recorte final
 
-* alinhamento final entre runtime, CI, deploy e documentação
-* preparação da promoção `develop -> main` via Pull Request
+* `LLM_PROVIDER=mock` continua sendo o baseline reproduzível do projeto
+* o Telegram público do ambiente remoto depende de secrets externos não versionados
+* o deploy remoto validado usa `sslip.io`, sem domínio próprio, rotação de secrets ou CD completo
 
-### Próxima direção
+### Evoluções opcionais após o fechamento do case
 
 * endurecer a operação remota com domínio próprio, rotação de secrets e CD quando isso fizer sentido
-* fechar o case final para portfólio e entrevista
+* validar um provedor LLM externo real como caminho reproduzível adicional
+* expandir a operação remota sem perder o corte mínimo e explicável do projeto
 
 ---
 
@@ -540,23 +542,22 @@ O recorte continua enxuto de propósito: entrega real, baixo custo e operação 
 
 ## Próximos Passos
 
-### Curto prazo
+### Fechamento do fluxo Git
 
-* concluir a Fase 14 com a documentação principal contando exatamente a mesma história do runtime
-* revisar o PR `develop -> main` com o pacote consolidado até a Fase 13
-* manter a regressão automatizada da branch saudável
+* revisar e promover `develop -> main` por Pull Request como trilha oficial de entrega
+* preservar a branch final como referência de trabalho e histórico do encerramento
 
-### Médio prazo
+### Evolução opcional de infraestrutura
 
 * endurecer a operação remota com domínio próprio, rotação de secrets e CD
 * manter o Telegram público ativo sobre a URL estável do ambiente remoto
-* manter os contratos de `request_id`, `tenant_id` e observabilidade no ambiente em nuvem
+* preservar os contratos de `request_id`, `tenant_id` e observabilidade no ambiente em nuvem
 
-### Próximo nível
+### Evolução opcional do case
 
-* usar Pull Request de `develop` para `main` como trilha oficial de promoção
-* consolidar o case final para portfólio e entrevista
-* fechar o alinhamento final entre runtime, CI e deploy
+* adicionar um caminho reproduzível com provedor LLM externo real
+* ampliar a documentação pública para portfólio e entrevista sem inflar o README
+* expandir a operação remota apenas se isso mantiver o sistema explicável
 
 ---
 

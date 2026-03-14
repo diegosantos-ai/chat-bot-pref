@@ -85,6 +85,7 @@ Thumbs.db
 
 # Project specific
 .env.example
+!/.env.example
 *.pyc
 __pycache__/
 .pytest_cache/
@@ -170,6 +171,18 @@ auto_generated/
 # Cache
 .cache/
 *.cache
+
+# Terraform local artifacts
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
 
 # SQLite temporary files
 *.db-journal

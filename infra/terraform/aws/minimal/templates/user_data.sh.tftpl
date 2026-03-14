@@ -1,0 +1,63 @@
+#!/bin/bash
+set -euxo pipefail
+
+dnf update -y
+dnf install -y docker git python3
+
+# Amazon Linux 2023 does not ship the docker compose plugin in the default dnf repos.
+mkdir -p /usr/local/lib/docker/cli-plugins
+curl -fsSL https://github.com/docker/compose/releases/download/v2.39.4/docker-compose-linux-x86_64 \
+  -o /usr/local/lib/docker/cli-plugins/docker-compose
+chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+
+systemctl enable --now docker
+usermod -aG docker ec2-user || true
+
+mkdir -p /opt/chat-pref
+
+cat >/opt/chat-pref/runtime.env <<EOF
+ENV=prod
+DEBUG=false
+APP_HOST=0.0.0.0
+APP_PORT=${service_port}
+DATA_DIR=/app/data/runtime
+KNOWLEDGE_BASE_DIR=/app/data/knowledge_base
+CHROMA_DIR=/app/data/chroma
+CHROMA_COLLECTION_PREFIX=chat_pref_docs
+CHROMA_LEGACY_COLLECTION_PREFIXES=["chat_pref"]
+WEBHOOK_PAGE_TENANT_MAP={}
+TELEGRAM_BOT_TOKEN=${telegram_bot_token}
+TELEGRAM_WEBHOOK_SECRET=${telegram_webhook_secret}
+TELEGRAM_API_BASE_URL=https://api.telegram.org
+TELEGRAM_DEFAULT_TENANT_ID=${telegram_default_tenant_id}
+TELEGRAM_CHAT_TENANT_MAP={}
+TELEGRAM_DELIVERY_MODE=${telegram_delivery_mode}
+LLM_PROVIDER=${llm_provider}
+LLM_MODEL=${llm_model}
+LLM_API_KEY=${llm_api_key}
+PROMPT_BASE_VERSION=base_v1
+PROMPT_FALLBACK_VERSION=fallback_v1
+POLICY_TEXT_VERSION=policy_v1
+LLM_MIN_CONTEXT_SCORE=0.20
+LLM_CONTEXT_TOP_K=3
+CORS_ORIGINS=${cors_origins_json}
+ALLOWED_HOSTS=${allowed_hosts_json}
+EOF
+
+if [ ! -d /opt/chat-pref/app/.git ]; then
+  git clone --depth 1 --branch "${app_ref}" "${repo_url}" /opt/chat-pref/app
+fi
+
+cd /opt/chat-pref/app
+git fetch --depth 1 origin "${app_ref}"
+git checkout "${app_ref}"
+git reset --hard "origin/${app_ref}"
+chmod +x scripts/deploy_aws_instance.sh
+
+APP_DIR=/opt/chat-pref/app \
+RUNTIME_ENV_FILE=/opt/chat-pref/runtime.env \
+REPO_URL="${repo_url}" \
+APP_REF="${app_ref}" \
+TENANT_MANIFEST="${tenant_manifest}" \
+SERVICE_PORT="${service_port}" \
+/bin/bash scripts/deploy_aws_instance.sh

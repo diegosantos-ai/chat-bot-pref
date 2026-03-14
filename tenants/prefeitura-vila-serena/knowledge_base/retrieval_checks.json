@@ -63,6 +63,34 @@
       ]
     },
     {
+      "id": "cadunico-cras",
+      "question": "Onde fica o atendimento do Cadastro Unico e quais documentos devo levar?",
+      "expected_title_contains": "Cadastro Unico, CRAS Centro e Atualizacao Cadastral",
+      "expected_terms": [
+        "cpf",
+        "numero do nis"
+      ]
+    },
+    {
+      "id": "iluminacao-publica",
+      "question": "Como pedir manutencao de iluminacao publica?",
+      "expected_title_contains": "Iluminacao Publica e Pedido de Manutencao",
+      "expected_terms": [
+        "endereco completo",
+        "numero do poste",
+        "5 dias uteis"
+      ]
+    },
+    {
+      "id": "nota-fiscal-avulsa",
+      "question": "Como funciona a nota fiscal avulsa na prefeitura?",
+      "expected_title_contains": "Nota Fiscal Avulsa e Orientacao Tributaria Basica",
+      "expected_terms": [
+        "setor de tributacao",
+        "descricao do servico prestado"
+      ]
+    },
+    {
       "id": "assistente-emite-protocolo",
       "question": "O Atende Vila Serena emite protocolo oficial?",
       "expected_title_contains": "Limites Operacionais e Disclaimer do Atende Vila Serena",

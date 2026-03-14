@@ -28,6 +28,7 @@ O runtime ativo e um backend FastAPI minimo, com foco em:
 - tenant demonstrativo versionado
 - execucao local e via Docker
 - deploy remoto minimo validado em AWS com EC2 unica provisionada por Terraform
+- endpoint HTTPS publico estavel no ambiente remoto demonstrativo
 
 Rotas ativas no `app/main.py`:
 
@@ -47,7 +48,7 @@ Topologia remota validada na Fase 13:
 
 - `infra/terraform/aws/minimal` provisiona VPC, subnet publica, Internet Gateway, route table, Security Group, role SSM, EC2 e Elastic IP
 - `user_data` instala Docker, Compose, Git e Python 3
-- `scripts/deploy_aws_instance.sh` sincroniza a branch, sobe `docker compose` e executa o bootstrap do tenant demonstrativo
+- `scripts/deploy_aws_instance.sh` sincroniza a branch, renderiza o proxy HTTPS quando habilitado, sobe `docker compose` e executa o bootstrap do tenant demonstrativo
 - `scripts/smoke_remote.py` valida `/`, `/health`, `/metrics` e `POST /api/chat` a partir da URL publica do ambiente
 
 ## 3. Componentes ativos do backend
@@ -112,6 +113,8 @@ Topologia remota validada na Fase 13:
 5. a resposta e entregue por cliente Telegram em modo `api`, `dry_run` ou `disabled`
 6. a auditoria registra `telegram_update_received`, os eventos do fluxo de chat e `telegram_message_delivery`
 
+No ambiente local reproduzivel, o canal permanece em `dry_run` por padrao. No ambiente remoto demonstrativo validado, o mesmo webhook opera em `api` atras de uma URL HTTPS publica.
+
 ## 5. Persistencia ativa
 
 ### Historico de conversa
@@ -170,16 +173,16 @@ Os itens abaixo podem existir como narrativa do case, artefato antigo ou objetiv
 - `app/audit/` como modulo-fonte ativo
 - analytics e deploy como routers ativos
 - webhook Meta especifico como canal validado
-- bot Telegram em webhook publico estavel como parte do bootstrap reproduzivel
+- bot Telegram em webhook publico estavel como parte do bootstrap reproduzivel sem secrets externos
 - provedor LLM externo real como caminho principal validado do runtime
 - stack completa de Prometheus, Grafana e Loki como operacao externa do case
 - PostgreSQL e Redis como dependencias operacionais do runtime atual
 
 Quando estes elementos voltarem ao projeto, devem ser reintroduzidos como implementacao nova e validada, nao como heranca assumida.
 
-## 8. Eixo ativo e planejado: Guardrail Rastreavel
+## 8. Eixo ativo e historico: Guardrail Rastreavel
 
-As Fases 9 a 12 passam a carregar um eixo transversal de guardrail rastreavel.
+O eixo transversal de guardrail rastreavel foi distribuido nas Fases 9 a 12 e seus contratos permanecem ativos no runtime atual.
 
 Objetivo:
 
@@ -217,9 +220,9 @@ Os documentos normativos desse eixo sao:
 - `docs/guardrail_rastreavel.md`
 - `docs/genai_com_metodo.md`
 
-### Arquitetura-alvo das Fases 12 a 14
+### Fechamento das Fases 12 a 14
 
-A partir da Fase 10, o projeto deixou de ser apenas retrieval-first e passou a demonstrar GenAI controlada. A Fase 11 fechou a observabilidade minima do runtime, e as proximas fases fecham regressao automatizada e entrega.
+A partir da Fase 10, o projeto deixou de ser apenas retrieval-first e passou a demonstrar GenAI controlada. A Fase 11 fechou a observabilidade minima do runtime, a Fase 12 automatizou a regressao e a Fase 13 validou a entrega remota minima em AWS. A Fase 14 consolida a narrativa final sem mudar o pipeline.
 
 Pipeline alvo:
 
@@ -284,6 +287,12 @@ Regras dessa arquitetura-alvo:
 - bootstrap do tenant `prefeitura-vila-serena` na instancia
 - smoke remoto aprovado via `scripts/smoke_remote.py`
 
+### Fase 14 — Alinhamento final
+
+- README, contexto, arquitetura e evidencias revisados contra o runtime validado
+- governanca de agentes e Copilot alinhada ao estado real da branch
+- checklist final de `GenAI com metodo` consolidado com artefatos
+
 ## 10. Validacao arquitetural
 
 Validacoes minimas desta base:
@@ -302,6 +311,6 @@ Validacoes minimas desta base:
 ## 11. Regras de manutencao do documento
 
 - descrever como presente apenas o que esta no runtime validado
-- marcar como planejado o que ainda depende das Fases 9 a 12
+- marcar como planejado apenas o que ainda nao entrou no runtime validado
 - preservar coerencia com `README.md`, `docs/contexto.md` e `docs/planejamento_fases.md`
 - atualizar o documento sempre que um contrato de runtime mudar de fato

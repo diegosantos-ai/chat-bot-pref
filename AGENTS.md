@@ -36,12 +36,15 @@ O runtime ativo atual tem foco em:
 - tenant demonstrativo versionado
 - execução local e via Docker com smoke tests
 - workflow de CI versionado com quality gates, build Docker e smoke minimo
+- deploy remoto minimo validado em AWS com Terraform, EC2 unica, Docker e smoke remoto
+- endpoint HTTPS publico estavel validado no ambiente remoto demonstrativo
+- bot Telegram com webhook HTTPS ativo no ambiente remoto demonstrativo
 
 Os itens abaixo ainda não fazem parte do núcleo validado atual:
 
-- bot Telegram configurado com token real e webhook publico em ambiente externo
+- bot Telegram como parte do bootstrap reproduzivel sem secrets externos
 - provedor LLM externo real validado como caminho padrão reproduzível
-- deploy em AWS com Terraform
+- deploy remoto endurecido com dominio proprio, secrets gerenciados e CD completo
 
 ## 3. Documentos obrigatórios antes de alterar
 
@@ -52,7 +55,7 @@ Antes de propor ou executar mudanças, o agente deve ler:
 - `docs/arquitetura.md`
 - `docs/planejamento_fases.md`
 
-Se a alteração tocar as Fases 9 a 12, o agente também deve ler:
+Se a alteração tocar as Fases 9 a 14, o agente também deve ler:
 
 - `docs/guardrail_rastreavel.md`
 - `docs/genai_com_metodo.md`
@@ -61,6 +64,12 @@ Se a alteração tocar as Fases 10 a 12, o agente também deve considerar:
 
 - `docs/matriz_cenarios_validacao.md`
 - `docs/rubrica_qualidade_resposta.md`
+
+Se a alteração tocar as Fases 13 a 14, o agente também deve considerar:
+
+- `docs/fase_13_aws_deploy.md`
+- `docs/evidencias_case.md`
+- `docs/diario_bordo.md`
 
 Se a alteração estiver ligada a uma fase específica, o agente deve identificar:
 
@@ -106,7 +115,7 @@ O agente deve:
 - tratar `tenant_id` como contrato arquitetural
 - evitar reintroduzir estrutura ou naming removidos
 - manter coerência entre código, runtime, documentação e critérios de aceite da fase
-- usar `request_id` como contrato em evolução nos fluxos críticos tocados pelas Fases 9 a 12
+- usar `request_id` como contrato transversal consolidado nas Fases 9 a 14
 
 ### Depois da alteração
 
@@ -141,7 +150,7 @@ Agentes não devem:
 ### GenAI com método
 
 - RAG, policy, composição e resposta devem permanecer separáveis no runtime ativo
-- `request_id` deve evoluir como contrato transversal nas Fases 9 a 12
+- `request_id` deve permanecer como contrato transversal nas Fases 9 a 14
 - prompts, políticas e configurações de comportamento devem permanecer versionados
 - matriz de cenários e rubrica de qualidade devem orientar validações das Fases 10 a 12
 
@@ -162,7 +171,7 @@ Agentes não devem:
 - toda documentação deve refletir o estado real do código
 - arquitetura desejada futura deve ser marcada como futura, não como presente
 - `README.md` mantém a stack-alvo do case; `docs/arquitetura.md` e `docs/contexto.md` definem o runtime real da branch
-- nas Fases 9 a 12, `docs/guardrail_rastreavel.md` e `docs/genai_com_metodo.md` devem ser tratados como contratos documentais ativos
+- nas Fases 9 a 14, `docs/guardrail_rastreavel.md` e `docs/genai_com_metodo.md` devem ser tratados como contratos documentais ativos
 
 ## 8. Estrutura de saída esperada
 

@@ -2,12 +2,13 @@
   "id": "protocolo-geral-documentos-basicos",
   "tenant_id": "prefeitura-vila-serena",
   "title": "Protocolo Geral e Documentos Basicos",
-  "content": "O Protocolo Geral recebe requerimentos administrativos, pedidos de informacao e entregas documentais de segunda a sexta, das 8h as 16h. Sempre que o assunto depender de analise formal, o cidadao deve buscar o Protocolo Geral ou o setor competente.\n\nPara protocolo geral, os documentos basicos mais comuns sao documento com foto, CPF, comprovante de endereco e formulario padrao quando exigido pelo servico. Quando o pedido for apresentado por representante, tambem pode ser solicitado documento do procurador e procuracao simples assinada.",
+  "content": "O atendimento presencial do Protocolo Geral recebe requerimentos administrativos, pedidos de informacao e entregas documentais de segunda a sexta, das 8h as 16h. Sempre que o assunto depender de analise formal, o cidadao deve buscar o Protocolo Geral ou o setor competente.\n\nPara protocolo geral presencial, os documentos basicos mais comuns sao documento com foto, CPF, comprovante de endereco e formulario padrao quando exigido pelo servico. Quando o pedido for apresentado por representante, tambem pode ser solicitado documento do procurador e procuracao simples assinada.",
   "keywords": [
     "protocolo",
     "documentos",
     "requerimento",
-    "atendimento"
+    "atendimento",
+    "presencial"
   ],
   "intents": [
     "INFO_REQUEST",

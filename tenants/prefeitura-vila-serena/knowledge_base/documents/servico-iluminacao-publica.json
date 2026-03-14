@@ -1,0 +1,16 @@
+{
+  "id": "servico-iluminacao-publica",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Iluminacao Publica e Pedido de Manutencao",
+  "content": "Pedidos de reparo em iluminacao publica podem ser registrados pela Central de Atendimento ao Cidadao ou pelo Protocolo Geral, com encaminhamento para a equipe de Manutencao Urbana. O atendimento para abertura da solicitacao ocorre de segunda a sexta, das 8h as 17h.\n\nPara agilizar a manutencao, a prefeitura orienta informar endereco completo, ponto de referencia e, se possivel, numero do poste ou identificacao aproximada do local. Depois do registro, a vistoria tecnica costuma ocorrer em ate 5 dias uteis, salvo eventos climaticos ou volume atipico de ocorrencias.",
+  "keywords": [
+    "iluminacao",
+    "poste",
+    "manutencao",
+    "servicos-urbanos"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

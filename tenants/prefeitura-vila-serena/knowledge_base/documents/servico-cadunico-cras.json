@@ -1,0 +1,16 @@
+{
+  "id": "servico-cadunico-cras",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Cadastro Unico, CRAS Centro e Atualizacao Cadastral",
+  "content": "O atendimento para Cadastro Unico e orientacoes iniciais de beneficios sociais ocorre no CRAS Centro de segunda a sexta, das 8h as 16h30. A equipe do CRAS orienta sobre inscricao, atualizacao cadastral e documentos basicos para familias que precisam manter o cadastro regularizado.\n\nPara atendimento de Cadastro Unico, a orientacao e levar CPF ou titulo de eleitor do responsavel familiar, documento de identificacao dos demais moradores, comprovante de endereco e, quando houver, numero do NIS. A prefeitura recomenda atualizar o cadastro sempre que houver mudanca de endereco, renda, escola das criancas ou composicao familiar.",
+  "keywords": [
+    "cadastro-unico",
+    "cras",
+    "beneficios",
+    "assistencia-social"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

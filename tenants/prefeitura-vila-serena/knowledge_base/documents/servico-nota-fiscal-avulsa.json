@@ -1,0 +1,16 @@
+{
+  "id": "servico-nota-fiscal-avulsa",
+  "tenant_id": "prefeitura-vila-serena",
+  "title": "Nota Fiscal Avulsa e Orientacao Tributaria Basica",
+  "content": "A emissao de nota fiscal avulsa para prestadores eventuais deve ser solicitada ao Setor de Tributacao ou pelo portal institucional, quando o servico estiver disponivel digitalmente. O atendimento presencial ocorre de segunda a sexta, das 8h as 16h30.\n\nPara orientacao inicial sobre nota fiscal avulsa, a prefeitura recomenda apresentar CPF ou CNPJ, descricao do servico prestado, valor da operacao e documento basico do contribuinte. Quando houver incidencia de ISS ou necessidade de conferencia cadastral, o Setor de Tributacao informa o procedimento especifico e eventual prazo de emissao.",
+  "keywords": [
+    "nota-fiscal",
+    "tributacao",
+    "iss",
+    "prestador"
+  ],
+  "intents": [
+    "INFO_REQUEST",
+    "SERVICE_INFO"
+  ]
+}

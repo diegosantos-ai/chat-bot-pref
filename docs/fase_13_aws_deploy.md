@@ -12,10 +12,11 @@ O recorte minimo desta fase foi definido como:
 - VPC dedicada minima
 - uma subnet publica
 - Internet Gateway e route table publica
-- uma Security Group com acesso a porta da API
+- uma Security Group com acesso as portas da API e do proxy HTTPS
 - uma instancia EC2 unica
 - profile IAM com AWS Systems Manager
 - Elastic IP para URL estavel por IP
+- proxy HTTPS publico com Caddy
 - deploy inicial via `user_data` + `docker compose`
 
 Esse corte evita inflar o case com ALB, ECS, ECR, RDS ou backend remoto do Terraform antes da hora.
@@ -57,16 +58,17 @@ Enquanto o deploy remoto automatizado por GitHub Actions nao for fechado, o rede
 - `service_ingress_cidrs`
 - `tenant_manifest`
 
-### Secrets opcionais do ambiente remoto
+### Secrets e variaveis opcionais do ambiente remoto
 
 - `llm_api_key`
 - `telegram_bot_token`
 - `telegram_webhook_secret`
+- `public_base_hostname`
 
 No corte atual, o ambiente em nuvem pode operar com:
 
 - `LLM_PROVIDER=mock`
-- Telegram em `disabled`
+- Telegram em `disabled`, `dry_run` ou `api`
 
 ## Validacao local do codigo da fase
 
@@ -90,7 +92,7 @@ Depois do `apply`, use a URL de output da API:
 
 ```bash
 .venv/bin/python scripts/smoke_remote.py \
-  --base-url http://SEU_IP_PUBLICO:8000 \
+  --base-url https://SEU_HOSTNAME_PUBLICO \
   --tenant-id prefeitura-vila-serena \
   --json-out artifacts/fase13-remote-smoke.json
 ```
@@ -101,9 +103,10 @@ Entregas efetivamente validadas:
 
 - `terraform apply` provisionou VPC, subnet publica, Security Group, role SSM, EC2 unica e Elastic IP
 - `user_data` concluiu a instalacao de Docker e Docker Compose na EC2
-- `scripts/deploy_aws_instance.sh` subiu o backend e bootstrapped o tenant `prefeitura-vila-serena`
+- `scripts/deploy_aws_instance.sh` subiu o backend, renderizou o proxy HTTPS e bootstrapped o tenant `prefeitura-vila-serena`
 - `scripts/smoke_remote.py` aprovou `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
 - o artefato remoto ficou salvo em `artifacts/fase13-remote-smoke.json`
+- o bot Telegram ficou com webhook HTTPS ativo no ambiente remoto demonstrativo
 
 ## Ajustes de engenharia feitos durante a fase
 
@@ -128,7 +131,7 @@ Correcoes aplicadas:
 - `terraform validate`
 - `terraform plan`
 - `terraform apply`
-- `scripts/smoke_remote.py --base-url http://<output>:8000`
+- `scripts/smoke_remote.py --base-url https://<output-hostname>`
 
 O `plan` validou um corte minimo com 11 recursos AWS:
 

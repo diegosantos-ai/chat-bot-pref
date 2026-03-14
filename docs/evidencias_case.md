@@ -12,12 +12,22 @@ Este documento traduz o projeto em uma matriz simples de `claim -> evidencia -> 
 | O fluxo e tenant-aware | `tenant_id` obrigatorio; segregacao por tenant em chat, auditoria e RAG | [arquitetura.md](./arquitetura.md) |
 | O tenant demonstrativo e controlado | tenant ficticio versionado e base documental propria | [fase_7_tenant_demonstrativo.md](./fase_7_tenant_demonstrativo.md) |
 | O RAG e controlado por tenant | ingest, query, reset e retrieval checks validados | [fase_8_base_documental_ficticia.md](./fase_8_base_documental_ficticia.md) |
-| O Telegram reutiliza o mesmo fluxo principal | webhook demonstrativo e smoke do canal aprovados | [fase_9_telegram_demo.md](./fase_9_telegram_demo.md) |
+| O Telegram reutiliza o mesmo fluxo principal e pode ser demonstrado externamente | webhook HTTPS ativo no ambiente remoto, `getWebhookInfo` apontando para a URL publica e mesmo contrato do `ChatService` | [fase_9_telegram_demo.md](./fase_9_telegram_demo.md) |
 | O projeto demonstra GenAI controlada | adaptador LLM isolado, prompts versionados, `policy_pre` e `policy_post` | [fase_10_composicao_generativa.md](./fase_10_composicao_generativa.md) |
 | O pipeline e rastreavel | `request_id` compartilhado por auditoria, logs e traces | [fase_11_observabilidade_aplicada.md](./fase_11_observabilidade_aplicada.md) |
 | O projeto bloqueia regressao relevante em pipeline | workflow de CI versionado com quality gates, build Docker, smoke reduzido e artefato JSON | [fase_12_github_actions.md](./fase_12_github_actions.md) |
-| O projeto roda fora da maquina local com deploy reproduzivel | `terraform apply` provisionou EC2 + Docker; smoke remoto aprovou `/`, `/health`, `/metrics` e `POST /api/chat` | [fase_13_aws_deploy.md](./fase_13_aws_deploy.md) |
+| O projeto roda fora da maquina local com deploy reproduzivel | `terraform apply` provisionou EC2 + Docker + proxy HTTPS; smoke remoto aprovou `/`, `/health`, `/metrics` e `POST /api/chat` | [fase_13_aws_deploy.md](./fase_13_aws_deploy.md) |
 | O projeto ja tem evidencias executaveis | `pytest`, smoke por fase e artefatos JSON versionados | [diario_bordo.md](./diario_bordo.md) |
+
+## Checklist final consolidado
+
+Para leitura executiva do requisito principal do case, leia em conjunto:
+
+1. [genai_com_metodo.md](./genai_com_metodo.md)
+2. [guardrail_rastreavel.md](./guardrail_rastreavel.md)
+3. [fase_11_observabilidade_aplicada.md](./fase_11_observabilidade_aplicada.md)
+4. [fase_12_github_actions.md](./fase_12_github_actions.md)
+5. [fase_13_aws_deploy.md](./fase_13_aws_deploy.md)
 
 ## Exemplo curto de prova tecnica
 

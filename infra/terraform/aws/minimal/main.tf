@@ -1,5 +1,6 @@
 locals {
-  name_prefix = "${var.project_name}-${var.environment}"
+  name_prefix           = "${var.project_name}-${var.environment}"
+  public_https_hostname = trimspace(var.public_base_hostname) != "" ? trimspace(var.public_base_hostname) : "${replace(aws_eip.app.public_ip, ".", "-")}.sslip.io"
   common_tags = merge(
     {
       Project     = var.project_name
@@ -74,6 +75,30 @@ resource "aws_security_group" "app" {
     cidr_blocks = var.service_ingress_cidrs
   }
 
+  dynamic "ingress" {
+    for_each = var.public_https_enabled ? [1] : []
+
+    content {
+      description = "HTTP publico para desafio e redirect"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = var.service_ingress_cidrs
+    }
+  }
+
+  dynamic "ingress" {
+    for_each = var.public_https_enabled ? [1] : []
+
+    content {
+      description = "HTTPS publico para Telegram e demonstracao"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = var.service_ingress_cidrs
+    }
+  }
+
   egress {
     description = "Saida total para bootstrap e operacao"
     from_port   = 0
@@ -131,6 +156,8 @@ resource "aws_instance" "app" {
     app_ref                    = var.app_ref
     tenant_manifest            = var.tenant_manifest
     service_port               = var.service_port
+    public_https_enabled       = var.public_https_enabled
+    public_base_hostname       = var.public_base_hostname
     llm_provider               = var.llm_provider
     llm_model                  = var.llm_model
     llm_api_key                = var.llm_api_key

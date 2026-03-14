@@ -44,3 +44,13 @@ Para entrega real em um bot configurado no BotFather, e necessario:
 - usar `TELEGRAM_DELIVERY_MODE=api`
 - expor uma URL publica HTTPS para `POST /api/telegram/webhook`
 - configurar o webhook com `scripts/telegram_webhook.py`
+
+## Complemento operacional na Fase 14
+
+O canal deixou de depender de tunel temporario no ambiente remoto demonstrativo:
+
+- a AWS agora expoe um endpoint HTTPS publico estavel via proxy Caddy
+- o bot `@ChatPref_bot` foi validado com webhook ativo apontando para a URL publica do deploy remoto
+- a mesma base documental do tenant `prefeitura-vila-serena` foi ampliada para reforcar respostas frequentes no canal
+
+Esse ponto nao muda o contrato local reproduzivel da Fase 9, mas amplia a demonstracao publica do case.

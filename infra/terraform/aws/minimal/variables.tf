@@ -88,6 +88,18 @@ variable "cors_origins" {
   default     = ["http://localhost:8000"]
 }
 
+variable "public_https_enabled" {
+  description = "Habilita proxy HTTPS publico no ambiente remoto."
+  type        = bool
+  default     = false
+}
+
+variable "public_base_hostname" {
+  description = "Hostname publico opcional para o proxy HTTPS. Quando vazio, o deploy remoto deriva um hostname sslip.io a partir do IP publico."
+  type        = string
+  default     = ""
+}
+
 variable "llm_provider" {
   description = "Provedor LLM do deploy remoto."
   type        = string

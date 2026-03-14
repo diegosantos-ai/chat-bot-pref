@@ -22,6 +22,58 @@ Cada registro abaixo tenta responder quatro perguntas:
 
 ## Linha do tempo
 
+### 2026-03-14 - Telegram ficou publico com HTTPS estavel no ambiente remoto
+
+**Marco**
+
+O ambiente remoto do Chat Pref passou a expor a API por HTTPS estavel usando proxy Caddy sobre hostname `sslip.io`, e o bot `@ChatPref_bot` ficou com webhook ativo apontando para `POST /api/telegram/webhook`.
+
+**Por que isso importa**
+
+Esse fechamento tira o Telegram da categoria de "demo local controlada" e o leva para uma demonstracao externa real. Isso e o que permite compartilhar o bot com terceiros, como recrutadores, sem depender de tunel temporario.
+
+**Validacao principal**
+
+- `terraform apply` reaplicado com proxy HTTPS habilitado
+- `scripts/deploy_aws_instance.sh` renderizando `Caddyfile.runtime` e validando `https://.../health`
+- smoke remoto aprovado em `https://52-205-207-194.sslip.io`
+- `getWebhookInfo` do Telegram retornando a URL publica HTTPS do deploy remoto
+- ingest limpa reaprovada com base documental ampliada para 14 documentos e 11 retrieval checks
+
+**Evidencias**
+
+- [fase_13_aws_deploy.md](fase_13_aws_deploy.md)
+- [fase_9_telegram_demo.md](fase_9_telegram_demo.md)
+- [fase13-remote-smoke.json](../artifacts/fase13-remote-smoke.json)
+- [deploy_aws_instance.sh](../scripts/deploy_aws_instance.sh)
+
+### 2026-03-14 - Fase 14 alinhou a narrativa final do case
+
+**Marco**
+
+Os documentos centrais do repositorio passaram a contar a mesma historia do runtime validado: operacao local, CI, deploy remoto em AWS e limites declarados do case.
+
+**Por que isso importa**
+
+Sem esse fechamento, o projeto correria o risco de parecer maior ou menor do que realmente e. A Fase 14 existe para transformar validacoes tecnicas dispersas em uma narrativa unica, retomavel e defensavel em revisao tecnica, entrevista e leitura de terceiros.
+
+**Validacao principal**
+
+- revisao cruzada entre `README`, `docs/contexto.md`, `docs/arquitetura.md`, `docs/genai_com_metodo.md` e `docs/evidencias_case.md`
+- atualizacao da governanca de agentes e Copilot para refletir o deploy remoto minimo ja validado
+- `scripts/check_runtime_residues.py`
+- `pytest` com `32 passed`
+- `docker compose -f docker-compose.yml config`
+- smoke remoto reaprovado em `artifacts/fase13-remote-smoke.json`
+
+**Evidencias**
+
+- [README.md](../README.md)
+- [contexto.md](contexto.md)
+- [arquitetura.md](arquitetura.md)
+- [genai_com_metodo.md](genai_com_metodo.md)
+- [evidencias_case.md](evidencias_case.md)
+
 ### 2026-03-14 - Fase 13 validada com deploy remoto em AWS
 
 **Marco**
@@ -216,6 +268,10 @@ O projeto ganhou um tenant ficticio coerente, base documental propria, retrieval
 **Por que isso importa**
 
 Sem tenant e base documental controlados, a demonstracao de RAG e guardrails perderia explicabilidade e repetibilidade.
+
+**Estado mais recente da base**
+
+Ao final da Fase 14, a base documental do tenant demonstrativo foi ampliada para 14 documentos e 11 retrieval checks controlados, reforcando a capacidade do canal Telegram de responder duvidas institucionais frequentes.
 
 **Evidencias**
 

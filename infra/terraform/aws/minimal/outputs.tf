@@ -25,7 +25,7 @@ output "public_hostname" {
 
 output "https_base_url" {
   description = "URL HTTPS publica recomendada para o Chat Pref."
-  value       = "https://${local.public_https_hostname}"
+  value       = var.public_https_enabled ? "https://${local.public_https_hostname}" : null
 }
 
 output "health_url" {
@@ -35,7 +35,7 @@ output "health_url" {
 
 output "https_health_url" {
   description = "URL HTTPS remota do healthcheck."
-  value       = "https://${local.public_https_hostname}/health"
+  value       = var.public_https_enabled ? "https://${local.public_https_hostname}/health" : null
 }
 
 output "metrics_url" {
@@ -45,7 +45,7 @@ output "metrics_url" {
 
 output "telegram_webhook_url" {
   description = "Webhook HTTPS recomendado para ativacao do Telegram."
-  value       = "https://${local.public_https_hostname}/api/telegram/webhook"
+  value       = var.public_https_enabled ? "https://${local.public_https_hostname}/api/telegram/webhook" : null
 }
 
 output "ssm_start_session_command" {

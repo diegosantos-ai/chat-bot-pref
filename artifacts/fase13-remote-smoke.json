@@ -1,0 +1,28 @@
+{
+  "base_url": "http://<public-ip>:8000",
+  "tenant_id": "prefeitura-vila-serena",
+  "request_id": "fase13-remote-smoke",
+  "root": {
+    "message": "Chat Pref API ativa.",
+    "env": "prod",
+    "version": "0.1.0",
+    "docs": "/docs"
+  },
+  "health": {
+    "status": "healthy"
+  },
+  "metrics_checked": [
+    "chatpref_chat_requests_total",
+    "chatpref_policy_decisions_total",
+    "chatpref_retrieval_total",
+    "chatpref_llm_compositions_total",
+    "chatpref_llm_compose_latency_seconds"
+  ],
+  "chat": {
+    "request_id": "fase13-remote-smoke",
+    "session_id": "ce3a1758-9069-4783-98ed-a171d86a639e",
+    "tenant_id": "prefeitura-vila-serena",
+    "message": "De acordo com as informacoes institucionais da Prefeitura Municipal de Vila Serena, A sala de vacinacao funciona das 8h as 16h, com pausa operacional curta entre 12h e 13h para organizacao interna. Se precisar de atendimento formal, procure os canais oficiais da prefeitura.",
+    "channel": "web"
+  }
+}

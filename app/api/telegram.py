@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException, Request
 
 from app.contracts.dto import TelegramWebhookRequest, TelegramWebhookResponse
 from app.services.telegram_service import (
@@ -14,6 +14,7 @@ telegram_service = TelegramService()
 
 @router.post("/webhook", response_model=TelegramWebhookResponse)
 async def telegram_webhook(
+    request: Request,
     update: TelegramWebhookRequest,
     telegram_secret: str | None = Header(
         default=None,
@@ -24,7 +25,10 @@ async def telegram_webhook(
         raise HTTPException(status_code=403, detail="Invalid telegram secret")
 
     try:
-        return await telegram_service.handle_update(update)
+        return await telegram_service.handle_update(
+            update,
+            request_id=getattr(request.state, "request_id", None),
+        )
     except TelegramTenantResolutionError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except TelegramDeliveryError as exc:

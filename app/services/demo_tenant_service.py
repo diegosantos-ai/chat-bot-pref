@@ -590,6 +590,65 @@ class DemoTenantService:
             "criteria": criteria,
         }
 
+    def build_phase11_managerial_report(
+        self,
+        manifest_path: str | Path,
+        runtime_validation: dict[str, Any],
+    ) -> dict[str, Any]:
+        validation = self.validate_bundle(manifest_path)
+
+        criteria = [
+            {
+                "criterion": "logs estruturados acessiveis e correlacionados ao audit trail",
+                "ok": bool(runtime_validation.get("structured_log_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("structured_log_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "metricas basicas expostas e verificaveis em /metrics",
+                "ok": bool(runtime_validation.get("metrics_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("metrics_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "trilha minima request -> policy_pre -> retrieval -> compose -> policy_post -> response observavel",
+                "ok": bool(runtime_validation.get("trace_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("trace_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "auditoria, logs e traces usando os mesmos IDs de correlacao",
+                "ok": bool(runtime_validation.get("observability_correlation_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("observability_correlation_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "fluxo do tenant demonstrativo documentado e aderente ao escopo institucional",
+                "ok": bool(runtime_validation.get("scope_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("scope_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "resumo tecnico do case consolidado com evidencias rastreaveis",
+                "ok": bool(runtime_validation.get("audit_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("audit_validation", {}).get("evidence", "")),
+            },
+        ]
+
+        passed = sum(1 for item in criteria if item["ok"])
+        total = len(criteria)
+
+        return {
+            "phase": "Fase 11 - Observabilidade Aplicada e Fechamento Tecnico do Case",
+            "tenant_id": validation["tenant_id"],
+            "client_name": validation["client_name"],
+            "status": "passed" if passed == total else "failed",
+            "criteria_total": total,
+            "criteria_passed": passed,
+            "criteria_failed": total - passed,
+            "executive_summary": (
+                "Observabilidade minima aplicada com logs, metricas e traces correlacionados ao fluxo do tenant demonstrativo."
+                if passed == total
+                else "A trilha de observabilidade ainda possui pendencias de execucao ou correlacao."
+            ),
+            "criteria": criteria,
+        }
+
     def bootstrap_bundle(
         self,
         manifest_path: str | Path,

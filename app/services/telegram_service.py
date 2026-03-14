@@ -12,6 +12,9 @@ from app.contracts.dto import (
     TelegramWebhookRequest,
     TelegramWebhookResponse,
 )
+from app.observability.context import update_correlation_context
+from app.observability.logging import log_event
+from app.observability.tracing import annotate_current_span, get_tracer
 from app.services.chat_service import ChatService
 from app.settings import settings
 from app.storage.audit_repository import FileAuditRepository
@@ -122,6 +125,7 @@ class TelegramService:
             (default_tenant_id if default_tenant_id is not None else settings.TELEGRAM_DEFAULT_TENANT_ID)
             .strip()
         )
+        self.tracer = get_tracer(__name__)
         self.chat_tenant_map = {
             str(key).strip(): str(value).strip()
             for key, value in (
@@ -130,7 +134,12 @@ class TelegramService:
             if str(key).strip() and str(value).strip()
         }
 
-    async def handle_update(self, update: TelegramWebhookRequest) -> TelegramWebhookResponse:
+    async def handle_update(
+        self,
+        update: TelegramWebhookRequest,
+        *,
+        request_id: str | None = None,
+    ) -> TelegramWebhookResponse:
         message = self._resolve_supported_message(update)
         if message is None or not message.text:
             return TelegramWebhookResponse(
@@ -143,81 +152,138 @@ class TelegramService:
             )
 
         tenant_id = self._resolve_tenant(message.chat.id)
-        request_id = str(uuid4())
+        resolved_request_id = str(request_id).strip() or str(uuid4())
         session_id = self._build_session_id(message.chat.id)
         audit_context = self._build_audit_context(update, message)
 
-        self._append_event(
-            request_id=request_id,
+        update_correlation_context(
+            request_id=resolved_request_id,
             tenant_id=tenant_id,
             session_id=session_id,
-            event_type="telegram_update_received",
-            payload={
-                **audit_context,
-                "text": message.text,
-            },
+            channel="telegram",
+        )
+        annotate_current_span(
+            request_id=resolved_request_id,
+            tenant_id=tenant_id,
+            session_id=session_id,
+            channel="telegram",
         )
 
-        set_tenant(tenant_id)
-        try:
-            chat_response = await self.chat_service.process(
-                ChatRequest(
-                    tenant_id=tenant_id,
-                    session_id=session_id,
-                    message=message.text,
-                    channel="telegram",
-                ),
-                request_id=request_id,
-                session_id=session_id,
-                audit_context=audit_context,
-            )
-        finally:
-            clear_tenant()
-
-        try:
-            delivery = await self.bot_client.send_message(
-                chat_id=message.chat.id,
-                text=chat_response.message,
-                reply_to_message_id=message.message_id,
-            )
-        except TelegramDeliveryError as exc:
-            self._append_event(
-                request_id=request_id,
+        with self.tracer.start_as_current_span("telegram.receive"):
+            annotate_current_span(
+                request_id=resolved_request_id,
                 tenant_id=tenant_id,
                 session_id=session_id,
-                event_type="telegram_message_delivery_failed",
+                channel="telegram",
+                telegram_update_id=update.update_id,
+                telegram_chat_id=message.chat.id,
+                telegram_message_id=message.message_id,
+            )
+            log_event(
+                "telegram.update.received",
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=session_id,
+                channel="telegram",
+                telegram_update_id=update.update_id,
+                telegram_chat_id=message.chat.id,
+                telegram_message_id=message.message_id,
+            )
+
+            self._append_event(
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=session_id,
+                event_type="telegram_update_received",
                 payload={
                     **audit_context,
-                    "delivery_status": "failed",
-                    "detail": str(exc),
+                    "text": message.text,
                 },
             )
-            raise
 
-        self._append_event(
-            request_id=request_id,
-            tenant_id=tenant_id,
-            session_id=session_id,
-            event_type="telegram_message_delivery",
-            payload={
-                **audit_context,
-                "delivery_status": delivery.status,
-                "external_message_id": delivery.external_message_id,
-                "detail": delivery.detail,
-            },
-        )
+            set_tenant(tenant_id)
+            try:
+                chat_response = await self.chat_service.process(
+                    ChatRequest(
+                        tenant_id=tenant_id,
+                        session_id=session_id,
+                        message=message.text,
+                        channel="telegram",
+                    ),
+                    request_id=resolved_request_id,
+                    session_id=session_id,
+                    audit_context=audit_context,
+                )
+            finally:
+                clear_tenant()
 
-        return TelegramWebhookResponse(
-            status="processed",
-            request_id=request_id,
-            tenant_id=tenant_id,
-            session_id=session_id,
-            update_id=update.update_id,
-            chat_id=message.chat.id,
-            inbound_message_id=message.message_id,
-            outbound_status=delivery.status,
-            detail=delivery.detail,
-        )
+            try:
+                with self.tracer.start_as_current_span("telegram.send"):
+                    annotate_current_span(
+                        request_id=resolved_request_id,
+                        tenant_id=tenant_id,
+                        session_id=session_id,
+                        channel="telegram",
+                    )
+                    delivery = await self.bot_client.send_message(
+                        chat_id=message.chat.id,
+                        text=chat_response.message,
+                        reply_to_message_id=message.message_id,
+                    )
+            except TelegramDeliveryError as exc:
+                self._append_event(
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=session_id,
+                    event_type="telegram_message_delivery_failed",
+                    payload={
+                        **audit_context,
+                        "delivery_status": "failed",
+                        "detail": str(exc),
+                    },
+                )
+                log_event(
+                    "telegram.message.delivery_failed",
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=session_id,
+                    channel="telegram",
+                    detail=str(exc),
+                )
+                raise
+
+            self._append_event(
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=session_id,
+                event_type="telegram_message_delivery",
+                payload={
+                    **audit_context,
+                    "delivery_status": delivery.status,
+                    "external_message_id": delivery.external_message_id,
+                    "detail": delivery.detail,
+                },
+            )
+            log_event(
+                "telegram.message.delivered",
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=session_id,
+                channel="telegram",
+                delivery_status=delivery.status,
+            )
+
+            return TelegramWebhookResponse(
+                status="processed",
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=session_id,
+                update_id=update.update_id,
+                chat_id=message.chat.id,
+                inbound_message_id=message.message_id,
+                outbound_status=delivery.status,
+                detail=delivery.detail,
+            )
 
     def _resolve_supported_message(self, update: TelegramWebhookRequest) -> TelegramMessage | None:
         return update.message or update.edited_message

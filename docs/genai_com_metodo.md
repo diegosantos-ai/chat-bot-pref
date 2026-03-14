@@ -39,9 +39,6 @@ Hoje a base ja possui:
 
 Hoje a base ainda nao possui:
 
-- logs estruturados
-- metricas em `/metrics`
-- traces com OpenTelemetry
 - regressao automatica de comportamento em CI
 - provedor LLM externo real validado como default reproduzivel
 
@@ -81,7 +78,7 @@ Cobertura ativa no runtime, mas ainda sem cenario dedicado no smoke:
 | Regressao de comportamento | parcial, sem CI | Fase 12 |
 | Aderencia ao escopo institucional | implementado no corte minimo da Fase 10 | Fases 10 e 12 |
 | Tenant-awareness no fluxo de IA | implementado no nucleo atual | Fases 9 a 10 |
-| Observabilidade util | nao implementado | Fase 11 |
+| Observabilidade util | implementado no corte minimo da Fase 11 | Fase 11 |
 | Fechamento de evidencias do case | parcial | Fases 11 a 14 |
 
 ## 6. Relacao entre os blocos do sistema
@@ -110,9 +107,9 @@ Cobertura ativa no runtime, mas ainda sem cenario dedicado no smoke:
 
 ### Fase 11
 
-- observar o pipeline completo com logs, metricas e traces
-- consolidar a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
-- ampliar a cobertura observavel dos cenarios e reason codes ja ativos
+- logs estruturados, metricas e traces implementados
+- trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response` validada no smoke
+- correlacao por `request_id` consolidada entre auditoria, logs e traces
 
 ### Fase 12
 

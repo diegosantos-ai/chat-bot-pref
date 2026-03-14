@@ -45,7 +45,7 @@ Papel no projeto:
 
 - correlacionar logs, traces e metricas
 - materializar a trilha ponta a ponta do fluxo
-- entrar apenas a partir da Fase 11
+- estar ativo a partir da Fase 11
 
 ## 3. Estado atual da base
 
@@ -61,9 +61,6 @@ O runtime ativo hoje ja possui uma base minima reaproveitavel:
 
 O runtime ativo hoje ainda nao possui:
 
-- logging estruturado
-- `/metrics`
-- traces com OpenTelemetry
 - regressao automatizada em CI desses contratos
 - provedor LLM externo real validado como caminho padrao do runtime
 
@@ -196,7 +193,7 @@ Implementados no runtime, mas ainda sem cenario dedicado no smoke:
 
 ## 10. Regras de logging e auditoria
 
-Campos minimos planejados para logs estruturados:
+Campos minimos ativos para logs estruturados:
 
 - `timestamp`
 - `level`

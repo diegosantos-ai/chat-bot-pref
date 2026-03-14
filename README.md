@@ -274,7 +274,7 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
 **Fase ativa na branch:** Fase 11 — Observabilidade aplicada e fechamento técnico do case.
-**Status da fase na branch:** iniciada na branch de trabalho.
+**Status da fase na branch:** concluida e validada na branch de trabalho.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe
@@ -288,6 +288,9 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * prompts e política textual versionados
 * `policy_pre` e `policy_post` com `reason_codes`
 * integração Telegram demonstrativa com reutilização do fluxo principal
+* logs estruturados correlacionados por `request_id`
+* métricas mínimas expostas em `/metrics`
+* traces OpenTelemetry persistidos por `request_id`
 * documentação técnica alinhada ao runtime mínimo
 * tenant fictício demonstrativo versionado
 * base documental fictícia do tenant demonstrativo
@@ -295,13 +298,11 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 
 ### Em andamento
 
-* observabilidade aplicada da Fase 11
-* consolidação da trilha correlacionada entre auditoria, logs, métricas e traces
-* regressão automatizada de comportamento para a Fase 12
+* regressão automatizada de comportamento e rastreabilidade para a Fase 12
+* consolidação do case final para demonstração profissional
 
 ### Próxima direção
 
-* observabilidade aplicada com logs estruturados, métricas e traces
 * CI com GitHub Actions
 * deploy mínimo em AWS com Terraform
 * fechamento do case com evidências de operação
@@ -466,7 +467,7 @@ Ele funciona como **canal demonstrativo** para validar:
 
 O projeto deve oferecer visibilidade mínima sobre o fluxo do atendimento.
 
-Na base ativa atual, a evidência já validada inclui auditoria versionada `audit.v1`, `PolicyDecision`, `reason_codes` e correlação mínima por `request_id`. Logs estruturados, métricas expostas e traces correlacionados entram como evolução planejada da Fase 11.
+Na base ativa atual, a evidência já validada inclui auditoria versionada `audit.v1`, `PolicyDecision`, `reason_codes`, logs estruturados, métricas expostas em `/metrics` e traces correlacionados por `request_id`.
 
 ### Evidências esperadas
 
@@ -519,9 +520,9 @@ A recomendação atual é privilegiar uma arquitetura enxuta, suficiente para de
 
 ### Curto prazo
 
-* consolidar a observabilidade aplicada da Fase 11
-* expor métricas mínimas e trilha correlacionada do pipeline
+* automatizar regressão funcional e comportamental com GitHub Actions
 * preservar o contrato de `request_id` e `tenant_id` nos fluxos críticos
+* consolidar os artefatos técnicos finais do case
 
 ### Médio prazo
 

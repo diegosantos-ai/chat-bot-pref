@@ -20,6 +20,7 @@ Isso cobre:
 
 - `GET /`
 - `GET /health`
+- `GET /metrics`
 - `POST /api/chat`
 - `POST /api/webhook`
 - `POST /api/telegram/webhook`
@@ -34,7 +35,6 @@ Fica fora deste bootstrap:
 - painel administrativo como serviço validado
 - banco relacional
 - Redis
-- observabilidade
 - integrações externas completas além do Telegram demonstrativo
 
 ## Arquivos de ambiente
@@ -51,7 +51,7 @@ Variáveis relevantes para o Telegram:
 - `TELEGRAM_DELIVERY_MODE`
 - `TELEGRAM_BOT_TOKEN`
 
-Variaveis relevantes para a Fase 10:
+Variaveis relevantes para a Fase 10 e Fase 11:
 
 - `LLM_PROVIDER`
 - `LLM_MODEL`
@@ -88,18 +88,18 @@ O tenant demonstrativo oficial desta fase e `prefeitura-vila-serena`. Para mater
   --manifest tenants/prefeitura-vila-serena/tenant.json \
   --purge-documents \
   --ingest \
-  --phase-report fase10
+  --phase-report fase11
 ```
 
-Para validar a Fase 10 com o smoke completo e relatorio gerencial da fase:
+Para validar a Fase 11 com o smoke completo e relatorio gerencial da fase:
 
 ```bash
 .venv/bin/python scripts/smoke_tests.py \
   --env prod \
   --tenant-id prefeitura-vila-serena \
   --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
-  --phase-report fase10 \
-  --json-out artifacts/fase10-smoke-prod.json
+  --phase-report fase11 \
+  --json-out artifacts/fase11-smoke-prod.json
 ```
 
 Variante `dev`:
@@ -109,8 +109,8 @@ Variante `dev`:
   --env dev \
   --tenant-id prefeitura-vila-serena \
   --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
-  --phase-report fase10 \
-  --json-out artifacts/fase10-smoke-dev.json
+  --phase-report fase11 \
+  --json-out artifacts/fase11-smoke-dev.json
 ```
 
 Se o ambiente ja estiver levantado e voce quiser reaproveita-lo sem `down` automatico no fim do smoke:
@@ -121,8 +121,8 @@ Se o ambiente ja estiver levantado e voce quiser reaproveita-lo sem `down` autom
   --runtime-mode reuse \
   --tenant-id prefeitura-vila-serena \
   --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
-  --phase-report fase10 \
-  --json-out artifacts/fase10-smoke-prod.json
+  --phase-report fase11 \
+  --json-out artifacts/fase11-smoke-prod.json
 ```
 
 ### 1. Validar estado inicial sem base
@@ -192,7 +192,7 @@ Resultado esperado:
 - nao reutilizar o contexto de `prefeitura-demo`
 - retornar mensagem controlada de base ausente para o outro tenant
 
-### 6. Validar cenarios controlados da Fase 10
+### 6. Validar cenarios controlados das Fases 10 e 11
 
 Rode exemplos simples com `X-Request-ID` para acompanhar a auditoria:
 
@@ -220,7 +220,24 @@ Resultado esperado:
 - pergunta de baixa confianca responde com fallback de contexto insuficiente
 - o mesmo `request_id` aparece na resposta e na auditoria do tenant
 
-### 7. Resetar a base
+### 7. Validar observabilidade minima da Fase 11
+
+Use o mesmo `request_id` de um cenario controlado para inspecionar metricas, logs e traces:
+
+```bash
+curl -sS http://127.0.0.1:8000/metrics | rg "chatpref_(chat_requests_total|policy_decisions_total|retrieval_total|llm_compositions_total|llm_compose_latency_seconds)"
+
+docker exec chat-pref-api sh -lc 'find /app/data/runtime/logs -type f | sort | tail -n 4'
+docker exec chat-pref-api sh -lc 'find /app/data/runtime/traces -type f | sort | tail -n 4'
+```
+
+Resultado esperado:
+
+- `/metrics` exposto com as series minimas da Fase 11
+- arquivo JSONL de logs estruturados por `request_id`
+- arquivo JSONL de traces por `request_id`
+
+### 8. Resetar a base
 
 ```bash
 curl -sS -X POST http://127.0.0.1:8000/api/rag/reset \
@@ -235,7 +252,7 @@ Resultado esperado:
 - possiveis colecoes legadas removidas
 - `ready: false`
 
-### 8. Simular webhook do Telegram localmente
+### 9. Simular webhook do Telegram localmente
 
 O compose padrao sobe o Telegram em `dry_run`, sem depender de token real para o smoke.
 
@@ -253,7 +270,7 @@ Resultado esperado:
 - `channel: "telegram"`
 - `outbound_status: "dry_run"`
 
-### 9. Configurar webhook real do Telegram
+### 10. Configurar webhook real do Telegram
 
 Para um bot real criado no BotFather, use o utilitario abaixo depois de expor uma URL publica HTTPS para a API:
 

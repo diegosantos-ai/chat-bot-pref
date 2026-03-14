@@ -6,8 +6,8 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 11 — Observabilidade Aplicada e Fechamento Tecnico do Case
-- **Status da fase atual:** concluida e validada na branch de trabalho
+- **Fase ativa:** Fase 12 — Automacao de Qualidade com GitHub Actions
+- **Status da fase atual:** iniciada na branch de trabalho
 - **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
 
 ## 2. Objetivo do projeto

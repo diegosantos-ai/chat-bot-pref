@@ -22,6 +22,31 @@ Cada registro abaixo tenta responder quatro perguntas:
 
 ## Linha do tempo
 
+### 2026-03-14 - Hotfix do build Docker no GitHub Actions
+
+**Marco**
+
+O primeiro run remoto da CI expôs uma divergencia entre o ambiente local e o checkout do GitHub Actions: o `Dockerfile` copiava `.env.example`, mas esse arquivo estava ignorado no Git e, por isso, nao existia no runner.
+
+**Por que isso importa**
+
+Esse tipo de falha e pequeno em codigo, mas importante como prova de maturidade. Ele mostra que o projeto nao ficou apenas "verde na maquina local": a pipeline remota encontrou uma diferenca real de empacotamento, a causa raiz foi identificada e o contrato do build foi corrigido.
+
+**Validacao principal**
+
+- erro reproduzido no job `docker build` do GitHub Actions
+- causa raiz confirmada em `.gitignore`
+- `docker build -t chat-pref-ci -f Dockerfile .` aprovado apos versionar `/.env.example`
+- workflow remoto da branch voltou a passar
+
+**Evidencias**
+
+- [Dockerfile](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/Dockerfile)
+- [.gitignore](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/.gitignore)
+- [.env.example](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/.env.example)
+- [ci.yml](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/.github/workflows/ci.yml)
+- [fase_12_github_actions.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_12_github_actions.md)
+
 ### 2026-03-14 - Fase 12 implementada e validada localmente na branch
 
 **Marco**

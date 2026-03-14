@@ -1,5 +1,5 @@
 {
-  "base_url": "http://52.205.207.194:8000",
+  "base_url": "http://<public-ip>:8000",
   "tenant_id": "prefeitura-vila-serena",
   "request_id": "fase13-remote-smoke",
   "root": {

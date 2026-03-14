@@ -33,6 +33,7 @@ Escopo implementado:
 - `GET /health`
 - `POST /api/chat`
 - `POST /api/webhook`
+- `POST /api/telegram/webhook`
 - `GET /api/rag/status`
 - `POST /api/rag/documents`
 - `POST /api/rag/ingest`
@@ -44,12 +45,13 @@ Escopo implementado:
 - auditoria mínima por tenant
 - RAG tenant-aware com ingest limpa
 - tenant demonstrativo e base documental fictícia
+- integração Telegram demonstrativa com entrega `dry_run`
 - Docker funcional
 - smoke tests e retrieval checks
 
 Não assuma como ativos no runtime atual:
 
-- canal Telegram ponta a ponta
+- bot Telegram configurado com token real e webhook publico externo
 - composição generativa ativa com provedor LLM
 - `policy_pre` e `policy_post`
 - `PolicyDecision` e `AuditEvent` versionado

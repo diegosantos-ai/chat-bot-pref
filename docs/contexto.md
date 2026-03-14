@@ -7,6 +7,7 @@
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
 - **Fase ativa:** Fase 9 — Operacionalizacao do chat via Telegram
+- **Status da fase atual:** concluida e validada na branch de trabalho
 - **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
 
 ## 2. Objetivo do projeto
@@ -32,6 +33,7 @@ Ele inclui:
 - `GET /health`
 - `POST /api/chat`
 - `POST /api/webhook`
+- `POST /api/telegram/webhook`
 - `GET /api/rag/status`
 - `POST /api/rag/documents`
 - `POST /api/rag/ingest`
@@ -43,6 +45,7 @@ Capacidades atualmente validadas:
 - `tenant_id` explicito nos fluxos criticos
 - `tenant_context` por request
 - resolucao minima de tenant no webhook
+- integracao demonstrativa do Telegram com o mesmo fluxo do chat
 - historico de chat em arquivo por tenant
 - auditoria minima em arquivo por tenant
 - base documental e retrieval por tenant em Chroma
@@ -91,7 +94,7 @@ Os itens abaixo continuam sendo direcao futura, nao comportamento presente do ru
 - logs estruturados no runtime
 - endpoint `/metrics`
 - traces com OpenTelemetry
-- canal Telegram operando em producao demonstrativa
+- bot Telegram operando com token real e webhook publico em ambiente externo
 - painel admin como servico validado no ambiente local
 - CI executando validacoes no GitHub Actions
 - deploy em AWS provisionado por Terraform
@@ -100,11 +103,12 @@ Os itens abaixo continuam sendo direcao futura, nao comportamento presente do ru
 
 ### Fase 9
 
-Objetivo imediato:
+Entregas validadas na branch:
 
-- colocar o tenant demonstrativo para operar via Telegram
-- manter consistencia com o fluxo atual de `POST /api/chat`
-- registrar auditoria correlacionada das interacoes do canal
+- tenant demonstrativo operando no webhook do Telegram
+- reutilizacao do mesmo `ChatService` do chat direto
+- auditoria correlacionada com `request_id`, `tenant_id`, `chat_id`, `message_id` e `update_id`
+- smoke local validando o canal em `dry_run`
 
 ### Fases 10 a 12
 
@@ -143,10 +147,10 @@ Referencia normativa desse eixo:
 
 O proximo ciclo sera considerado bem encaminhado quando:
 
-- o Telegram operar sobre o mesmo contrato tenant-aware do chat direto
-- a auditoria do canal estiver correlacionada por IDs minimos
-- a documentacao-base separar claramente presente e planejado
-- o eixo Guardrail Rastreavel estiver embutido no planejamento das Fases 9 a 12
+- a composicao generativa minima entrar sem quebrar o contrato multi-tenant
+- `PolicyDecision` e auditoria versionada surgirem com evidencias por `request_id`
+- a documentacao-base continuar separando claramente presente e planejado
+- a Fase 10 introduzir GenAI controlada sem regredir o runtime validado
 
 ## 10. Forma de validacao
 

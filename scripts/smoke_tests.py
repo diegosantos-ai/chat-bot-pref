@@ -12,6 +12,7 @@ Exemplos:
     python scripts/smoke_tests.py --env prod --json-out artifacts/smoke-prod.json
     python scripts/smoke_tests.py --env dev --json --json-out artifacts/smoke-dev.json
     python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase8
+    python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase9
 
 Requisitos:
     - Docker e Docker Compose disponíveis
@@ -40,6 +41,7 @@ BASE_URL: str = "http://127.0.0.1:8000"
 DEFAULT_TENANT_ID: str = "prefeitura-demo"
 TIMEOUT_SECONDS: int = 10
 HEALTH_WAIT_SECONDS: int = 60
+DEFAULT_TELEGRAM_SECRET: str = "telegram-demo-secret"
 
 
 @dataclass
@@ -66,6 +68,7 @@ class TestContext:
     tenant_id: str
     tenant_manifest: str | None = None
     phase_report: str = "fase7"
+    telegram_secret: str = DEFAULT_TELEGRAM_SECRET
     print_json: bool = False
     json_out: str | None = None
     results: list[TestResult] = field(default_factory=list)
@@ -74,6 +77,10 @@ class TestContext:
     empty_state_validation: dict[str, Any] | None = None
     ingest_validation: dict[str, Any] | None = None
     controlled_retrieval_report: dict[str, Any] | None = None
+    telegram_webhook_validation: dict[str, Any] | None = None
+    telegram_tenant_validation: dict[str, Any] | None = None
+    telegram_message_validation: dict[str, Any] | None = None
+    telegram_audit_validation: dict[str, Any] | None = None
 
     def add_result(self, result: TestResult) -> None:
         """
@@ -118,6 +125,7 @@ def http_request(
     method: str,
     path: str,
     data: dict[str, Any] | None = None,
+    headers: dict[str, str] | None = None,
 ) -> tuple[int, dict[str, Any] | str]:
     """
     Executa uma requisição HTTP simples e tenta parsear JSON.
@@ -132,7 +140,9 @@ def http_request(
     """
     url = f"{BASE_URL}{path}"
     body: bytes | None = None
-    headers = {"Content-Type": "application/json"}
+    request_headers = {"Content-Type": "application/json"}
+    if headers:
+        request_headers.update(headers)
 
     if data is not None:
         body = json.dumps(data).encode("utf-8")
@@ -140,7 +150,7 @@ def http_request(
     request = urllib.request.Request(
         url=url,
         data=body,
-        headers=headers,
+        headers=request_headers,
         method=method,
     )
 
@@ -259,6 +269,28 @@ def _build_phase_report(context: TestContext) -> dict[str, Any] | None:
                 "retrieval_validation": context.controlled_retrieval_report or {
                     "ok": False,
                     "evidence": "retrieval controlado nao executado",
+                },
+            },
+        )
+    if context.phase_report == "fase9":
+        return service.build_phase9_managerial_report(
+            context.tenant_manifest,
+            runtime_validation={
+                "telegram_webhook_validation": context.telegram_webhook_validation or {
+                    "ok": False,
+                    "evidence": "webhook do Telegram nao validado",
+                },
+                "telegram_tenant_validation": context.telegram_tenant_validation or {
+                    "ok": False,
+                    "evidence": "tenant do Telegram nao validado",
+                },
+                "telegram_message_validation": context.telegram_message_validation or {
+                    "ok": False,
+                    "evidence": "resposta do Telegram nao validada",
+                },
+                "telegram_audit_validation": context.telegram_audit_validation or {
+                    "ok": False,
+                    "evidence": "auditoria correlacionada do Telegram nao validada",
                 },
             },
         )
@@ -689,6 +721,138 @@ def query_chat(context: TestContext) -> None:
         raise RuntimeError("Falha no endpoint de chat.")
 
 
+def query_telegram(context: TestContext) -> None:
+    """
+    Simula o webhook do Telegram com entrega em dry_run.
+    """
+    if context.phase_report != "fase9":
+        return
+
+    update_payload = {
+        "update_id": "900001",
+        "message": {
+            "message_id": "700001",
+            "date": 1710000000,
+            "chat": {
+                "id": "55119990001",
+                "type": "private",
+                "username": "vila_serena_demo",
+            },
+            "from": {
+                "id": "55119990001",
+                "is_bot": False,
+                "first_name": "Demo",
+                "username": "vila_serena_demo",
+            },
+            "text": "Qual o horario do alvara?",
+        },
+    }
+    status, response = http_request(
+        "POST",
+        "/api/telegram/webhook",
+        update_payload,
+        headers={"X-Telegram-Bot-Api-Secret-Token": context.telegram_secret},
+    )
+    ok = (
+        status == 200
+        and isinstance(response, dict)
+        and response.get("status") == "processed"
+        and response.get("tenant_id") == context.tenant_id
+        and response.get("channel") == "telegram"
+        and response.get("outbound_status") in {"dry_run", "sent", "disabled"}
+    )
+
+    session_id = response.get("session_id") if isinstance(response, dict) else None
+    request_id = response.get("request_id") if isinstance(response, dict) else None
+    audit_lines: list[dict[str, Any]] = []
+    if session_id:
+        audit_path = f"/app/data/runtime/audit/{context.tenant_id}/{session_id}.jsonl"
+        result = run_command(
+            [
+                "docker",
+                "exec",
+                context.container_name,
+                "python",
+                "-c",
+                (
+                    "from pathlib import Path; "
+                    f"path = Path({audit_path!r}); "
+                    "print(path.read_text(encoding='utf-8') if path.exists() else '')"
+                ),
+            ],
+            check=False,
+        )
+        for line in result.stdout.strip().splitlines():
+            if line.strip():
+                audit_lines.append(json.loads(line))
+
+    audit_ok = False
+    if audit_lines and request_id:
+        event_types = [line.get("event_type") for line in audit_lines]
+        required_events = {
+            "telegram_update_received",
+            "chat_request_received",
+            "chat_response_generated",
+            "telegram_message_delivery",
+        }
+        same_request_id = all(line.get("request_id") == request_id for line in audit_lines)
+        correlated_payloads = all(
+            line.get("payload", {}).get("telegram_chat_id") == "55119990001"
+            and line.get("payload", {}).get("telegram_message_id") == "700001"
+            and line.get("payload", {}).get("telegram_update_id") == "900001"
+            for line in audit_lines
+            if line.get("event_type") != "telegram_message_delivery_failed"
+        )
+        audit_ok = required_events.issubset(set(event_types)) and same_request_id and correlated_payloads
+
+    context.telegram_webhook_validation = {
+        "ok": bool(ok),
+        "evidence": (
+            f"status={status} | tenant_id={response.get('tenant_id') if isinstance(response, dict) else 'n/a'} | "
+            f"outbound_status={response.get('outbound_status') if isinstance(response, dict) else 'n/a'}"
+        ),
+    }
+    context.telegram_tenant_validation = {
+        "ok": bool(ok and isinstance(response, dict) and response.get("tenant_id") == context.tenant_id),
+        "evidence": (
+            f"tenant_id={response.get('tenant_id') if isinstance(response, dict) else 'n/a'} | "
+            f"session_id={response.get('session_id') if isinstance(response, dict) else 'n/a'}"
+        ),
+    }
+    context.telegram_message_validation = {
+        "ok": bool(ok and isinstance(response, dict) and response.get("outbound_status") in {"dry_run", "sent"}),
+        "evidence": (
+            f"outbound_status={response.get('outbound_status') if isinstance(response, dict) else 'n/a'} | "
+            f"detail={response.get('detail') if isinstance(response, dict) else response}"
+        ),
+    }
+    context.telegram_audit_validation = {
+        "ok": bool(audit_ok),
+        "evidence": (
+            f"events={len(audit_lines)} | "
+            f"request_id={request_id or 'n/a'} | "
+            f"event_types={[line.get('event_type') for line in audit_lines]}"
+        ),
+    }
+
+    record_step(
+        context=context,
+        nome="Webhook do Telegram",
+        ok=bool(ok and audit_ok),
+        explicacao="Valida o canal Telegram com tenant demo, entrega simulada e auditoria correlacionada.",
+        detalhes=pretty_json(
+            {
+                "response": response,
+                "audit_validation": context.telegram_audit_validation,
+            }
+        ),
+    )
+    if not ok:
+        raise RuntimeError("Falha no webhook do Telegram.")
+    if not audit_ok:
+        raise RuntimeError("Auditoria do Telegram nao corresponde ao esperado.")
+
+
 def reset_rag(context: TestContext) -> None:
     """
     Reseta a base do tenant.
@@ -802,6 +966,8 @@ def print_summary(context: TestContext) -> dict[str, Any]:
         print("Leitura humana: o backend subiu, respondeu health, tratou base vazia,")
         if context.phase_report == "fase8":
             print("ingeriu a base ficticia, validou retrieval controlado e respondeu no fluxo principal.")
+        elif context.phase_report == "fase9":
+            print("ingeriu a base ficticia, respondeu no fluxo principal e validou o canal Telegram com auditoria correlacionada.")
         else:
             print("ingeriu documento, recuperou contexto e respondeu no fluxo principal.")
     else:
@@ -854,6 +1020,7 @@ def build_context(args: argparse.Namespace) -> TestContext:
             tenant_id=args.tenant_id,
             tenant_manifest=args.tenant_manifest,
             phase_report=args.phase_report,
+            telegram_secret=args.telegram_secret,
             print_json=args.json,
             json_out=args.json_out,
         )
@@ -865,6 +1032,7 @@ def build_context(args: argparse.Namespace) -> TestContext:
         tenant_id=args.tenant_id,
         tenant_manifest=args.tenant_manifest,
         phase_report=args.phase_report,
+        telegram_secret=args.telegram_secret,
         print_json=args.json,
         json_out=args.json_out,
     )
@@ -909,9 +1077,15 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--phase-report",
-        choices=["fase7", "fase8"],
+        choices=["fase7", "fase8", "fase9"],
         default="fase7",
         help="Fase cujos criterios de aceite devem ser consolidados no relatorio gerencial.",
+    )
+    parser.add_argument(
+        "--telegram-secret",
+        type=str,
+        default=DEFAULT_TELEGRAM_SECRET,
+        help="Secret usado no header do webhook do Telegram durante o smoke.",
     )
     return parser.parse_args()
 
@@ -938,6 +1112,7 @@ def main() -> int:
         query_rag(context)
         validate_controlled_retrievals(context)
         query_chat(context)
+        query_telegram(context)
         reset_rag(context)
         return_code = 0
     except Exception as exc:

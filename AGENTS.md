@@ -20,6 +20,7 @@ O projeto está em reconstrução controlada sobre uma base mínima já validada
 O runtime ativo atual tem foco em:
 
 - FastAPI com `GET /`, `GET /health`, `POST /api/chat`, `POST /api/webhook` e endpoints `RAG`
+- webhook demonstrativo do Telegram em `POST /api/telegram/webhook`
 - contrato explícito de `tenant_id`
 - contexto de tenant por request
 - persistência local por tenant
@@ -30,7 +31,7 @@ O runtime ativo atual tem foco em:
 
 Os itens abaixo ainda não fazem parte do núcleo validado atual:
 
-- canal Telegram operando como demonstração ponta a ponta
+- bot Telegram configurado com token real e webhook publico em ambiente externo
 - composição generativa ativa com provedor LLM
 - `PolicyDecision` e `AuditEvent` versionado
 - logs estruturados, `/metrics` e traces

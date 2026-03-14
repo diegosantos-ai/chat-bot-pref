@@ -6,6 +6,8 @@ Subir o runtime validado atual com Docker e validar os fluxos minimos de:
 
 - healthcheck
 - chat com `tenant_id`
+- composicao generativa minima com `LLM_PROVIDER=mock`
+- guardrails e fallback controlado
 - ingest RAG por tenant
 - query RAG por tenant
 - reset da base
@@ -49,6 +51,17 @@ Variáveis relevantes para o Telegram:
 - `TELEGRAM_DELIVERY_MODE`
 - `TELEGRAM_BOT_TOKEN`
 
+Variaveis relevantes para a Fase 10:
+
+- `LLM_PROVIDER`
+- `LLM_MODEL`
+- `LLM_API_KEY`
+- `PROMPT_BASE_VERSION`
+- `PROMPT_FALLBACK_VERSION`
+- `POLICY_TEXT_VERSION`
+- `LLM_MIN_CONTEXT_SCORE`
+- `LLM_CONTEXT_TOP_K`
+
 A persistência do ambiente padrão fica no volume Docker `chat_pref_data`.
 
 ## Subida padrao
@@ -75,29 +88,41 @@ O tenant demonstrativo oficial desta fase e `prefeitura-vila-serena`. Para mater
   --manifest tenants/prefeitura-vila-serena/tenant.json \
   --purge-documents \
   --ingest \
-  --phase-report fase8
+  --phase-report fase10
 ```
 
-Para validar a base documental ficticia com o smoke completo e relatorio gerencial da fase:
+Para validar a Fase 10 com o smoke completo e relatorio gerencial da fase:
 
 ```bash
 .venv/bin/python scripts/smoke_tests.py \
   --env prod \
   --tenant-id prefeitura-vila-serena \
   --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
-  --phase-report fase8 \
-  --json-out artifacts/fase8-smoke-prod.json
+  --phase-report fase10 \
+  --json-out artifacts/fase10-smoke-prod.json
 ```
 
-Para validar a Fase 9 com o webhook do Telegram em `dry_run`:
+Variante `dev`:
+
+```bash
+.venv/bin/python scripts/smoke_tests.py \
+  --env dev \
+  --tenant-id prefeitura-vila-serena \
+  --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
+  --phase-report fase10 \
+  --json-out artifacts/fase10-smoke-dev.json
+```
+
+Se o ambiente ja estiver levantado e voce quiser reaproveita-lo sem `down` automatico no fim do smoke:
 
 ```bash
 .venv/bin/python scripts/smoke_tests.py \
   --env prod \
+  --runtime-mode reuse \
   --tenant-id prefeitura-vila-serena \
   --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
-  --phase-report fase9 \
-  --json-out artifacts/fase9-smoke-prod.json
+  --phase-report fase10 \
+  --json-out artifacts/fase10-smoke-prod.json
 ```
 
 ### 1. Validar estado inicial sem base
@@ -112,7 +137,7 @@ curl -sS -X POST http://127.0.0.1:8000/api/chat \
 Resultado esperado:
 
 - `ready: false`
-- mensagem controlada informando que o tenant ainda nao possui documentos
+- fallback controlado informando que a base institucional ainda nao possui contexto suficiente
 
 ### 2. Criar um documento
 
@@ -152,7 +177,7 @@ curl -sS -X POST http://127.0.0.1:8000/api/chat \
 Resultado esperado:
 
 - query com `status: "ready"`
-- chat respondendo com `Contexto recuperado`
+- chat respondendo com composicao controlada e referencia aos canais oficiais
 
 ### 5. Validar isolamento entre tenants
 
@@ -167,7 +192,35 @@ Resultado esperado:
 - nao reutilizar o contexto de `prefeitura-demo`
 - retornar mensagem controlada de base ausente para o outro tenant
 
-### 6. Resetar a base
+### 6. Validar cenarios controlados da Fase 10
+
+Rode exemplos simples com `X-Request-ID` para acompanhar a auditoria:
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -H "X-Request-ID: fase10-demo-normal" \
+  -d '{"tenant_id":"prefeitura-vila-serena","message":"Qual o horario da sala de vacinacao da UBS?"}' && echo
+
+curl -sS -X POST http://127.0.0.1:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -H "X-Request-ID: fase10-demo-out-of-scope" \
+  -d '{"tenant_id":"prefeitura-vila-serena","message":"Me diga onde investir meu dinheiro"}' && echo
+
+curl -sS -X POST http://127.0.0.1:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -H "X-Request-ID: fase10-demo-low-confidence" \
+  -d '{"tenant_id":"prefeitura-vila-serena","message":"Tem estacionamento no centro?"}' && echo
+```
+
+Resultado esperado:
+
+- cenario normal responde com contexto institucional da base
+- pergunta fora de escopo responde com fallback institucional
+- pergunta de baixa confianca responde com fallback de contexto insuficiente
+- o mesmo `request_id` aparece na resposta e na auditoria do tenant
+
+### 7. Resetar a base
 
 ```bash
 curl -sS -X POST http://127.0.0.1:8000/api/rag/reset \
@@ -182,7 +235,7 @@ Resultado esperado:
 - possiveis colecoes legadas removidas
 - `ready: false`
 
-### 7. Simular webhook do Telegram localmente
+### 8. Simular webhook do Telegram localmente
 
 O compose padrao sobe o Telegram em `dry_run`, sem depender de token real para o smoke.
 
@@ -200,7 +253,7 @@ Resultado esperado:
 - `channel: "telegram"`
 - `outbound_status: "dry_run"`
 
-### 8. Configurar webhook real do Telegram
+### 9. Configurar webhook real do Telegram
 
 Para um bot real criado no BotFather, use o utilitario abaixo depois de expor uma URL publica HTTPS para a API:
 

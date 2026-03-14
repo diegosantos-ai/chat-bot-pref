@@ -17,8 +17,10 @@ Endpoints atuais:
 Regra:
 
 - no chat direto, `tenant_id` é obrigatório no payload
+- no chat direto e no webhook, `X-Request-ID` pode ser recebido no header e é devolvido na resposta
 - no webhook, o tenant pode chegar explicitamente ou ser resolvido por `page_id`
 - no Telegram, o tenant é resolvido por `TELEGRAM_DEFAULT_TENANT_ID` ou `TELEGRAM_CHAT_TENANT_MAP`
+- no Telegram, o `request_id` é gerado internamente e preservado na auditoria do request
 
 Exemplo de chat direto:
 
@@ -120,16 +122,33 @@ Path:
 data/runtime/audit/<tenant_id>/<session_id>.jsonl
 ```
 
-Cada request atual grava três eventos:
+Cada request do chat direto ou do webhook pode gravar, no minimo:
 
 - `chat_request_received`
-- `chat_retrieval_completed` ou `chat_retrieval_unavailable`
+- `policy_pre_evaluated`
+- `chat_retrieval_completed`, `chat_retrieval_unavailable` ou `chat_retrieval_skipped`
+- `llm_composition_completed`
+- `policy_post_evaluated`
+- `llm_response_rewritten` quando houver reescrita para fallback
 - `chat_response_generated`
 
 No canal Telegram, o mesmo request ainda registra:
 
 - `telegram_update_received`
 - `telegram_message_delivery` ou `telegram_message_delivery_failed`
+
+Campos minimos ativos do schema `audit.v1`:
+
+- `schema_version`
+- `event_id`
+- `request_id`
+- `tenant_id`
+- `session_id`
+- `channel`
+- `event_type`
+- `policy_decision`
+- `payload`
+- `created_at`
 
 Payloads do Telegram devem carregar, no minimo:
 
@@ -174,4 +193,4 @@ Toda evolução futura deve manter estas propriedades:
 - segregação de persistência por tenant
 - segregação de retrieval por tenant
 - rastreabilidade mínima associada ao tenant
-- correlação mínima por `request_id`, `tenant_id`, `channel` e identificadores do Telegram quando o canal estiver em uso
+- correlação mínima por `request_id`, `tenant_id`, `session_id`, `channel` e identificadores do Telegram quando o canal estiver em uso

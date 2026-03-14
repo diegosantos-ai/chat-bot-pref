@@ -52,13 +52,11 @@ def test_chat_returns_controlled_message_without_ingest(tmp_path) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["tenant_id"] == "prefeitura-demo"
-    assert (
-        payload["message"]
-        == "Base de conhecimento do tenant 'prefeitura-demo' ainda não possui documentos."
-    )
+    assert "ainda nao possui informacoes carregadas" in payload["message"]
     assert payload["channel"] == "web"
     assert payload["session_id"]
     assert payload["request_id"]
+    assert response.headers["X-Request-ID"] == payload["request_id"]
 
 
 def test_chat_clears_tenant_context_after_request(tmp_path) -> None:
@@ -123,22 +121,30 @@ def test_chat_persists_audit_trail_by_tenant(tmp_path) -> None:
     assert audit_file.exists()
 
     lines = audit_file.read_text(encoding="utf-8").strip().splitlines()
-    assert len(lines) == 3
+    assert len(lines) == 6
 
     first_event = json.loads(lines[0])
     second_event = json.loads(lines[1])
     third_event = json.loads(lines[2])
-    assert first_event["event_type"] == "chat_request_received"
-    assert second_event["event_type"] == "chat_retrieval_unavailable"
-    assert third_event["event_type"] == "chat_response_generated"
-    assert first_event["request_id"] == payload["request_id"]
-    assert second_event["request_id"] == payload["request_id"]
-    assert third_event["request_id"] == payload["request_id"]
-    assert second_event["payload"]["retrieved_count"] == "0"
-    assert second_event["payload"]["status"] == "knowledge_base_not_loaded"
-    assert first_event["tenant_id"] == "prefeitura-demo"
-    assert second_event["tenant_id"] == "prefeitura-demo"
-    assert third_event["tenant_id"] == "prefeitura-demo"
+    fourth_event = json.loads(lines[3])
+    fifth_event = json.loads(lines[4])
+    sixth_event = json.loads(lines[5])
+    assert [event["event_type"] for event in [first_event, second_event, third_event, fourth_event, fifth_event, sixth_event]] == [
+        "chat_request_received",
+        "policy_pre_evaluated",
+        "chat_retrieval_unavailable",
+        "llm_composition_completed",
+        "policy_post_evaluated",
+        "chat_response_generated",
+    ]
+    assert all(event["request_id"] == payload["request_id"] for event in [first_event, second_event, third_event, fourth_event, fifth_event, sixth_event])
+    assert third_event["payload"]["retrieved_count"] == "0"
+    assert third_event["payload"]["status"] == "knowledge_base_not_loaded"
+    assert second_event["policy_decision"]["stage"] == "policy_pre"
+    assert fifth_event["policy_decision"]["stage"] == "policy_post"
+    assert fifth_event["policy_decision"]["reason_codes"] == ["NO_KNOWLEDGE_BASE"]
+    assert all(event["tenant_id"] == "prefeitura-demo" for event in [first_event, second_event, third_event, fourth_event, fifth_event, sixth_event])
+    assert all(event["schema_version"] == "audit.v1" for event in [first_event, second_event, third_event, fourth_event, fifth_event, sixth_event])
 
 
 def test_chat_uses_ingested_document_context_and_isolated_tenant(tmp_path) -> None:
@@ -177,8 +183,5 @@ def test_chat_uses_ingested_document_context_and_isolated_tenant(tmp_path) -> No
 
     assert first_response.status_code == 200
     assert second_response.status_code == 200
-    assert "O setor de alvará atende das 8h às 17h." in first_response.json()["message"]
-    assert (
-        second_response.json()["message"]
-        == "Base de conhecimento do tenant 'prefeitura-b' ainda não possui documentos."
-    )
+    assert "O setor de alvará atende das 8h às 17h" in first_response.json()["message"]
+    assert "ainda nao possui informacoes carregadas" in second_response.json()["message"]

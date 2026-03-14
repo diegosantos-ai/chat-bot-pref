@@ -40,10 +40,14 @@ Escopo implementado:
 - `POST /api/rag/query`
 - `POST /api/rag/reset`
 - `tenant_id` explícito no chat direto
+- `X-Request-ID` propagado no chat e no webhook
 - contexto de tenant por request
 - persistência local por tenant
-- auditoria mínima por tenant
+- auditoria `audit.v1` por tenant
 - RAG tenant-aware com ingest limpa
+- composição generativa mínima com `LLM_PROVIDER=mock`
+- prompts e política textual versionados
+- `policy_pre` e `policy_post` com `PolicyDecision`
 - tenant demonstrativo e base documental fictícia
 - integração Telegram demonstrativa com entrega `dry_run`
 - Docker funcional
@@ -52,9 +56,7 @@ Escopo implementado:
 Não assuma como ativos no runtime atual:
 
 - bot Telegram configurado com token real e webhook publico externo
-- composição generativa ativa com provedor LLM
-- `policy_pre` e `policy_post`
-- `PolicyDecision` e `AuditEvent` versionado
+- provedor LLM externo real validado como caminho padrão reproduzível
 - logs estruturados
 - `/metrics`
 - traces com OpenTelemetry
@@ -92,7 +94,7 @@ Não assuma como ativos no runtime atual:
 
 ## Áreas fora do caminho crítico atual
 
-Diretórios como `admin-api/`, `admin-panel/`, `db/`, `panel/`, `prompts/`, `logging/`, `dashboards/`, `grafana/` e afins não devem ser assumidos como parte do runtime mínimo validado sem confirmação explícita da task.
+Diretórios como `admin-api/`, `admin-panel/`, `db/`, `panel/`, `logging/`, `dashboards/`, `grafana/` e afins não devem ser assumidos como parte do runtime mínimo validado sem confirmação explícita da task.
 
 ## Validação mínima recomendada
 
@@ -107,7 +109,7 @@ Use apenas validações coerentes com a task. Exemplos:
 - `curl -X POST http://localhost:8000/api/chat -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
 - `curl -X POST http://localhost:8000/api/webhook -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
 - `curl "http://localhost:8000/api/rag/status?tenant_id=prefeitura-demo"`
-- `.venv/bin/python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase8`
+- `.venv/bin/python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase10`
 
 ## Forma de trabalho
 

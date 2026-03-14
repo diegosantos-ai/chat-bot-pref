@@ -140,16 +140,21 @@ def test_telegram_webhook_processes_demo_tenant_and_audit(tmp_path) -> None:
     assert audit_file.exists()
 
     lines = [json.loads(line) for line in audit_file.read_text(encoding="utf-8").strip().splitlines()]
-    assert len(lines) == 5
+    assert len(lines) == 8
     assert {line["event_type"] for line in lines} == {
         "telegram_update_received",
         "chat_request_received",
+        "policy_pre_evaluated",
         "chat_retrieval_unavailable",
+        "llm_composition_completed",
+        "policy_post_evaluated",
         "chat_response_generated",
         "telegram_message_delivery",
     }
     assert all(line["request_id"] == payload["request_id"] for line in lines)
     assert all(line["tenant_id"] == "prefeitura-vila-serena" for line in lines)
+    assert all(line["channel"] == "telegram" for line in lines)
+    assert all(line["schema_version"] == "audit.v1" for line in lines)
     assert all(line["payload"]["telegram_chat_id"] == "55119990001" for line in lines)
     assert all(line["payload"]["telegram_message_id"] == "700001" for line in lines)
     assert all(line["payload"]["telegram_update_id"] == "900001" for line in lines)

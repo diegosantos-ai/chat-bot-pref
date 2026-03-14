@@ -77,6 +77,26 @@ def test_demo_tenant_bootstrap_and_ingest(tmp_path) -> None:
     assert ingest_response.chunks_count >= 18
 
 
+def test_demo_phase10_managerial_report_passes() -> None:
+    service = DemoTenantService()
+
+    report = service.build_phase10_managerial_report(
+        _manifest_path(),
+        runtime_validation={
+            "llm_adapter_validation": {"ok": True, "evidence": "provider=mock | prompt_versions=['base_v1','fallback_v1']"},
+            "prompt_policy_validation": {"ok": True, "evidence": "prompt_versions=['base_v1','fallback_v1'] | policy_versions=['policy_v1']"},
+            "composition_validation": {"ok": True, "evidence": "SCN-01 | prompt=base_v1 | rubric=12"},
+            "policy_validation": {"ok": True, "evidence": "scenarios_with_policy=5/5 | policy_versions=['policy_v1']"},
+            "scenario_validation": {"ok": True, "evidence": "scenarios_passed=5/5"},
+            "audit_validation": {"ok": True, "evidence": "request_ids_correlated=True | scenarios=5"},
+            "scope_validation": {"ok": True, "evidence": "transactional_claims_blocked=True | checked_scenarios=5"},
+        },
+    )
+
+    assert report["status"] == "passed"
+    assert report["criteria_passed"] == report["criteria_total"] == 7
+
+
 def test_demo_knowledge_base_controlled_retrieval_checks_pass(tmp_path) -> None:
     tenant_id = "prefeitura-vila-serena"
     knowledge_dir = tmp_path / "knowledge"

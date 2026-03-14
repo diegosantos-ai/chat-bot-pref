@@ -16,8 +16,11 @@ O runtime ativo e um backend FastAPI minimo, com foco em:
 
 - contrato explicito de `tenant_id`
 - contexto de tenant por request
+- composicao generativa minima controlada
+- prompts e politica textual versionados
+- `policy_pre` e `policy_post`
 - persistencia local em arquivo
-- auditoria minima por tenant
+- auditoria versionada por tenant
 - retrieval tenant-aware em Chroma
 - tenant demonstrativo versionado
 - execucao local e via Docker
@@ -45,14 +48,18 @@ Rotas ativas no `app/main.py`:
 | `app/api/telegram.py` | webhook demonstrativo do Telegram com validacao de secret e reaproveitamento do chat |
 | `app/api/rag.py` | operacoes de documentos, ingest, query, status e reset do RAG |
 | `app/api/health.py` | endpoints de raiz e healthcheck |
-| `app/services/chat_service.py` | fluxo principal atual de chat, retrieval e auditoria minima |
+| `app/services/chat_service.py` | fluxo principal atual com retrieval, composicao, guardrails e auditoria |
 | `app/services/telegram_service.py` | resolucao do tenant no canal Telegram, envio de resposta e auditoria correlacionada |
+| `app/services/llm_service.py` | adaptador LLM e composicao controlada com provedores `mock` e `gemini` |
+| `app/services/prompt_service.py` | carregamento e renderizacao de prompts e politica textual versionados |
 | `app/services/rag_service.py` | operacoes do RAG por tenant |
 | `app/services/demo_tenant_service.py` | validacao e bootstrap do tenant demonstrativo |
+| `app/services/tenant_profile_service.py` | perfil institucional do tenant para composicao e fallback |
+| `app/policy_guard/service.py` | `policy_pre`, `policy_post` e emissao de `PolicyDecision` |
 | `app/tenant_context.py` | injecao, leitura e limpeza do tenant no fluxo por request |
 | `app/tenant_resolver.py` | resolucao de tenant em fluxos externos simples |
 | `app/storage/chat_repository.py` | historico de conversa em arquivo por tenant |
-| `app/storage/audit_repository.py` | auditoria minima em arquivo por tenant |
+| `app/storage/audit_repository.py` | auditoria `audit.v1` em arquivo por tenant |
 | `app/storage/document_repository.py` | persistencia de documentos da base RAG por tenant |
 | `app/storage/chroma_repository.py` | collections e retrieval no Chroma segregados por tenant |
 
@@ -61,21 +68,26 @@ Rotas ativas no `app/main.py`:
 ### Chat direto
 
 1. `POST /api/chat` recebe `tenant_id` e `message`
-2. o endpoint injeta `tenant_id` no `tenant_context`
-3. `ChatService` confirma o tenant ativo
-4. o fluxo gera `request_id` e `session_id`
-5. o request e auditado
-6. o `RagService` consulta a collection do tenant
-7. a resposta e devolvida ao cliente
-8. historico e auditoria sao persistidos em arquivo
+2. o endpoint aceita `X-Request-ID` opcional
+3. o endpoint injeta `tenant_id` no `tenant_context`
+4. `ChatService` confirma o tenant ativo
+5. o fluxo normaliza `request_id` e `session_id`
+6. o request e auditado em `audit.v1`
+7. `policy_pre` decide entre seguir, bloquear ou preparar fallback
+8. o `RagService` consulta a collection do tenant ou o retrieval e pulado
+9. `LLMComposeService` compoe resposta ou fallback usando prompt versionado
+10. `policy_post` valida a resposta candidata e pode reescrever para fallback
+11. a resposta e devolvida ao cliente com `X-Request-ID`
+12. historico e auditoria sao persistidos em arquivo
 
 ### Webhook minimo
 
 1. `POST /api/webhook` recebe `tenant_id` explicito ou `page_id`
 2. o tenant e resolvido de forma controlada
 3. o endpoint injeta o tenant no contexto
-4. o fluxo reaproveita o mesmo `ChatService`
-5. a resposta volta em HTTP com o mesmo contrato funcional do chat
+4. o endpoint aceita `X-Request-ID` opcional
+5. o fluxo reaproveita o mesmo `ChatService`
+6. a resposta volta em HTTP com o mesmo contrato funcional do chat
 
 ### Telegram demonstrativo
 
@@ -84,7 +96,7 @@ Rotas ativas no `app/main.py`:
 3. o tenant e resolvido por `TELEGRAM_DEFAULT_TENANT_ID` ou `TELEGRAM_CHAT_TENANT_MAP`
 4. o fluxo reaproveita o mesmo `ChatService` do chat direto com `channel="telegram"`
 5. a resposta e entregue por cliente Telegram em modo `api`, `dry_run` ou `disabled`
-6. a auditoria registra `telegram_update_received` e `telegram_message_delivery`
+6. a auditoria registra `telegram_update_received`, os eventos do fluxo de chat e `telegram_message_delivery`
 
 ## 5. Persistencia ativa
 
@@ -103,10 +115,14 @@ Rotas ativas no `app/main.py`:
 
 Campos atuais do `AuditEventRecord`:
 
+- `schema_version`
+- `event_id`
 - `request_id`
 - `tenant_id`
 - `session_id`
+- `channel`
 - `event_type`
+- `policy_decision`
 - `payload`
 - `created_at`
 
@@ -121,10 +137,13 @@ Campos atuais do `AuditEventRecord`:
 
 - `tenant_id` e obrigatorio nos fluxos criticos
 - ausencia de tenant gera erro controlado
+- `request_id` pode ser recebido de fora em HTTP e e devolvido na resposta
 - webhook nao usa tenant default silencioso
 - Telegram nao usa tenant silencioso fora de `TELEGRAM_DEFAULT_TENANT_ID` ou `TELEGRAM_CHAT_TENANT_MAP`
+- `PolicyDecision` e emitido em `policy_pre` e `policy_post`
+- prompt base, prompt de fallback e politica textual sao versionados
 - persistencia e retrieval devem respeitar segregacao por tenant
-- `request_id` ja existe no fluxo de chat e na auditoria minima
+- `request_id`, `tenant_id`, `session_id` e `channel` formam a correlacao minima do pipeline ativo
 - o runtime atual continua usando persistencia local em arquivo
 
 ## 7. Componentes fora do runtime ativo atual
@@ -133,17 +152,17 @@ Os itens abaixo podem existir como narrativa do case, artefato antigo ou objetiv
 
 - `app/orchestrator/service.py`
 - `app/classifier/service.py`
-- `app/policy_guard/service.py`
 - `app/audit/` como modulo-fonte ativo
 - analytics e deploy como routers ativos
 - webhook Meta especifico como canal validado
-- bot Telegram em webhook publico com token real fora do ambiente local
+- bot Telegram em webhook publico estavel como parte do bootstrap reproduzivel
+- provedor LLM externo real como caminho principal validado do runtime
 - pipeline completo de logs estruturados, Prometheus, Grafana e Loki
 - PostgreSQL e Redis como dependencias operacionais do runtime atual
 
 Quando estes elementos voltarem ao projeto, devem ser reintroduzidos como implementacao nova e validada, nao como heranca assumida.
 
-## 8. Eixo planejado: Guardrail Rastreavel
+## 8. Eixo ativo e planejado: Guardrail Rastreavel
 
 As Fases 9 a 12 passam a carregar um eixo transversal de guardrail rastreavel.
 
@@ -153,14 +172,14 @@ Objetivo:
 - correlacionar request, tenant, canal, logs e traces
 - registrar guardrails com vocabulario minimo consistente
 
-Modelo de correlacao planejado:
+Modelo de correlacao ativo na Fase 10:
 
 - `request_id`
 - `tenant_id`
 - `session_id`
 - `channel`
 
-Evolucoes planejadas:
+Contratos ja ativos:
 
 - `PolicyDecision` padronizado
 - `AuditEvent` versionado
@@ -169,18 +188,21 @@ Evolucoes planejadas:
 - composicao generativa controlada
 - `reason_codes`
 - prompts e politicas versionados
+
+Evolucoes ainda planejadas:
+
 - logs estruturados
 - `/metrics`
 - OpenTelemetry
 
-Esses itens ainda nao fazem parte do runtime atual. Os documentos normativos desse eixo sao:
+Os documentos normativos desse eixo sao:
 
 - `docs/guardrail_rastreavel.md`
 - `docs/genai_com_metodo.md`
 
-### Arquitetura-alvo das Fases 10 a 12
+### Arquitetura-alvo das Fases 11 e 12
 
-A partir da Fase 10, o projeto deixa de ser apenas retrieval-first e passa a demonstrar GenAI controlada.
+A partir da Fase 10, o projeto deixou de ser apenas retrieval-first e passou a demonstrar GenAI controlada. As proximas fases fecham observabilidade e regressao automatizada.
 
 Pipeline alvo:
 
@@ -212,13 +234,13 @@ Regras dessa arquitetura-alvo:
 
 ### Fase 10 — Composicao generativa, guardrails e evidencias
 
-- introduzir a composicao generativa minima controlada
-- isolar o adaptador de provedor LLM
-- versionar prompt base, prompt de fallback e politica textual
-- introduzir `PolicyDecision`
-- versionar o schema de auditoria
-- executar `policy_pre` e `policy_post`
-- registrar evidencias por `request_id`
+- composicao generativa minima introduzida
+- adaptador de provedor LLM isolado
+- prompt base, prompt de fallback e politica textual versionados
+- `PolicyDecision` ativo
+- schema de auditoria versionado em `audit.v1`
+- `policy_pre` e `policy_post` ativos
+- evidencias registradas por `request_id`
 
 ### Fase 11 — Observabilidade aplicada
 

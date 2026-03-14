@@ -52,20 +52,20 @@ Papel no projeto:
 O runtime ativo hoje ja possui uma base minima reaproveitavel:
 
 - `tenant_id` explicito nos fluxos criticos
-- `request_id` gerado no fluxo de chat e devolvido na resposta
-- auditoria minima por tenant em `app/storage/audit_repository.py`
+- `request_id` gerado no fluxo de chat e aceito em `X-Request-ID` no chat e no webhook
+- `PolicyDecision` ativo em `policy_pre` e `policy_post`
+- auditoria `audit.v1` por tenant em `app/storage/audit_repository.py`
+- composicao generativa minima com adaptador LLM isolado
+- prompts e politica textual versionados
 - segregacao por tenant no historico, na auditoria e no RAG
 
 O runtime ativo hoje ainda nao possui:
 
-- `PolicyDecision`
-- `AuditEvent` versionado
-- `policy_pre`
-- `policy_post`
-- `reason_codes`
 - logging estruturado
 - `/metrics`
 - traces com OpenTelemetry
+- regressao automatizada em CI desses contratos
+- provedor LLM externo real validado como caminho padrao do runtime
 
 ## 4. Estado alvo planejado
 
@@ -107,7 +107,7 @@ Schema versionado para auditoria:
 
 ### Versionamento de prompt e policy
 
-Quando a camada generativa entrar, cada comportamento relevante deve apontar para versoes explicitas de:
+Na Fase 10, cada comportamento relevante passa a apontar para versoes explicitas de:
 
 - prompt base
 - prompt de fallback
@@ -131,7 +131,7 @@ Ele deve atravessar o pipeline futuro:
 7. auditoria, logs e traces
 8. resposta final
 
-Regra planejada:
+Regra ativa:
 
 - o mesmo `request_id` deve atravessar entrada, auditoria, composicao e resposta
 - toda decisao de `policy_pre` e `policy_post` deve gerar um `PolicyDecision`
@@ -146,7 +146,7 @@ Os fluxos criticos devem convergir para estes campos:
 - `session_id`
 - `channel`
 
-Regras planejadas:
+Regras ativas na Fase 10:
 
 - `request_id` obrigatorio em todo fluxo critico
 - `tenant_id` obrigatorio em todo fluxo critico
@@ -211,12 +211,12 @@ Regras operacionais:
 
 ### Fase 10
 
-- introducao da composicao generativa minima controlada
-- introducao de `PolicyDecision`
-- introducao de `AuditEvent` versionado
-- versionamento de prompt base, prompt de fallback e politica textual
+- composicao generativa minima controlada ativa
+- `PolicyDecision` ativo
+- `AuditEvent` versionado em `audit.v1`
+- prompt base, prompt de fallback e politica textual versionados
 - `policy_pre` e `policy_post` com `reason_codes`
-- matriz de cenarios ligada ao catalogo de ameaças e fallbacks
+- matriz de cenarios ligada ao catalogo de ameacas e fallbacks
 
 ### Fase 11
 

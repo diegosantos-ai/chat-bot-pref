@@ -23,7 +23,7 @@ O projeto foi estruturado para demonstrar, de forma prática:
 
 - backend modular com **FastAPI**
 - arquitetura **tenant-aware**
-- pipeline de atendimento com **RAG validado** e evolução planejada para **guardrails rastreáveis**
+- pipeline de atendimento com **composição generativa mínima**, **RAG tenant-aware** e **guardrails rastreáveis**
 - **auditoria** e **rastreabilidade**
 - execução local reproduzível com **Docker**
 - demonstração funcional com **tenant fictício**
@@ -80,7 +80,7 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 
 ### Incluído
 - API backend em FastAPI
-- pipeline de processamento tenant-aware com RAG validado e evolução planejada para guardrails rastreáveis
+- pipeline de processamento tenant-aware com composição generativa mínima, RAG validado e guardrails rastreáveis
 - arquitetura multi-tenant em consolidação
 - auditoria mínima operacional e evidências de validação
 - Docker e ambiente local reproduzível
@@ -273,7 +273,7 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
-**Fase ativa na branch:** Fase 9 — Operacionalização do chat via Telegram.
+**Fase ativa na branch:** Fase 10 — Composição generativa, guardrails e evidências.
 **Status da fase na branch:** concluída e validada na branch de trabalho.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
@@ -281,8 +281,12 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 
 * backend funcional em FastAPI
 * contrato explícito de `tenant_id` no chat e no webhook mínimo
-* persistência local e auditoria mínima por tenant
+* `request_id` propagado no chat e no webhook via `X-Request-ID`
+* persistência local e auditoria versionada `audit.v1` por tenant
 * RAG tenant-aware com ingest limpa por tenant
+* composição generativa mínima com adaptador LLM isolado
+* prompts e política textual versionados
+* `policy_pre` e `policy_post` com `reason_codes`
 * integração Telegram demonstrativa com reutilização do fluxo principal
 * documentação técnica alinhada ao runtime mínimo
 * tenant fictício demonstrativo versionado
@@ -291,14 +295,12 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 
 ### Em andamento
 
-* incorporação do eixo Guardrail Rastreável nas Fases 9 a 12
-* preparação da camada generativa controlada da Fase 10
-* consolidação da trilha correlacionada entre request, tenant, canal e auditoria
+* observabilidade aplicada da Fase 11
+* consolidação da trilha correlacionada entre auditoria, logs, métricas e traces
+* regressão automatizada de comportamento para a Fase 12
 
 ### Próxima direção
 
-* composição generativa controlada sobre contexto recuperado
-* guardrails rastreáveis com `PolicyDecision`, `reason_codes` e evidências por `request_id`
 * observabilidade aplicada com logs estruturados, métricas e traces
 * CI com GitHub Actions
 * deploy mínimo em AWS com Terraform
@@ -464,7 +466,7 @@ Ele funciona como **canal demonstrativo** para validar:
 
 O projeto deve oferecer visibilidade mínima sobre o fluxo do atendimento.
 
-Na base ativa atual, a evidência já validada é a auditoria mínima por tenant em arquivo. Logs estruturados, métricas expostas e traces correlacionados entram como evolução planejada das Fases 10 e 11.
+Na base ativa atual, a evidência já validada inclui auditoria versionada `audit.v1`, `PolicyDecision`, `reason_codes` e correlação mínima por `request_id`. Logs estruturados, métricas expostas e traces correlacionados entram como evolução planejada da Fase 11.
 
 ### Evidências esperadas
 
@@ -517,17 +519,15 @@ A recomendação atual é privilegiar uma arquitetura enxuta, suficiente para de
 
 ### Curto prazo
 
-* concluir a refatoração estrutural
-* consolidar Docker e ambiente local
-* estabilizar `tenant_id` nos fluxos críticos
-* resetar e reingestar a base RAG
+* consolidar a observabilidade aplicada da Fase 11
+* expor métricas mínimas e trilha correlacionada do pipeline
+* preservar o contrato de `request_id` e `tenant_id` nos fluxos críticos
 
 ### Médio prazo
 
-* criar tenant fictício
-* carregar base documental de demonstração
-* colocar o chat para operar via Telegram
-* executar cenários de validação e gerar evidências
+* automatizar regressão funcional e comportamental com GitHub Actions
+* endurecer validações de schema de auditoria e `reason_codes`
+* preparar deploy mínimo preservando os contratos do método
 
 ### Próximo nível
 

@@ -24,6 +24,14 @@ class Settings(BaseSettings):
     TELEGRAM_DEFAULT_TENANT_ID: str = ""
     TELEGRAM_CHAT_TENANT_MAP: dict[str, str] = Field(default_factory=dict)
     TELEGRAM_DELIVERY_MODE: str = "dry_run"
+    LLM_PROVIDER: str = "mock"
+    LLM_MODEL: str = "mock-compose-v1"
+    LLM_API_KEY: str = ""
+    PROMPT_BASE_VERSION: str = "base_v1"
+    PROMPT_FALLBACK_VERSION: str = "fallback_v1"
+    POLICY_TEXT_VERSION: str = "policy_v1"
+    LLM_MIN_CONTEXT_SCORE: float = 0.2
+    LLM_CONTEXT_TOP_K: int = 3
     CORS_ORIGINS: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",
@@ -99,7 +107,18 @@ class Settings(BaseSettings):
                 pairs[normalized_key] = normalized_item
         return pairs
 
-    @field_validator("TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "TELEGRAM_DEFAULT_TENANT_ID", mode="before")
+    @field_validator(
+        "TELEGRAM_BOT_TOKEN",
+        "TELEGRAM_WEBHOOK_SECRET",
+        "TELEGRAM_DEFAULT_TENANT_ID",
+        "LLM_PROVIDER",
+        "LLM_MODEL",
+        "LLM_API_KEY",
+        "PROMPT_BASE_VERSION",
+        "PROMPT_FALLBACK_VERSION",
+        "POLICY_TEXT_VERSION",
+        mode="before",
+    )
     @classmethod
     def parse_optional_string(cls, value: Any) -> str:
         if value is None:
@@ -115,6 +134,38 @@ class Settings(BaseSettings):
         if normalized not in {"api", "dry_run", "disabled"}:
             raise ValueError("TELEGRAM_DELIVERY_MODE deve ser api, dry_run ou disabled.")
         return normalized
+
+    @field_validator("LLM_PROVIDER", mode="before")
+    @classmethod
+    def parse_llm_provider(cls, value: Any) -> str:
+        normalized = str(value or "").strip().lower()
+        if not normalized:
+            return "mock"
+        if normalized not in {"mock", "gemini"}:
+            raise ValueError("LLM_PROVIDER deve ser mock ou gemini.")
+        return normalized
+
+    @field_validator("LLM_MIN_CONTEXT_SCORE", mode="before")
+    @classmethod
+    def parse_llm_min_context_score(cls, value: Any) -> float:
+        try:
+            score = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("LLM_MIN_CONTEXT_SCORE deve ser numérico.") from exc
+        if score < 0.0 or score > 1.0:
+            raise ValueError("LLM_MIN_CONTEXT_SCORE deve ficar entre 0.0 e 1.0.")
+        return score
+
+    @field_validator("LLM_CONTEXT_TOP_K", mode="before")
+    @classmethod
+    def parse_llm_context_top_k(cls, value: Any) -> int:
+        try:
+            top_k = int(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("LLM_CONTEXT_TOP_K deve ser inteiro.") from exc
+        if top_k < 1 or top_k > 8:
+            raise ValueError("LLM_CONTEXT_TOP_K deve ficar entre 1 e 8.")
+        return top_k
 
     @field_validator(
         "CORS_ORIGINS",

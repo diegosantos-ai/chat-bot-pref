@@ -172,6 +172,18 @@ auto_generated/
 .cache/
 *.cache
 
+# Terraform local artifacts
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!*.tfvars.example
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
 # SQLite temporary files
 *.db-journal
 *.db-wal

@@ -1,0 +1,22 @@
+aws_region               = "us-east-1"
+project_name             = "chat-pref"
+environment              = "demo"
+availability_zone_suffix = "a"
+instance_type            = "t3.micro"
+service_port             = 8000
+service_ingress_cidrs    = ["0.0.0.0/0"]
+
+repo_url        = "https://github.com/diegosantos-ai/chat-bot-pref.git"
+app_ref         = "chore/fase-13-aws-terraform"
+tenant_manifest = "tenants/prefeitura-vila-serena/tenant.json"
+
+telemetry_allowed_hosts = ["*"]
+cors_origins            = ["http://localhost:8000"]
+
+llm_provider            = "mock"
+llm_model               = "mock-compose-v1"
+llm_api_key             = ""
+telegram_bot_token      = ""
+telegram_webhook_secret = "troque-este-secret"
+telegram_default_tenant_id = "prefeitura-vila-serena"
+telegram_delivery_mode  = "disabled"

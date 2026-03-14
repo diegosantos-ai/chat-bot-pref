@@ -1,4 +1,8 @@
-{$PUBLIC_BASE_HOSTNAME} {
+# Arquivo de referencia local.
+# O deploy remoto renderiza `deploy/caddy/Caddyfile.runtime` a partir de
+# `deploy/caddy/Caddyfile.template` usando o hostname publico configurado.
+
+localhost {
   encode zstd gzip
   reverse_proxy chat-pref-api:8000
 }

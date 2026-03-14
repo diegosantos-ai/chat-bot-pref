@@ -171,7 +171,7 @@ Fluxo recomendado:
 terraform -chdir=infra/terraform/aws/minimal output
 
 .venv/bin/python scripts/smoke_remote.py \
-  --base-url http://SEU_IP_PUBLICO:8000 \
+  --base-url https://SEU_HOSTNAME_PUBLICO \
   --tenant-id prefeitura-vila-serena \
   --json-out artifacts/fase13-remote-smoke.json
 ```
@@ -189,6 +189,32 @@ Observacoes da sessao SSM:
 
 ```bash
 git config --global --add safe.directory /opt/chat-pref/app
+```
+
+### Ativar Telegram no ambiente remoto
+
+Quando o deploy remoto estiver com HTTPS publico ativo, o webhook do Telegram pode ser ativado assim:
+
+```bash
+TELEGRAM_BOT_TOKEN=SEU_TOKEN \
+TELEGRAM_WEBHOOK_SECRET=SEU_SECRET \
+.venv/bin/python scripts/telegram_webhook.py set \
+  --webhook-url https://SEU_HOSTNAME_PUBLICO/api/telegram/webhook \
+  --secret-token SEU_SECRET
+```
+
+Para inspecionar:
+
+```bash
+TELEGRAM_BOT_TOKEN=SEU_TOKEN \
+.venv/bin/python scripts/telegram_webhook.py info
+```
+
+Para desativar:
+
+```bash
+TELEGRAM_BOT_TOKEN=SEU_TOKEN \
+.venv/bin/python scripts/telegram_webhook.py delete --drop-pending-updates
 ```
 
 ### 1. Validar estado inicial sem base

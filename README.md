@@ -27,7 +27,7 @@ O projeto foi estruturado para demonstrar, de forma prática:
 - **auditoria** e **rastreabilidade**
 - execução local reproduzível com **Docker**
 - demonstração funcional com **tenant fictício**
-- canal real de operação via **Telegram**
+- canal real de operação via **Telegram**, com webhook HTTPS ativo no ambiente remoto demonstrativo
 - evolução para **CI/CD** e **deploy em AWS com Terraform**
 
 O foco atual é transformar uma base funcional, mas heterogênea, em uma plataforma **coerente, demonstrável e tecnicamente defensável**.
@@ -85,10 +85,10 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 - auditoria mínima operacional e evidências de validação
 - Docker e ambiente local reproduzível
 - tenant fictício demonstrativo
-- canal demonstrativo via Telegram com reutilização do fluxo principal
+- canal demonstrativo via Telegram com reutilização do fluxo principal e webhook HTTPS ativo no ambiente remoto
 - geração de evidências de funcionamento
 - workflow de CI versionado com quality gates mínimos
-- deploy mínimo em AWS validado com Terraform
+- deploy mínimo em AWS validado com Terraform e proxy HTTPS público
 
 ### Não incluído neste momento
 - produto enterprise finalizado
@@ -290,16 +290,16 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * composição generativa mínima com adaptador LLM isolado
 * prompts e política textual versionados
 * `policy_pre` e `policy_post` com `reason_codes`
-* integração Telegram demonstrativa com reutilização do fluxo principal
+* integração Telegram com reutilização do fluxo principal, `dry_run` reproduzível localmente e webhook HTTPS ativo no ambiente remoto demonstrativo
 * logs estruturados correlacionados por `request_id`
 * métricas mínimas expostas em `/metrics`
 * traces OpenTelemetry persistidos por `request_id`
 * documentação técnica alinhada ao runtime mínimo
 * tenant fictício demonstrativo versionado
-* base documental fictícia do tenant demonstrativo
+* base documental fictícia do tenant demonstrativo com 14 documentos e 11 retrieval checks controlados
 * ambiente local reproduzível com Docker e smoke tests
 * workflow de CI versionado com quality gates, build Docker e smoke reduzido
-* deploy mínimo em AWS provisionado com Terraform e smoke remoto aprovado
+* deploy mínimo em AWS provisionado com Terraform, smoke remoto aprovado e proxy HTTPS público estável por `sslip.io`
 
 ### Em andamento
 
@@ -308,7 +308,7 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 
 ### Próxima direção
 
-* endurecer a operação remota quando fizer sentido com domínio, HTTPS e secrets
+* endurecer a operação remota com domínio próprio, rotação de secrets e CD quando isso fizer sentido
 * fechar o case final para portfólio e entrevista
 
 ---
@@ -465,6 +465,11 @@ Ele funciona como **canal demonstrativo** para validar:
 * auditoria
 * logs e evidências
 
+Na branch atual, esse canal já possui dois modos de operação validados:
+
+* **local reproduzível** em `dry_run`, sem depender de token real
+* **ambiente remoto demonstrativo** em `api`, com webhook HTTPS ativo sobre a URL pública provisionada na AWS
+
 ---
 
 ## Observabilidade, Auditoria e Evidências
@@ -525,10 +530,11 @@ Na branch atual, a Fase 13 já validou um corte mínimo e explicável em AWS `us
 * perfil IAM com SSM
 * EC2 única
 * Elastic IP
+* proxy HTTPS público com Caddy e hostname `sslip.io` derivado do IP
 * bootstrap via `user_data` + `docker compose`
 * smoke remoto aprovado em `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
 
-O recorte continua enxuto de propósito: entrega real, baixo custo e operação explicável antes de domínio, HTTPS, ECS ou backend remoto de Terraform.
+O recorte continua enxuto de propósito: entrega real, baixo custo e operação explicável antes de domínio próprio, ECS ou backend remoto de Terraform.
 
 ---
 
@@ -542,8 +548,8 @@ O recorte continua enxuto de propósito: entrega real, baixo custo e operação 
 
 ### Médio prazo
 
-* endurecer a operação remota com secrets, domínio e HTTPS quando isso fizer sentido
-* avaliar a ativação do Telegram sobre a URL pública estável
+* endurecer a operação remota com domínio próprio, rotação de secrets e CD
+* manter o Telegram público ativo sobre a URL estável do ambiente remoto
 * manter os contratos de `request_id`, `tenant_id` e observabilidade no ambiente em nuvem
 
 ### Próximo nível

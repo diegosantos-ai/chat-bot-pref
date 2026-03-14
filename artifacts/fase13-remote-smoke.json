@@ -1,5 +1,5 @@
 {
-  "base_url": "http://52.205.207.194:8000",
+  "base_url": "https://52-205-207-194.sslip.io",
   "tenant_id": "prefeitura-vila-serena",
   "request_id": "fase13-remote-smoke",
   "root": {
@@ -20,7 +20,7 @@
   ],
   "chat": {
     "request_id": "fase13-remote-smoke",
-    "session_id": "04c6b94e-95a3-4ea4-95ba-34c2f3099811",
+    "session_id": "8b025a73-1301-4e24-a1c8-567b306d7786",
     "tenant_id": "prefeitura-vila-serena",
     "message": "De acordo com as informacoes institucionais da Prefeitura Municipal de Vila Serena, A sala de vacinacao funciona das 8h as 16h, com pausa operacional curta entre 12h e 13h para organizacao interna. Se precisar de atendimento formal, procure os canais oficiais da prefeitura.",
     "channel": "web"

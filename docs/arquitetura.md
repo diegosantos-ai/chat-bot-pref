@@ -28,6 +28,7 @@ O runtime ativo e um backend FastAPI minimo, com foco em:
 - tenant demonstrativo versionado
 - execucao local e via Docker
 - deploy remoto minimo validado em AWS com EC2 unica provisionada por Terraform
+- endpoint HTTPS publico estavel no ambiente remoto demonstrativo
 
 Rotas ativas no `app/main.py`:
 
@@ -47,7 +48,7 @@ Topologia remota validada na Fase 13:
 
 - `infra/terraform/aws/minimal` provisiona VPC, subnet publica, Internet Gateway, route table, Security Group, role SSM, EC2 e Elastic IP
 - `user_data` instala Docker, Compose, Git e Python 3
-- `scripts/deploy_aws_instance.sh` sincroniza a branch, sobe `docker compose` e executa o bootstrap do tenant demonstrativo
+- `scripts/deploy_aws_instance.sh` sincroniza a branch, renderiza o proxy HTTPS quando habilitado, sobe `docker compose` e executa o bootstrap do tenant demonstrativo
 - `scripts/smoke_remote.py` valida `/`, `/health`, `/metrics` e `POST /api/chat` a partir da URL publica do ambiente
 
 ## 3. Componentes ativos do backend
@@ -112,6 +113,8 @@ Topologia remota validada na Fase 13:
 5. a resposta e entregue por cliente Telegram em modo `api`, `dry_run` ou `disabled`
 6. a auditoria registra `telegram_update_received`, os eventos do fluxo de chat e `telegram_message_delivery`
 
+No ambiente local reproduzivel, o canal permanece em `dry_run` por padrao. No ambiente remoto demonstrativo validado, o mesmo webhook opera em `api` atras de uma URL HTTPS publica.
+
 ## 5. Persistencia ativa
 
 ### Historico de conversa
@@ -170,7 +173,7 @@ Os itens abaixo podem existir como narrativa do case, artefato antigo ou objetiv
 - `app/audit/` como modulo-fonte ativo
 - analytics e deploy como routers ativos
 - webhook Meta especifico como canal validado
-- bot Telegram em webhook publico estavel como parte do bootstrap reproduzivel
+- bot Telegram em webhook publico estavel como parte do bootstrap reproduzivel sem secrets externos
 - provedor LLM externo real como caminho principal validado do runtime
 - stack completa de Prometheus, Grafana e Loki como operacao externa do case
 - PostgreSQL e Redis como dependencias operacionais do runtime atual

@@ -37,12 +37,14 @@ O runtime ativo atual tem foco em:
 - execução local e via Docker com smoke tests
 - workflow de CI versionado com quality gates, build Docker e smoke minimo
 - deploy remoto minimo validado em AWS com Terraform, EC2 unica, Docker e smoke remoto
+- endpoint HTTPS publico estavel validado no ambiente remoto demonstrativo
+- bot Telegram com webhook HTTPS ativo no ambiente remoto demonstrativo
 
 Os itens abaixo ainda não fazem parte do núcleo validado atual:
 
-- bot Telegram configurado com token real e webhook publico em ambiente externo
+- bot Telegram como parte do bootstrap reproduzivel sem secrets externos
 - provedor LLM externo real validado como caminho padrão reproduzível
-- deploy remoto endurecido com dominio proprio, HTTPS e CD completo
+- deploy remoto endurecido com dominio proprio, secrets gerenciados e CD completo
 
 ## 3. Documentos obrigatórios antes de alterar
 

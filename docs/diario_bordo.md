@@ -22,6 +22,31 @@ Cada registro abaixo tenta responder quatro perguntas:
 
 ## Linha do tempo
 
+### 2026-03-14 - Telegram ficou publico com HTTPS estavel no ambiente remoto
+
+**Marco**
+
+O ambiente remoto do Chat Pref passou a expor a API por HTTPS estavel usando proxy Caddy sobre hostname `sslip.io`, e o bot `@ChatPref_bot` ficou com webhook ativo apontando para `POST /api/telegram/webhook`.
+
+**Por que isso importa**
+
+Esse fechamento tira o Telegram da categoria de "demo local controlada" e o leva para uma demonstracao externa real. Isso e o que permite compartilhar o bot com terceiros, como recrutadores, sem depender de tunel temporario.
+
+**Validacao principal**
+
+- `terraform apply` reaplicado com proxy HTTPS habilitado
+- `scripts/deploy_aws_instance.sh` renderizando `Caddyfile.runtime` e validando `https://.../health`
+- smoke remoto aprovado em `https://52-205-207-194.sslip.io`
+- `getWebhookInfo` do Telegram retornando a URL publica HTTPS do deploy remoto
+- ingest limpa reaprovada com base documental ampliada para 14 documentos e 11 retrieval checks
+
+**Evidencias**
+
+- [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md)
+- [fase_9_telegram_demo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_9_telegram_demo.md)
+- [fase13-remote-smoke.json](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/fase13-remote-smoke.json)
+- [deploy_aws_instance.sh](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/scripts/deploy_aws_instance.sh)
+
 ### 2026-03-14 - Fase 14 alinhou a narrativa final do case
 
 **Marco**
@@ -243,6 +268,10 @@ O projeto ganhou um tenant ficticio coerente, base documental propria, retrieval
 **Por que isso importa**
 
 Sem tenant e base documental controlados, a demonstracao de RAG e guardrails perderia explicabilidade e repetibilidade.
+
+**Estado mais recente da base**
+
+Ao final da Fase 14, a base documental do tenant demonstrativo foi ampliada para 14 documentos e 11 retrieval checks controlados, reforcando a capacidade do canal Telegram de responder duvidas institucionais frequentes.
 
 **Evidencias**
 

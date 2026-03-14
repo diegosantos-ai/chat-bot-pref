@@ -37,7 +37,8 @@ Hoje a base ja possui:
 - tenant demonstrativo e base documental controlada
 - smoke tests e retrieval checks
 - workflow de CI versionado com regressao automatizada localmente validada
-- deploy remoto minimo validado em AWS com smoke publico
+- deploy remoto minimo validado em AWS com smoke publico e endpoint HTTPS estavel
+- bot Telegram com webhook HTTPS ativo no ambiente remoto demonstrativo
 - matriz de evidencias e diario de bordo para leitura por terceiros
 
 Hoje a base ainda nao possui:
@@ -134,8 +135,8 @@ Limites assumidos:
 
 - `LLM_PROVIDER=mock` continua sendo o caminho default reproduzivel do runtime
 - o provedor externo real existe como opcional, nao como baseline obrigatorio
-- o Telegram foi validado como canal demonstrativo, mas o bootstrap publico estavel nao faz parte do caminho padrao do repositorio
-- o deploy AWS validado e minimo, sem dominio proprio, HTTPS ou CD completo
+- o Telegram foi validado como canal demonstrativo e possui webhook HTTPS ativo no ambiente remoto, mas esse bootstrap ainda depende de secrets nao versionados
+- o deploy AWS validado e minimo, com HTTPS publico via proxy, mas sem dominio proprio ou CD completo
 
 ## 9. Veredito final
 

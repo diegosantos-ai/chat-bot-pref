@@ -177,7 +177,7 @@ Este contrato ainda não cobre:
 
 - persistência relacional
 - webhook Meta específico
-- bot Telegram com token real e webhook público
+- bot Telegram como parte do bootstrap reproduzivel sem secrets externos
 - upload binário de documentos
 - auditoria em banco
 - regras multi-canal avançadas

@@ -58,19 +58,20 @@ Escopo implementado:
 - `/metrics`
 - traces com OpenTelemetry persistidos por `request_id`
 - tenant demonstrativo e base documental fictícia
-- integração Telegram demonstrativa com entrega `dry_run`
+- integração Telegram com entrega `dry_run` local e webhook HTTPS ativo no ambiente remoto demonstrativo
 - Docker funcional
 - smoke tests e retrieval checks
 - workflow de CI versionado em `.github/workflows/ci.yml`
 - deploy remoto minimo validado em AWS com Terraform, EC2 unica e smoke remoto
+- endpoint HTTPS publico estavel no ambiente remoto demonstrativo
 
 Não assuma como ativos no runtime atual:
 
-- bot Telegram configurado com token real e webhook publico externo
+- bot Telegram como parte do bootstrap reproduzivel sem secrets externos
 - provedor LLM externo real validado como caminho padrão reproduzível
 - painel/admin no caminho crítico
 - banco relacional como dependência operacional
-- deploy remoto endurecido com dominio proprio, HTTPS e CD completo
+- deploy remoto endurecido com dominio proprio, secrets gerenciados e CD completo
 
 ## Guardrails de alteração
 

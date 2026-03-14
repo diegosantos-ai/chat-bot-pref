@@ -276,8 +276,8 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
-**Fase ativa na branch:** Fase 13 — Infraestrutura como código e deploy em AWS.
-**Status da fase na branch:** concluida e validada na branch de trabalho.
+**Fase ativa na branch:** Fase 14 — Alinhamento final entre arquitetura, operação e documentação.
+**Status da fase na branch:** iniciada na branch de trabalho.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe

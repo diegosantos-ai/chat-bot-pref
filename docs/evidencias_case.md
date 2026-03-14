@@ -15,6 +15,7 @@ Este documento traduz o projeto em uma matriz simples de `claim -> evidencia -> 
 | O Telegram reutiliza o mesmo fluxo principal | webhook demonstrativo e smoke do canal aprovados | [fase_9_telegram_demo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_9_telegram_demo.md) |
 | O projeto demonstra GenAI controlada | adaptador LLM isolado, prompts versionados, `policy_pre` e `policy_post` | [fase_10_composicao_generativa.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_10_composicao_generativa.md) |
 | O pipeline e rastreavel | `request_id` compartilhado por auditoria, logs e traces | [fase_11_observabilidade_aplicada.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_11_observabilidade_aplicada.md) |
+| O projeto bloqueia regressao relevante em pipeline | workflow de CI versionado com quality gates, build Docker, smoke reduzido e artefato JSON | [fase_12_github_actions.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_12_github_actions.md) |
 | O projeto ja tem evidencias executaveis | `pytest`, smoke por fase e artefatos JSON versionados | [diario_bordo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/diario_bordo.md) |
 
 ## Exemplo curto de prova tecnica

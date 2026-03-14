@@ -6,8 +6,8 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 11 — Observabilidade Aplicada e Fechamento Tecnico do Case
-- **Status da fase atual:** concluida e validada na branch de trabalho
+- **Fase ativa:** Fase 12 — Automacao de Qualidade com GitHub Actions
+- **Status da fase atual:** implementada e validada localmente na branch de trabalho
 - **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
 
 ## 2. Objetivo do projeto
@@ -75,7 +75,6 @@ Hoje o projeto ja demonstra metodo real em:
 
 O principal gap para `GenAI com metodo` ainda e:
 
-- ausencia de regressao automatizada em CI
 - ausencia de validacao reproduzivel com provedor LLM externo real
 - ausencia de automacao de evidencias no pipeline de entrega
 
@@ -105,7 +104,6 @@ Os itens abaixo continuam sendo direcao futura, nao comportamento presente do ru
 - bot Telegram operando com webhook publico estavel como parte do bootstrap reproduzivel
 - provedor LLM externo real validado como default do runtime
 - painel admin como servico validado no ambiente local
-- CI executando validacoes no GitHub Actions
 - deploy em AWS provisionado por Terraform
 
 ## 6. Fase atual e direcao aprovada
@@ -142,11 +140,15 @@ Entregas validadas na branch:
 
 ### Fase 12
 
-Direcao aprovada:
+Entregas validadas na branch:
 
-- automatizar regressao desses contratos em CI
-- validar schema da auditoria e a presenca de campos obrigatorios
-- bloquear regressao relevante de comportamento e rastreabilidade
+- workflow de CI versionado em `.github/workflows/ci.yml`
+- lint minimo, `pytest`, `compileall` e varredura anti-residuos automatizados
+- validacao automatica de `docker compose config` e `docker build`
+- smoke `prod` reduzido automatizado com `runtime-mode=reuse`
+- upload do artefato `fase11-smoke-prod.json` no workflow
+- regressao automatica de `audit.v1`, `request_id`, `tenant_id` e `reason_codes` em `tests/test_phase12.py`
+- nenhuma credencial nova obrigatoria para o corte atual da CI; deploy continua separado
 
 Referencia normativa desse eixo:
 
@@ -174,8 +176,8 @@ Referencia normativa desse eixo:
 
 O proximo ciclo sera considerado bem encaminhado quando:
 
-- a regressao automatizada preservar logs, metricas, traces e auditoria
-- o schema `audit.v1` e os `reason_codes` passarem a bloquear regressao em CI
+- a regressao automatizada preservar logs, metricas, traces e auditoria no runner GitHub
+- o schema `audit.v1` e os `reason_codes` permanecerem bloqueando regressao em CI
 - a documentacao-base continuar separando claramente presente e planejado
 
 ## 10. Forma de validacao

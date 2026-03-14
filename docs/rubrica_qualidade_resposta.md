@@ -46,11 +46,11 @@ Estado atual:
 
 - pontuacao automatizada local no `scripts/smoke_tests.py`
 - uso combinado com auditoria e `request_id`
-- ainda sem correlacao com logs, metricas e traces
-- ainda sem automacao em CI
+- correlacao com logs, metricas e traces validada na Fase 11
+- checks objetivos da rubrica automatizados em CI via `pytest` e smoke reduzido
 
 ## 6. Uso por fase
 
 - Fase 10: avaliacao automatizada local das respostas dos cenarios principais, com complemento manual quando necessario
 - Fase 11: comparacao entre resposta, auditoria e observabilidade
-- Fase 12: automacao parcial ou total dos checks objetivos da rubrica
+- Fase 12: automacao parcial dos checks objetivos da rubrica no workflow de CI

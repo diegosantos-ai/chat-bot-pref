@@ -43,7 +43,7 @@ seguir para a próxima fase.
 - [x] Fase 9 — Operacionalização do Chat via Telegram
 - [x] Fase 10 — Composição Generativa, Guardrails e Evidências
 - [x] Fase 11 — Observabilidade Aplicada e Fechamento Técnico do Case
-- [ ] Fase 12 — Automação de Qualidade com GitHub Actions
+- [x] Fase 12 — Automação de Qualidade com GitHub Actions
 - [ ] Fase 13 — Infraestrutura como Código e Deploy em AWS
 - [ ] Fase 14 — Alinhamento Final entre Arquitetura, Operação e Documentação
 
@@ -490,6 +490,7 @@ Pipeline de CI funcional executando checks técnicos relevantes sobre o projeto.
 
 ### Observações
 Esta fase deve focar em CI. CD só entra quando houver alvo de deploy estável.
+No corte atual, o workflow pode operar sem secrets novos obrigatorios, usando `LLM_PROVIDER=mock` e smoke reduzido sobre o runtime local do runner.
 
 #### Tasks — Fase 12
 

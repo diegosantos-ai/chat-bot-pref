@@ -2,7 +2,7 @@
 set -euo pipefail
 
 dnf update -y
-dnf install -y docker git python3
+dnf install -y docker git python3 curl-minimal
 
 # Amazon Linux 2023 does not ship the docker compose plugin in the default dnf repos.
 mkdir -p /usr/local/lib/docker/cli-plugins

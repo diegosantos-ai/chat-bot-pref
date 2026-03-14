@@ -20,6 +20,7 @@ Isso cobre:
 - `GET /health`
 - `POST /api/chat`
 - `POST /api/webhook`
+- `POST /api/telegram/webhook`
 - `GET /api/rag/status`
 - `POST /api/rag/documents`
 - `POST /api/rag/ingest`
@@ -32,13 +33,21 @@ Fica fora deste bootstrap:
 - banco relacional
 - Redis
 - observabilidade
-- integrações externas completas
+- integrações externas completas além do Telegram demonstrativo
 
 ## Arquivos de ambiente
 
 - `.env.compose`: defaults usados pelo `docker compose`
 - `.env.example`: referência para rodar fora do container
 - `.env.prod.example`: referência mínima para publicação futura
+
+Variáveis relevantes para o Telegram:
+
+- `TELEGRAM_WEBHOOK_SECRET`
+- `TELEGRAM_DEFAULT_TENANT_ID`
+- `TELEGRAM_CHAT_TENANT_MAP`
+- `TELEGRAM_DELIVERY_MODE`
+- `TELEGRAM_BOT_TOKEN`
 
 A persistência do ambiente padrão fica no volume Docker `chat_pref_data`.
 
@@ -78,6 +87,17 @@ Para validar a base documental ficticia com o smoke completo e relatorio gerenci
   --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
   --phase-report fase8 \
   --json-out artifacts/fase8-smoke-prod.json
+```
+
+Para validar a Fase 9 com o webhook do Telegram em `dry_run`:
+
+```bash
+.venv/bin/python scripts/smoke_tests.py \
+  --env prod \
+  --tenant-id prefeitura-vila-serena \
+  --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
+  --phase-report fase9 \
+  --json-out artifacts/fase9-smoke-prod.json
 ```
 
 ### 1. Validar estado inicial sem base
@@ -161,6 +181,42 @@ Resultado esperado:
 - colecao atual removida
 - possiveis colecoes legadas removidas
 - `ready: false`
+
+### 7. Simular webhook do Telegram localmente
+
+O compose padrao sobe o Telegram em `dry_run`, sem depender de token real para o smoke.
+
+```bash
+curl -sS -X POST http://127.0.0.1:8000/api/telegram/webhook \
+  -H "Content-Type: application/json" \
+  -H "X-Telegram-Bot-Api-Secret-Token: telegram-demo-secret" \
+  -d '{"update_id":"900001","message":{"message_id":"700001","chat":{"id":"55119990001","type":"private"},"from":{"id":"55119990001","first_name":"Demo"},"text":"Qual o horario do alvara?"}}' && echo
+```
+
+Resultado esperado:
+
+- `status: "processed"`
+- `tenant_id: "prefeitura-vila-serena"`
+- `channel: "telegram"`
+- `outbound_status: "dry_run"`
+
+### 8. Configurar webhook real do Telegram
+
+Para um bot real criado no BotFather, use o utilitario abaixo depois de expor uma URL publica HTTPS para a API:
+
+```bash
+.venv/bin/python scripts/telegram_webhook.py me
+.venv/bin/python scripts/telegram_webhook.py set \
+  --webhook-url https://seu-host.exemplo/api/telegram/webhook \
+  --secret-token telegram-demo-secret
+.venv/bin/python scripts/telegram_webhook.py info
+```
+
+Observacao:
+
+- para entrega real, troque `TELEGRAM_DELIVERY_MODE=api`
+- configure `TELEGRAM_BOT_TOKEN`
+- mantenha `TELEGRAM_DEFAULT_TENANT_ID=prefeitura-vila-serena` ou use `TELEGRAM_CHAT_TENANT_MAP`
 
 ## Compose de desenvolvimento
 

@@ -274,7 +274,7 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
 **Fase ativa na branch:** Fase 9 — Operacionalização do chat via Telegram.
-**Status da fase na branch:** iniciada na branch de trabalho.
+**Status da fase na branch:** concluída e validada na branch de trabalho.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe
@@ -283,6 +283,7 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * contrato explícito de `tenant_id` no chat e no webhook mínimo
 * persistência local e auditoria mínima por tenant
 * RAG tenant-aware com ingest limpa por tenant
+* integração Telegram demonstrativa com reutilização do fluxo principal
 * documentação técnica alinhada ao runtime mínimo
 * tenant fictício demonstrativo versionado
 * base documental fictícia do tenant demonstrativo
@@ -290,8 +291,8 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 
 ### Em andamento
 
-* operacionalização do canal de demonstração via Telegram
 * incorporação do eixo Guardrail Rastreável nas Fases 9 a 12
+* preparação da camada generativa controlada da Fase 10
 * consolidação da trilha correlacionada entre request, tenant, canal e auditoria
 
 ### Próxima direção

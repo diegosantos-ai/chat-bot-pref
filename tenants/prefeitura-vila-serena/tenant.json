@@ -29,7 +29,8 @@
   },
   "channels": {
     "web_chat_enabled": true,
-    "webhook_page_id": "page-demo-vila-serena"
+    "webhook_page_id": "page-demo-vila-serena",
+    "telegram_enabled": true
   },
   "knowledge_base": {
     "manifest_file": "knowledge_base/manifest.json",

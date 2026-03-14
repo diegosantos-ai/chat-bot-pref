@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     CHROMA_COLLECTION_PREFIX: str = "chat_pref_docs"
     CHROMA_LEGACY_COLLECTION_PREFIXES: list[str] = Field(default_factory=lambda: ["chat_pref"])
     WEBHOOK_PAGE_TENANT_MAP: dict[str, str] = Field(default_factory=dict)
+    TELEGRAM_BOT_TOKEN: str = ""
+    TELEGRAM_WEBHOOK_SECRET: str = ""
+    TELEGRAM_API_BASE_URL: str = "https://api.telegram.org"
+    TELEGRAM_DEFAULT_TENANT_ID: str = ""
+    TELEGRAM_CHAT_TENANT_MAP: dict[str, str] = Field(default_factory=dict)
+    TELEGRAM_DELIVERY_MODE: str = "dry_run"
     CORS_ORIGINS: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",
@@ -54,7 +60,11 @@ class Settings(BaseSettings):
             return False
         raise ValueError("DEBUG deve ser booleano ou um alias reconhecido.")
 
-    @field_validator("WEBHOOK_PAGE_TENANT_MAP", mode="before")
+    @field_validator(
+        "WEBHOOK_PAGE_TENANT_MAP",
+        "TELEGRAM_CHAT_TENANT_MAP",
+        mode="before",
+    )
     @classmethod
     def parse_string_dict(cls, value: Any) -> dict[str, str]:
         if isinstance(value, dict):
@@ -88,6 +98,23 @@ class Settings(BaseSettings):
             if normalized_key and normalized_item:
                 pairs[normalized_key] = normalized_item
         return pairs
+
+    @field_validator("TELEGRAM_BOT_TOKEN", "TELEGRAM_WEBHOOK_SECRET", "TELEGRAM_DEFAULT_TENANT_ID", mode="before")
+    @classmethod
+    def parse_optional_string(cls, value: Any) -> str:
+        if value is None:
+            return ""
+        return str(value).strip()
+
+    @field_validator("TELEGRAM_DELIVERY_MODE", mode="before")
+    @classmethod
+    def parse_telegram_delivery_mode(cls, value: Any) -> str:
+        normalized = str(value or "").strip().lower()
+        if not normalized:
+            return "dry_run"
+        if normalized not in {"api", "dry_run", "disabled"}:
+            raise ValueError("TELEGRAM_DELIVERY_MODE deve ser api, dry_run ou disabled.")
+        return normalized
 
     @field_validator(
         "CORS_ORIGINS",

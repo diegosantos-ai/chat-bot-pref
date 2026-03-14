@@ -53,9 +53,9 @@ variable "service_port" {
 }
 
 variable "service_ingress_cidrs" {
-  description = "CIDRs autorizados a acessar a API publica."
+  description = "CIDRs autorizados a acessar a API publica. Por padrao nao ha acesso liberado; defina explicitamente (ex.: IP do operador ou range da VPN). Nao use 0.0.0.0/0 fora de demos controladas."
   type        = list(string)
-  default     = ["0.0.0.0/0"]
+  default     = []
 }
 
 variable "repo_url" {
@@ -79,7 +79,7 @@ variable "tenant_manifest" {
 variable "telemetry_allowed_hosts" {
   description = "Hosts confiaveis aceitos pelo runtime em nuvem."
   type        = list(string)
-  default     = ["*"]
+  default     = ["localhost", "127.0.0.1"]
 }
 
 variable "cors_origins" {
@@ -127,9 +127,9 @@ variable "telegram_bot_token" {
 }
 
 variable "telegram_webhook_secret" {
-  description = "Secret opcional do webhook Telegram."
+  description = "Secret opcional do webhook Telegram. Ao habilitar o Telegram (telegram_delivery_mode != \"disabled\"/\"dry_run\"), defina um secret forte e exclusivo."
   type        = string
-  default     = "troque-este-secret"
+  default     = ""
   sensitive   = true
 }
 

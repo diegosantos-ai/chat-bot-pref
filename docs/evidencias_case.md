@@ -49,11 +49,11 @@ Artefatos:
 
 Leitura curta recomendada:
 
-1. [README.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/README.md)
-2. [contexto.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/contexto.md)
-3. [arquitetura.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/arquitetura.md)
-4. [diario_bordo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/diario_bordo.md)
-5. [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md)
+1. [README.md](../README.md)
+2. [contexto.md](./contexto.md)
+3. [arquitetura.md](./arquitetura.md)
+4. [diario_bordo.md](./diario_bordo.md)
+5. [fase_13_aws_deploy.md](./fase_13_aws_deploy.md)
 
 Leitura de prova:
 

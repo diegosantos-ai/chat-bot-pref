@@ -55,6 +55,7 @@ Escopo implementado:
 - integração Telegram demonstrativa com entrega `dry_run`
 - Docker funcional
 - smoke tests e retrieval checks
+- workflow de CI versionado em `.github/workflows/ci.yml`
 
 Não assuma como ativos no runtime atual:
 
@@ -62,7 +63,7 @@ Não assuma como ativos no runtime atual:
 - provedor LLM externo real validado como caminho padrão reproduzível
 - painel/admin no caminho crítico
 - banco relacional como dependência operacional
-- CI e deploy em nuvem como parte do runtime da branch
+- deploy em nuvem como parte do runtime da branch
 
 ## Guardrails de alteração
 
@@ -101,7 +102,10 @@ Diretórios como `admin-api/`, `admin-panel/`, `db/`, `panel/`, `logging/`, `das
 Use apenas validações coerentes com a task. Exemplos:
 
 - `python -m uvicorn app.main:app --host 0.0.0.0 --port 8000`
+- `.venv/bin/python scripts/lint_runtime.py`
+- `.venv/bin/python scripts/check_runtime_residues.py`
 - `.venv/bin/python -m pytest tests -q`
+- `docker build -t chat-pref-ci -f Dockerfile .`
 - `docker compose -f docker-compose.yml config`
 - `docker compose -f docker-compose.yml up -d --build`
 - `curl http://localhost:8000/`
@@ -109,7 +113,7 @@ Use apenas validações coerentes com a task. Exemplos:
 - `curl -X POST http://localhost:8000/api/chat -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
 - `curl -X POST http://localhost:8000/api/webhook -H "Content-Type: application/json" -d '{"tenant_id":"prefeitura-demo","message":"Teste"}'`
 - `curl "http://localhost:8000/api/rag/status?tenant_id=prefeitura-demo"`
-- `.venv/bin/python scripts/smoke_tests.py --env prod --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase10`
+- `.venv/bin/python scripts/smoke_tests.py --env prod --runtime-mode reuse --tenant-id prefeitura-vila-serena --tenant-manifest tenants/prefeitura-vila-serena/tenant.json --phase-report fase11`
 
 ## Forma de trabalho
 

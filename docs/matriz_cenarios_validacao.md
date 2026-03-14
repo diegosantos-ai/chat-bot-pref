@@ -51,11 +51,13 @@ Cobertura ja automatizada localmente:
 Cobertura ja validada por teste automatizado fora do smoke:
 
 - `SCN-03` via fluxo de chat sem base carregada
+- `SCN-07` via `tests/test_phase12.py`
+- `SCN-08` via `tests/test_phase12.py`
 
-Cobertura ainda pendente de cenario dedicado:
+Cobertura atualmente levada para CI:
 
-- `SCN-07`
-- `SCN-08`
+- `pytest` executa a matriz automatizada dos cenarios dedicados
+- o smoke reduzido da Fase 11 preserva a trilha observavel por `request_id`
 
 ## 6. Uso por fase
 

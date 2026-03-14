@@ -201,7 +201,7 @@ Contratos ja ativos:
 
 Evolucoes ainda planejadas:
 
-- regressao automatizada desses contratos em CI
+- validacao remota desses contratos no runner GitHub apos push/PR
 - stack externa mais ampla de observabilidade do case
 
 Os documentos normativos desse eixo sao:
@@ -261,9 +261,12 @@ Regras dessa arquitetura-alvo:
 
 ### Fase 12 — CI
 
-- automatizar regressao dos contratos de correlacao
-- validar schema de auditoria
-- bloquear pipeline em falhas relevantes
+- workflow versionado em `.github/workflows/ci.yml`
+- `quality gates` com lint minimo, anti-residuos, `compileall` e `pytest`
+- validacao automatica de `docker compose config` e `docker build`
+- smoke `prod` reduzido reaproveitando o mesmo runtime da Fase 11
+- upload do artefato JSON do smoke no GitHub Actions
+- bloqueio do pipeline em regressao de `audit.v1`, `request_id`, `tenant_id`, `reason_codes` e integridade do audit trail
 
 ## 10. Validacao arquitetural
 

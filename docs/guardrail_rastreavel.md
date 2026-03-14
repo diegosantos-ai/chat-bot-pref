@@ -2,7 +2,7 @@
 
 ## 1. Objetivo
 
-Este documento define o eixo transversal de guardrail rastreavel para as Fases 9 a 12 do Chat Pref.
+Este documento define o eixo transversal de guardrail rastreavel do Chat Pref, distribuido nas Fases 9 a 12 e consolidado como contrato documental ate a Fase 14.
 
 Ele existe para alinhar:
 
@@ -65,7 +65,7 @@ O runtime ativo hoje ainda nao possui:
 
 ## 4. Estado alvo planejado
 
-Ao final das Fases 9 a 12, o projeto deve ter:
+Ao final das Fases 9 a 12, com consolidacao documental nas Fases 13 e 14, o projeto deve ter:
 
 - correlacao minima consistente entre HTTP, Telegram, auditoria, logs e traces
 - decisoes de politica registradas antes e depois da resposta

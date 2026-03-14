@@ -19,6 +19,16 @@ Este documento traduz o projeto em uma matriz simples de `claim -> evidencia -> 
 | O projeto roda fora da maquina local com deploy reproduzivel | `terraform apply` provisionou EC2 + Docker; smoke remoto aprovou `/`, `/health`, `/metrics` e `POST /api/chat` | [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md) |
 | O projeto ja tem evidencias executaveis | `pytest`, smoke por fase e artefatos JSON versionados | [diario_bordo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/diario_bordo.md) |
 
+## Checklist final consolidado
+
+Para leitura executiva do requisito principal do case, leia em conjunto:
+
+1. [genai_com_metodo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/genai_com_metodo.md)
+2. [guardrail_rastreavel.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/guardrail_rastreavel.md)
+3. [fase_11_observabilidade_aplicada.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_11_observabilidade_aplicada.md)
+4. [fase_12_github_actions.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_12_github_actions.md)
+5. [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md)
+
 ## Exemplo curto de prova tecnica
 
 Claim:

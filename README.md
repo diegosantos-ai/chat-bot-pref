@@ -85,10 +85,10 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 - auditoria mínima operacional e evidências de validação
 - Docker e ambiente local reproduzível
 - tenant fictício demonstrativo
-- preparação do canal de demonstração via Telegram
+- canal demonstrativo via Telegram com reutilização do fluxo principal
 - geração de evidências de funcionamento
-- preparação para CI/CD com GitHub Actions
-- preparação para deploy em AWS com Terraform
+- workflow de CI versionado com quality gates mínimos
+- deploy mínimo em AWS validado com Terraform
 
 ### Não incluído neste momento
 - produto enterprise finalizado
@@ -277,7 +277,7 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
 **Fase ativa na branch:** Fase 14 — Alinhamento final entre arquitetura, operação e documentação.
-**Status da fase na branch:** iniciada na branch de trabalho.
+**Status da fase na branch:** implementada e validada na branch de trabalho; aguardando fechamento.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe
@@ -303,12 +303,13 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 
 ### Em andamento
 
-* fechamento documental da Fase 13 e alinhamento final do case
+* alinhamento final entre runtime, CI, deploy e documentação
+* preparação da promoção `develop -> main` via Pull Request
 
 ### Próxima direção
 
-* alinhamento final entre runtime, CI, deploy e documentação
-* fechamento do case com evidências finais de operação
+* endurecer a operação remota quando fizer sentido com domínio, HTTPS e secrets
+* fechar o case final para portfólio e entrevista
 
 ---
 
@@ -535,8 +536,8 @@ O recorte continua enxuto de propósito: entrega real, baixo custo e operação 
 
 ### Curto prazo
 
-* consolidar os artefatos técnicos finais do case
-* revisar a documentação principal com o runtime local, CI e deploy remoto contando a mesma história
+* concluir a Fase 14 com a documentação principal contando exatamente a mesma história do runtime
+* revisar o PR `develop -> main` com o pacote consolidado até a Fase 13
 * manter a regressão automatizada da branch saudável
 
 ### Médio prazo

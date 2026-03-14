@@ -10,7 +10,7 @@ Leia nesta ordem:
 4. `docs/arquitetura.md`
 5. `docs/planejamento_fases.md`
 
-Se a task tocar as Fases 9 a 12, leia tambem:
+Se a task tocar as Fases 9 a 14, leia tambem:
 
 6. `docs/guardrail_rastreavel.md`
 7. `docs/genai_com_metodo.md`
@@ -19,6 +19,12 @@ Se a task tocar as Fases 10 a 12, consulte tambem:
 
 8. `docs/matriz_cenarios_validacao.md`
 9. `docs/rubrica_qualidade_resposta.md`
+
+Se a task tocar as Fases 13 a 14, consulte tambem:
+
+10. `docs/fase_13_aws_deploy.md`
+11. `docs/evidencias_case.md`
+12. `docs/diario_bordo.md`
 
 Use `.github/agents/`, `.ai/skills/` e `.ai/workflows/` como camada ativa de governança.
 
@@ -56,6 +62,7 @@ Escopo implementado:
 - Docker funcional
 - smoke tests e retrieval checks
 - workflow de CI versionado em `.github/workflows/ci.yml`
+- deploy remoto minimo validado em AWS com Terraform, EC2 unica e smoke remoto
 
 Não assuma como ativos no runtime atual:
 
@@ -63,7 +70,7 @@ Não assuma como ativos no runtime atual:
 - provedor LLM externo real validado como caminho padrão reproduzível
 - painel/admin no caminho crítico
 - banco relacional como dependência operacional
-- deploy em nuvem como parte do runtime da branch
+- deploy remoto endurecido com dominio proprio, HTTPS e CD completo
 
 ## Guardrails de alteração
 
@@ -74,7 +81,7 @@ Não assuma como ativos no runtime atual:
 - preserve o contrato mínimo de `request_id` nos fluxos que já o expõem
 - não versione `.env` real nem segredos
 - se a alteração impactar arquitetura, tenant, RAG, guardrails, Docker ou operação, atualize a documentação correspondente
-- nas Fases 9 a 12, siga `docs/guardrail_rastreavel.md` e `docs/genai_com_metodo.md` como referência de contrato
+- nas Fases 9 a 14, siga `docs/guardrail_rastreavel.md` e `docs/genai_com_metodo.md` como referência de contrato
 
 ## Áreas ativas principais
 

@@ -161,6 +161,36 @@ Secrets necessarios para o corte atual da CI:
 - `LLM_API_KEY` so e necessario se voce quiser validar `LLM_PROVIDER=gemini` fora do caminho padrao reproduzivel
 - `TELEGRAM_BOT_TOKEN` so e necessario para integracao externa real do Telegram
 
+## Equivalente remoto da Fase 13
+
+O deploy remoto minimo validado na AWS usa Terraform + EC2 + Docker.
+
+Fluxo recomendado:
+
+```bash
+terraform -chdir=infra/terraform/aws/minimal output
+
+.venv/bin/python scripts/smoke_remote.py \
+  --base-url http://SEU_IP_PUBLICO:8000 \
+  --tenant-id prefeitura-vila-serena \
+  --json-out artifacts/fase13-remote-smoke.json
+```
+
+Para inspecao operacional na instancia:
+
+```bash
+aws ssm start-session --target SEU_INSTANCE_ID --region us-east-1
+```
+
+Observacoes da sessao SSM:
+
+- use `sudo docker ...` para evitar erro de permissao no socket
+- se precisar usar `git` no diretorio remoto bootstrapado pelo `user_data`, marque o repositorio como seguro:
+
+```bash
+git config --global --add safe.directory /opt/chat-pref/app
+```
+
 ### 1. Validar estado inicial sem base
 
 ```bash

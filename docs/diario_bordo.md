@@ -22,6 +22,33 @@ Cada registro abaixo tenta responder quatro perguntas:
 
 ## Linha do tempo
 
+### 2026-03-14 - Fase 14 alinhou a narrativa final do case
+
+**Marco**
+
+Os documentos centrais do repositorio passaram a contar a mesma historia do runtime validado: operacao local, CI, deploy remoto em AWS e limites declarados do case.
+
+**Por que isso importa**
+
+Sem esse fechamento, o projeto correria o risco de parecer maior ou menor do que realmente e. A Fase 14 existe para transformar validacoes tecnicas dispersas em uma narrativa unica, retomavel e defensavel em revisao tecnica, entrevista e leitura de terceiros.
+
+**Validacao principal**
+
+- revisao cruzada entre `README`, `docs/contexto.md`, `docs/arquitetura.md`, `docs/genai_com_metodo.md` e `docs/evidencias_case.md`
+- atualizacao da governanca de agentes e Copilot para refletir o deploy remoto minimo ja validado
+- `scripts/check_runtime_residues.py`
+- `pytest` com `32 passed`
+- `docker compose -f docker-compose.yml config`
+- smoke remoto reaprovado em `artifacts/fase13-remote-smoke.json`
+
+**Evidencias**
+
+- [README.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/README.md)
+- [contexto.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/contexto.md)
+- [arquitetura.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/arquitetura.md)
+- [genai_com_metodo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/genai_com_metodo.md)
+- [evidencias_case.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/evidencias_case.md)
+
 ### 2026-03-14 - Fase 13 validada com deploy remoto em AWS
 
 **Marco**

@@ -6,9 +6,9 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 14 — Alinhamento Final entre Arquitetura, Operação e Documentação
-- **Status da fase atual:** iniciada na branch de trabalho
-- **Eixo transversal aprovado:** Guardrail Rastreável nas Fases 9 a 12
+- **Fase ativa:** Fase 14 — Alinhamento Final entre Arquitetura, Operacao e Documentacao
+- **Status da fase atual:** implementada e validada na branch de trabalho; aguardando fechamento
+- **Eixo transversal aprovado:** Guardrail Rastreavel distribuido nas Fases 9 a 12 e consolidado ate a Fase 14
 
 ## 2. Objetivo do projeto
 
@@ -77,9 +77,10 @@ Hoje o projeto ja demonstra metodo real em:
 O principal gap para `GenAI com metodo` ainda e:
 
 - ausencia de validacao reproduzivel com provedor LLM externo real
-- ausencia de automacao de evidencias no pipeline de entrega
+- ausencia de um bootstrap publico estavel do Telegram como parte do caminho reproduzivel
+- ausencia de endurecimento do deploy remoto com dominio proprio, HTTPS e secrets gerenciados
 
-As Fases 9 a 12 foram redefinidas para fechar esse gap de forma incremental e rastreavel.
+As Fases 9 a 13 fecharam o nucleo minimo desse requisito de forma incremental e rastreavel. A Fase 14 organiza a narrativa final sem ampliar o runtime.
 
 ## 4. O que ja foi estabilizado
 
@@ -189,7 +190,8 @@ O proximo ciclo sera considerado bem encaminhado quando:
 
 - README, contexto, arquitetura, diario e evidencias contarem a mesma historia da branch
 - o deploy minimo remoto permanecer alinhado aos contratos de `request_id`, `tenant_id` e observabilidade
-- a preparacao da Fase 14 organizar o case final sem inflar promessa tecnica
+- o checklist final de `GenAI com metodo` estiver consolidado com `claim -> evidencia -> artefato`
+- o PR `develop -> main` refletir com clareza o estado real do case
 
 ## 10. Forma de validacao
 
@@ -198,9 +200,11 @@ Validacoes minimas esperadas nesta etapa:
 - leitura cruzada de `README.md`, `docs/contexto.md`, `docs/arquitetura.md` e `docs/planejamento_fases.md`
 - coerencia entre estado do runtime e descricoes dos documentos
 - ausencia de declaracao indevida de features ainda nao implementadas
-- alinhamento das Fases 9 a 12 com `docs/guardrail_rastreavel.md`
+- alinhamento das Fases 9 a 14 com `docs/guardrail_rastreavel.md`
+- `scripts/check_runtime_residues.py`
 - `pytest`
-- smoke `prod` e `dev` da fase ativa
+- `docker compose -f docker-compose.yml config`
+- smoke `prod` e `dev` da Fase 11
 - smoke remoto da Fase 13
 
 ## 11. Observacoes de continuidade

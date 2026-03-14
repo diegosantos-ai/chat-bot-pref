@@ -6,9 +6,9 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 14 — Alinhamento Final entre Arquitetura, Operacao e Documentacao
+- **Fase ativa:** Fase 14 — Alinhamento Final entre Arquitetura, Operação e Documentação
 - **Status da fase atual:** iniciada na branch de trabalho
-- **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
+- **Eixo transversal aprovado:** Guardrail Rastreável nas Fases 9 a 12
 
 ## 2. Objetivo do projeto
 

@@ -75,20 +75,28 @@ resource "aws_security_group" "app" {
     cidr_blocks = var.service_ingress_cidrs
   }
 
-  ingress {
-    description = "HTTP publico para desafio e redirect"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = var.service_ingress_cidrs
+  dynamic "ingress" {
+    for_each = var.public_https_enabled ? [1] : []
+
+    content {
+      description = "HTTP publico para desafio e redirect"
+      from_port   = 80
+      to_port     = 80
+      protocol    = "tcp"
+      cidr_blocks = var.service_ingress_cidrs
+    }
   }
 
-  ingress {
-    description = "HTTPS publico para Telegram e demonstracao"
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
-    cidr_blocks = var.service_ingress_cidrs
+  dynamic "ingress" {
+    for_each = var.public_https_enabled ? [1] : []
+
+    content {
+      description = "HTTPS publico para Telegram e demonstracao"
+      from_port   = 443
+      to_port     = 443
+      protocol    = "tcp"
+      cidr_blocks = var.service_ingress_cidrs
+    }
   }
 
   egress {

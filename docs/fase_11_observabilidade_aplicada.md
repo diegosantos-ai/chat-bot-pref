@@ -114,3 +114,10 @@ O principal gap remanescente saiu da operacao local e foi para a disciplina de e
 - CI automatizada
 - regressao de comportamento no pipeline
 - validacao reproduzivel com provedor externo como caminho padrao
+
+## Leitura complementar de evidencias
+
+Para leitura mais direta por terceiros:
+
+- [diario_bordo.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/diario_bordo.md)
+- [evidencias_case.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/evidencias_case.md)

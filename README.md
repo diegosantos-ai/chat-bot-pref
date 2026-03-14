@@ -263,6 +263,8 @@ chat-bot-pref/
 * `docs/planejamento_fases.md`: fases, tasks e execução
 * `docs/guardrail_rastreavel.md`: eixo transversal de correlação e guardrails
 * `docs/genai_com_metodo.md`: definição operacional do requisito do case
+* `docs/evidencias_case.md`: matriz curta de `claim -> evidencia -> artefato`
+* `docs/diario_bordo.md`: narrativa técnica da construção e das validações mais importantes
 * `AGENTS.md`: governança de agentes e regras operacionais
 
 ---
@@ -468,6 +470,11 @@ Ele funciona como **canal demonstrativo** para validar:
 O projeto deve oferecer visibilidade mínima sobre o fluxo do atendimento.
 
 Na base ativa atual, a evidência já validada inclui auditoria versionada `audit.v1`, `PolicyDecision`, `reason_codes`, logs estruturados, métricas expostas em `/metrics` e traces correlacionados por `request_id`.
+
+Para leitura humana mais direta do case, use também:
+
+* [docs/evidencias_case.md](docs/evidencias_case.md)
+* [docs/diario_bordo.md](docs/diario_bordo.md)
 
 ### Evidências esperadas
 

@@ -195,3 +195,4 @@ Validacoes minimas esperadas nesta etapa:
 - o `README.md` deve manter a espinha dorsal do case e sinalizar fase/status
 - `docs/arquitetura.md` deve continuar como fonte de verdade do runtime ativo
 - toda evolucao futura deve priorizar contrato, evidencia e coerencia entre codigo e documentacao
+- a narrativa legivel do case pode ser mantida em `docs/diario_bordo.md` e `docs/evidencias_case.md` sem inflar os documentos-base

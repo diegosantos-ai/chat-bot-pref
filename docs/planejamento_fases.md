@@ -41,7 +41,7 @@ seguir para a próxima fase.
 - [x] Fase 7 — Construção do Tenant Demonstrativo Fictício
 - [x] Fase 8 — Construção da Base Documental Fictícia e Ingest Limpa
 - [x] Fase 9 — Operacionalização do Chat via Telegram
-- [ ] Fase 10 — Composição Generativa, Guardrails e Evidências
+- [x] Fase 10 — Composição Generativa, Guardrails e Evidências
 - [ ] Fase 11 — Observabilidade Aplicada e Fechamento Técnico do Case
 - [ ] Fase 12 — Automação de Qualidade com GitHub Actions
 - [ ] Fase 13 — Infraestrutura como Código e Deploy em AWS

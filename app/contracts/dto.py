@@ -37,6 +37,21 @@ def _normalize_string_list(value: Any) -> list[str]:
     return normalized_items
 
 
+def _normalize_string_mapping(value: Any) -> dict[str, str]:
+    if value in (None, ""):
+        return {}
+    if not isinstance(value, dict):
+        raise ValueError("valor deve ser um objeto")
+
+    normalized_mapping: dict[str, str] = {}
+    for key, item in value.items():
+        normalized_key = str(key).strip()
+        normalized_item = str(item).strip()
+        if normalized_key and normalized_item:
+            normalized_mapping[normalized_key] = normalized_item
+    return normalized_mapping
+
+
 class ChatRequest(BaseModel):
     tenant_id: Optional[str] = Field(
         default=None,
@@ -99,13 +114,67 @@ class ChatExchangeRecord(BaseModel):
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
+class PolicyDecision(BaseModel):
+    stage: str
+    decision: str
+    reason_codes: list[str] = Field(default_factory=list)
+    policy_version: str
+    summary: str
+    metadata: dict[str, str] = Field(default_factory=dict)
+
+    @field_validator("stage", mode="before")
+    @classmethod
+    def normalize_stage(cls, value: Any) -> str:
+        normalized = _normalize_required_text(value, "stage").lower()
+        if normalized not in {"policy_pre", "policy_post"}:
+            raise ValueError("stage deve ser policy_pre ou policy_post")
+        return normalized
+
+    @field_validator("decision", mode="before")
+    @classmethod
+    def normalize_decision(cls, value: Any) -> str:
+        normalized = _normalize_required_text(value, "decision").lower()
+        if normalized not in {"allow", "block", "fallback", "review"}:
+            raise ValueError("decision deve ser allow, block, fallback ou review")
+        return normalized
+
+    @field_validator("policy_version", "summary", mode="before")
+    @classmethod
+    def normalize_required_fields(cls, value: Any, info) -> str:
+        return _normalize_required_text(value, info.field_name)
+
+    @field_validator("reason_codes", mode="before")
+    @classmethod
+    def normalize_reason_codes(cls, value: Any) -> list[str]:
+        return _normalize_string_list(value)
+
+    @field_validator("metadata", mode="before")
+    @classmethod
+    def normalize_metadata(cls, value: Any) -> dict[str, str]:
+        return _normalize_string_mapping(value)
+
+
 class AuditEventRecord(BaseModel):
+    schema_version: str = "audit.v1"
+    event_id: str = Field(default_factory=lambda: str(uuid4()))
     request_id: str
     tenant_id: str
     session_id: str
+    channel: str = "web"
     event_type: str
-    payload: dict[str, str]
+    policy_decision: Optional[PolicyDecision] = None
+    payload: dict[str, str] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @field_validator("schema_version", "request_id", "tenant_id", "session_id", "channel", "event_type", mode="before")
+    @classmethod
+    def normalize_string_fields(cls, value: Any, info) -> str:
+        return _normalize_required_text(value, info.field_name)
+
+    @field_validator("payload", mode="before")
+    @classmethod
+    def normalize_payload(cls, value: Any) -> dict[str, str]:
+        return _normalize_string_mapping(value)
 
 
 class RagDocumentCreateRequest(BaseModel):

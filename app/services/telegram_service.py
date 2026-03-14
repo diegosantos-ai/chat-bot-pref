@@ -275,6 +275,7 @@ class TelegramService:
                 request_id=request_id,
                 tenant_id=tenant_id,
                 session_id=session_id,
+                channel="telegram",
                 event_type=event_type,
                 payload=normalized_payload,
             )

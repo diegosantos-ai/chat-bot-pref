@@ -22,18 +22,21 @@ O runtime ativo atual tem foco em:
 - FastAPI com `GET /`, `GET /health`, `POST /api/chat`, `POST /api/webhook` e endpoints `RAG`
 - webhook demonstrativo do Telegram em `POST /api/telegram/webhook`
 - contrato explícito de `tenant_id`
+- contrato mínimo de `request_id` nos fluxos HTTP críticos
 - contexto de tenant por request
 - persistência local por tenant
-- auditoria mínima por tenant
+- auditoria versionada `audit.v1` por tenant
 - RAG tenant-aware com ingest limpa
+- composição generativa mínima com adaptador LLM isolado
+- prompts e política textual versionados
+- `PolicyDecision` ativo em `policy_pre` e `policy_post`
 - tenant demonstrativo versionado
 - execução local e via Docker com smoke tests
 
 Os itens abaixo ainda não fazem parte do núcleo validado atual:
 
 - bot Telegram configurado com token real e webhook publico em ambiente externo
-- composição generativa ativa com provedor LLM
-- `PolicyDecision` e `AuditEvent` versionado
+- provedor LLM externo real validado como caminho padrão reproduzível
 - logs estruturados, `/metrics` e traces
 - CI ativa no GitHub Actions
 - deploy em AWS com Terraform
@@ -135,9 +138,9 @@ Agentes não devem:
 
 ### GenAI com método
 
-- RAG, policy, composição e resposta devem permanecer separáveis quando a camada generativa entrar
+- RAG, policy, composição e resposta devem permanecer separáveis no runtime ativo
 - `request_id` deve evoluir como contrato transversal nas Fases 9 a 12
-- prompts, políticas e configurações de comportamento devem ser versionados quando forem introduzidos
+- prompts, políticas e configurações de comportamento devem permanecer versionados
 - matriz de cenários e rubrica de qualidade devem orientar validações das Fases 10 a 12
 
 ### Persistência atual

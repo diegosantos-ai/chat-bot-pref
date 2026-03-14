@@ -526,6 +526,70 @@ class DemoTenantService:
             "criteria": criteria,
         }
 
+    def build_phase10_managerial_report(
+        self,
+        manifest_path: str | Path,
+        runtime_validation: dict[str, Any],
+    ) -> dict[str, Any]:
+        validation = self.validate_bundle(manifest_path)
+
+        criteria = [
+            {
+                "criterion": "adaptador de provedor LLM implementado e isolado do restante da aplicacao",
+                "ok": bool(runtime_validation.get("llm_adapter_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("llm_adapter_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "composicao de resposta limitada ao contexto recuperado e ao escopo institucional",
+                "ok": bool(runtime_validation.get("composition_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("composition_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "prompts e politicas versionados",
+                "ok": bool(runtime_validation.get("prompt_policy_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("prompt_policy_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "policy_pre e policy_post executados com reason_codes",
+                "ok": bool(runtime_validation.get("policy_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("policy_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "cenarios normais, fora de escopo, baixa confianca e risco validados",
+                "ok": bool(runtime_validation.get("scenario_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("scenario_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "evidencias registradas com correlacao minima por request_id",
+                "ok": bool(runtime_validation.get("audit_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("audit_validation", {}).get("evidence", "")),
+            },
+            {
+                "criterion": "comportamento alinhado ao escopo institucional do tenant ficticio",
+                "ok": bool(runtime_validation.get("scope_validation", {}).get("ok")),
+                "evidence": str(runtime_validation.get("scope_validation", {}).get("evidence", "")),
+            },
+        ]
+
+        passed = sum(1 for item in criteria if item["ok"])
+        total = len(criteria)
+
+        return {
+            "phase": "Fase 10 - Composicao Generativa, Guardrails e Evidencias",
+            "tenant_id": validation["tenant_id"],
+            "client_name": validation["client_name"],
+            "status": "passed" if passed == total else "failed",
+            "criteria_total": total,
+            "criteria_passed": passed,
+            "criteria_failed": total - passed,
+            "executive_summary": (
+                "Camada generativa minima, guardrails e trilha de evidencias validados para o tenant demonstrativo."
+                if passed == total
+                else "A camada generativa ou os guardrails ainda possuem pendencias de execucao e evidencia."
+            ),
+            "criteria": criteria,
+        }
+
     def bootstrap_bundle(
         self,
         manifest_path: str | Path,

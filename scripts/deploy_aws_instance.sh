@@ -78,6 +78,16 @@ if [ "$PUBLIC_HTTPS_ENABLED" = "true" ] && [ -z "$PUBLIC_BASE_HOSTNAME" ]; then
   printf '\nPUBLIC_BASE_HOSTNAME=%s\n' "$PUBLIC_BASE_HOSTNAME" >>"$APP_DIR/.env.compose"
 fi
 
+if [ "$PUBLIC_HTTPS_ENABLED" = "true" ]; then
+  if [ ! -f "$APP_DIR/deploy/caddy/Caddyfile.template" ]; then
+    echo "Template do Caddy nao encontrado em $APP_DIR/deploy/caddy/Caddyfile.template." >&2
+    exit 1
+  fi
+  log "Renderizando configuracao do Caddy para $PUBLIC_BASE_HOSTNAME"
+  sed "s/__PUBLIC_BASE_HOSTNAME__/${PUBLIC_BASE_HOSTNAME}/g" \
+    "$APP_DIR/deploy/caddy/Caddyfile.template" >"$APP_DIR/deploy/caddy/Caddyfile.runtime"
+fi
+
 log "Subindo backend via docker compose"
 if [ "$PUBLIC_HTTPS_ENABLED" = "true" ]; then
   log "Habilitando proxy HTTPS publico para $PUBLIC_BASE_HOSTNAME"

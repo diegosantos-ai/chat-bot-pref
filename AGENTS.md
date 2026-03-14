@@ -35,12 +35,12 @@ O runtime ativo atual tem foco em:
 - traces OpenTelemetry persistidos por `request_id`
 - tenant demonstrativo versionado
 - execução local e via Docker com smoke tests
+- workflow de CI versionado com quality gates, build Docker e smoke minimo
 
 Os itens abaixo ainda não fazem parte do núcleo validado atual:
 
 - bot Telegram configurado com token real e webhook publico em ambiente externo
 - provedor LLM externo real validado como caminho padrão reproduzível
-- CI ativa no GitHub Actions
 - deploy em AWS com Terraform
 
 ## 3. Documentos obrigatórios antes de alterar
@@ -204,7 +204,10 @@ Toda alteração relevante deve indicar pelo menos uma destas validações:
 - validação da persistência por tenant
 - validação da auditoria por tenant
 - validação de smoke tests quando a task tocar tenant demonstrativo, RAG ou canal
+- `scripts/lint_runtime.py`
+- `scripts/check_runtime_residues.py`
 - `pytest`
+- `docker build`
 - `docker compose config`
 - `docker compose up`
 

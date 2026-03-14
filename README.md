@@ -265,6 +265,7 @@ chat-bot-pref/
 * `docs/genai_com_metodo.md`: definição operacional do requisito do case
 * `docs/evidencias_case.md`: matriz curta de `claim -> evidencia -> artefato`
 * `docs/diario_bordo.md`: narrativa técnica da construção e das validações mais importantes
+* `docs/fase_12_github_actions.md`: automação de qualidade, escopo do workflow e matriz de secrets
 * `AGENTS.md`: governança de agentes e regras operacionais
 
 ---
@@ -276,7 +277,7 @@ O projeto está em **refatoração estrutural com foco em demonstração funcion
 Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e sinaliza o estágio atual das fases.
 
 **Fase ativa na branch:** Fase 12 — Automação de qualidade com GitHub Actions.
-**Status da fase na branch:** iniciada na branch de trabalho.
+**Status da fase na branch:** implementada e validada localmente na branch de trabalho.
 **Eixo transversal aprovado:** Guardrail Rastreável distribuído entre as Fases 9, 10, 11 e 12.
 
 ### Já existe
@@ -297,15 +298,14 @@ Na branch de desenvolvimento, este README mantém a **stack-alvo do projeto** e 
 * tenant fictício demonstrativo versionado
 * base documental fictícia do tenant demonstrativo
 * ambiente local reproduzível com Docker e smoke tests
+* workflow de CI versionado com quality gates, build Docker e smoke reduzido
 
 ### Em andamento
 
-* regressão automatizada de comportamento e rastreabilidade para a Fase 12
 * consolidação do case final para demonstração profissional
 
 ### Próxima direção
 
-* CI com GitHub Actions
 * deploy mínimo em AWS com Terraform
 * fechamento do case com evidências de operação
 
@@ -502,13 +502,16 @@ Após a estabilização da demonstração funcional, o projeto evolui para uma t
 
 ### GitHub Actions
 
-A pipeline deve automatizar, no mínimo:
+A branch atual ja possui workflow de CI versionado em `.github/workflows/ci.yml`, cobrindo:
 
-* lint
-* testes
-* validações críticas
+* lint minimo do runtime
+* `pytest`
+* validacao de `docker compose config`
 * build Docker
-* varredura de termos proibidos e resíduos históricos
+* varredura de termos proibidos e residuos historicos
+* smoke `prod` reduzido com upload de artefato
+
+No corte atual, esse workflow nao exige secrets novos. Os secrets `DEPLOY_WEBHOOK_URL` e `DEPLOY_WEBHOOK_TOKEN` continuam restritos ao workflow manual de deploy.
 
 ### AWS + Terraform
 
@@ -527,21 +530,21 @@ A recomendação atual é privilegiar uma arquitetura enxuta, suficiente para de
 
 ### Curto prazo
 
-* automatizar regressão funcional e comportamental com GitHub Actions
-* preservar o contrato de `request_id` e `tenant_id` nos fluxos críticos
 * consolidar os artefatos técnicos finais do case
+* preparar o deploy mínimo preservando os contratos de `request_id` e `tenant_id`
+* manter a regressão automatizada da branch saudável
 
 ### Médio prazo
 
-* automatizar regressão funcional e comportamental com GitHub Actions
 * endurecer validações de schema de auditoria e `reason_codes`
 * preparar deploy mínimo preservando os contratos do método
+* publicar a primeira validação remota do workflow no GitHub
 
 ### Próximo nível
 
-* automatizar qualidade com GitHub Actions
 * publicar demonstração em AWS com Terraform
 * consolidar o case final para portfólio e entrevista
+* fechar o alinhamento final entre runtime, CI e deploy
 
 ---
 

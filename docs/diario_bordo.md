@@ -22,6 +22,32 @@ Cada registro abaixo tenta responder quatro perguntas:
 
 ## Linha do tempo
 
+### 2026-03-14 - Fase 12 implementada e validada localmente na branch
+
+**Marco**
+
+O projeto ganhou workflow de CI versionado com quality gates, build Docker, smoke reduzido e upload de artefato.
+
+**Por que isso importa**
+
+A partir daqui, o case nao depende apenas de validacao manual local. O repositorio passa a carregar regressao automatizada de comportamento, rastreabilidade e integridade do `audit.v1`.
+
+**Validacao principal**
+
+- `scripts/lint_runtime.py`
+- `scripts/check_runtime_residues.py`
+- `python -m compileall app scripts tests`
+- `pytest` com `32 passed`
+- `docker compose config`
+- `docker build`
+- smoke `prod` em `runtime-mode=reuse` com `15/15`
+
+**Evidencias**
+
+- [fase_12_github_actions.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_12_github_actions.md)
+- [ci.yml](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/.github/workflows/ci.yml)
+- [test_phase12.py](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/tests/test_phase12.py)
+
 ### 2026-03-14 - Fase 11 concluida na branch de trabalho
 
 **Marco**

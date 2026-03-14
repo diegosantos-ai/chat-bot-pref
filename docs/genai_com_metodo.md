@@ -36,10 +36,10 @@ Hoje a base ja possui:
 - fallback controlado e cenarios validados
 - tenant demonstrativo e base documental controlada
 - smoke tests e retrieval checks
+- workflow de CI versionado com regressao automatizada localmente validada
 
 Hoje a base ainda nao possui:
 
-- regressao automatica de comportamento em CI
 - provedor LLM externo real validado como default reproduzivel
 
 ## 4. Cobertura validada hoje
@@ -57,9 +57,12 @@ Cobertura validada no runtime e nos testes:
 
 Cobertura ativa no runtime, mas ainda sem cenario dedicado no smoke:
 
+- uso de provedor LLM externo real como caminho validado
+
+Cobertura automatizada em teste fora do smoke:
+
 - `SENSITIVE_DATA_REQUEST`
 - `PROMPT_INJECTION_SUSPECTED`
-- uso de provedor LLM externo real como caminho validado
 
 ## 5. Checklist do requisito
 
@@ -70,12 +73,12 @@ Cobertura ativa no runtime, mas ainda sem cenario dedicado no smoke:
 | Separacao retrieval / policy / compose / response | implementado no corte minimo da Fase 10 | Fase 10 |
 | Guardrails pre e post | implementado no corte minimo da Fase 10 | Fase 10 |
 | Fallback controlado | implementado no nucleo atual | Fases 10 e 12 |
-| Avaliacao por cenarios | parcial com automacao local inicial | Fases 10 e 12 |
+| Avaliacao por cenarios | implementado com smoke e testes automatizados | Fases 10 e 12 |
 | Auditoria de comportamento | implementado com cobertura inicial de cenarios | Fases 10 a 11 |
 | Rastreabilidade ponta a ponta | parcial | Fases 9 a 11 |
 | Versionamento de prompt / policy / config | implementado no corte minimo da Fase 10 | Fase 10 |
-| Criterios objetivos de qualidade | parcial com rubrica automatizada local | Fases 10 e 12 |
-| Regressao de comportamento | parcial, sem CI | Fase 12 |
+| Criterios objetivos de qualidade | parcial com rubrica automatizada local e checks objetivos em CI | Fases 10 e 12 |
+| Regressao de comportamento | implementado com workflow versionado e testes bloqueantes | Fase 12 |
 | Aderencia ao escopo institucional | implementado no corte minimo da Fase 10 | Fases 10 e 12 |
 | Tenant-awareness no fluxo de IA | implementado no nucleo atual | Fases 9 a 10 |
 | Observabilidade util | implementado no corte minimo da Fase 11 | Fase 11 |
@@ -113,8 +116,8 @@ Cobertura ativa no runtime, mas ainda sem cenario dedicado no smoke:
 
 ### Fase 12
 
-- automatizar regressao de comportamento e rastreabilidade
-- levar a cobertura local da Fase 10 para CI
+- regressao automatizada de comportamento e rastreabilidade versionada em CI
+- cobertura local da Fase 10 e Fase 11 levada para workflow com quality gates, Docker build e smoke reduzido
 
 ### Fases 13 e 14
 

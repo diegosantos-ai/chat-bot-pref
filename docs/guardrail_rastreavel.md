@@ -61,7 +61,6 @@ O runtime ativo hoje ja possui uma base minima reaproveitavel:
 
 O runtime ativo hoje ainda nao possui:
 
-- regressao automatizada em CI desses contratos
 - provedor LLM externo real validado como caminho padrao do runtime
 
 ## 4. Estado alvo planejado
@@ -191,6 +190,11 @@ Implementados no runtime, mas ainda sem cenario dedicado no smoke:
 - `SENSITIVE_DATA_REQUEST`
 - `PROMPT_INJECTION_SUSPECTED`
 
+Implementados com regressao automatizada fora do smoke:
+
+- `SENSITIVE_DATA_REQUEST`
+- `PROMPT_INJECTION_SUSPECTED`
+
 ## 10. Regras de logging e auditoria
 
 Campos minimos ativos para logs estruturados:
@@ -243,7 +247,7 @@ Regras operacionais:
 
 - validacao automatica do schema de auditoria
 - regressao de `request_id`, `tenant_id`, `reason_codes` e integridade do audit trail
-- CI bloqueando regressao relevante
+- workflow de CI versionado bloqueando regressao relevante
 
 ## 12. Fonte de verdade
 

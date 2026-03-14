@@ -125,6 +125,42 @@ Se o ambiente ja estiver levantado e voce quiser reaproveita-lo sem `down` autom
   --json-out artifacts/fase11-smoke-prod.json
 ```
 
+## Equivalente local da Fase 12
+
+Os mesmos gates usados no workflow de CI podem ser executados localmente:
+
+```bash
+.venv/bin/python scripts/lint_runtime.py
+.venv/bin/python scripts/check_runtime_residues.py
+.venv/bin/python -m compileall app scripts tests
+.venv/bin/python -m pytest tests -q
+docker compose -f docker-compose.yml config
+docker compose -f docker-compose.yml -f docker-compose.local.yml config
+docker build -t chat-pref-ci -f Dockerfile .
+```
+
+Smoke reduzido equivalente ao job Docker do GitHub Actions:
+
+```bash
+docker compose -f docker-compose.yml up -d --build
+until [ "$(docker inspect -f '{{.State.Health.Status}}' chat-pref-api 2>/dev/null)" = "healthy" ]; do sleep 1; done
+.venv/bin/python scripts/smoke_tests.py \
+  --env prod \
+  --runtime-mode reuse \
+  --tenant-id prefeitura-vila-serena \
+  --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
+  --phase-report fase11 \
+  --json-out artifacts/fase11-smoke-prod.json
+docker compose -f docker-compose.yml down -v
+```
+
+Secrets necessarios para o corte atual da CI:
+
+- nenhum secret novo obrigatorio para `.github/workflows/ci.yml`
+- `DEPLOY_WEBHOOK_URL` e `DEPLOY_WEBHOOK_TOKEN` continuam exclusivos do workflow de deploy
+- `LLM_API_KEY` so e necessario se voce quiser validar `LLM_PROVIDER=gemini` fora do caminho padrao reproduzivel
+- `TELEGRAM_BOT_TOKEN` so e necessario para integracao externa real do Telegram
+
 ### 1. Validar estado inicial sem base
 
 ```bash

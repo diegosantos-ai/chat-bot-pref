@@ -67,10 +67,10 @@ Isso reforca um ponto importante do case: a aplicacao estava funcional; o que ap
 
 **Evidencias**
 
-- [fase_13_aws_deploy.md](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/docs/fase_13_aws_deploy.md)
-- [fase13-remote-smoke.json](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/fase13-remote-smoke.json)
-- [main.tf](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/infra/terraform/aws/minimal/main.tf)
-- [deploy_aws_instance.sh](/media/diegosantos/TOSHIBA%20EXT/Projetos/Desenvolvendo/chat-bot-pref/scripts/deploy_aws_instance.sh)
+- [fase_13_aws_deploy.md](docs/fase_13_aws_deploy.md)
+- [fase13-remote-smoke.json](artifacts/fase13-remote-smoke.json)
+- [main.tf](infra/terraform/aws/minimal/main.tf)
+- [deploy_aws_instance.sh](scripts/deploy_aws_instance.sh)
 
 ### 2026-03-14 - Hotfix do build Docker no GitHub Actions
 

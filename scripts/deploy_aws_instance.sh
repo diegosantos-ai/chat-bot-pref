@@ -134,7 +134,7 @@ PY
 if [ "$PUBLIC_HTTPS_ENABLED" = "true" ]; then
   log "Validando HTTPS publico do proxy"
   attempt=0
-  until curl -fsS "https://${PUBLIC_BASE_HOSTNAME}/health" >/dev/null 2>&1; do
+  until curl -fsS --connect-timeout 5 --max-time 10 "https://${PUBLIC_BASE_HOSTNAME}/health" >/dev/null 2>&1; do
     attempt=$((attempt + 1))
     if [ "$attempt" -ge 30 ]; then
       echo "Proxy HTTPS publico nao respondeu em https://${PUBLIC_BASE_HOSTNAME}/health." >&2

@@ -115,9 +115,9 @@ variable "telegram_bot_token" {
 }
 
 variable "telegram_webhook_secret" {
-  description = "Secret opcional do webhook Telegram."
+  description = "Secret opcional do webhook Telegram. Ao habilitar o Telegram (telegram_delivery_mode != \"disabled\"/\"dry_run\"), defina um secret forte e exclusivo."
   type        = string
-  default     = "troque-este-secret"
+  default     = ""
   sensitive   = true
 }
 

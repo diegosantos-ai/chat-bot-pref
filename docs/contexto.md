@@ -6,8 +6,8 @@
 - **Repositorio:** `/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref`
 - **Responsavel:** Diego Santos
 - **Status atual:** em andamento
-- **Fase ativa:** Fase 10 — Composicao Generativa, Guardrails e Evidencias
-- **Status da fase atual:** concluida e validada na branch de trabalho
+- **Fase ativa:** Fase 11 — Observabilidade Aplicada e Fechamento Tecnico do Case
+- **Status da fase atual:** iniciada na branch de trabalho
 - **Eixo transversal aprovado:** Guardrail Rastreavel nas Fases 9 a 12
 
 ## 2. Objetivo do projeto
@@ -131,12 +131,22 @@ Entregas validadas na branch:
 - cenarios normais, fora de escopo, baixa confianca, transacional e risco validados
 - evidencias correlacionadas por `request_id` no smoke e nos testes
 
-### Fases 11 e 12
+### Fase 11
 
 Direcao aprovada:
 
 - correlacionar logs, auditoria e traces
+- expor metricas minimas em `/metrics`
+- consolidar a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
+- transformar a validacao funcional da Fase 10 em evidencia observavel do pipeline
+
+### Fase 12
+
+Direcao aprovada:
+
 - automatizar regressao desses contratos em CI
+- validar schema da auditoria e a presenca de campos obrigatorios
+- bloquear regressao relevante de comportamento e rastreabilidade
 
 Referencia normativa desse eixo:
 
@@ -171,12 +181,14 @@ O proximo ciclo sera considerado bem encaminhado quando:
 
 ## 10. Forma de validacao
 
-Validacoes minimas esperadas nesta etapa documental:
+Validacoes minimas esperadas nesta etapa:
 
 - leitura cruzada de `README.md`, `docs/contexto.md`, `docs/arquitetura.md` e `docs/planejamento_fases.md`
 - coerencia entre estado do runtime e descricoes dos documentos
 - ausencia de declaracao indevida de features ainda nao implementadas
 - alinhamento das Fases 9 a 12 com `docs/guardrail_rastreavel.md`
+- `pytest`
+- smoke `prod` e `dev` da fase ativa
 
 ## 11. Observacoes de continuidade
 

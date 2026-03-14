@@ -172,7 +172,7 @@ Objetivo:
 - correlacionar request, tenant, canal, logs e traces
 - registrar guardrails com vocabulario minimo consistente
 
-Modelo de correlacao ativo na Fase 10:
+Modelo de correlacao ativo desde a Fase 10:
 
 - `request_id`
 - `tenant_id`
@@ -248,6 +248,7 @@ Regras dessa arquitetura-alvo:
 - adicionar logs estruturados correlacionados
 - instrumentar traces com OpenTelemetry
 - consolidar a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
+- tornar observavel a cobertura dos guardrails e reason codes ja ativos
 
 ### Fase 12 — CI
 

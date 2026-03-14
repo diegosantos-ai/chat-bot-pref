@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Header, HTTPException, Response
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 
 from app.contracts.dto import ChatRequest, ChatResponse, WebhookChatRequest
 from app.services.chat_service import ChatService
@@ -12,6 +12,7 @@ tenant_resolver = TenantResolver()
 
 @router.post("/webhook", response_model=ChatResponse)
 async def webhook_chat(
+    request: Request,
     webhook_request: WebhookChatRequest,
     response: Response,
     request_id: str | None = Header(default=None, alias="X-Request-ID"),
@@ -32,7 +33,10 @@ async def webhook_chat(
             message=webhook_request.message,
             channel=webhook_request.channel,
         )
-        chat_response = await chat_service.process(chat_request, request_id=request_id)
+        chat_response = await chat_service.process(
+            chat_request,
+            request_id=request_id or getattr(request.state, "request_id", None),
+        )
         response.headers["X-Request-ID"] = chat_response.request_id
         return chat_response
     finally:

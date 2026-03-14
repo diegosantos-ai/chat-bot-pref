@@ -1,5 +1,8 @@
 import asyncio
+from time import perf_counter
 from uuid import uuid4
+
+from opentelemetry.trace import Status, StatusCode
 
 from app.contracts.dto import (
     AuditEventRecord,
@@ -11,6 +14,15 @@ from app.contracts.dto import (
     RagQueryRequest,
     RagQueryResponse,
 )
+from app.observability.context import update_correlation_context
+from app.observability.logging import log_event
+from app.observability.metrics import (
+    record_chat_request,
+    record_llm_composition,
+    record_policy_decision,
+    record_retrieval,
+)
+from app.observability.tracing import annotate_current_span, get_tracer
 from app.policy_guard.service import PolicyGuardService, PostPolicyInput
 from app.services.llm_service import LLMComposeService, LLMGenerationResponse
 from app.services.rag_service import RagService
@@ -37,6 +49,7 @@ class ChatService:
         self.llm_service = llm_service or LLMComposeService()
         self.policy_guard = policy_guard or PolicyGuardService()
         self.tenant_profile_service = tenant_profile_service or TenantProfileService()
+        self.tracer = get_tracer(__name__)
 
     async def process(
         self,
@@ -52,207 +65,329 @@ class ChatService:
         normalized_audit_context = self._normalize_audit_context(audit_context)
         channel = chat_request.channel
         tenant_profile = self.tenant_profile_service.get_profile(tenant_id)
-
-        self._append_event(
+        update_correlation_context(
             request_id=resolved_request_id,
             tenant_id=tenant_id,
             session_id=resolved_session_id,
             channel=channel,
-            event_type="chat_request_received",
-            payload=self._build_audit_payload(
-                {
-                    "message": chat_request.message,
-                    "bot_name": tenant_profile.bot_name,
-                    "client_name": tenant_profile.client_name,
-                },
-                normalized_audit_context,
-            ),
         )
-
-        pre_decision = self.policy_guard.evaluate_pre(chat_request.message, tenant_profile)
-        self._append_policy_event(
+        annotate_current_span(
             request_id=resolved_request_id,
             tenant_id=tenant_id,
             session_id=resolved_session_id,
             channel=channel,
-            event_type="policy_pre_evaluated",
-            policy_decision=pre_decision,
-            payload=self._build_audit_payload(
-                {
-                    "message": self._truncate(chat_request.message),
-                },
-                normalized_audit_context,
-            ),
         )
+        record_chat_request(channel=channel)
 
-        rag_response = self._build_empty_rag_response(tenant_id, chat_request.message)
-        llm_result: LLMGenerationResponse
-        initial_reason_code = ""
-
-        if pre_decision.decision == "allow":
-            rag_response = self.rag_service.query(
-                RagQueryRequest(
-                    tenant_id=tenant_id,
-                    query=chat_request.message,
-                    top_k=settings.LLM_CONTEXT_TOP_K,
-                    min_score=0.0,
-                    boost_enabled=False,
-                )
-            )
-            self._append_retrieval_event(
+        with self.tracer.start_as_current_span("chat.process") as process_span:
+            annotate_current_span(
                 request_id=resolved_request_id,
                 tenant_id=tenant_id,
                 session_id=resolved_session_id,
                 channel=channel,
-                rag_response=rag_response,
-                audit_context=normalized_audit_context,
+            )
+            log_event(
+                "chat.process.started",
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=resolved_session_id,
+                channel=channel,
+                bot_name=tenant_profile.bot_name,
+                client_name=tenant_profile.client_name,
             )
 
-            if rag_response.status == "ready":
-                llm_result = await self.llm_service.compose_answer(
-                    tenant_profile=tenant_profile,
-                    question=chat_request.message,
-                    context_chunks=rag_response.chunks,
+            self._append_event(
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=resolved_session_id,
+                channel=channel,
+                event_type="chat_request_received",
+                payload=self._build_audit_payload(
+                    {
+                        "message": chat_request.message,
+                        "bot_name": tenant_profile.bot_name,
+                        "client_name": tenant_profile.client_name,
+                    },
+                    normalized_audit_context,
+                ),
+            )
+
+            with self.tracer.start_as_current_span("policy_pre") as policy_pre_span:
+                annotate_current_span(
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
                 )
+                pre_decision = self.policy_guard.evaluate_pre(chat_request.message, tenant_profile)
+                annotate_current_span(
+                    policy_stage=pre_decision.stage,
+                    decision=pre_decision.decision,
+                    reason_codes=",".join(pre_decision.reason_codes),
+                )
+
+            record_policy_decision(
+                stage=pre_decision.stage,
+                decision=pre_decision.decision,
+                reason_codes=pre_decision.reason_codes,
+                channel=channel,
+            )
+            self._append_policy_event(
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=resolved_session_id,
+                channel=channel,
+                event_type="policy_pre_evaluated",
+                policy_decision=pre_decision,
+                payload=self._build_audit_payload(
+                    {
+                        "message": self._truncate(chat_request.message),
+                    },
+                    normalized_audit_context,
+                ),
+            )
+
+            rag_response = self._build_empty_rag_response(tenant_id, chat_request.message)
+            llm_result: LLMGenerationResponse
+            initial_reason_code = ""
+
+            if pre_decision.decision == "allow":
+                with self.tracer.start_as_current_span("retrieval") as retrieval_span:
+                    annotate_current_span(
+                        request_id=resolved_request_id,
+                        tenant_id=tenant_id,
+                        session_id=resolved_session_id,
+                        channel=channel,
+                    )
+                    rag_response = self.rag_service.query(
+                        RagQueryRequest(
+                            tenant_id=tenant_id,
+                            query=chat_request.message,
+                            top_k=settings.LLM_CONTEXT_TOP_K,
+                            min_score=0.0,
+                            boost_enabled=False,
+                        )
+                    )
+                    annotate_current_span(
+                        retrieval_status=rag_response.status,
+                        best_score=f"{rag_response.best_score:.4f}",
+                    )
+
+                record_retrieval(status=rag_response.status, channel=channel)
+                self._append_retrieval_event(
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
+                    rag_response=rag_response,
+                    audit_context=normalized_audit_context,
+                )
+
+                if rag_response.status == "ready":
+                    llm_result, llm_latency = await self._compose_with_span(
+                        tenant_profile=tenant_profile,
+                        question=chat_request.message,
+                        context_chunks=rag_response.chunks,
+                        channel=channel,
+                    )
+                else:
+                    initial_reason_code = self._fallback_reason_from_rag(rag_response)
+                    llm_result, llm_latency = await self._compose_fallback_with_span(
+                        tenant_profile=tenant_profile,
+                        question=chat_request.message,
+                        reason_code=initial_reason_code,
+                        policy_summary=rag_response.message,
+                        channel=channel,
+                        span_name="compose",
+                    )
             else:
-                initial_reason_code = self._fallback_reason_from_rag(rag_response)
-                llm_result = await self.llm_service.compose_fallback(
+                self._append_event(
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
+                    event_type="chat_retrieval_skipped",
+                    payload=self._build_audit_payload(
+                        {
+                            "status": "policy_pre_blocked",
+                            "reason_codes": self._join_reason_codes(pre_decision),
+                        },
+                        normalized_audit_context,
+                    ),
+                )
+                initial_reason_code = self._primary_reason_code(pre_decision)
+                llm_result, llm_latency = await self._compose_fallback_with_span(
                     tenant_profile=tenant_profile,
                     question=chat_request.message,
                     reason_code=initial_reason_code,
-                    policy_summary=rag_response.message,
+                    policy_summary=pre_decision.summary,
+                    channel=channel,
+                    span_name="compose",
                 )
-        else:
-            self._append_event(
-                request_id=resolved_request_id,
-                tenant_id=tenant_id,
-                session_id=resolved_session_id,
+
+            record_llm_composition(
+                provider=llm_result.provider,
+                mode=llm_result.mode,
                 channel=channel,
-                event_type="chat_retrieval_skipped",
-                payload=self._build_audit_payload(
-                    {
-                        "status": "policy_pre_blocked",
-                        "reason_codes": self._join_reason_codes(pre_decision),
-                    },
-                    normalized_audit_context,
-                ),
-            )
-            initial_reason_code = self._primary_reason_code(pre_decision)
-            llm_result = await self.llm_service.compose_fallback(
-                tenant_profile=tenant_profile,
-                question=chat_request.message,
-                reason_code=initial_reason_code,
-                policy_summary=pre_decision.summary,
-            )
-
-        self._append_event(
-            request_id=resolved_request_id,
-            tenant_id=tenant_id,
-            session_id=resolved_session_id,
-            channel=channel,
-            event_type="llm_composition_completed",
-            payload=self._build_audit_payload(
-                {
-                    "provider": llm_result.provider,
-                    "model": llm_result.model,
-                    "prompt_version": llm_result.prompt_version,
-                    "mode": llm_result.mode,
-                },
-                normalized_audit_context,
-            ),
-        )
-
-        post_decision = self.policy_guard.evaluate_post(
-            PostPolicyInput(
-                question=chat_request.message,
-                candidate_response=llm_result.message,
-                rag_response=rag_response,
-            ),
-            pre_decision=pre_decision,
-        )
-        self._append_policy_event(
-            request_id=resolved_request_id,
-            tenant_id=tenant_id,
-            session_id=resolved_session_id,
-            channel=channel,
-            event_type="policy_post_evaluated",
-            policy_decision=post_decision,
-            payload=self._build_audit_payload(
-                {
-                    "provider": llm_result.provider,
-                    "prompt_version": llm_result.prompt_version,
-                },
-                normalized_audit_context,
-            ),
-        )
-
-        final_llm_result = llm_result
-        post_reason_code = self._primary_reason_code(post_decision)
-        should_rewrite = post_decision.decision != "allow" and (
-            llm_result.mode != "fallback" or post_reason_code != initial_reason_code
-        )
-        if should_rewrite:
-            final_llm_result = await self.llm_service.compose_fallback(
-                tenant_profile=tenant_profile,
-                question=chat_request.message,
-                reason_code=post_reason_code,
-                policy_summary=post_decision.summary,
+                latency_seconds=llm_latency,
             )
             self._append_event(
                 request_id=resolved_request_id,
                 tenant_id=tenant_id,
                 session_id=resolved_session_id,
                 channel=channel,
-                event_type="llm_response_rewritten",
+                event_type="llm_composition_completed",
                 payload=self._build_audit_payload(
                     {
-                        "provider": final_llm_result.provider,
-                        "model": final_llm_result.model,
-                        "prompt_version": final_llm_result.prompt_version,
-                        "reason_codes": self._join_reason_codes(post_decision),
+                        "provider": llm_result.provider,
+                        "model": llm_result.model,
+                        "prompt_version": llm_result.prompt_version,
+                        "mode": llm_result.mode,
+                        "latency_ms": f"{llm_latency * 1000:.2f}",
                     },
                     normalized_audit_context,
                 ),
             )
 
-        response = ChatResponse(
-            request_id=resolved_request_id,
-            session_id=resolved_session_id,
-            tenant_id=tenant_id,
-            message=final_llm_result.message,
-            channel=channel,
-        )
+            with self.tracer.start_as_current_span("policy_post") as policy_post_span:
+                annotate_current_span(
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
+                )
+                post_decision = self.policy_guard.evaluate_post(
+                    PostPolicyInput(
+                        question=chat_request.message,
+                        candidate_response=llm_result.message,
+                        rag_response=rag_response,
+                    ),
+                    pre_decision=pre_decision,
+                )
+                annotate_current_span(
+                    policy_stage=post_decision.stage,
+                    decision=post_decision.decision,
+                    reason_codes=",".join(post_decision.reason_codes),
+                )
 
-        exchange_record = ChatExchangeRecord(
-            request_id=response.request_id,
-            tenant_id=tenant_id,
-            session_id=resolved_session_id,
-            channel=channel,
-            user_message=chat_request.message,
-            assistant_message=response.message,
-        )
-        self.repository.append_exchange(exchange_record)
+            record_policy_decision(
+                stage=post_decision.stage,
+                decision=post_decision.decision,
+                reason_codes=post_decision.reason_codes,
+                channel=channel,
+            )
+            self._append_policy_event(
+                request_id=resolved_request_id,
+                tenant_id=tenant_id,
+                session_id=resolved_session_id,
+                channel=channel,
+                event_type="policy_post_evaluated",
+                policy_decision=post_decision,
+                payload=self._build_audit_payload(
+                    {
+                        "provider": llm_result.provider,
+                        "prompt_version": llm_result.prompt_version,
+                    },
+                    normalized_audit_context,
+                ),
+            )
 
-        self._append_event(
-            request_id=response.request_id,
-            tenant_id=tenant_id,
-            session_id=resolved_session_id,
-            channel=channel,
-            event_type="chat_response_generated",
-            payload=self._build_audit_payload(
-                {
-                    "message": response.message,
-                    "provider": final_llm_result.provider,
-                    "model": final_llm_result.model,
-                    "prompt_version": final_llm_result.prompt_version,
-                    "response_mode": final_llm_result.mode,
-                    "policy_version": post_decision.policy_version,
-                    "reason_codes": self._join_reason_codes(post_decision or pre_decision),
-                },
-                normalized_audit_context,
-            ),
-        )
-        return response
+            final_llm_result = llm_result
+            post_reason_code = self._primary_reason_code(post_decision)
+            should_rewrite = post_decision.decision != "allow" and (
+                llm_result.mode != "fallback" or post_reason_code != initial_reason_code
+            )
+            if should_rewrite:
+                final_llm_result, rewrite_latency = await self._compose_fallback_with_span(
+                    tenant_profile=tenant_profile,
+                    question=chat_request.message,
+                    reason_code=post_reason_code,
+                    policy_summary=post_decision.summary,
+                    channel=channel,
+                    span_name="compose.rewrite",
+                )
+                record_llm_composition(
+                    provider=final_llm_result.provider,
+                    mode=final_llm_result.mode,
+                    channel=channel,
+                    latency_seconds=rewrite_latency,
+                )
+                self._append_event(
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
+                    event_type="llm_response_rewritten",
+                    payload=self._build_audit_payload(
+                        {
+                            "provider": final_llm_result.provider,
+                            "model": final_llm_result.model,
+                            "prompt_version": final_llm_result.prompt_version,
+                            "reason_codes": self._join_reason_codes(post_decision),
+                            "latency_ms": f"{rewrite_latency * 1000:.2f}",
+                        },
+                        normalized_audit_context,
+                    ),
+                )
+
+            with self.tracer.start_as_current_span("response") as response_span:
+                annotate_current_span(
+                    request_id=resolved_request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
+                )
+                response = ChatResponse(
+                    request_id=resolved_request_id,
+                    session_id=resolved_session_id,
+                    tenant_id=tenant_id,
+                    message=final_llm_result.message,
+                    channel=channel,
+                )
+
+                exchange_record = ChatExchangeRecord(
+                    request_id=response.request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
+                    user_message=chat_request.message,
+                    assistant_message=response.message,
+                )
+                self.repository.append_exchange(exchange_record)
+
+                self._append_event(
+                    request_id=response.request_id,
+                    tenant_id=tenant_id,
+                    session_id=resolved_session_id,
+                    channel=channel,
+                    event_type="chat_response_generated",
+                    payload=self._build_audit_payload(
+                        {
+                            "message": response.message,
+                            "provider": final_llm_result.provider,
+                            "model": final_llm_result.model,
+                            "prompt_version": final_llm_result.prompt_version,
+                            "response_mode": final_llm_result.mode,
+                            "policy_version": post_decision.policy_version,
+                            "reason_codes": self._join_reason_codes(post_decision or pre_decision),
+                        },
+                        normalized_audit_context,
+                    ),
+                )
+
+            process_span.set_status(Status(StatusCode.OK))
+            log_event(
+                "chat.process.completed",
+                request_id=response.request_id,
+                tenant_id=tenant_id,
+                session_id=resolved_session_id,
+                channel=channel,
+                response_mode=final_llm_result.mode,
+                provider=final_llm_result.provider,
+                prompt_version=final_llm_result.prompt_version,
+                reason_codes=post_decision.reason_codes or pre_decision.reason_codes,
+            )
+            return response
 
     async def _resolve_active_tenant(self) -> str:
         await asyncio.sleep(0)
@@ -375,6 +510,62 @@ class ChatService:
         if decision is None or not decision.reason_codes:
             return ""
         return ",".join(decision.reason_codes)
+
+    async def _compose_with_span(
+        self,
+        *,
+        tenant_profile,
+        question: str,
+        context_chunks,
+        channel: str,
+    ) -> tuple[LLMGenerationResponse, float]:
+        started_at = perf_counter()
+        with self.tracer.start_as_current_span("compose"):
+            result = await self.llm_service.compose_answer(
+                tenant_profile=tenant_profile,
+                question=question,
+                context_chunks=context_chunks,
+            )
+            latency_seconds = perf_counter() - started_at
+            annotate_current_span(
+                provider=result.provider,
+                model=result.model,
+                prompt_version=result.prompt_version,
+                mode=result.mode,
+                channel=channel,
+                latency_ms=f"{latency_seconds * 1000:.2f}",
+            )
+            return result, latency_seconds
+
+    async def _compose_fallback_with_span(
+        self,
+        *,
+        tenant_profile,
+        question: str,
+        reason_code: str,
+        policy_summary: str,
+        channel: str,
+        span_name: str,
+    ) -> tuple[LLMGenerationResponse, float]:
+        started_at = perf_counter()
+        with self.tracer.start_as_current_span(span_name):
+            result = await self.llm_service.compose_fallback(
+                tenant_profile=tenant_profile,
+                question=question,
+                reason_code=reason_code,
+                policy_summary=policy_summary,
+            )
+            latency_seconds = perf_counter() - started_at
+            annotate_current_span(
+                provider=result.provider,
+                model=result.model,
+                prompt_version=result.prompt_version,
+                mode=result.mode,
+                channel=channel,
+                reason_code=reason_code,
+                latency_ms=f"{latency_seconds * 1000:.2f}",
+            )
+            return result, latency_seconds
 
     def _truncate(self, text: str) -> str:
         normalized = text.replace("\n", " ").strip()

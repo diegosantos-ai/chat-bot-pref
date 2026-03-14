@@ -21,6 +21,9 @@ O runtime ativo e um backend FastAPI minimo, com foco em:
 - `policy_pre` e `policy_post`
 - persistencia local em arquivo
 - auditoria versionada por tenant
+- logs estruturados correlacionados por `request_id`
+- metricas minimas expostas em `/metrics`
+- traces OpenTelemetry persistidos por `request_id`
 - retrieval tenant-aware em Chroma
 - tenant demonstrativo versionado
 - execucao local e via Docker
@@ -32,6 +35,7 @@ Rotas ativas no `app/main.py`:
 - `POST /api/chat`
 - `POST /api/webhook`
 - `POST /api/telegram/webhook`
+- `GET /metrics`
 - `GET /api/rag/status`
 - `POST /api/rag/documents`
 - `POST /api/rag/ingest`
@@ -46,8 +50,10 @@ Rotas ativas no `app/main.py`:
 | `app/api/chat.py` | entrada HTTP do chat direto com `tenant_id` explicito |
 | `app/api/webhook.py` | entrada HTTP do webhook minimo com resolucao controlada de tenant |
 | `app/api/telegram.py` | webhook demonstrativo do Telegram com validacao de secret e reaproveitamento do chat |
+| `app/api/metrics.py` | exposicao de metricas Prometheus do runtime atual |
 | `app/api/rag.py` | operacoes de documentos, ingest, query, status e reset do RAG |
 | `app/api/health.py` | endpoints de raiz e healthcheck |
+| `app/observability/` | middleware, contexto, logs, metricas e traces correlacionados |
 | `app/services/chat_service.py` | fluxo principal atual com retrieval, composicao, guardrails e auditoria |
 | `app/services/telegram_service.py` | resolucao do tenant no canal Telegram, envio de resposta e auditoria correlacionada |
 | `app/services/llm_service.py` | adaptador LLM e composicao controlada com provedores `mock` e `gemini` |
@@ -111,7 +117,7 @@ Rotas ativas no `app/main.py`:
 - repositorio ativo: `app/storage/audit_repository.py`
 - formato: JSONL
 - segregacao: `data/runtime/audit/<tenant_id>/<session_id>.jsonl`
-- schema ativo hoje: `AuditEventRecord`
+- schema ativo hoje: `AuditEventRecord` em `audit.v1`
 
 Campos atuais do `AuditEventRecord`:
 
@@ -144,6 +150,7 @@ Campos atuais do `AuditEventRecord`:
 - prompt base, prompt de fallback e politica textual sao versionados
 - persistencia e retrieval devem respeitar segregacao por tenant
 - `request_id`, `tenant_id`, `session_id` e `channel` formam a correlacao minima do pipeline ativo
+- auditoria, logs estruturados e traces devem compartilhar os mesmos IDs de correlacao
 - o runtime atual continua usando persistencia local em arquivo
 
 ## 7. Componentes fora do runtime ativo atual
@@ -157,7 +164,7 @@ Os itens abaixo podem existir como narrativa do case, artefato antigo ou objetiv
 - webhook Meta especifico como canal validado
 - bot Telegram em webhook publico estavel como parte do bootstrap reproduzivel
 - provedor LLM externo real como caminho principal validado do runtime
-- pipeline completo de logs estruturados, Prometheus, Grafana e Loki
+- stack completa de Prometheus, Grafana e Loki como operacao externa do case
 - PostgreSQL e Redis como dependencias operacionais do runtime atual
 
 Quando estes elementos voltarem ao projeto, devem ser reintroduzidos como implementacao nova e validada, nao como heranca assumida.
@@ -172,7 +179,7 @@ Objetivo:
 - correlacionar request, tenant, canal, logs e traces
 - registrar guardrails com vocabulario minimo consistente
 
-Modelo de correlacao ativo na Fase 10:
+Modelo de correlacao ativo desde a Fase 10:
 
 - `request_id`
 - `tenant_id`
@@ -188,21 +195,23 @@ Contratos ja ativos:
 - composicao generativa controlada
 - `reason_codes`
 - prompts e politicas versionados
+- logs estruturados correlacionados por `request_id`
+- metricas minimas em `/metrics`
+- traces OpenTelemetry persistidos por `request_id`
 
 Evolucoes ainda planejadas:
 
-- logs estruturados
-- `/metrics`
-- OpenTelemetry
+- regressao automatizada desses contratos em CI
+- stack externa mais ampla de observabilidade do case
 
 Os documentos normativos desse eixo sao:
 
 - `docs/guardrail_rastreavel.md`
 - `docs/genai_com_metodo.md`
 
-### Arquitetura-alvo das Fases 11 e 12
+### Arquitetura-alvo das Fases 12 a 14
 
-A partir da Fase 10, o projeto deixou de ser apenas retrieval-first e passou a demonstrar GenAI controlada. As proximas fases fecham observabilidade e regressao automatizada.
+A partir da Fase 10, o projeto deixou de ser apenas retrieval-first e passou a demonstrar GenAI controlada. A Fase 11 fechou a observabilidade minima do runtime, e as proximas fases fecham regressao automatizada e entrega.
 
 Pipeline alvo:
 
@@ -222,7 +231,7 @@ Regras dessa arquitetura-alvo:
 - o adaptador LLM deve ficar isolado da logica de transporte
 - prompt base, prompt de fallback e politica textual devem ser versionados
 - a trilha deve permanecer correlacionavel por `request_id`, `tenant_id`, `session_id` e `channel`
-- a observabilidade da Fase 11 deve observar o pipeline completo, nao apenas HTTP
+- a observabilidade ativa da Fase 11 observa o pipeline completo, nao apenas HTTP
 
 ## 9. Evolucao planejada por fase
 
@@ -244,10 +253,11 @@ Regras dessa arquitetura-alvo:
 
 ### Fase 11 — Observabilidade aplicada
 
-- expor `/metrics`
-- adicionar logs estruturados correlacionados
-- instrumentar traces com OpenTelemetry
-- consolidar a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
+- `GET /metrics` exposto no runtime
+- logs estruturados correlacionados por `request_id`
+- traces OpenTelemetry persistidos por `request_id`
+- trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response` validada no smoke
+- cobertura minima dos guardrails e `reason_codes` tornada observavel
 
 ### Fase 12 — CI
 

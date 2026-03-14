@@ -30,6 +30,9 @@ O runtime ativo atual tem foco em:
 - composição generativa mínima com adaptador LLM isolado
 - prompts e política textual versionados
 - `PolicyDecision` ativo em `policy_pre` e `policy_post`
+- logs estruturados correlacionados
+- `/metrics` exposto
+- traces OpenTelemetry persistidos por `request_id`
 - tenant demonstrativo versionado
 - execução local e via Docker com smoke tests
 
@@ -37,7 +40,6 @@ Os itens abaixo ainda não fazem parte do núcleo validado atual:
 
 - bot Telegram configurado com token real e webhook publico em ambiente externo
 - provedor LLM externo real validado como caminho padrão reproduzível
-- logs estruturados, `/metrics` e traces
 - CI ativa no GitHub Actions
 - deploy em AWS com Terraform
 

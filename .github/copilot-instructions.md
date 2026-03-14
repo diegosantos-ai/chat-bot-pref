@@ -48,6 +48,9 @@ Escopo implementado:
 - composição generativa mínima com `LLM_PROVIDER=mock`
 - prompts e política textual versionados
 - `policy_pre` e `policy_post` com `PolicyDecision`
+- logs estruturados correlacionados por `request_id`
+- `/metrics`
+- traces com OpenTelemetry persistidos por `request_id`
 - tenant demonstrativo e base documental fictícia
 - integração Telegram demonstrativa com entrega `dry_run`
 - Docker funcional
@@ -57,9 +60,6 @@ Não assuma como ativos no runtime atual:
 
 - bot Telegram configurado com token real e webhook publico externo
 - provedor LLM externo real validado como caminho padrão reproduzível
-- logs estruturados
-- `/metrics`
-- traces com OpenTelemetry
 - painel/admin no caminho crítico
 - banco relacional como dependência operacional
 - CI e deploy em nuvem como parte do runtime da branch

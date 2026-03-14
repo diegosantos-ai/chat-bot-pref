@@ -39,13 +39,29 @@ Hoje a base ja possui:
 
 Hoje a base ainda nao possui:
 
-- logs estruturados
-- metricas em `/metrics`
-- traces com OpenTelemetry
 - regressao automatica de comportamento em CI
 - provedor LLM externo real validado como default reproduzivel
 
-## 4. Checklist do requisito
+## 4. Cobertura validada hoje
+
+O requisito ja possui cobertura objetiva, mas ainda nao completa.
+
+Cobertura validada no runtime e nos testes:
+
+- `SCN-01` pergunta institucional normal
+- `SCN-02` fora de escopo institucional
+- `SCN-04` baixa confianca no retrieval
+- `SCN-05` pedido transacional nao suportado
+- `SCN-06` conteudo clinico, crise ou risco
+- ausencia de base com `NO_KNOWLEDGE_BASE` em teste automatizado do chat
+
+Cobertura ativa no runtime, mas ainda sem cenario dedicado no smoke:
+
+- `SENSITIVE_DATA_REQUEST`
+- `PROMPT_INJECTION_SUSPECTED`
+- uso de provedor LLM externo real como caminho validado
+
+## 5. Checklist do requisito
 
 | Dimensao | Estado atual | Fechamento previsto |
 | --- | --- | --- |
@@ -54,18 +70,18 @@ Hoje a base ainda nao possui:
 | Separacao retrieval / policy / compose / response | implementado no corte minimo da Fase 10 | Fase 10 |
 | Guardrails pre e post | implementado no corte minimo da Fase 10 | Fase 10 |
 | Fallback controlado | implementado no nucleo atual | Fases 10 e 12 |
-| Avaliacao por cenarios | implementado localmente na Fase 10 | Fases 10 e 12 |
-| Auditoria de comportamento | implementado no nucleo atual | Fase 10 |
+| Avaliacao por cenarios | parcial com automacao local inicial | Fases 10 e 12 |
+| Auditoria de comportamento | implementado com cobertura inicial de cenarios | Fases 10 a 11 |
 | Rastreabilidade ponta a ponta | parcial | Fases 9 a 11 |
 | Versionamento de prompt / policy / config | implementado no corte minimo da Fase 10 | Fase 10 |
-| Criterios objetivos de qualidade | implementado localmente na Fase 10 | Fase 10 |
-| Regressao de comportamento | parcial | Fase 12 |
+| Criterios objetivos de qualidade | parcial com rubrica automatizada local | Fases 10 e 12 |
+| Regressao de comportamento | parcial, sem CI | Fase 12 |
 | Aderencia ao escopo institucional | implementado no corte minimo da Fase 10 | Fases 10 e 12 |
 | Tenant-awareness no fluxo de IA | implementado no nucleo atual | Fases 9 a 10 |
-| Observabilidade util | nao implementado | Fase 11 |
+| Observabilidade util | implementado no corte minimo da Fase 11 | Fase 11 |
 | Fechamento de evidencias do case | parcial | Fases 11 a 14 |
 
-## 5. Relacao entre os blocos do sistema
+## 6. Relacao entre os blocos do sistema
 
 - RAG fornece contexto segregado por tenant
 - guardrail limita o comportamento antes e depois da resposta
@@ -75,7 +91,7 @@ Hoje a base ainda nao possui:
 - rubrica de qualidade qualifica a resposta
 - observabilidade consolida logs, metricas e traces
 
-## 6. Mapa por fase
+## 7. Mapa por fase
 
 ### Fase 9
 
@@ -91,19 +107,21 @@ Hoje a base ainda nao possui:
 
 ### Fase 11
 
-- observar o pipeline completo com logs, metricas e traces
-- consolidar a trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
+- logs estruturados, metricas e traces implementados
+- trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response` validada no smoke
+- correlacao por `request_id` consolidada entre auditoria, logs e traces
 
 ### Fase 12
 
 - automatizar regressao de comportamento e rastreabilidade
+- levar a cobertura local da Fase 10 para CI
 
 ### Fases 13 e 14
 
 - preservar esses contratos no deploy
 - fechar a narrativa final do case com `claim -> evidencia -> artefato`
 
-## 7. Documentos relacionados
+## 8. Documentos relacionados
 
 - `docs/guardrail_rastreavel.md`
 - `docs/matriz_cenarios_validacao.md`

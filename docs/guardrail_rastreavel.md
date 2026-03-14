@@ -45,14 +45,14 @@ Papel no projeto:
 
 - correlacionar logs, traces e metricas
 - materializar a trilha ponta a ponta do fluxo
-- entrar apenas a partir da Fase 11
+- estar ativo a partir da Fase 11
 
 ## 3. Estado atual da base
 
 O runtime ativo hoje ja possui uma base minima reaproveitavel:
 
 - `tenant_id` explicito nos fluxos criticos
-- `request_id` gerado no fluxo de chat e aceito em `X-Request-ID` no chat e no webhook
+- `request_id` presente em todo fluxo critico, recebido por `X-Request-ID` no chat e no webhook ou gerado internamente
 - `PolicyDecision` ativo em `policy_pre` e `policy_post`
 - auditoria `audit.v1` por tenant em `app/storage/audit_repository.py`
 - composicao generativa minima com adaptador LLM isolado
@@ -61,9 +61,6 @@ O runtime ativo hoje ja possui uma base minima reaproveitavel:
 
 O runtime ativo hoje ainda nao possui:
 
-- logging estruturado
-- `/metrics`
-- traces com OpenTelemetry
 - regressao automatizada em CI desses contratos
 - provedor LLM externo real validado como caminho padrao do runtime
 
@@ -77,11 +74,11 @@ Ao final das Fases 9 a 12, o projeto deve ter:
 - evidencia rastreavel por `request_id` e `tenant_id`
 - validacao automatica do schema de auditoria e dos campos obrigatorios
 
-## 5. Contratos planejados
+## 5. Contratos ativos e planejados
 
 ### PolicyDecision
 
-Objeto padronizado para decisao de politica:
+Objeto padronizado para decisao de politica, ativo desde a Fase 10:
 
 - `stage`: `policy_pre | policy_post`
 - `decision`: `allow | block | fallback | review`
@@ -92,7 +89,7 @@ Objeto padronizado para decisao de politica:
 
 ### AuditEvent
 
-Schema versionado para auditoria:
+Schema versionado para auditoria, ativo no runtime como `AuditEventRecord`:
 
 - `schema_version`: `audit.v1`
 - `event_id`
@@ -107,7 +104,7 @@ Schema versionado para auditoria:
 
 ### Versionamento de prompt e policy
 
-Na Fase 10, cada comportamento relevante passa a apontar para versoes explicitas de:
+Desde a Fase 10, cada comportamento relevante aponta para versoes explicitas de:
 
 - prompt base
 - prompt de fallback
@@ -120,7 +117,7 @@ O objetivo e impedir que a camada generativa evolua sem baseline rastreavel.
 
 O eixo de guardrail rastreavel nao existe para observar apenas HTTP e retrieval.
 
-Ele deve atravessar o pipeline futuro:
+Ele atravessa o pipeline minimo ativo e o pipeline futuro ampliado:
 
 1. entrada HTTP ou Telegram
 2. resolucao de tenant
@@ -146,14 +143,15 @@ Os fluxos criticos devem convergir para estes campos:
 - `session_id`
 - `channel`
 
-Regras ativas na Fase 10:
+Regras ativas desde a Fase 10:
 
-- `request_id` obrigatorio em todo fluxo critico
+- `request_id` obrigatorio como identificador interno de todo fluxo critico
 - `tenant_id` obrigatorio em todo fluxo critico
 - `session_id` mantido como identificador de conversa
 - `channel` sempre persistido em auditoria
 - HTTP deve aceitar `X-Request-ID` quando recebido e devolver o mesmo header na resposta
 - Telegram deve persistir `chat_id`, `message_id` e `update_id` no `payload`
+- quando o cliente nao envia `X-Request-ID`, o backend deve gerar o identificador e preserva-lo na trilha
 
 ## 8. Catalogo inicial de reason_code
 
@@ -178,9 +176,24 @@ Regras ativas na Fase 10:
 | Tentativa de injecao ou bypass | bloqueio ou fallback defensivo | `PROMPT_INJECTION_SUSPECTED` | decisao de policy + trilha por `request_id` |
 | Conteudo clinico, crise ou risco | bloqueio e encaminhamento seguro | `CRISIS_OR_MEDICAL_RISK` | decisao registrada + resposta segura |
 
+### Cobertura validada hoje
+
+Ja validados com teste automatizado ou smoke:
+
+- `NO_KNOWLEDGE_BASE`
+- `OUT_OF_SCOPE`
+- `LOW_CONFIDENCE_RETRIEVAL`
+- `UNSUPPORTED_TRANSACTIONAL_ACTION`
+- `CRISIS_OR_MEDICAL_RISK`
+
+Implementados no runtime, mas ainda sem cenario dedicado no smoke:
+
+- `SENSITIVE_DATA_REQUEST`
+- `PROMPT_INJECTION_SUSPECTED`
+
 ## 10. Regras de logging e auditoria
 
-Campos minimos planejados para logs estruturados:
+Campos minimos ativos para logs estruturados:
 
 - `timestamp`
 - `level`
@@ -224,6 +237,7 @@ Regras operacionais:
 - endpoint `/metrics`
 - OpenTelemetry para traces e correlacao do fluxo principal
 - observabilidade da trilha `request -> policy_pre -> retrieval -> compose -> policy_post -> response`
+- ampliar a cobertura observavel dos `reason_codes` ainda sem cenario dedicado
 
 ### Fase 12
 

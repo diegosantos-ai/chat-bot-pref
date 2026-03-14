@@ -38,8 +38,19 @@ Pontuacao total sugerida:
 - uma resposta nao deve ser considerada aprovada se falhar em aderencia ao escopo ou em ausencia de invencao
 - a rubrica deve ser aplicada junto com a matriz de cenarios e com a evidencia de auditoria
 
-## 5. Uso por fase
+## 5. Uso atual
 
-- Fase 10: avaliacao manual controlada das respostas dos cenarios principais
+Na Fase 10, a rubrica ja foi incorporada ao smoke local para os cenarios principais de composicao e guardrail.
+
+Estado atual:
+
+- pontuacao automatizada local no `scripts/smoke_tests.py`
+- uso combinado com auditoria e `request_id`
+- ainda sem correlacao com logs, metricas e traces
+- ainda sem automacao em CI
+
+## 6. Uso por fase
+
+- Fase 10: avaliacao automatizada local das respostas dos cenarios principais, com complemento manual quando necessario
 - Fase 11: comparacao entre resposta, auditoria e observabilidade
 - Fase 12: automacao parcial ou total dos checks objetivos da rubrica

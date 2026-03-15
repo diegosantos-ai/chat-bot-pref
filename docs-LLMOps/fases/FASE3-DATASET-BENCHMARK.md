@@ -2,14 +2,15 @@
 
 ## Objetivo deste documento
 
-Registrar o resultado do Bloco 1 da Fase 3, dedicado a criar a estrutura minima do dataset de benchmark reproduzivel do Chat Pref.
+Registrar o estado atual do dataset de benchmark da Fase 3 apos os Blocos 1 e 2.
 
-Este documento descreve apenas o que foi efetivamente implementado nesta etapa:
+Este documento descreve apenas o que foi efetivamente implementado ate aqui:
 
 - estrutura local do dataset no repositorio;
 - contrato minimo de casos de avaliacao;
 - organizacao por tenant e por cenario;
-- placeholders controlados para o tenant demonstrativo;
+- priorizacao metodologica inicial dos cenarios do tenant demonstrativo;
+- diferenciacao entre cenario aderente ao tenant, cenario generico municipal e placeholder controlado;
 - validacoes locais simples da estrutura.
 
 Ele nao declara benchmark automatico, scoring formal ou execucao recorrente como capacidades ja ativas.
@@ -19,8 +20,9 @@ Ele nao declara benchmark automatico, scoring formal ou execucao recorrente como
 - ciclo: LLMOps, avaliacao e governanca
 - fase ativa: Fase 3 — Dataset de Avaliacao e Benchmark Reproduzivel
 - branch de execucao: `feat/dataset-avaliacao`
-- task principal deste bloco: `CPPX-F3-T1`
-- apoio parcial neste bloco: `CPPX-F3-T2` e `CPPX-F3-T6`
+- task principal desta entrega: `CPPX-F3-T2`
+- tasks ja cobertas na base atual: `CPPX-F3-T1`
+- apoio parcial nesta entrega: `CPPX-F3-T3`, `CPPX-F3-T4`, `CPPX-F3-T5` e `CPPX-F3-T6`
 
 ## Estrutura adotada
 
@@ -55,6 +57,7 @@ Cada dataset local desta fase possui um `dataset_manifest.json` com os campos:
 - `dataset_version`
 - `tenant_id`
 - `description`
+- `selection_hypotheses`
 - `scenario_files`
 - `notes`
 
@@ -63,6 +66,9 @@ Cada item de `scenario_files` declara:
 - `scenario_type`
 - `relative_path`
 - `cases_count`
+- `priority_tier`
+- `coverage_type`
+- `selection_rationale`
 
 Esse manifest permite que as proximas tasks da Fase 3 executem o benchmark de forma repetivel sem depender de banco ou servico externo.
 
@@ -73,6 +79,8 @@ Cada linha JSONL representa um caso de avaliacao com o seguinte contrato minimo:
 - `case_id`
 - `tenant_id`
 - `scenario_type`
+- `priority_tier`
+- `coverage_type`
 - `input_query`
 - `expected_behavior`
 - `expected_answer_reference`
@@ -105,6 +113,46 @@ O dataset inicial cobre um caso minimo para cada cenario exigido no planejamento
 
 Nesta etapa, a cobertura e propositalmente pequena. O objetivo foi estruturar o metodo, nao preencher o benchmark com volume artificial.
 
+## Priorizacao inicial adotada
+
+Os cenarios foram priorizados com tres faixas simples:
+
+- `p1`: cenarios centrais para o tenant demonstrativo, frequentes ou sensiveis a regressao funcional;
+- `p2`: cenarios importantes para ambiguidade, limites de escopo ou comparacao complementar;
+- `p3`: placeholders honestos para lacunas ainda nao cobertas pelo tenant demonstrativo.
+
+Tambem foi adotada uma diferenciacao explicita de aderencia:
+
+- `tenant_demonstrativo`: caso sustentado diretamente por bundle, retrieval checks ou limite institucional ja documentado do tenant demonstrativo;
+- `generico_municipal`: caso plausivel no dominio municipal, util para benchmark, mas nao validado por um servico especifico do tenant;
+- `placeholder`: caso mantido para explicitar lacuna real e guiar refinamento posterior.
+
+### Matriz inicial de priorizacao
+
+| Cenário | Prioridade | Aderência | Racional curto |
+|---|---|---|---|
+| `atendimento_normal` | `p1` | `tenant_demonstrativo` | cobre perguntas centrais e frequentes do bundle atual, sensiveis a regressao de retrieval |
+| `risco_policy` | `p1` | `tenant_demonstrativo` | protege um comportamento critico de guardrail e privacidade |
+| `pergunta_ambigua` | `p2` | `tenant_demonstrativo` | testa desambiguacao dentro do dominio ja coberto pelo tenant |
+| `fora_de_escopo` | `p2` | `generico_municipal` | mede limite de escopo com exemplo plausivel no contexto municipal |
+| `baixa_confianca` | `p3` | `placeholder` | explicita uma lacuna atual do tenant sem inventar cobertura documental |
+
+### Casos P1 atualmente materializados
+
+Os casos P1 escolhidos para o tenant demonstrativo foram:
+
+- horario da Central de Atendimento;
+- documentos basicos para protocolo geral presencial;
+- segunda via do IPTU;
+- bloqueio de pedido de CPF de servidor.
+
+Eles foram priorizados porque combinam:
+
+- alta aderencia ao escopo institucional conhecido do tenant;
+- frequencia plausivel no atendimento municipal;
+- dependencia clara de contexto recuperado ou de guardrail;
+- utilidade alta para detectar regressao funcional.
+
 ## Tenant demonstrativo usado
 
 O primeiro dataset foi criado para:
@@ -117,7 +165,7 @@ Justificativa:
 - existem retrieval checks controladas no repositorio;
 - o conjunto permite exemplos plausiveis sem usar dado sensivel ou caso real.
 
-Mesmo assim, alguns casos desta etapa foram mantidos como placeholders honestos, especialmente em `baixa_confianca` e `pergunta_ambigua`, porque a intencao do bloco e validar a estrutura metodologica do benchmark, nao fingir cobertura que o tenant ainda nao tem.
+Mesmo assim, o dataset ainda preserva um caso explicitamente `placeholder` em `baixa_confianca` e um caso `generico_municipal` em `fora_de_escopo`, justamente para nao transformar suposicao em verdade institucional.
 
 ## Relacao com o runtime e com o tracking
 
@@ -137,6 +185,7 @@ Com esta estrutura, os proximos blocos podem:
 
 - ampliar casos por tenant e por cenario;
 - refinar `expected_answer_reference` e `expected_context_reference`;
+- substituir placeholders por casos aderentes ao tenant quando a base documental for aprofundada;
 - conectar `dataset_version` ao tracking experimental local;
 - criar o runner repetivel do benchmark;
 - consolidar baseline inicial da Fase 3.
@@ -150,6 +199,16 @@ Neste bloco ainda nao existe:
 - comparacao formal entre runs de benchmark;
 - integracao do dataset com MLflow;
 - cobertura ampla de casos por tenant.
+
+## Leitura metodologica do estado atual
+
+No estado atual:
+
+- `tenant_demonstrativo` significa aderencia suficiente ao bundle e aos retrieval checks ja versionados;
+- `generico_municipal` significa utilidade metodologica sem declaracao de servico especifico do tenant;
+- `placeholder` significa falta de cobertura assumida explicitamente, nao defeito escondido.
+
+Isso permite usar o benchmark repetidamente desde agora, sem perder a distinção entre evidencia real do tenant e extrapolacao ainda nao consolidada.
 
 ## Validacoes locais recomendadas
 

@@ -22,6 +22,22 @@ class BenchmarkScenarioType(StrEnum):
     RISCO_POLICY = "risco_policy"
 
 
+class BenchmarkPriorityTier(StrEnum):
+    """Classifica a prioridade metodologica do caso ou grupo de casos."""
+
+    P1 = "p1"
+    P2 = "p2"
+    P3 = "p3"
+
+
+class BenchmarkCoverageType(StrEnum):
+    """Diferencia a aderencia do cenario ao tenant demonstrativo."""
+
+    TENANT_DEMONSTRATIVO = "tenant_demonstrativo"
+    GENERICO_MUNICIPAL = "generico_municipal"
+    PLACEHOLDER = "placeholder"
+
+
 @dataclass(frozen=True, slots=True)
 class BenchmarkAnswerReference:
     """Define a referencia minima de resposta esperada para um caso."""
@@ -93,6 +109,8 @@ class BenchmarkCase:
     case_id: str
     tenant_id: str
     scenario_type: BenchmarkScenarioType
+    priority_tier: BenchmarkPriorityTier
+    coverage_type: BenchmarkCoverageType
     input_query: str
     expected_behavior: str
     expected_answer_reference: BenchmarkAnswerReference
@@ -116,6 +134,8 @@ class BenchmarkCase:
             case_id=_require_non_empty_text("case_id", str(payload.get("case_id", ""))),
             tenant_id=_require_non_empty_text("tenant_id", str(payload.get("tenant_id", ""))),
             scenario_type=BenchmarkScenarioType(str(payload.get("scenario_type", ""))),
+            priority_tier=BenchmarkPriorityTier(str(payload.get("priority_tier", ""))),
+            coverage_type=BenchmarkCoverageType(str(payload.get("coverage_type", ""))),
             input_query=_require_non_empty_text("input_query", str(payload.get("input_query", ""))),
             expected_behavior=_require_non_empty_text(
                 "expected_behavior",
@@ -138,11 +158,15 @@ class BenchmarkScenarioFile:
     scenario_type: BenchmarkScenarioType
     relative_path: str
     cases_count: int
+    priority_tier: BenchmarkPriorityTier
+    coverage_type: BenchmarkCoverageType
+    selection_rationale: str
 
     def __post_init__(self) -> None:
         """Valida a declaracao minima do arquivo de cenario."""
 
         _require_non_empty_text("scenario_files.relative_path", self.relative_path)
+        _require_non_empty_text("scenario_files.selection_rationale", self.selection_rationale)
         if self.cases_count < 1:
             raise ValueError("scenario_files.cases_count deve ser maior ou igual a 1.")
 
@@ -157,6 +181,12 @@ class BenchmarkScenarioFile:
                 str(payload.get("relative_path", "")),
             ),
             cases_count=int(payload.get("cases_count", 0)),
+            priority_tier=BenchmarkPriorityTier(str(payload.get("priority_tier", ""))),
+            coverage_type=BenchmarkCoverageType(str(payload.get("coverage_type", ""))),
+            selection_rationale=_require_non_empty_text(
+                "scenario_files.selection_rationale",
+                str(payload.get("selection_rationale", "")),
+            ),
         )
 
 
@@ -167,6 +197,7 @@ class BenchmarkDatasetManifest:
     dataset_version: str
     tenant_id: str
     description: str
+    selection_hypotheses: tuple[str, ...]
     scenario_files: tuple[BenchmarkScenarioFile, ...]
     notes: str
     manifest_path: Path
@@ -178,6 +209,8 @@ class BenchmarkDatasetManifest:
         _require_non_empty_text("tenant_id", self.tenant_id)
         _require_non_empty_text("description", self.description)
         _require_non_empty_text("notes", self.notes)
+        if not self.selection_hypotheses:
+            raise ValueError("selection_hypotheses deve conter ao menos uma hipotese.")
         if not self.scenario_files:
             raise ValueError("scenario_files deve conter ao menos um arquivo de cenario.")
 
@@ -211,6 +244,7 @@ class BenchmarkDatasetManifest:
             ),
             tenant_id=_require_non_empty_text("tenant_id", str(payload.get("tenant_id", ""))),
             description=_require_non_empty_text("description", str(payload.get("description", ""))),
+            selection_hypotheses=_normalize_string_tuple(payload.get("selection_hypotheses", [])),
             scenario_files=tuple(BenchmarkScenarioFile.from_dict(item) for item in raw_files),
             notes=_require_non_empty_text("notes", str(payload.get("notes", ""))),
             manifest_path=manifest_path,
@@ -258,6 +292,16 @@ def load_benchmark_cases(manifest: BenchmarkDatasetManifest) -> tuple[BenchmarkC
                 if case.scenario_type != scenario_file.scenario_type:
                     raise ValueError(
                         "scenario_type divergente entre o manifest e o arquivo "
+                        f"{file_path}:{line_number}."
+                    )
+                if case.priority_tier != scenario_file.priority_tier:
+                    raise ValueError(
+                        "priority_tier divergente entre o manifest e o arquivo "
+                        f"{file_path}:{line_number}."
+                    )
+                if case.coverage_type != scenario_file.coverage_type:
+                    raise ValueError(
+                        "coverage_type divergente entre o manifest e o arquivo "
                         f"{file_path}:{line_number}."
                     )
                 loaded_cases.append(case)

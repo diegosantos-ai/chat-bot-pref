@@ -96,7 +96,7 @@ Esta fase deixa de ser apenas conceitual e passa a incorporar a preparação for
 
 ---
 
-## Card Macro — Fase 2 — Versionamento de Prompts, Policies e Configuração de RAG
+## Card Macro — Fase 2 — Versionamento de Prompts, Policies e Configuração de RAG (CONCLUIDO)
 
 ### Objetivo da fase
 
@@ -131,7 +131,7 @@ Mudanças em prompt, policy e parâmetros de RAG registradas de forma rastreáve
 
 Nenhuma instalação nova deve ocorrer nesta fase. O foco é governança de artefatos, não expansão do ambiente.
 
-#### Tasks — Fase 2
+#### Tasks — Fase 2 
 
 * `CPPX-F2-T1 — Definir estrutura de versionamento de prompts`
 * `CPPX-F2-T2 — Definir estrutura de versionamento de guardrails e policies`

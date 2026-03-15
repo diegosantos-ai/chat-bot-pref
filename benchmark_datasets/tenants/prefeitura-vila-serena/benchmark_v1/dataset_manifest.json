@@ -2,32 +2,52 @@
   "dataset_version": "benchmark_v1",
   "tenant_id": "prefeitura-vila-serena",
   "description": "Dataset inicial e controlado de benchmark da Fase 3 para o tenant demonstrativo Prefeitura Municipal de Vila Serena.",
+  "selection_hypotheses": [
+    "Cenarios P1 devem refletir perguntas institucionais centrais e frequentes do tenant demonstrativo ja cobertas por bundle e retrieval checks.",
+    "Cenarios P2 devem capturar ambiguidade ou limites de escopo relevantes para regressao, mesmo sem serem o nucleo mais frequente do atendimento.",
+    "Cenarios P3 devem explicitar lacunas atuais do tenant demonstrativo por meio de placeholders honestos e controlados."
+  ],
   "scenario_files": [
     {
       "scenario_type": "atendimento_normal",
       "relative_path": "scenarios/atendimento_normal.jsonl",
-      "cases_count": 1
+      "cases_count": 3,
+      "priority_tier": "p1",
+      "coverage_type": "tenant_demonstrativo",
+      "selection_rationale": "Agrupa demandas institucionais centrais, frequentes e diretamente suportadas pela base documental atual do tenant demonstrativo."
     },
     {
       "scenario_type": "pergunta_ambigua",
       "relative_path": "scenarios/pergunta_ambigua.jsonl",
-      "cases_count": 1
+      "cases_count": 1,
+      "priority_tier": "p2",
+      "coverage_type": "tenant_demonstrativo",
+      "selection_rationale": "Captura ambiguidade plausivel dentro do dominio ja coberto pelo tenant, ajudando a detectar regressao de desambiguacao."
     },
     {
       "scenario_type": "fora_de_escopo",
       "relative_path": "scenarios/fora_de_escopo.jsonl",
-      "cases_count": 1
+      "cases_count": 1,
+      "priority_tier": "p2",
+      "coverage_type": "generico_municipal",
+      "selection_rationale": "Representa um limite de escopo municipal plausivel e recorrente, util para benchmark mesmo sem validacao especifica por documento do tenant."
     },
     {
       "scenario_type": "baixa_confianca",
       "relative_path": "scenarios/baixa_confianca.jsonl",
-      "cases_count": 1
+      "cases_count": 1,
+      "priority_tier": "p3",
+      "coverage_type": "placeholder",
+      "selection_rationale": "Mantem explicita uma lacuna do tenant demonstrativo atual e evita inventar cobertura documental inexistente."
     },
     {
       "scenario_type": "risco_policy",
       "relative_path": "scenarios/risco_policy.jsonl",
-      "cases_count": 1
+      "cases_count": 1,
+      "priority_tier": "p1",
+      "coverage_type": "tenant_demonstrativo",
+      "selection_rationale": "Protege um comportamento critico de guardrail e regressao funcional do atendimento institucional."
     }
   ],
-  "notes": "Casos iniciais e honestos para demonstrar a estrutura do benchmark. A base usa referencias minimas e placeholders controlados do tenant demonstrativo atual."
+  "notes": "Selecao inicial de cenarios priorizados para benchmark recorrente do tenant demonstrativo. O dataset mantem cobertura pequena, mas intencional."
 }

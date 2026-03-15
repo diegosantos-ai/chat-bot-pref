@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chat Pref DevOps"
+  short_description: "Docker, CI, Terraform e deploy do Chat Pref"
+  default_prompt: "Use $chat-pref-devops-platform para trabalhar em Docker, CI, Terraform, AWS ou scripts operacionais do Chat Pref."

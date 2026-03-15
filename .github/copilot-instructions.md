@@ -51,7 +51,7 @@ Consulte também:
 17. `docs-fundacao-operacional/evidencias_case.md`
 18. `docs-fundacao-operacional/diario_bordo.md`
 
-Use `.github/agents/`, `.ai/skills/` e `.ai/workflows/` como camada ativa de governança.
+Use `.codex/skills/`, `.github/agents/`, `.ai/skills/` e `.ai/workflows/` como camada ativa de governanca.
 
 ---
 

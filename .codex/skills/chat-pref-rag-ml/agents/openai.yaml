@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chat Pref RAG"
+  short_description: "RAG tenant-aware e avaliacao do Chat Pref"
+  default_prompt: "Use $chat-pref-rag-ml para revisar ingest, retrieval, colecoes por tenant ou avaliacao do RAG no Chat Pref."

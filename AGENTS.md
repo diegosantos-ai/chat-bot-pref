@@ -158,6 +158,7 @@ Se a alteração estiver ligada a uma fase específica, o agente deve identifica
 
 ### Governança auxiliar
 - instruções do Copilot: `.github/copilot-instructions.md`
+- skills nativas do Codex: `.codex/skills/`
 - agentes especializados: `.github/agents/`
 - skills e workflows: `.ai/`
 

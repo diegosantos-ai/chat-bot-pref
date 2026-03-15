@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chat Pref Docs"
+  short_description: "Documentacao e governanca do Chat Pref"
+  default_prompt: "Use $chat-pref-docs-operator para alinhar README, AGENTS, docs operacionais ou governanca do Chat Pref."

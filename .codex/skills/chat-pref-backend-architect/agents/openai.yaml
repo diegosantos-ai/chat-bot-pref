@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chat Pref Backend"
+  short_description: "Backend FastAPI e tenant-aware do Chat Pref"
+  default_prompt: "Use $chat-pref-backend-architect para ajustar um endpoint, contrato HTTP ou fluxo tenant-aware do Chat Pref."

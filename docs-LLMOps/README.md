@@ -82,6 +82,7 @@ Documentos de fase atualmente presentes nesta pasta:
 - `fases/FASE1-LLMOPS.md`
 - `fases/FASE2-LLMOPS.md`
 - `fases/FASE3-DATASET-BENCHMARK.md`
+- `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
 
 ## Diretriz de manutenção
 
@@ -109,6 +110,7 @@ A sequência recomendada de leitura desta pasta é:
 4. `fases/FASE1-LLMOPS.md`
 5. `fases/FASE2-LLMOPS.md`
 6. `fases/FASE3-DATASET-BENCHMARK.md`
+7. `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
 
 ## Status
 

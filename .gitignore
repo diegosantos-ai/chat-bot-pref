@@ -83,9 +83,6 @@ artifacts/logs/
 artifacts/llmops/**/mlruns/
 artifacts/llmops/**/mlartifacts/
 artifacts/llmops/**/mlflow.db
-artifacts/llmops/_tmp_mlflow_probe/
-artifacts/llmops/**/smoke_report.json
-artifacts/llmops/**/req-smoke-*_artifact.json
 
 # OS
 .DS_Store

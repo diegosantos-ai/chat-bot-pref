@@ -2,7 +2,7 @@
 
 ## Objetivo deste documento
 
-Registrar o estado atual do dataset de benchmark da Fase 3 apos os Blocos 1 a 6.
+Registrar o estado atual do dataset de benchmark da Fase 3 apos os Blocos 1 a 7.
 
 Este documento descreve apenas o que foi efetivamente implementado ate aqui:
 
@@ -20,9 +20,9 @@ Ele nao declara benchmark automatico, scoring formal ou execucao recorrente como
 - ciclo: LLMOps, avaliacao e governanca
 - fase ativa: Fase 3 — Dataset de Avaliacao e Benchmark Reproduzivel
 - branch de execucao: `feat/dataset-avaliacao`
-- task principal desta entrega: `CPPX-F3-T6`
-- tasks ja cobertas na base atual: `CPPX-F3-T1`, `CPPX-F3-T2`, `CPPX-F3-T3`, `CPPX-F3-T4` e `CPPX-F3-T5`
-- apoio parcial nesta entrega: `CPPX-F3-T7`
+- task principal desta entrega: `CPPX-F3-T7`
+- tasks ja cobertas na base atual: `CPPX-F3-T1`, `CPPX-F3-T2`, `CPPX-F3-T3`, `CPPX-F3-T4`, `CPPX-F3-T5` e `CPPX-F3-T6`
+- status da fase neste escopo: baseline inicial consolidada
 
 ## Estrutura adotada
 
@@ -143,6 +143,32 @@ O dataset atual cobre os cinco cenarios exigidos no planejamento:
 - `risco_policy`
 
 Nesta etapa, a cobertura continua pequena de proposito. O objetivo segue sendo estruturar o metodo com casos diagnosticos fortes, nao preencher o benchmark com volume artificial.
+
+## Baseline inicial consolidada
+
+A baseline inicial reproduzivel da Fase 3 ficou explicitamente consolidada em:
+
+- `benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json`
+
+Distribuicao final desta baseline:
+
+- total de casos: `17`
+- por cenario:
+  - `atendimento_normal`: `6`
+  - `pergunta_ambigua`: `1`
+  - `fora_de_escopo`: `3`
+  - `baixa_confianca`: `3`
+  - `risco_policy`: `4`
+- por prioridade:
+  - `p1`: `10`
+  - `p2`: `4`
+  - `p3`: `3`
+- por aderencia:
+  - `tenant_demonstrativo`: `11`
+  - `generico_municipal`: `3`
+  - `placeholder`: `3`
+
+Essa baseline passa a ser a referencia inicial para execucoes repetidas da fase, sempre carregada a partir do manifest versionado e validada pelo contrato local em `app/llmops/benchmark_dataset.py`.
 
 ## Priorizacao inicial adotada
 
@@ -292,20 +318,36 @@ Esta entrega:
 
 O contrato foi colocado em `app/llmops/benchmark_dataset.py` apenas para carga e validacao local do dataset offline.
 
+## Validacao local da baseline
+
+Comandos minimos para validar a baseline inicial consolidada:
+
+- `source .venv/bin/activate`
+- `python scripts/summarize_fase3_benchmark.py`
+- `pytest tests/test_phase3_benchmark_dataset.py -q`
+- `pytest tests -q`
+
+O script `scripts/summarize_fase3_benchmark.py` nao executa benchmark nem scoring. Ele apenas carrega o manifest baseline atual e imprime um resumo agregador estavel de:
+
+- dataset ativo;
+- total de casos;
+- distribuicao por cenario;
+- distribuicao por prioridade;
+- distribuicao por aderencia.
+
 ## O que fica preparado para os proximos blocos
 
 Com esta estrutura, os proximos blocos podem:
 
-- ampliar casos por tenant e por cenario;
-- reutilizar o padrao refinado de `expected_answer_reference` e `expected_context_reference` no runner inicial;
+- reutilizar esta baseline no runner repetivel das proximas fases;
 - substituir placeholders por casos aderentes ao tenant quando a base documental for aprofundada;
 - conectar `dataset_version` ao tracking experimental local;
-- criar o runner repetivel do benchmark;
-- consolidar baseline inicial da Fase 3.
+- integrar execucao do benchmark com a avaliacao formal da Fase 4;
+- ampliar benchmark por tenant sem quebrar a segregacao atual.
 
 ## O que ainda nao foi implementado
 
-Neste bloco ainda nao existe:
+Mesmo com a baseline consolidada, ainda nao existe:
 
 - benchmark runner recorrente;
 - scoring automatico de qualidade;
@@ -320,6 +362,23 @@ No estado atual:
 - `tenant_demonstrativo` significa aderencia suficiente ao bundle e aos retrieval checks ja versionados;
 - `generico_municipal` significa utilidade metodologica sem declaracao de servico especifico do tenant;
 - `placeholder` significa falta de cobertura assumida explicitamente, nao defeito escondido.
+
+## Entrega efetiva da Fase 3
+
+Neste escopo, a Fase 3 agora entrega:
+
+- baseline inicial reproduzivel e tenant-aware;
+- manifest versionado e contrato local validavel;
+- casos distribuidos por cenario, prioridade e aderencia;
+- referencia minima de resposta e grounding refinada por tipo de cenario;
+- validacao agregada local da baseline sem depender de banco ou servico externo.
+
+Neste escopo, a Fase 3 ainda nao entrega:
+
+- execucao automatica de benchmark com scoring;
+- comparacao historica entre runs;
+- integracao com MLflow ou avaliacao formal do RAG;
+- cobertura ampla multi-tenant.
 
 Isso permite usar o benchmark repetidamente desde agora, sem perder a distinção entre evidencia real do tenant e extrapolacao ainda nao consolidada.
 

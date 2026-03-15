@@ -143,7 +143,7 @@ Nenhuma instalação nova deve ocorrer nesta fase. O foco é governança de arte
 
 ---
 
-## Card Macro — Fase 3 — Dataset de Avaliação e Benchmark Reproduzível
+## Card Macro — Fase 3 — Dataset de Avaliação e Benchmark Reproduzível (CONSOLIDADA NESTE ESCOPO)
 
 ### Objetivo da fase
 

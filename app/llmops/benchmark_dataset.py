@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass
 from enum import StrEnum
 import json
@@ -10,6 +11,13 @@ from typing import Any, Final, Mapping
 
 REPO_ROOT: Final[Path] = Path(__file__).resolve().parents[2]
 BENCHMARK_DATASETS_DIR: Final[Path] = REPO_ROOT / "benchmark_datasets"
+PHASE3_INITIAL_BASELINE_MANIFEST: Final[Path] = (
+    BENCHMARK_DATASETS_DIR
+    / "tenants"
+    / "prefeitura-vila-serena"
+    / "benchmark_v1"
+    / "dataset_manifest.json"
+)
 
 
 class BenchmarkScenarioType(StrEnum):
@@ -287,11 +295,67 @@ class LoadedBenchmarkDataset:
     cases: tuple[BenchmarkCase, ...]
 
 
+@dataclass(frozen=True, slots=True)
+class BenchmarkDatasetSummary:
+    """Consolida o resumo agregador de um dataset local de benchmark."""
+
+    tenant_id: str
+    dataset_version: str
+    manifest_path: Path
+    total_cases: int
+    cases_by_scenario: dict[BenchmarkScenarioType, int]
+    cases_by_priority: dict[BenchmarkPriorityTier, int]
+    cases_by_coverage: dict[BenchmarkCoverageType, int]
+
+
 def discover_benchmark_manifests(base_dir: Path | None = None) -> tuple[Path, ...]:
     """Descobre manifests de benchmark seguindo a estrutura tenant/version."""
 
     root_dir = base_dir or BENCHMARK_DATASETS_DIR
     return tuple(sorted(root_dir.glob("tenants/*/*/dataset_manifest.json")))
+
+
+def load_phase3_initial_baseline() -> LoadedBenchmarkDataset:
+    """Carrega o benchmark baseline inicial consolidado da Fase 3."""
+
+    return load_benchmark_dataset(PHASE3_INITIAL_BASELINE_MANIFEST)
+
+
+def build_benchmark_dataset_summary(dataset: LoadedBenchmarkDataset) -> BenchmarkDatasetSummary:
+    """Gera um resumo agregador estavel de um dataset de benchmark carregado."""
+
+    return BenchmarkDatasetSummary(
+        tenant_id=dataset.manifest.tenant_id,
+        dataset_version=dataset.manifest.dataset_version,
+        manifest_path=dataset.manifest.manifest_path,
+        total_cases=len(dataset.cases),
+        cases_by_scenario=dict(Counter(case.scenario_type for case in dataset.cases)),
+        cases_by_priority=dict(Counter(case.priority_tier for case in dataset.cases)),
+        cases_by_coverage=dict(Counter(case.coverage_type for case in dataset.cases)),
+    )
+
+
+def format_benchmark_dataset_summary(summary: BenchmarkDatasetSummary) -> str:
+    """Renderiza um resumo textual simples e reproduzivel do benchmark."""
+
+    lines = [
+        f"baseline: {summary.tenant_id}/{summary.dataset_version}",
+        f"manifest: {summary.manifest_path.relative_to(REPO_ROOT)}",
+        f"total_cases: {summary.total_cases}",
+        "cases_by_scenario:",
+    ]
+    for scenario_type in BenchmarkScenarioType:
+        lines.append(f"  - {scenario_type.value}: {summary.cases_by_scenario.get(scenario_type, 0)}")
+
+    lines.append("cases_by_priority:")
+    for priority_tier in BenchmarkPriorityTier:
+        lines.append(f"  - {priority_tier.value}: {summary.cases_by_priority.get(priority_tier, 0)}")
+
+    lines.append("cases_by_coverage:")
+    for coverage_type in BenchmarkCoverageType:
+        lines.append(f"  - {coverage_type.value}: {summary.cases_by_coverage.get(coverage_type, 0)}")
+
+    return "\n".join(lines)
 
 
 def load_benchmark_manifest(manifest_path: Path) -> BenchmarkDatasetManifest:

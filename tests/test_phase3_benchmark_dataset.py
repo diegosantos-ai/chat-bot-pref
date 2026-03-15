@@ -5,14 +5,19 @@ import pytest
 
 from app.llmops.benchmark_dataset import (
     BENCHMARK_DATASETS_DIR,
+    PHASE3_INITIAL_BASELINE_MANIFEST,
     BenchmarkCase,
     BenchmarkCoverageType,
+    BenchmarkDatasetSummary,
     BenchmarkPriorityTier,
     BenchmarkScenarioType,
     SCENARIO_ANSWER_REFERENCE_TYPES,
     SCENARIO_CONTEXT_REFERENCE_TYPES,
+    build_benchmark_dataset_summary,
     discover_benchmark_manifests,
+    format_benchmark_dataset_summary,
     load_benchmark_dataset,
+    load_phase3_initial_baseline,
 )
 
 
@@ -22,6 +27,15 @@ def test_phase3_benchmark_manifests_are_discoverable() -> None:
     assert manifests
     assert all(path.is_file() for path in manifests)
     assert BENCHMARK_DATASETS_DIR.is_dir()
+
+
+def test_phase3_initial_baseline_manifest_is_explicit_and_loadable() -> None:
+    dataset = load_phase3_initial_baseline()
+
+    assert PHASE3_INITIAL_BASELINE_MANIFEST.is_file()
+    assert dataset.manifest.manifest_path == PHASE3_INITIAL_BASELINE_MANIFEST
+    assert dataset.manifest.tenant_id == "prefeitura-vila-serena"
+    assert dataset.manifest.dataset_version == "benchmark_v1"
 
 
 def test_phase3_benchmark_dataset_has_required_structure_and_tenant_isolation() -> None:
@@ -302,3 +316,34 @@ def test_phase3_reference_contract_is_consistent_across_scenarios() -> None:
             continue
 
         assert case.expected_context_reference.required_terms
+
+
+def test_phase3_baseline_summary_keeps_final_distribution_stable() -> None:
+    dataset = load_phase3_initial_baseline()
+    summary = build_benchmark_dataset_summary(dataset)
+    rendered_summary = format_benchmark_dataset_summary(summary)
+
+    assert isinstance(summary, BenchmarkDatasetSummary)
+    assert summary.manifest_path == PHASE3_INITIAL_BASELINE_MANIFEST
+    assert summary.total_cases == 17
+    assert summary.cases_by_scenario == {
+        BenchmarkScenarioType.ATENDIMENTO_NORMAL: 6,
+        BenchmarkScenarioType.PERGUNTA_AMBIGUA: 1,
+        BenchmarkScenarioType.FORA_DE_ESCOPO: 3,
+        BenchmarkScenarioType.BAIXA_CONFIANCA: 3,
+        BenchmarkScenarioType.RISCO_POLICY: 4,
+    }
+    assert summary.cases_by_priority == {
+        BenchmarkPriorityTier.P1: 10,
+        BenchmarkPriorityTier.P2: 4,
+        BenchmarkPriorityTier.P3: 3,
+    }
+    assert summary.cases_by_coverage == {
+        BenchmarkCoverageType.TENANT_DEMONSTRATIVO: 11,
+        BenchmarkCoverageType.GENERICO_MUNICIPAL: 3,
+        BenchmarkCoverageType.PLACEHOLDER: 3,
+    }
+    assert "baseline: prefeitura-vila-serena/benchmark_v1" in rendered_summary
+    assert "total_cases: 17" in rendered_summary
+    assert "atendimento_normal: 6" in rendered_summary
+    assert "risco_policy: 4" in rendered_summary

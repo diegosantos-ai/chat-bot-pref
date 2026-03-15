@@ -8,6 +8,7 @@ Registrar o fechamento do bloco atual da Fase 4 no escopo de:
 - `CPPX-F4-T2 — Conectar benchmark ao contrato de avaliacao formal`
 - `CPPX-F4-T3 — Executar avaliacao formal offline com tracking experimental`
 - parte operacional do `CPPX-F4-T4 — Registrar metricas complementares viaveis`
+- `CPPX-F4-T5 — Gerar artifacts comparativos por experimento`
 
 Este documento descreve apenas o que foi efetivamente implementado ou fechado neste bloco:
 
@@ -15,6 +16,7 @@ Este documento descreve apenas o que foi efetivamente implementado ou fechado ne
 - contrato tecnico minimo da avaliacao offline por caso e por run;
 - executor offline que conecta benchmark, retrieval, composicao, policy e avaliacao;
 - registro minimo da run no `MLflow` local;
+- artifacts comparativos por run e experimento;
 - metricas obrigatorias da fase;
 - metricas complementares iniciais ja enquadradas no contrato e registradas quando viaveis;
 - limites metodologicos do benchmark atual da Fase 3.
@@ -34,6 +36,7 @@ Ele nao declara:
   - `CPPX-F4-T1`
   - `CPPX-F4-T2`
   - `CPPX-F4-T3`
+  - `CPPX-F4-T5`
 - task preparada parcialmente agora: `CPPX-F4-T4`
 - base reutilizada:
   - benchmark versionado da Fase 3 em `benchmark_datasets/`
@@ -231,6 +234,20 @@ Metricas agregadas minimas registradas:
 - `cases_with_methodology_limitations`
 - contadores de skip por metrica, quando ocorrerem
 
+Artifacts comparativos persistidos agora:
+
+- `*_rag_evaluation_run.json`
+- `*_rag_evaluation_comparison.json`
+- `*_rag_evaluation_comparison.csv`
+- `*_rag_evaluation_case_ranking.json`
+
+Finalidade de cada artifact:
+
+- `run.json`: relatorio completo da run atual com resumo e casos executados;
+- `comparison.json`: snapshot comparativo das runs anteriores do mesmo experimento e tenant mais a run atual;
+- `comparison.csv`: versao tabular do snapshot comparativo para leitura manual e automacao posterior;
+- `case_ranking.json`: melhores casos avaliados, piores casos avaliados e casos nao avaliados da run atual, sem inferencia interpretativa adicional.
+
 ## Metricas obrigatorias desta fase
 
 As metricas obrigatorias definidas neste bloco sao:
@@ -314,7 +331,6 @@ Neste bloco, fica explicitamente medido ou preparavel:
 Este bloco ainda nao entrega:
 
 - baseline comparativa entre variacoes de prompt, retrieval e base vetorial;
-- artifacts comparativos por experimento;
 - correlacao automatica com custo, latencia, fallback e bloqueio;
 - julgamento semantico forte de contexto quando o dataset nao tiver `reference_answer` textual.
 
@@ -376,6 +392,16 @@ Consequencia:
 - os scores ficam comparaveis entre runs do mesmo repositorio e stack;
 - os resultados ainda nao equivalem a uma avaliacao semantica forte com juiz externo dedicado.
 
+### 6. O comparativo atual nao substitui leitura interpretativa dos casos
+
+Os artifacts comparativos deste bloco deixam o contexto da run explicito, mas ainda nao executam interpretacao tecnica automatica dos piores casos.
+
+Consequencia:
+
+- o `comparison.json` mostra diferencas e contexto entre runs;
+- o `case_ranking.json` lista casos fortes, fracos e nao avaliados;
+- a analise causal detalhada dos casos criticos continua reservada ao bloco seguinte da fase.
+
 ## Relacao com a Fase 3
 
 Esta entrega depende diretamente da qualidade metodologica do benchmark consolidado na Fase 3.
@@ -394,11 +420,12 @@ Implementado agora:
 - contrato Python offline da avaliacao formal;
 - executor offline do benchmark para avaliacao formal;
 - registro minimo da run no `MLflow` local;
+- snapshot comparativo JSON/CSV por experimento e tenant;
+- ranking JSON de casos da run atual;
 - catalogo explicito de metricas obrigatorias e complementares iniciais;
 - agregacao minima por run sem acoplamento ao runtime transacional;
 - documentacao dos limites metodologicos da medicao.
 
 Preparado, mas nao concluido agora:
 
-- comparacao entre multiplas runs e geracao de artifacts comparativos;
 - curadoria adicional de `reference_answer` para destravar `context_precision` e `context_recall` em toda a baseline.

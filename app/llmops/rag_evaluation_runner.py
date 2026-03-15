@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import asyncio
 from copy import deepcopy
+import csv
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from enum import StrEnum
 import hashlib
 import json
@@ -183,6 +185,9 @@ class LoggedMlflowRun:
     run_id: str
     tracking_uri: str
     report_path: Path
+    comparison_snapshot_path: Path
+    comparison_csv_path: Path
+    case_ranking_path: Path
 
 
 @dataclass(frozen=True, slots=True)
@@ -355,6 +360,8 @@ class RagEvaluationRunExecution:
                 self.cases_with_methodology_limitations_count()
             ),
         }
+        for metric_name, count in self.summary.metric_case_counts.items():
+            metrics[f"{metric_name}_cases"] = float(count)
         for metric_name, count in self.metric_skip_counts().items():
             metrics[f"{metric_name}_skipped"] = float(count)
         return metrics
@@ -382,6 +389,523 @@ class RagEvaluationRunExecution:
             },
             "summary": self.summary.as_artifact_payload(),
             "cases": [case.as_artifact_payload() for case in self.case_executions],
+        }
+
+    def build_comparison_row(self, *, run_id: str) -> "RagEvaluationComparisonRow":
+        """Converte a run atual em uma linha plana comparavel com runs anteriores."""
+
+        run_contract = self.tracking_run.run_contract
+        tracking_metadata = self.tracking_run.tracking_metadata
+        methodology_notes = _build_methodology_notes(
+            evaluator_mode=self.evaluator_mode,
+            cases_with_methodology_limitations=self.cases_with_methodology_limitations_count(),
+            skipped_metric_entries=sum(self.metric_skip_counts().values()),
+        )
+        return RagEvaluationComparisonRow(
+            run_id=run_id,
+            request_id=self.run_request_id,
+            experiment_name=self.experiment_name,
+            tenant_id=self.tenant_id,
+            dataset_version=self.dataset.manifest.dataset_version,
+            prompt_version=run_contract.prompt_version,
+            prompt_version_id=tracking_metadata.prompt_version_id,
+            policy_version=run_contract.policy_version,
+            policy_version_id=tracking_metadata.policy_version_id,
+            retriever_version=run_contract.retriever_version,
+            retriever_version_id=tracking_metadata.retriever_version_id,
+            embedding_version=run_contract.embedding_version,
+            chunking_version=tracking_metadata.chunking_version,
+            chunking_version_id=tracking_metadata.chunking_version_id,
+            vectorstore_collection=self.vectorstore_collection,
+            vectorstore_fingerprint=self.vectorstore_fingerprint,
+            evaluator_library=self.stack_resolution.metric_library.value,
+            evaluator_library_version=self.stack_resolution.metric_library_version,
+            evaluator_mode=self.evaluator_mode,
+            model_provider=run_contract.model_provider,
+            model_name=run_contract.model_name,
+            selected_cases_count=len(self.selected_case_ids),
+            observed_prompt_versions=",".join(self.observed_prompt_versions),
+            total_latency_ms=self.total_latency_ms,
+            cases_total=self.summary.total_cases,
+            cases_evaluated=self.evaluated_cases_count(),
+            cases_partial=self.partial_cases_count(),
+            cases_skipped=self.skipped_cases_count(),
+            cases_with_methodology_limitations=self.cases_with_methodology_limitations_count(),
+            faithfulness_mean=self.summary.faithfulness_mean,
+            answer_relevance_mean=self.summary.answer_relevance_mean,
+            context_precision_mean=self.summary.context_precision_mean,
+            context_recall_mean=self.summary.context_recall_mean,
+            expected_context_coverage_mean=self.summary.expected_context_coverage_mean,
+            retrieval_empty_rate=self.summary.retrieval_empty_rate,
+            faithfulness_cases=self.summary.metric_case_counts.get("faithfulness", 0),
+            answer_relevance_cases=self.summary.metric_case_counts.get("answer_relevance", 0),
+            context_precision_cases=self.summary.metric_case_counts.get("context_precision", 0),
+            context_recall_cases=self.summary.metric_case_counts.get("context_recall", 0),
+            expected_context_coverage_cases=self.summary.metric_case_counts.get(
+                "expected_context_coverage", 0
+            ),
+            retrieval_empty_cases=self.summary.metric_case_counts.get("retrieval_empty", 0),
+            heuristic_evaluator="heuristic" in self.evaluator_mode,
+            methodology_notes=methodology_notes,
+            logged_at=datetime.now(timezone.utc).isoformat(),
+        )
+
+    def build_case_ranking_artifact(
+        self,
+        *,
+        run_id: str,
+        limit: int = 5,
+    ) -> "RagEvaluationCaseRankingArtifact":
+        """Monta o artifact de melhores, piores e nao avaliados da run atual."""
+
+        return RagEvaluationCaseRankingArtifact.from_execution(
+            execution=self,
+            run_id=run_id,
+            limit=limit,
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class RagEvaluationComparisonRow:
+    """Representa uma linha plana de comparacao entre runs do mesmo experimento."""
+
+    run_id: str
+    request_id: str
+    experiment_name: str
+    tenant_id: str
+    dataset_version: str
+    prompt_version: str
+    prompt_version_id: str
+    policy_version: str
+    policy_version_id: str
+    retriever_version: str
+    retriever_version_id: str
+    embedding_version: str
+    chunking_version: str
+    chunking_version_id: str
+    vectorstore_collection: str
+    vectorstore_fingerprint: str
+    evaluator_library: str
+    evaluator_library_version: str
+    evaluator_mode: str
+    model_provider: str
+    model_name: str
+    selected_cases_count: int
+    observed_prompt_versions: str
+    total_latency_ms: float
+    cases_total: int
+    cases_evaluated: int
+    cases_partial: int
+    cases_skipped: int
+    cases_with_methodology_limitations: int
+    faithfulness_mean: float | None
+    answer_relevance_mean: float | None
+    context_precision_mean: float | None
+    context_recall_mean: float | None
+    expected_context_coverage_mean: float | None
+    retrieval_empty_rate: float | None
+    faithfulness_cases: int
+    answer_relevance_cases: int
+    context_precision_cases: int
+    context_recall_cases: int
+    expected_context_coverage_cases: int
+    retrieval_empty_cases: int
+    heuristic_evaluator: bool
+    methodology_notes: tuple[str, ...]
+    logged_at: str
+
+    def as_artifact_payload(self) -> dict[str, object]:
+        """Retorna a linha de comparacao em formato JSON serializavel."""
+
+        return {
+            "run_id": self.run_id,
+            "request_id": self.request_id,
+            "experiment_name": self.experiment_name,
+            "tenant_id": self.tenant_id,
+            "dataset_version": self.dataset_version,
+            "prompt_version": self.prompt_version,
+            "prompt_version_id": self.prompt_version_id,
+            "policy_version": self.policy_version,
+            "policy_version_id": self.policy_version_id,
+            "retriever_version": self.retriever_version,
+            "retriever_version_id": self.retriever_version_id,
+            "embedding_version": self.embedding_version,
+            "chunking_version": self.chunking_version,
+            "chunking_version_id": self.chunking_version_id,
+            "vectorstore_collection": self.vectorstore_collection,
+            "vectorstore_fingerprint": self.vectorstore_fingerprint,
+            "evaluator_library": self.evaluator_library,
+            "evaluator_library_version": self.evaluator_library_version,
+            "evaluator_mode": self.evaluator_mode,
+            "model_provider": self.model_provider,
+            "model_name": self.model_name,
+            "selected_cases_count": self.selected_cases_count,
+            "observed_prompt_versions": self.observed_prompt_versions,
+            "total_latency_ms": self.total_latency_ms,
+            "cases_total": self.cases_total,
+            "cases_evaluated": self.cases_evaluated,
+            "cases_partial": self.cases_partial,
+            "cases_skipped": self.cases_skipped,
+            "cases_with_methodology_limitations": self.cases_with_methodology_limitations,
+            "faithfulness_mean": self.faithfulness_mean,
+            "answer_relevance_mean": self.answer_relevance_mean,
+            "context_precision_mean": self.context_precision_mean,
+            "context_recall_mean": self.context_recall_mean,
+            "expected_context_coverage_mean": self.expected_context_coverage_mean,
+            "retrieval_empty_rate": self.retrieval_empty_rate,
+            "faithfulness_cases": self.faithfulness_cases,
+            "answer_relevance_cases": self.answer_relevance_cases,
+            "context_precision_cases": self.context_precision_cases,
+            "context_recall_cases": self.context_recall_cases,
+            "expected_context_coverage_cases": self.expected_context_coverage_cases,
+            "retrieval_empty_cases": self.retrieval_empty_cases,
+            "heuristic_evaluator": self.heuristic_evaluator,
+            "methodology_notes": list(self.methodology_notes),
+            "logged_at": self.logged_at,
+        }
+
+    def as_csv_row(self) -> dict[str, str]:
+        """Retorna a linha de comparacao pronta para exportacao CSV."""
+
+        payload = self.as_artifact_payload()
+        csv_row: dict[str, str] = {}
+        for key, value in payload.items():
+            if isinstance(value, list):
+                csv_row[key] = "|".join(str(item) for item in value)
+                continue
+            if value is None:
+                csv_row[key] = ""
+                continue
+            csv_row[key] = str(value)
+        return csv_row
+
+    @classmethod
+    def from_mlflow_run(
+        cls,
+        *,
+        run: Any,
+        experiment_name: str,
+    ) -> "RagEvaluationComparisonRow":
+        """Reconstrui uma linha comparativa a partir de uma run ja persistida no MLflow."""
+
+        data = run.data
+        tags = data.tags
+        params = data.params
+        metrics = data.metrics
+        skipped_metric_entries = sum(
+            _coerce_int(value)
+            for key, value in metrics.items()
+            if key.endswith("_skipped")
+        )
+        methodology_notes = _build_methodology_notes(
+            evaluator_mode=tags.get("evaluator_mode", params.get("evaluator_mode", "")),
+            cases_with_methodology_limitations=_coerce_int(
+                metrics.get("cases_with_methodology_limitations", 0.0)
+            ),
+            skipped_metric_entries=skipped_metric_entries,
+        )
+        return cls(
+            run_id=run.info.run_id,
+            request_id=tags.get("request_id", ""),
+            experiment_name=experiment_name,
+            tenant_id=tags.get("tenant_id", ""),
+            dataset_version=params.get("dataset_version", ""),
+            prompt_version=params.get("prompt_version", ""),
+            prompt_version_id=tags.get("prompt_version_id", ""),
+            policy_version=params.get("policy_version", ""),
+            policy_version_id=tags.get("policy_version_id", ""),
+            retriever_version=params.get("retriever_version", ""),
+            retriever_version_id=tags.get("retriever_version_id", ""),
+            embedding_version=params.get("embedding_version", ""),
+            chunking_version=params.get("chunking_version", ""),
+            chunking_version_id=tags.get("chunking_version_id", ""),
+            vectorstore_collection=params.get(
+                "vectorstore_collection",
+                tags.get("vectorstore_collection", ""),
+            ),
+            vectorstore_fingerprint=params.get(
+                "vectorstore_fingerprint",
+                tags.get("vectorstore_fingerprint", ""),
+            ),
+            evaluator_library=params.get(
+                "evaluator_library",
+                tags.get("evaluator_library", ""),
+            ),
+            evaluator_library_version=params.get("evaluator_library_version", ""),
+            evaluator_mode=params.get("evaluator_mode", tags.get("evaluator_mode", "")),
+            model_provider=params.get("model_provider", ""),
+            model_name=params.get("model_name", ""),
+            selected_cases_count=_coerce_int(params.get("selected_cases_count", 0)),
+            observed_prompt_versions=params.get("observed_prompt_versions", ""),
+            total_latency_ms=_coerce_float(metrics.get("latency_ms", 0.0)) or 0.0,
+            cases_total=_coerce_int(metrics.get("cases_total", 0.0)),
+            cases_evaluated=_coerce_int(metrics.get("cases_evaluated", 0.0)),
+            cases_partial=_coerce_int(metrics.get("cases_partial", 0.0)),
+            cases_skipped=_coerce_int(metrics.get("cases_skipped", 0.0)),
+            cases_with_methodology_limitations=_coerce_int(
+                metrics.get("cases_with_methodology_limitations", 0.0)
+            ),
+            faithfulness_mean=_coerce_float(metrics.get("faithfulness_mean")),
+            answer_relevance_mean=_coerce_float(metrics.get("answer_relevance_mean")),
+            context_precision_mean=_coerce_float(metrics.get("context_precision_mean")),
+            context_recall_mean=_coerce_float(metrics.get("context_recall_mean")),
+            expected_context_coverage_mean=_coerce_float(
+                metrics.get("expected_context_coverage_mean")
+            ),
+            retrieval_empty_rate=_coerce_float(metrics.get("retrieval_empty_rate")),
+            faithfulness_cases=_coerce_int(metrics.get("faithfulness_cases", 0.0)),
+            answer_relevance_cases=_coerce_int(metrics.get("answer_relevance_cases", 0.0)),
+            context_precision_cases=_coerce_int(metrics.get("context_precision_cases", 0.0)),
+            context_recall_cases=_coerce_int(metrics.get("context_recall_cases", 0.0)),
+            expected_context_coverage_cases=_coerce_int(
+                metrics.get("expected_context_coverage_cases", 0.0)
+            ),
+            retrieval_empty_cases=_coerce_int(metrics.get("retrieval_empty_cases", 0.0)),
+            heuristic_evaluator="heuristic" in tags.get(
+                "evaluator_mode",
+                params.get("evaluator_mode", ""),
+            ),
+            methodology_notes=methodology_notes,
+            logged_at=_format_mlflow_timestamp(run.info.start_time),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class RagEvaluationComparisonSnapshot:
+    """Consolida um recorte comparavel de runs do mesmo experimento e tenant."""
+
+    experiment_name: str
+    tenant_id: str
+    runs: tuple[RagEvaluationComparisonRow, ...]
+    methodology_notes: tuple[str, ...]
+
+    @classmethod
+    def from_rows(
+        cls,
+        *,
+        experiment_name: str,
+        tenant_id: str,
+        rows: Sequence[RagEvaluationComparisonRow],
+    ) -> "RagEvaluationComparisonSnapshot":
+        """Monta o snapshot comparativo ordenado a partir das linhas disponiveis."""
+
+        sorted_rows = tuple(
+            sorted(rows, key=lambda row: (row.logged_at, row.run_id))
+        )
+        methodology_notes = _build_comparison_snapshot_notes(sorted_rows)
+        return cls(
+            experiment_name=experiment_name,
+            tenant_id=tenant_id,
+            runs=sorted_rows,
+            methodology_notes=methodology_notes,
+        )
+
+    def as_artifact_payload(self) -> dict[str, object]:
+        """Retorna o snapshot comparativo em formato JSON serializavel."""
+
+        return {
+            "phase": "F4",
+            "artifact_type": "comparison_snapshot",
+            "experiment_name": self.experiment_name,
+            "tenant_id": self.tenant_id,
+            "runs_compared": len(self.runs),
+            "dataset_versions": sorted({row.dataset_version for row in self.runs if row.dataset_version}),
+            "evaluator_modes": sorted({row.evaluator_mode for row in self.runs if row.evaluator_mode}),
+            "methodology_notes": list(self.methodology_notes),
+            "runs": [row.as_artifact_payload() for row in self.runs],
+        }
+
+    def write_csv(self, path: Path) -> None:
+        """Escreve as linhas comparativas em CSV para leitura manual e automacao."""
+
+        csv_rows = [row.as_csv_row() for row in self.runs]
+        fieldnames = list(csv_rows[0].keys()) if csv_rows else []
+        with path.open("w", encoding="utf-8", newline="") as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
+            for row in csv_rows:
+                writer.writerow(row)
+
+
+@dataclass(frozen=True, slots=True)
+class RagEvaluationCaseRankingEntry:
+    """Representa uma entrada de ranking dos casos executados na run."""
+
+    case_id: str
+    scenario_type: str
+    status: str
+    mandatory_score_mean: float | None
+    faithfulness: float | None
+    answer_relevance: float | None
+    expected_context_coverage: float | None
+    response_mode: str
+    rag_status: str
+    prompt_version: str
+    policy_version: str
+    best_score: float
+    methodology_limitation: bool
+    skipped_metrics: dict[str, str]
+
+    @classmethod
+    def from_case_execution(
+        cls,
+        case_execution: RagEvaluationCaseExecution,
+    ) -> "RagEvaluationCaseRankingEntry":
+        """Converte a execucao de um caso em uma entrada compacta de ranking."""
+
+        mandatory_values = [
+            value
+            for value in (
+                case_execution.case_result.faithfulness,
+                case_execution.case_result.answer_relevance,
+            )
+            if value is not None
+        ]
+        mandatory_score_mean = (
+            round(sum(mandatory_values) / len(mandatory_values), 4)
+            if mandatory_values
+            else None
+        )
+        return cls(
+            case_id=case_execution.case_input.case_id,
+            scenario_type=case_execution.case_input.benchmark_case.scenario_type.value,
+            status=case_execution.status.value,
+            mandatory_score_mean=mandatory_score_mean,
+            faithfulness=case_execution.case_result.faithfulness,
+            answer_relevance=case_execution.case_result.answer_relevance,
+            expected_context_coverage=case_execution.case_result.expected_context_coverage,
+            response_mode=case_execution.response_mode,
+            rag_status=case_execution.rag_status,
+            prompt_version=case_execution.prompt_version,
+            policy_version=case_execution.policy_version,
+            best_score=case_execution.best_score,
+            methodology_limitation=case_execution.has_methodology_limitation(),
+            skipped_metrics=dict(case_execution.skipped_metrics),
+        )
+
+    def as_artifact_payload(self) -> dict[str, object]:
+        """Retorna a entrada de ranking em formato JSON serializavel."""
+
+        return {
+            "case_id": self.case_id,
+            "scenario_type": self.scenario_type,
+            "status": self.status,
+            "mandatory_score_mean": self.mandatory_score_mean,
+            "faithfulness": self.faithfulness,
+            "answer_relevance": self.answer_relevance,
+            "expected_context_coverage": self.expected_context_coverage,
+            "response_mode": self.response_mode,
+            "rag_status": self.rag_status,
+            "prompt_version": self.prompt_version,
+            "policy_version": self.policy_version,
+            "best_score": self.best_score,
+            "methodology_limitation": self.methodology_limitation,
+            "skipped_metrics": dict(self.skipped_metrics),
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class RagEvaluationCaseRankingArtifact:
+    """Consolida melhores, piores e nao avaliados da run atual sem inferencia extra."""
+
+    experiment_name: str
+    run_id: str
+    request_id: str
+    tenant_id: str
+    dataset_version: str
+    evaluator_library: str
+    evaluator_mode: str
+    methodology_notes: tuple[str, ...]
+    status_counts: dict[str, int]
+    best_evaluated_cases: tuple[RagEvaluationCaseRankingEntry, ...]
+    worst_evaluated_cases: tuple[RagEvaluationCaseRankingEntry, ...]
+    non_evaluated_cases: tuple[RagEvaluationCaseRankingEntry, ...]
+
+    @classmethod
+    def from_execution(
+        cls,
+        *,
+        execution: RagEvaluationRunExecution,
+        run_id: str,
+        limit: int = 5,
+    ) -> "RagEvaluationCaseRankingArtifact":
+        """Gera o ranking dos casos da run atual sem misturar avaliados e nao avaliados."""
+
+        entries = tuple(
+            RagEvaluationCaseRankingEntry.from_case_execution(case_execution)
+            for case_execution in execution.case_executions
+        )
+        evaluated = sorted(
+            (entry for entry in entries if entry.status == RagEvaluationCaseStatus.EVALUATED.value),
+            key=lambda entry: (
+                -(entry.mandatory_score_mean if entry.mandatory_score_mean is not None else -1.0),
+                entry.case_id,
+            ),
+        )
+        non_evaluated = tuple(
+            sorted(
+                (entry for entry in entries if entry.status != RagEvaluationCaseStatus.EVALUATED.value),
+                key=lambda entry: (entry.status, entry.case_id),
+            )
+        )
+        worst_evaluated = tuple(
+            sorted(
+                evaluated,
+                key=lambda entry: (
+                    entry.mandatory_score_mean if entry.mandatory_score_mean is not None else 2.0,
+                    entry.case_id,
+                ),
+            )[:limit]
+        )
+        best_evaluated = tuple(evaluated[:limit])
+        methodology_notes = _build_methodology_notes(
+            evaluator_mode=execution.evaluator_mode,
+            cases_with_methodology_limitations=execution.cases_with_methodology_limitations_count(),
+            skipped_metric_entries=sum(execution.metric_skip_counts().values()),
+        )
+        return cls(
+            experiment_name=execution.experiment_name,
+            run_id=run_id,
+            request_id=execution.run_request_id,
+            tenant_id=execution.tenant_id,
+            dataset_version=execution.dataset.manifest.dataset_version,
+            evaluator_library=execution.stack_resolution.metric_library.value,
+            evaluator_mode=execution.evaluator_mode,
+            methodology_notes=methodology_notes,
+            status_counts={
+                RagEvaluationCaseStatus.EVALUATED.value: execution.evaluated_cases_count(),
+                RagEvaluationCaseStatus.PARTIAL.value: execution.partial_cases_count(),
+                RagEvaluationCaseStatus.SKIPPED.value: execution.skipped_cases_count(),
+            },
+            best_evaluated_cases=best_evaluated,
+            worst_evaluated_cases=worst_evaluated,
+            non_evaluated_cases=non_evaluated,
+        )
+
+    def as_artifact_payload(self) -> dict[str, object]:
+        """Retorna o ranking de casos em formato JSON serializavel."""
+
+        return {
+            "phase": "F4",
+            "artifact_type": "case_ranking",
+            "experiment_name": self.experiment_name,
+            "run_id": self.run_id,
+            "request_id": self.request_id,
+            "tenant_id": self.tenant_id,
+            "dataset_version": self.dataset_version,
+            "evaluator_library": self.evaluator_library,
+            "evaluator_mode": self.evaluator_mode,
+            "methodology_notes": list(self.methodology_notes),
+            "status_counts": dict(self.status_counts),
+            "best_evaluated_cases": [
+                entry.as_artifact_payload() for entry in self.best_evaluated_cases
+            ],
+            "worst_evaluated_cases": [
+                entry.as_artifact_payload() for entry in self.worst_evaluated_cases
+            ],
+            "non_evaluated_cases": [
+                entry.as_artifact_payload() for entry in self.non_evaluated_cases
+            ],
         }
 
 
@@ -656,6 +1180,12 @@ class MlflowRagEvaluationTracker:
         else:
             experiment_id = experiment.experiment_id
 
+        previous_rows = self._load_existing_comparison_rows(
+            client=client,
+            experiment_id=str(experiment_id),
+            tenant_id=execution.tenant_id,
+        )
+
         run_name = (
             f"rag_eval__{execution.tenant_id}__{execution.dataset.manifest.dataset_version}"
             f"__{execution.run_request_id[:8]}"
@@ -664,16 +1194,38 @@ class MlflowRagEvaluationTracker:
             self.tracking_config.reports_dir
             / f"{execution.run_request_id}_rag_evaluation_run.json"
         )
-        report_path.write_text(
-            json.dumps(execution.as_artifact_payload(), ensure_ascii=False, indent=2),
-            encoding="utf-8",
+        comparison_snapshot_path = (
+            self.tracking_config.reports_dir
+            / f"{execution.run_request_id}_rag_evaluation_comparison.json"
+        )
+        comparison_csv_path = (
+            self.tracking_config.reports_dir
+            / f"{execution.run_request_id}_rag_evaluation_comparison.csv"
+        )
+        case_ranking_path = (
+            self.tracking_config.reports_dir
+            / f"{execution.run_request_id}_rag_evaluation_case_ranking.json"
         )
 
         with mlflow.start_run(experiment_id=experiment_id, run_name=run_name) as run:
             mlflow.set_tags(execution.as_tracking_tags())
             mlflow.log_params(execution.as_tracking_params())
             mlflow.log_metrics(execution.as_tracking_metrics())
+            current_row = execution.build_comparison_row(run_id=run.info.run_id)
+            comparison_snapshot = RagEvaluationComparisonSnapshot.from_rows(
+                experiment_name=self.tracking_config.experiment_name,
+                tenant_id=execution.tenant_id,
+                rows=(*previous_rows, current_row),
+            )
+            case_ranking = execution.build_case_ranking_artifact(run_id=run.info.run_id)
+            _write_json_file(report_path, execution.as_artifact_payload())
+            _write_json_file(comparison_snapshot_path, comparison_snapshot.as_artifact_payload())
+            comparison_snapshot.write_csv(comparison_csv_path)
+            _write_json_file(case_ranking_path, case_ranking.as_artifact_payload())
             mlflow.log_artifact(str(report_path))
+            mlflow.log_artifact(str(comparison_snapshot_path))
+            mlflow.log_artifact(str(comparison_csv_path))
+            mlflow.log_artifact(str(case_ranking_path))
             run_id = run.info.run_id
 
         return LoggedMlflowRun(
@@ -681,6 +1233,31 @@ class MlflowRagEvaluationTracker:
             run_id=run_id,
             tracking_uri=tracking_uri,
             report_path=report_path,
+            comparison_snapshot_path=comparison_snapshot_path,
+            comparison_csv_path=comparison_csv_path,
+            case_ranking_path=case_ranking_path,
+        )
+
+    def _load_existing_comparison_rows(
+        self,
+        *,
+        client: Any,
+        experiment_id: str,
+        tenant_id: str,
+    ) -> tuple[RagEvaluationComparisonRow, ...]:
+        """Busca runs anteriores do mesmo tenant para montar o snapshot comparativo."""
+
+        prior_runs = client.search_runs(
+            experiment_ids=[experiment_id],
+            filter_string=f"tags.tenant_id = '{tenant_id}'",
+            order_by=["attributes.start_time ASC"],
+        )
+        return tuple(
+            RagEvaluationComparisonRow.from_mlflow_run(
+                run=run,
+                experiment_name=self.tracking_config.experiment_name,
+            )
+            for run in prior_runs
         )
 
 
@@ -1286,3 +1863,71 @@ def _lexical_score(*, query_tokens: list[str], text: str) -> float:
     content_tokens = set(_tokenize(text))
     overlap = len(set(query_tokens) & content_tokens)
     return overlap / len(set(query_tokens))
+
+
+def _build_methodology_notes(
+    *,
+    evaluator_mode: str,
+    cases_with_methodology_limitations: int,
+    skipped_metric_entries: int,
+) -> tuple[str, ...]:
+    """Consolida notas metodologicas minimas para rows e artifacts comparativos."""
+
+    notes: list[str] = []
+    if "heuristic" in evaluator_mode:
+        notes.append("offline_heuristic_evaluator")
+    if cases_with_methodology_limitations > 0:
+        notes.append("benchmark_cases_with_missing_fields")
+    if skipped_metric_entries > 0:
+        notes.append("skipped_metrics_present")
+    return tuple(notes)
+
+
+def _build_comparison_snapshot_notes(
+    rows: Sequence[RagEvaluationComparisonRow],
+) -> tuple[str, ...]:
+    """Agrega notas metodologicas do snapshot comparativo do experimento."""
+
+    notes: list[str] = []
+    if any(row.heuristic_evaluator for row in rows):
+        notes.append("scores_from_offline_heuristic_ragas_are_not_external_semantic_judgments")
+    if any(row.cases_with_methodology_limitations > 0 for row in rows):
+        notes.append("runs_with_missing_fields_or_partial_metrics_remain_explicit")
+    if len({row.dataset_version for row in rows if row.dataset_version}) > 1:
+        notes.append("multiple_dataset_versions_present_in_same_experiment_snapshot")
+    if len({row.evaluator_mode for row in rows if row.evaluator_mode}) > 1:
+        notes.append("multiple_evaluator_modes_present_in_same_experiment_snapshot")
+    return tuple(notes)
+
+
+def _coerce_float(value: Any) -> float | None:
+    """Converte um valor simples em float quando possivel."""
+
+    if value in ("", None):
+        return None
+    return round(float(value), 4)
+
+
+def _coerce_int(value: Any) -> int:
+    """Converte um valor simples em inteiro sem propagar NaN textual."""
+
+    if value in ("", None):
+        return 0
+    return int(round(float(value)))
+
+
+def _format_mlflow_timestamp(timestamp_ms: int | None) -> str:
+    """Converte o timestamp em milissegundos do MLflow para ISO UTC."""
+
+    if not timestamp_ms:
+        return ""
+    return datetime.fromtimestamp(timestamp_ms / 1000, tz=timezone.utc).isoformat()
+
+
+def _write_json_file(path: Path, payload: dict[str, object]) -> None:
+    """Escreve um payload JSON com identacao estavel para artifacts da Fase 4."""
+
+    path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )

@@ -44,6 +44,13 @@ A execução da avaliação formal depende, no mínimo, de:
 
 A instalação dessas dependências deve ocorrer na **Fase 1**, conforme definido em `PLANEJAMENTO-LLMOps.md`.
 
+Estado atual implementado no repositório:
+
+- `Ragas` é a stack primária de métricas da Fase 4;
+- `MLflow` é o tracking experimental da run;
+- a execução atual ocorre em pipeline offline, sem acoplamento ao runtime transacional;
+- o modo inicial do avaliador é `offline_heuristic_ragas`, com adapters locais para manter a execução reproduzível no ambiente dev.
+
 ## Objetos mínimos de avaliação
 
 Toda avaliação formal deve buscar registrar, quando aplicável:
@@ -110,8 +117,32 @@ Executar o benchmark no contexto planejado, preservando:
 - registro das métricas;
 - persistência dos resultados experimentais.
 
+Comando mínimo atual:
+
+```bash
+./.venv/bin/python scripts/run_phase4_rag_evaluation.py \
+  --manifest benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json \
+  --case-id vs-normal-001 \
+  --case-id vs-risco-policy-001
+```
+
+Saída esperada:
+
+- resumo JSON curto no terminal;
+- criação do backend local do `MLflow` em `artifacts/llmops/fase4_rag_evaluation/`;
+- geração de um relatório JSON por run em `artifacts/llmops/fase4_rag_evaluation/run_reports/`.
+
 ### Etapa 4 — Registrar métricas e artifacts
 Persistir os resultados no sistema de tracking adotado, incluindo métricas e artifacts comparativos.
+
+No estado atual da Fase 4, a run já registra no `MLflow`:
+
+- `tenant_id`, `dataset_version`, `prompt_version`, `policy_version`, `retriever_version`, `embedding_version`;
+- `prompt_version_id`, `policy_version_id`, `retriever_version_id`, `chunking_version`, `chunking_version_id`;
+- `vectorstore_collection`, `vectorstore_fingerprint`, `evaluator_library`, `evaluator_library_version`, `evaluator_mode`;
+- `faithfulness_mean`, `answer_relevance_mean`, `expected_context_coverage_mean`, `retrieval_empty_rate`;
+- `cases_total`, `cases_evaluated`, `cases_partial`, `cases_skipped`, `cases_with_methodology_limitations`;
+- contadores de skip por métrica e um relatório JSON consolidado da run.
 
 ### Etapa 5 — Revisar os resultados
 Analisar:
@@ -134,6 +165,14 @@ Conforme a maturidade da fase evoluir, a avaliação deve buscar registrar pelo 
 - custo estimado
 - taxa de fallback
 - taxa de retrieval vazio
+
+Estado efetivamente registrado agora:
+
+- `faithfulness_mean`
+- `answer_relevance_mean`
+- `expected_context_coverage_mean`
+- `retrieval_empty_rate`
+- contagens de casos avaliados, parciais e pulados
 
 ## Critérios mínimos de leitura
 
@@ -185,6 +224,11 @@ Cada avaliação relevante deve gerar evidência mínima, preferencialmente comp
 - ignorar custo e latência ao melhorar qualidade;
 - alterar múltiplas variáveis ao mesmo tempo sem controle.
 
+Limitação metodológica relevante do estado atual:
+
+- `context_precision` e `context_recall` continuam parciais porque o benchmark atual ainda não fornece `reference_answer` textual canônica para toda a baseline;
+- o judge inicial da stack `Ragas` é offline e heurístico, então a leitura deve priorizar comparabilidade entre runs e inspeção dos piores casos, não interpretação absoluta da nota.
+
 ## Saídas possíveis após avaliação
 
 Ao final de uma avaliação, a decisão técnica deve cair em uma das seguintes categorias:
@@ -212,9 +256,9 @@ Este runbook deve ser lido em conjunto com:
 
 ## Status
 
-Runbook inicial de avaliação formal de RAG definido.
+Runbook atualizado com a execução offline mínima da Fase 4.
 
 Próximo passo:
-- consolidar benchmark mínimo;
-- integrar tracking experimental;
-- executar baseline inicial da fase.
+- ampliar a baseline executada;
+- destravar `context_precision` e `context_recall` com `reference_answer`;
+- evoluir para comparação controlada entre múltiplas runs.

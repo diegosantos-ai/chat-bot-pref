@@ -2,24 +2,27 @@
 
 ## Objetivo deste documento
 
-Registrar o fechamento do bloco inicial da Fase 4 no escopo de:
+Registrar o fechamento do bloco atual da Fase 4 no escopo de:
 
 - `CPPX-F4-T1 — Definir stack de avaliacao formal do RAG`
-- preparacao estrutural do `CPPX-F4-T4 — Definir metricas complementares de contexto e recuperacao`
+- `CPPX-F4-T2 — Conectar benchmark ao contrato de avaliacao formal`
+- `CPPX-F4-T3 — Executar avaliacao formal offline com tracking experimental`
+- parte operacional do `CPPX-F4-T4 — Registrar metricas complementares viaveis`
 
-Este documento descreve apenas o que foi efetivamente definido neste bloco:
+Este documento descreve apenas o que foi efetivamente implementado ou fechado neste bloco:
 
 - stack de avaliacao formal disponivel no ambiente dev;
 - contrato tecnico minimo da avaliacao offline por caso e por run;
+- executor offline que conecta benchmark, retrieval, composicao, policy e avaliacao;
+- registro minimo da run no `MLflow` local;
 - metricas obrigatorias da fase;
-- metricas complementares iniciais ja enquadradas no contrato;
+- metricas complementares iniciais ja enquadradas no contrato e registradas quando viaveis;
 - limites metodologicos do benchmark atual da Fase 3.
 
 Ele nao declara:
 
-- execucao baseline ja consolidada;
-- artifacts comparativos ja persistidos;
-- integracao completa do scoring ao pipeline experimental;
+- baseline comparativa entre multiplas variacoes ja consolidada;
+- artifacts comparativos avancados ja persistidos;
 - uso da avaliacao formal no runtime transacional.
 
 ## Enquadramento do bloco
@@ -27,7 +30,10 @@ Ele nao declara:
 - ciclo: Fase 1 — LLMOps, avaliacao e governanca
 - fase ativa: Fase 4 — Avaliacao Formal de RAG com Metricas de Qualidade
 - branch de execucao: `feat/avaliacao-rag-metricas-de-qualidade`
-- task principal coberta agora: `CPPX-F4-T1`
+- tasks cobertas agora:
+  - `CPPX-F4-T1`
+  - `CPPX-F4-T2`
+  - `CPPX-F4-T3`
 - task preparada parcialmente agora: `CPPX-F4-T4`
 - base reutilizada:
   - benchmark versionado da Fase 3 em `benchmark_datasets/`
@@ -73,6 +79,18 @@ Motivos da escolha:
   - `context_precision`
   - `context_recall`
 
+Implementacao efetiva neste bloco:
+
+- o executor offline usa `Ragas` como biblioteca primaria;
+- o modo atual do avaliador e `offline_heuristic_ragas`;
+- esse modo injeta adapters locais deterministas de `LLM` e embeddings para permitir execucao offline sem chave externa nem dependencia nova.
+
+Leitura correta:
+
+- a stack continua sendo `Ragas`;
+- o judge semantico atual e controlado localmente para manter reprodutibilidade no ambiente dev;
+- os scores desta etapa servem para comparacao tecnica entre runs offline do projeto, nao como substituto de uma baseline futura com juiz semantico externo.
+
 ### Camada de tracking
 
 - `MLflow 3.10.1`
@@ -98,6 +116,7 @@ Status:
 O contrato Python minimo deste bloco foi formalizado em:
 
 - `app/llmops/rag_evaluation.py`
+- `app/llmops/rag_evaluation_runner.py`
 
 ### Entrada minima por caso
 
@@ -156,6 +175,61 @@ Leitura arquitetural:
 - o contrato agregado continua offline e experimental;
 - o tracking da run deve ser isolavel por `tenant_id`;
 - a agregacao nao substitui leitura por caso.
+
+## Como a run experimental funciona agora
+
+O executor offline atual:
+
+1. carrega o manifest do benchmark da Fase 3;
+2. seleciona um recorte estavel de `case_id`, quando informado;
+3. executa `policy_pre`;
+4. executa retrieval offline tenant-aware sem tocar auditoria operacional;
+5. compoe resposta ou fallback com o mesmo conjunto de servicos do pipeline;
+6. executa `policy_post`;
+7. monta `RagEvaluationCaseInput` com resposta final e contexto recuperado;
+8. calcula metricas por caso com a stack formal resolvida;
+9. agrega resultados por run;
+10. registra tags, parametros, metricas e um relatorio JSON no `MLflow`.
+
+Arquivos principais deste fluxo:
+
+- `app/llmops/rag_evaluation_runner.py`
+- `scripts/run_phase4_rag_evaluation.py`
+
+## O que a run registra de fato no MLflow
+
+Parametros e metadados minimos registrados:
+
+- `tenant_id`
+- `dataset_version`
+- `prompt_version`
+- `policy_version`
+- `retriever_version`
+- `embedding_version`
+- `prompt_version_id`
+- `policy_version_id`
+- `retriever_version_id`
+- `chunking_version`
+- `chunking_version_id`
+- `vectorstore_collection`
+- `vectorstore_fingerprint`
+- `evaluator_library`
+- `evaluator_library_version`
+- `evaluator_mode`
+- `selected_case_ids`
+
+Metricas agregadas minimas registradas:
+
+- `faithfulness_mean`
+- `answer_relevance_mean`
+- `expected_context_coverage_mean`
+- `retrieval_empty_rate`
+- `cases_total`
+- `cases_evaluated`
+- `cases_partial`
+- `cases_skipped`
+- `cases_with_methodology_limitations`
+- contadores de skip por metrica, quando ocorrerem
 
 ## Metricas obrigatorias desta fase
 
@@ -228,17 +302,18 @@ Fonte:
 Neste bloco, fica explicitamente medido ou preparavel:
 
 - disponibilidade local da stack de avaliacao;
-- obrigatoriedade de `faithfulness` e `answer_relevance`;
-- suporte contratual a `context_precision` e `context_recall` quando houver `reference_answer`;
-- taxa agregada de retrieval vazio por run;
-- cobertura lexical inicial dos termos esperados de grounding.
+- `faithfulness` agregado por run;
+- `answer_relevance` agregado por run;
+- `retrieval_empty_rate` agregado por run;
+- `expected_context_coverage_mean` agregado por run;
+- total de casos, casos avaliados, casos parciais e casos pulados;
+- suporte contratual a `context_precision` e `context_recall` quando houver `reference_answer`.
 
 ## O que ainda nao sera medido neste bloco
 
 Este bloco ainda nao entrega:
 
-- baseline executada do benchmark inteiro com `Ragas`;
-- persistencia automatica em `MLflow` dos resultados da Fase 4;
+- baseline comparativa entre variacoes de prompt, retrieval e base vetorial;
 - artifacts comparativos por experimento;
 - correlacao automatica com custo, latencia, fallback e bloqueio;
 - julgamento semantico forte de contexto quando o dataset nao tiver `reference_answer` textual.
@@ -291,6 +366,16 @@ Mesmo com metricas formais:
 - um tenant multi-servico continua exigindo leitura de cenarios criticos;
 - casos `risco_policy`, `fora_de_escopo` e `baixa_confianca` merecem leitura qualitativa adicional.
 
+### 5. O judge atual e offline e heuristico
+
+Para manter este bloco executavel sem dependencia nova nem chave externa, o executor usa `Ragas` com adapters locais deterministas.
+
+Consequencia:
+
+- a run permanece reproduzivel no ambiente dev;
+- os scores ficam comparaveis entre runs do mesmo repositorio e stack;
+- os resultados ainda nao equivalem a uma avaliacao semantica forte com juiz externo dedicado.
+
 ## Relacao com a Fase 3
 
 Esta entrega depende diretamente da qualidade metodologica do benchmark consolidado na Fase 3.
@@ -307,13 +392,13 @@ Implementado agora:
 
 - decisao objetiva da stack primaria de avaliacao;
 - contrato Python offline da avaliacao formal;
+- executor offline do benchmark para avaliacao formal;
+- registro minimo da run no `MLflow` local;
 - catalogo explicito de metricas obrigatorias e complementares iniciais;
 - agregacao minima por run sem acoplamento ao runtime transacional;
 - documentacao dos limites metodologicos da medicao.
 
 Preparado, mas nao concluido agora:
 
-- execucao do benchmark inteiro com `Ragas`;
-- log estruturado da Fase 4 em `MLflow`;
-- artifacts comparativos por experimento;
+- comparacao entre multiplas runs e geracao de artifacts comparativos;
 - curadoria adicional de `reference_answer` para destravar `context_precision` e `context_recall` em toda a baseline.

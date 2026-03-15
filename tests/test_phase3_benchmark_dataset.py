@@ -9,6 +9,8 @@ from app.llmops.benchmark_dataset import (
     BenchmarkCoverageType,
     BenchmarkPriorityTier,
     BenchmarkScenarioType,
+    SCENARIO_ANSWER_REFERENCE_TYPES,
+    SCENARIO_CONTEXT_REFERENCE_TYPES,
     discover_benchmark_manifests,
     load_benchmark_dataset,
 )
@@ -51,7 +53,10 @@ def test_phase3_benchmark_dataset_has_required_structure_and_tenant_isolation() 
     }
     assert all(case.tenant_id == dataset.manifest.tenant_id for case in dataset.cases)
     assert all(case.expected_answer_reference.summary for case in dataset.cases)
+    assert all(case.expected_answer_reference.must_include for case in dataset.cases)
+    assert all(case.expected_answer_reference.must_not_include for case in dataset.cases)
     assert all(case.expected_context_reference.document_hints for case in dataset.cases)
+    assert all(case.expected_context_reference.notes for case in dataset.cases)
     assert priorities == {
         BenchmarkPriorityTier.P1: 10,
         BenchmarkPriorityTier.P2: 4,
@@ -83,6 +88,34 @@ def test_phase3_benchmark_case_contract_requires_minimum_fields() -> None:
                 "expected_context_reference": {
                     "reference_type": "referencia_documental_minima",
                     "document_hints": ["Central de Atendimento Presencial e Canais Oficiais"],
+                },
+                "notes": "Caso invalido para validacao.",
+            }
+        )
+
+
+def test_phase3_benchmark_case_contract_requires_reference_signals() -> None:
+    with pytest.raises(ValueError):
+        BenchmarkCase.from_dict(
+            {
+                "case_id": "case-invalido",
+                "tenant_id": "prefeitura-vila-serena",
+                "scenario_type": "atendimento_normal",
+                "priority_tier": "p1",
+                "coverage_type": "tenant_demonstrativo",
+                "input_query": "Teste",
+                "expected_behavior": "responder_com_contexto_documentado",
+                "expected_answer_reference": {
+                    "reference_type": "resposta_informativa_minima",
+                    "summary": "Resumo minimo",
+                    "must_include": [],
+                    "must_not_include": ["erro"],
+                },
+                "expected_context_reference": {
+                    "reference_type": "grounding_documental_forte",
+                    "document_hints": ["Central de Atendimento Presencial e Canais Oficiais"],
+                    "required_terms": ["central de atendimento"],
+                    "notes": "Teste invalido.",
                 },
                 "notes": "Caso invalido para validacao.",
             }
@@ -238,3 +271,34 @@ def test_phase3_risk_policy_cases_cover_sensitive_data_and_bypass_attempts() -> 
         case.expected_behavior == "bloquear_por_policy_e_redirecionar"
         for case in risk_policy_cases
     )
+
+
+def test_phase3_reference_contract_is_consistent_across_scenarios() -> None:
+    manifest_path = (
+        BENCHMARK_DATASETS_DIR
+        / "tenants"
+        / "prefeitura-vila-serena"
+        / "benchmark_v1"
+        / "dataset_manifest.json"
+    )
+    dataset = load_benchmark_dataset(manifest_path)
+
+    for case in dataset.cases:
+        assert (
+            case.expected_answer_reference.reference_type
+            == SCENARIO_ANSWER_REFERENCE_TYPES[case.scenario_type]
+        )
+        assert (
+            case.expected_context_reference.reference_type
+            == SCENARIO_CONTEXT_REFERENCE_TYPES[case.scenario_type]
+        )
+        assert set(case.expected_answer_reference.must_include).isdisjoint(
+            case.expected_answer_reference.must_not_include
+        )
+
+        if case.scenario_type == BenchmarkScenarioType.PERGUNTA_AMBIGUA:
+            assert len(case.expected_context_reference.document_hints) >= 2
+            assert case.expected_context_reference.required_terms == ()
+            continue
+
+        assert case.expected_context_reference.required_terms

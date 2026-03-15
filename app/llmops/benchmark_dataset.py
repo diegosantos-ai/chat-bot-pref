@@ -38,6 +38,23 @@ class BenchmarkCoverageType(StrEnum):
     PLACEHOLDER = "placeholder"
 
 
+SCENARIO_ANSWER_REFERENCE_TYPES: Final[Mapping[BenchmarkScenarioType, str]] = {
+    BenchmarkScenarioType.ATENDIMENTO_NORMAL: "resposta_informativa_minima",
+    BenchmarkScenarioType.PERGUNTA_AMBIGUA: "resposta_de_desambiguacao_minima",
+    BenchmarkScenarioType.FORA_DE_ESCOPO: "recusa_fora_de_escopo_minima",
+    BenchmarkScenarioType.BAIXA_CONFIANCA: "resposta_de_baixa_confianca_controlada",
+    BenchmarkScenarioType.RISCO_POLICY: "bloqueio_por_policy_minimo",
+}
+
+SCENARIO_CONTEXT_REFERENCE_TYPES: Final[Mapping[BenchmarkScenarioType, str]] = {
+    BenchmarkScenarioType.ATENDIMENTO_NORMAL: "grounding_documental_forte",
+    BenchmarkScenarioType.PERGUNTA_AMBIGUA: "grounding_de_desambiguacao",
+    BenchmarkScenarioType.FORA_DE_ESCOPO: "grounding_em_limite_institucional",
+    BenchmarkScenarioType.BAIXA_CONFIANCA: "grounding_limitado_com_lacuna_controlada",
+    BenchmarkScenarioType.RISCO_POLICY: "grounding_em_policy_e_limite",
+}
+
+
 @dataclass(frozen=True, slots=True)
 class BenchmarkAnswerReference:
     """Define a referencia minima de resposta esperada para um caso."""
@@ -52,6 +69,16 @@ class BenchmarkAnswerReference:
 
         _require_non_empty_text("expected_answer_reference.reference_type", self.reference_type)
         _require_non_empty_text("expected_answer_reference.summary", self.summary)
+        if not self.must_include:
+            raise ValueError("expected_answer_reference.must_include deve conter ao menos um sinal obrigatorio.")
+        if not self.must_not_include:
+            raise ValueError(
+                "expected_answer_reference.must_not_include deve conter ao menos um sinal proibido."
+            )
+        if set(self.must_include).intersection(self.must_not_include):
+            raise ValueError(
+                "expected_answer_reference.must_include e must_not_include nao podem se sobrepor."
+            )
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "BenchmarkAnswerReference":
@@ -86,6 +113,7 @@ class BenchmarkContextReference:
         _require_non_empty_text("expected_context_reference.reference_type", self.reference_type)
         if not self.document_hints:
             raise ValueError("expected_context_reference.document_hints deve conter ao menos um indicio.")
+        _require_non_empty_text("expected_context_reference.notes", self.notes)
 
     @classmethod
     def from_dict(cls, payload: Mapping[str, Any]) -> "BenchmarkContextReference":
@@ -351,6 +379,7 @@ def validate_loaded_benchmark_dataset(dataset: LoadedBenchmarkDataset) -> None:
                 f"{case.case_id} -> {case.tenant_id} != {dataset.manifest.tenant_id}"
             )
 
+        _validate_case_reference_contract(case)
         counts_by_scenario[case.scenario_type] = counts_by_scenario.get(case.scenario_type, 0) + 1
 
     for scenario_file in dataset.manifest.scenario_files:
@@ -360,6 +389,39 @@ def validate_loaded_benchmark_dataset(dataset: LoadedBenchmarkDataset) -> None:
                 "Contagem divergente para o cenario "
                 f"{scenario_file.scenario_type.value}: {actual_count} != {scenario_file.cases_count}"
             )
+
+
+def _validate_case_reference_contract(case: BenchmarkCase) -> None:
+    """Valida a consistencia minima da referencia de resposta e contexto por cenario."""
+
+    expected_answer_type = SCENARIO_ANSWER_REFERENCE_TYPES[case.scenario_type]
+    if case.expected_answer_reference.reference_type != expected_answer_type:
+        raise ValueError(
+            "expected_answer_reference.reference_type divergente para o cenario "
+            f"{case.scenario_type.value}: {case.expected_answer_reference.reference_type} != "
+            f"{expected_answer_type}"
+        )
+
+    expected_context_type = SCENARIO_CONTEXT_REFERENCE_TYPES[case.scenario_type]
+    if case.expected_context_reference.reference_type != expected_context_type:
+        raise ValueError(
+            "expected_context_reference.reference_type divergente para o cenario "
+            f"{case.scenario_type.value}: {case.expected_context_reference.reference_type} != "
+            f"{expected_context_type}"
+        )
+
+    if case.scenario_type == BenchmarkScenarioType.PERGUNTA_AMBIGUA:
+        if len(case.expected_context_reference.document_hints) < 2:
+            raise ValueError(
+                "Casos de pergunta_ambigua devem apontar ao menos dois indicios documentais."
+            )
+        return
+
+    if not case.expected_context_reference.required_terms:
+        raise ValueError(
+            "required_terms deve conter ao menos um termo esperado para cenarios "
+            f"{case.scenario_type.value}."
+        )
 
 
 def _normalize_string_tuple(raw_value: Any) -> tuple[str, ...]:

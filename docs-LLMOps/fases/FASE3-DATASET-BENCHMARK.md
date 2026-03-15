@@ -2,7 +2,7 @@
 
 ## Objetivo deste documento
 
-Registrar o estado atual do dataset de benchmark da Fase 3 apos os Blocos 1 a 5.
+Registrar o estado atual do dataset de benchmark da Fase 3 apos os Blocos 1 a 6.
 
 Este documento descreve apenas o que foi efetivamente implementado ate aqui:
 
@@ -20,9 +20,9 @@ Ele nao declara benchmark automatico, scoring formal ou execucao recorrente como
 - ciclo: LLMOps, avaliacao e governanca
 - fase ativa: Fase 3 — Dataset de Avaliacao e Benchmark Reproduzivel
 - branch de execucao: `feat/dataset-avaliacao`
-- task principal desta entrega: `CPPX-F3-T5`
-- tasks ja cobertas na base atual: `CPPX-F3-T1`, `CPPX-F3-T2`, `CPPX-F3-T3` e `CPPX-F3-T4`
-- apoio parcial nesta entrega: `CPPX-F3-T6` e `CPPX-F3-T7`
+- task principal desta entrega: `CPPX-F3-T6`
+- tasks ja cobertas na base atual: `CPPX-F3-T1`, `CPPX-F3-T2`, `CPPX-F3-T3`, `CPPX-F3-T4` e `CPPX-F3-T5`
+- apoio parcial nesta entrega: `CPPX-F3-T7`
 
 ## Estrutura adotada
 
@@ -94,12 +94,43 @@ Cada linha JSONL representa um caso de avaliacao com o seguinte contrato minimo:
 - `must_include`
 - `must_not_include`
 
+Interpretacao operacional:
+
+- `summary` descreve o comportamento minimo esperado, nao um gabarito textual literal;
+- `must_include` registra os sinais obrigatorios que precisam aparecer de forma recognoscivel na resposta;
+- `must_not_include` registra os sinais proibidos que invalidam a comparabilidade minima do caso;
+- qualquer formulacao fora desses campos permanece livre, desde que respeite o comportamento esperado.
+
 ### Estrutura de `expected_context_reference`
 
 - `reference_type`
 - `document_hints`
 - `required_terms`
 - `notes`
+
+Interpretacao operacional:
+
+- `document_hints` indica onde o grounding esperado deve estar ancorado, mesmo quando ele for leve ou indireto;
+- `required_terms` registra os termos minimos de grounding esperados para cenarios com contexto suficiente;
+- `notes` explica a nuance do caso, inclusive quando o benchmark aceita grounding limitado ou comparativo;
+- em cenarios de desambiguacao, `required_terms` pode ficar vazio, desde que haja mais de um `document_hint` concorrente.
+
+## Padrao minimo adotado neste bloco
+
+Para fechar o Bloco 6, a referencia minima foi padronizada de forma scenario-aware:
+
+- `atendimento_normal`: `reference_type` de resposta `resposta_informativa_minima` e contexto `grounding_documental_forte`;
+- `pergunta_ambigua`: `reference_type` de resposta `resposta_de_desambiguacao_minima` e contexto `grounding_de_desambiguacao`;
+- `fora_de_escopo`: `reference_type` de resposta `recusa_fora_de_escopo_minima` e contexto `grounding_em_limite_institucional`;
+- `baixa_confianca`: `reference_type` de resposta `resposta_de_baixa_confianca_controlada` e contexto `grounding_limitado_com_lacuna_controlada`;
+- `risco_policy`: `reference_type` de resposta `bloqueio_por_policy_minimo` e contexto `grounding_em_policy_e_limite`.
+
+Essa padronizacao nao cria resposta unica. Ela apenas torna comparavel:
+
+- qual comportamento o benchmark exige;
+- quais sinais obrigatorios precisam aparecer;
+- quais sinais proibidos invalidam a saida;
+- que tipo de grounding minimo deve existir em cada familia de cenario.
 
 ## Cenarios cobertos na base atual
 
@@ -205,6 +236,14 @@ Em outras palavras:
 - `baixa_confianca` testa limite de evidencia;
 - `pergunta_ambigua` testa necessidade de esclarecimento, nao de bloqueio.
 
+### Como interpretar a referencia por tipo de cenario
+
+- `atendimento_normal`: espera grounding forte em documento de servico e resposta informativa com fatos minimos verificaveis.
+- `pergunta_ambigua`: espera pedido de esclarecimento antes da orientacao; o benchmark compara a desambiguacao, nao uma resposta final de servico.
+- `fora_de_escopo`: espera recusa por papel institucional, com grounding suficiente em limite operacional e redirecionamento.
+- `baixa_confianca`: espera reconhecimento explicito de lacuna ou insuficiencia documental, sem inventar dado operacional.
+- `risco_policy`: espera bloqueio claro, tom seguro e redirecionamento institucional, mesmo quando houver documento de servico relacionado.
+
 ### Casos atuais de `fora_de_escopo`
 
 Os casos de `fora_de_escopo` passaram a cobrir:
@@ -258,7 +297,7 @@ O contrato foi colocado em `app/llmops/benchmark_dataset.py` apenas para carga e
 Com esta estrutura, os proximos blocos podem:
 
 - ampliar casos por tenant e por cenario;
-- refinar `expected_answer_reference` e `expected_context_reference`;
+- reutilizar o padrao refinado de `expected_answer_reference` e `expected_context_reference` no runner inicial;
 - substituir placeholders por casos aderentes ao tenant quando a base documental for aprofundada;
 - conectar `dataset_version` ao tracking experimental local;
 - criar o runner repetivel do benchmark;

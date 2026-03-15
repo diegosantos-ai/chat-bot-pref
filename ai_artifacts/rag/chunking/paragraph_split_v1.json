@@ -1,0 +1,6 @@
+{
+  "empty_content_fallback": "full_content",
+  "implementation_source": "app/services/rag_service.py::_split_content",
+  "section_id_template": "section-{index}",
+  "split_strategy": "double_newline_paragraphs"
+}

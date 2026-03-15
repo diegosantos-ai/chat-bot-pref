@@ -160,12 +160,12 @@
     {
       "name": "mlflow",
       "status": "PASS",
-      "detail": "Run criada, recuperada e correlacionada: 7cd3847ac7714f88bb55547e0aad128f"
+      "detail": "Run criada, recuperada e correlacionada: 3b054432b1dd40c5adcbbec356d0aa75"
     },
     {
       "name": "mlflow",
       "status": "PASS",
-      "detail": "Artifact mínimo registrado via MLflow: req-smoke-2df9eb7849c5_artifact.json"
+      "detail": "Artifact mínimo registrado via MLflow: req-smoke-9c31bff855c4_artifact.json"
     },
     {
       "name": "mlflow",

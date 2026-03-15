@@ -1,0 +1,10 @@
+{
+  "artifact_type": "prompt",
+  "artifact_name": "fallback_default",
+  "version_label": "fallback_v1",
+  "version_id": "prompt.fallback_default.fallback_v1.ea8501fdfb61",
+  "content_hash": "b6330362343078135e2c534fd01762578bba7d7b7b9efe632d10b4790e6f7907",
+  "status": "candidate",
+  "created_at": "2026-03-15T00:00:00Z",
+  "notes": "Versao inicial da estrutura versionavel do prompt de fallback institucional."
+}

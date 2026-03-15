@@ -1,0 +1,9 @@
+{
+  "boost_enabled_default": false,
+  "collection_strategy": "tenant_collection_name",
+  "embedding_version": "hash_embedding_v1",
+  "min_score_default_source": "settings.LLM_MIN_CONTEXT_SCORE",
+  "scope": "tenant_aware",
+  "top_k_default_source": "settings.LLM_CONTEXT_TOP_K",
+  "vector_store": "chroma"
+}

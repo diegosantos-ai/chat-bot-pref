@@ -14,6 +14,7 @@ from app.contracts.dto import (
     RagQueryRequest,
     RagQueryResponse,
 )
+from app.llmops import ActiveArtifactResolver
 from app.observability.context import update_correlation_context
 from app.observability.logging import log_event
 from app.observability.metrics import (
@@ -25,9 +26,9 @@ from app.observability.metrics import (
 from app.observability.tracing import annotate_current_span, get_tracer
 from app.policy_guard.service import PolicyGuardService, PostPolicyInput
 from app.services.llm_service import LLMComposeService, LLMGenerationResponse
+from app.services.prompt_service import PromptService
 from app.services.rag_service import RagService
 from app.services.tenant_profile_service import TenantProfileService
-from app.settings import settings
 from app.storage.audit_repository import FileAuditRepository
 from app.storage.chat_repository import FileChatRepository
 from app.tenant_context import require_tenant
@@ -42,12 +43,18 @@ class ChatService:
         llm_service: LLMComposeService | None = None,
         policy_guard: PolicyGuardService | None = None,
         tenant_profile_service: TenantProfileService | None = None,
+        artifact_resolver: ActiveArtifactResolver | None = None,
     ) -> None:
+        self.artifact_resolver = artifact_resolver or ActiveArtifactResolver()
         self.repository = repository or FileChatRepository()
         self.audit_repository = audit_repository or FileAuditRepository()
-        self.rag_service = rag_service or RagService()
-        self.llm_service = llm_service or LLMComposeService()
-        self.policy_guard = policy_guard or PolicyGuardService()
+        self.rag_service = rag_service or RagService(artifact_resolver=self.artifact_resolver)
+        self.llm_service = llm_service or LLMComposeService(
+            prompt_service=PromptService(artifact_resolver=self.artifact_resolver)
+        )
+        self.policy_guard = policy_guard or PolicyGuardService(
+            artifact_resolver=self.artifact_resolver
+        )
         self.tenant_profile_service = tenant_profile_service or TenantProfileService()
         self.tracer = get_tracer(__name__)
 
@@ -163,7 +170,7 @@ class ChatService:
                         RagQueryRequest(
                             tenant_id=tenant_id,
                             query=chat_request.message,
-                            top_k=settings.LLM_CONTEXT_TOP_K,
+                            top_k=self._active_top_k(),
                             min_score=0.0,
                             boost_enabled=False,
                         )
@@ -490,11 +497,16 @@ class ChatService:
             best_score=0.0,
             params_used=RagQueryParamsUsed(
                 min_score=0.0,
-                top_k=settings.LLM_CONTEXT_TOP_K,
+                top_k=self._active_top_k(),
                 boost_enabled=False,
                 collection=self.rag_service.chroma_repository.collection_name(tenant_id),
             ),
         )
+
+    def _active_top_k(self) -> int:
+        """Resolve o `top_k` ativo do runtime a partir do artefato de retrieval."""
+
+        return self.artifact_resolver.retrieval_top_k_default()
 
     def _fallback_reason_from_rag(self, rag_response: RagQueryResponse) -> str:
         if rag_response.status == "knowledge_base_not_loaded":

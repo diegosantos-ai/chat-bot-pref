@@ -151,15 +151,54 @@ O contrato foi aplicado aos artefatos iniciais já criados no bloco anterior:
 
 Cada um possui agora um sidecar `.meta.json` comparável localmente.
 
+## Pontos de integração atuais no runtime
+
+Nesta etapa, a resolução da versão ativa foi conectada de forma mínima aos componentes já existentes:
+
+- `app/services/prompt_service.py` resolve por padrão o prompt base, o prompt de fallback e a policy textual ativos diretamente em `ai_artifacts/`, validando o sidecar antes do uso;
+- `app/policy_guard/service.py` passa a derivar `policy_version` da policy textual ativa, mesmo mantendo a lógica de guardrail em código Python;
+- `app/services/chat_service.py` resolve o `top_k` ativo do fluxo principal a partir da configuração versionada de retrieval;
+- `app/services/rag_service.py` resolve a estratégia de chunking, o template de `section_id` e o fallback de conteúdo vazio a partir do artefato versionado;
+- `app/storage/chroma_repository.py` expõe `retriever_version` e `embedding_version` a partir da configuração ativa de retrieval.
+
+Esses pontos mantêm o runtime atual funcional, tenant-aware e sem dependência de banco ou MLflow.
+
+## Resolução da versão ativa
+
+O carregamento explícito foi centralizado em:
+
+- `app/llmops/active_artifacts.py`
+
+Esse resolvedor:
+
+- usa o catálogo mínimo da Fase 2;
+- resolve o caminho ativo do artefato em `ai_artifacts/`;
+- carrega o sidecar `.meta.json`;
+- valida `artifact_type`, `artifact_name`, `version_label` e `content_hash`;
+- entrega o conteúdo textual ou o payload JSON já validado para o runtime.
+
+O fallback local desta etapa permanece controlado e explícito:
+
+- `PromptService` ainda suporta `prompts_dir` alternativo quando houver uso de diretório customizado em teste;
+- `top_k_default` cai para `settings.LLM_CONTEXT_TOP_K` apenas se a chave não existir no JSON ativo;
+- chunking aceita apenas a estratégia atualmente suportada pelo runtime (`double_newline_paragraphs`), falhando de forma explícita para variações ainda não implementadas.
+
 ## Limite desta entrega
 
 Esta etapa não:
 
 - integra MLflow ao runtime;
-- muda a carga ativa de prompts ou policy;
-- troca a origem funcional da configuração RAG;
 - grava metadados em banco;
-- altera comportamento do chat.
+- altera o comportamento funcional já validado do chat;
+- introduz nova estratégia de retrieval além da já existente;
+
+## Débitos técnicos explícitos
+
+Os pontos abaixo continuam intencionalmente fora do escopo deste bloco:
+
+- a semântica de `policy_pre` e `policy_post` ainda permanece codificada em Python; o arquivo textual versionado identifica a versão ativa, mas ainda não dirige a lógica do guardrail;
+- o endpoint público `POST /api/rag/query` mantém seu schema próprio de entrada e não promove `top_k_default` automaticamente quando o cliente envia um valor explícito;
+- a integração dessas versões com tracking experimental e convenção de promoção/rollback permanece para as próximas tasks da Fase 2.
 
 ## Próximo passo lógico
 

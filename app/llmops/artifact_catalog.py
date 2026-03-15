@@ -67,7 +67,7 @@ PHASE2_ARTIFACT_CATALOG: Final[Phase2ArtifactCatalog] = Phase2ArtifactCatalog(
         version=settings.PROMPT_BASE_VERSION,
         relative_path=f"prompts/composer/{settings.PROMPT_BASE_VERSION}.txt",
         description="Prompt base de composição contextual.",
-        current_runtime_sources=("app/prompts/base_v1.txt",),
+        current_runtime_sources=("app/services/prompt_service.py",),
     ),
     fallback_prompt=VersionedArtifactDescriptor(
         artifact_type="prompt",
@@ -76,7 +76,7 @@ PHASE2_ARTIFACT_CATALOG: Final[Phase2ArtifactCatalog] = Phase2ArtifactCatalog(
         version=settings.PROMPT_FALLBACK_VERSION,
         relative_path=f"prompts/fallback/{settings.PROMPT_FALLBACK_VERSION}.txt",
         description="Prompt de fallback controlado para limites e baixa confiança.",
-        current_runtime_sources=("app/prompts/fallback_v1.txt",),
+        current_runtime_sources=("app/services/prompt_service.py",),
     ),
     policy_text=VersionedArtifactDescriptor(
         artifact_type="policy",
@@ -85,7 +85,7 @@ PHASE2_ARTIFACT_CATALOG: Final[Phase2ArtifactCatalog] = Phase2ArtifactCatalog(
         version=settings.POLICY_TEXT_VERSION,
         relative_path=f"guardrails/policies/{settings.POLICY_TEXT_VERSION}.md",
         description="Policy textual versionada para guardrails e decisões de bloqueio/fallback.",
-        current_runtime_sources=("app/prompts/policy_v1.md",),
+        current_runtime_sources=("app/services/prompt_service.py", "app/policy_guard/service.py"),
     ),
     retrieval_config=VersionedArtifactDescriptor(
         artifact_type="retrieval_config",
@@ -94,7 +94,7 @@ PHASE2_ARTIFACT_CATALOG: Final[Phase2ArtifactCatalog] = Phase2ArtifactCatalog(
         version=settings.RAG_RETRIEVER_VERSION,
         relative_path=f"rag/retrieval/{settings.RAG_RETRIEVER_VERSION}.json",
         description="Configuração versionável da estratégia de retrieval tenant-aware.",
-        current_runtime_sources=("app/storage/chroma_repository.py", "app/services/rag_service.py"),
+        current_runtime_sources=("app/services/chat_service.py", "app/storage/chroma_repository.py"),
     ),
     chunking_config=VersionedArtifactDescriptor(
         artifact_type="chunking_config",

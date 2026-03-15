@@ -7,6 +7,7 @@ from pathlib import Path
 import chromadb
 from chromadb.api.types import Documents, EmbeddingFunction
 
+from app.llmops import ActiveArtifactResolver
 from app.settings import settings
 
 TOKEN_PATTERN = re.compile(r"[a-z0-9]+", re.IGNORECASE)
@@ -82,7 +83,9 @@ class TenantChromaRepository:
         base_dir: str | Path | None = None,
         collection_prefix: str | None = None,
         legacy_prefixes: list[str] | None = None,
+        artifact_resolver: ActiveArtifactResolver | None = None,
     ) -> None:
+        self.artifact_resolver = artifact_resolver or ActiveArtifactResolver()
         self.base_dir = Path(base_dir or settings.CHROMA_DIR)
         self.base_dir.mkdir(parents=True, exist_ok=True)
         self.collection_prefix = collection_prefix or settings.CHROMA_COLLECTION_PREFIX
@@ -93,12 +96,12 @@ class TenantChromaRepository:
     def retriever_version(self) -> str:
         """Retorna a versão lógica da estratégia de retrieval usada no runtime atual."""
 
-        return settings.RAG_RETRIEVER_VERSION
+        return self.artifact_resolver.resolve_retrieval_config().version
 
     def embedding_version(self) -> str:
         """Retorna a versão lógica do embedding usado no runtime atual."""
 
-        return self.embedding_function.name()
+        return self.artifact_resolver.retrieval_embedding_version() or self.embedding_function.name()
 
     def collection_name(self, tenant_id: str) -> str:
         normalized_tenant = self._normalize_tenant(tenant_id)

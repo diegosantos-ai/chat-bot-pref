@@ -18,6 +18,7 @@ from app.contracts.dto import (
     RagRetrievedChunk,
     RagStatusResponse,
 )
+from app.llmops import ActiveArtifactResolver
 from app.storage.chroma_repository import IngestChunk
 from app.storage.chroma_repository import TenantChromaRepository
 from app.storage.document_repository import FileDocumentRepository
@@ -34,9 +35,13 @@ class RagService:
         self,
         document_repository: FileDocumentRepository | None = None,
         chroma_repository: TenantChromaRepository | None = None,
+        artifact_resolver: ActiveArtifactResolver | None = None,
     ) -> None:
+        self.artifact_resolver = artifact_resolver or ActiveArtifactResolver()
         self.document_repository = document_repository or FileDocumentRepository()
-        self.chroma_repository = chroma_repository or TenantChromaRepository()
+        self.chroma_repository = chroma_repository or TenantChromaRepository(
+            artifact_resolver=self.artifact_resolver
+        )
 
     def list_documents(self, tenant_id: str) -> RagDocumentListResponse:
         documents = self.document_repository.list_documents(tenant_id)
@@ -227,14 +232,16 @@ class RagService:
 
     def _build_chunks(self, documents: list[RagDocumentRecord]) -> list[IngestChunk]:
         chunks: list[IngestChunk] = []
+        section_id_template = self.artifact_resolver.chunk_section_id_template()
         for document in documents:
             for index, section in enumerate(self._split_content(document.content), start=1):
+                section_id = section_id_template.format(index=index)
                 chunks.append(
                     IngestChunk(
-                        chunk_id=f"{document.id}:section-{index}",
+                        chunk_id=f"{document.id}:{section_id}",
                         document_id=document.id,
                         title=document.title,
-                        section=f"section-{index}",
+                        section=section_id,
                         source=f"{document.id}.json",
                         text=section,
                         tags=document.keywords + document.intents,
@@ -243,8 +250,17 @@ class RagService:
         return chunks
 
     def _split_content(self, content: str) -> list[str]:
+        split_strategy = self.artifact_resolver.chunk_split_strategy()
+        if split_strategy != "double_newline_paragraphs":
+            raise ValueError(f"split_strategy nao suportada no runtime atual: {split_strategy}")
+
         parts = [part.strip() for part in CHUNK_SPLIT_PATTERN.split(content) if part.strip()]
         if not parts:
+            empty_fallback = self.artifact_resolver.chunk_empty_content_fallback()
+            if empty_fallback != "full_content":
+                raise ValueError(
+                    f"empty_content_fallback nao suportado no runtime atual: {empty_fallback}"
+                )
             return [content.strip()]
         return parts
 

@@ -1,5 +1,6 @@
 """Catálogo mínimo de artefatos versionáveis da Fase 2."""
 
+from app.llmops.active_artifacts import ActiveArtifactResolver, ActiveJsonArtifact, ActiveTextArtifact
 from app.llmops.artifact_catalog import (
     AI_ARTIFACTS_DIR,
     PHASE2_ARTIFACT_CATALOG,
@@ -18,6 +19,9 @@ from app.llmops.versioning import (
 
 __all__ = [
     "AI_ARTIFACTS_DIR",
+    "ActiveArtifactResolver",
+    "ActiveTextArtifact",
+    "ActiveJsonArtifact",
     "VersionedArtifactDescriptor",
     "Phase2ArtifactCatalog",
     "PHASE2_ARTIFACT_CATALOG",

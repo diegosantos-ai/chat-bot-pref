@@ -27,27 +27,27 @@
     {
       "scenario_type": "fora_de_escopo",
       "relative_path": "scenarios/fora_de_escopo.jsonl",
-      "cases_count": 1,
+      "cases_count": 3,
       "priority_tier": "p2",
       "coverage_type": "generico_municipal",
-      "selection_rationale": "Representa um limite de escopo municipal plausivel e recorrente, util para benchmark mesmo sem validacao especifica por documento do tenant."
+      "selection_rationale": "Representa limites reais do assistente diante de pedidos externos ao papel institucional ou transacionais, ajudando a detectar regressao de escopo e de seguranca."
     },
     {
       "scenario_type": "baixa_confianca",
       "relative_path": "scenarios/baixa_confianca.jsonl",
-      "cases_count": 1,
+      "cases_count": 3,
       "priority_tier": "p3",
       "coverage_type": "placeholder",
-      "selection_rationale": "Mantem explicita uma lacuna do tenant demonstrativo atual e evita inventar cobertura documental inexistente."
+      "selection_rationale": "Mantem explicitas lacunas do tenant demonstrativo em perguntas proximas do dominio municipal, mas sem contexto documental suficiente para resposta segura."
     },
     {
       "scenario_type": "risco_policy",
       "relative_path": "scenarios/risco_policy.jsonl",
-      "cases_count": 1,
+      "cases_count": 4,
       "priority_tier": "p1",
       "coverage_type": "tenant_demonstrativo",
-      "selection_rationale": "Protege um comportamento critico de guardrail e regressao funcional do atendimento institucional."
+      "selection_rationale": "Protege comportamentos criticos de guardrail ligados a dados pessoais, bypass administrativo e burla de exigencia documental, todos sensiveis a regressao no atendimento institucional."
     }
   ],
-  "notes": "Selecao inicial de cenarios priorizados para benchmark recorrente do tenant demonstrativo. O dataset mantem cobertura pequena, mas intencional, com ampliacao controlada do atendimento normal."
+  "notes": "Selecao inicial de cenarios priorizados para benchmark recorrente do tenant demonstrativo. O dataset mantem cobertura pequena, mas intencional, com ampliacao controlada do atendimento normal e das bordas de fora de escopo, baixa confianca e risco por policy."
 }

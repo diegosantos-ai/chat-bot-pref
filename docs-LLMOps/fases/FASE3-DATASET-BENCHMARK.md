@@ -1,8 +1,8 @@
-# Fase 3 — Estrutura Inicial do Dataset de Benchmark
+# Fase 3 — Dataset de Benchmark Reproduzivel
 
 ## Objetivo deste documento
 
-Registrar o estado atual do dataset de benchmark da Fase 3 apos os Blocos 1 e 2.
+Registrar o estado atual do dataset de benchmark da Fase 3 apos os Blocos 1 a 5.
 
 Este documento descreve apenas o que foi efetivamente implementado ate aqui:
 
@@ -11,7 +11,7 @@ Este documento descreve apenas o que foi efetivamente implementado ate aqui:
 - organizacao por tenant e por cenario;
 - priorizacao metodologica inicial dos cenarios do tenant demonstrativo;
 - diferenciacao entre cenario aderente ao tenant, cenario generico municipal e placeholder controlado;
-- validacoes locais simples da estrutura.
+- validacoes locais simples da estrutura e da classificacao metodologica.
 
 Ele nao declara benchmark automatico, scoring formal ou execucao recorrente como capacidades ja ativas.
 
@@ -20,9 +20,9 @@ Ele nao declara benchmark automatico, scoring formal ou execucao recorrente como
 - ciclo: LLMOps, avaliacao e governanca
 - fase ativa: Fase 3 — Dataset de Avaliacao e Benchmark Reproduzivel
 - branch de execucao: `feat/dataset-avaliacao`
-- task principal desta entrega: `CPPX-F3-T2`
-- tasks ja cobertas na base atual: `CPPX-F3-T1`
-- apoio parcial nesta entrega: `CPPX-F3-T3`, `CPPX-F3-T4`, `CPPX-F3-T5` e `CPPX-F3-T6`
+- task principal desta entrega: `CPPX-F3-T5`
+- tasks ja cobertas na base atual: `CPPX-F3-T1`, `CPPX-F3-T2`, `CPPX-F3-T3` e `CPPX-F3-T4`
+- apoio parcial nesta entrega: `CPPX-F3-T6` e `CPPX-F3-T7`
 
 ## Estrutura adotada
 
@@ -101,9 +101,9 @@ Cada linha JSONL representa um caso de avaliacao com o seguinte contrato minimo:
 - `required_terms`
 - `notes`
 
-## Cenarios cobertos neste bloco
+## Cenarios cobertos na base atual
 
-O dataset inicial cobre um caso minimo para cada cenario exigido no planejamento:
+O dataset atual cobre os cinco cenarios exigidos no planejamento:
 
 - `atendimento_normal`
 - `pergunta_ambigua`
@@ -111,7 +111,7 @@ O dataset inicial cobre um caso minimo para cada cenario exigido no planejamento
 - `baixa_confianca`
 - `risco_policy`
 
-Nesta etapa, a cobertura e propositalmente pequena. O objetivo foi estruturar o metodo, nao preencher o benchmark com volume artificial.
+Nesta etapa, a cobertura continua pequena de proposito. O objetivo segue sendo estruturar o metodo com casos diagnosticos fortes, nao preencher o benchmark com volume artificial.
 
 ## Priorizacao inicial adotada
 
@@ -147,7 +147,10 @@ Os casos P1 escolhidos para o tenant demonstrativo foram:
 - solicitacao de alvara para comercio de baixo risco;
 - horario da sala de vacinacao da UBS;
 - solicitacao de coleta de entulho;
-- bloqueio de pedido de CPF de servidor.
+- bloqueio de pedido de CPF de servidor;
+- bloqueio de pedido para liberar alvara sem analise administrativa;
+- bloqueio de orientacao para protocolar sem comprovante de endereco;
+- bloqueio de pedido de telefone pessoal de fiscal da prefeitura.
 
 Eles foram priorizados porque combinam:
 
@@ -185,6 +188,58 @@ Justificativa:
 - o conjunto permite exemplos plausiveis sem usar dado sensivel ou caso real.
 
 Mesmo assim, o dataset ainda preserva um caso explicitamente `placeholder` em `baixa_confianca` e um caso `generico_municipal` em `fora_de_escopo`, justamente para nao transformar suposicao em verdade institucional.
+
+## Diferenca metodologica entre `risco_policy`, `fora_de_escopo`, `baixa_confianca` e `pergunta_ambigua`
+
+Nesta fase, esses cenarios nao devem ser tratados como equivalentes:
+
+- `risco_policy`: a pergunta pede dado pessoal, bypass, excecao indevida ou orientacao para burlar fluxo oficial, entao a resposta correta e bloquear e redirecionar;
+- `fora_de_escopo`: a pergunta pede algo que o assistente nao faz por papel institucional, mesmo sem componente de risco ou burla;
+- `baixa_confianca`: a pergunta continua dentro ou muito proxima do dominio municipal, mas o contexto documental atual do tenant nao sustenta uma resposta segura;
+- `pergunta_ambigua`: a pergunta ainda pode ser atendida, mas exige desambiguacao antes de responder.
+
+Em outras palavras:
+
+- `risco_policy` testa limite de seguranca e integridade do fluxo;
+- `fora_de_escopo` testa limite de papel;
+- `baixa_confianca` testa limite de evidencia;
+- `pergunta_ambigua` testa necessidade de esclarecimento, nao de bloqueio.
+
+### Casos atuais de `fora_de_escopo`
+
+Os casos de `fora_de_escopo` passaram a cobrir:
+
+- emissao de documento que nao pertence ao papel do assistente;
+- agendamento transacional de consulta;
+- consulta de processo pessoal por CPF.
+
+Esses casos ajudam a detectar regressao quando o sistema tenta responder como se pudesse executar acao, consultar dado individual ou operar fora do papel institucional declarado.
+
+### Casos atuais de `baixa_confianca`
+
+Os casos de `baixa_confianca` passaram a cobrir:
+
+- taxa exata de licenciamento ambiental especial sem base documental;
+- valor atualizado de taxa de alvara, quando o tenant so documenta procedimento;
+- disponibilidade diaria de vacina, quando a base documenta servico e horario, mas nao estoque do dia.
+
+Esses casos ajudam a detectar regressao quando o sistema deixa de sinalizar incerteza e passa a inventar valor, prazo ou disponibilidade operacional sem suporte do RAG.
+
+### Casos atuais de `risco_policy`
+
+Os casos de `risco_policy` passaram a cobrir:
+
+- pedido de CPF de servidor;
+- tentativa de liberar alvara sem aguardar analise administrativa;
+- tentativa de protocolar sem comprovante de endereco;
+- pedido de telefone pessoal de fiscal para resolver demanda por fora do fluxo oficial.
+
+Esses casos ajudam a detectar regressao quando o sistema:
+
+- expõe dado pessoal ou contato privado;
+- orienta atalho administrativo indevido;
+- ensina a burlar exigencia documental;
+- troca redirecionamento institucional por promessa, conivencia ou instrucao indevida.
 
 ## Relacao com o runtime e com o tracking
 

@@ -40,7 +40,7 @@ def test_phase3_benchmark_dataset_has_required_structure_and_tenant_isolation() 
     assert dataset.manifest.dataset_version == "benchmark_v1"
     assert dataset.manifest.tenant_id == "prefeitura-vila-serena"
     assert dataset.manifest.selection_hypotheses
-    assert len(dataset.cases) == 10
+    assert len(dataset.cases) == 17
     assert len(case_ids) == len(dataset.cases)
     assert scenario_types == {
         BenchmarkScenarioType.ATENDIMENTO_NORMAL,
@@ -53,14 +53,14 @@ def test_phase3_benchmark_dataset_has_required_structure_and_tenant_isolation() 
     assert all(case.expected_answer_reference.summary for case in dataset.cases)
     assert all(case.expected_context_reference.document_hints for case in dataset.cases)
     assert priorities == {
-        BenchmarkPriorityTier.P1: 7,
-        BenchmarkPriorityTier.P2: 2,
-        BenchmarkPriorityTier.P3: 1,
+        BenchmarkPriorityTier.P1: 10,
+        BenchmarkPriorityTier.P2: 4,
+        BenchmarkPriorityTier.P3: 3,
     }
     assert coverage_types == {
-        BenchmarkCoverageType.TENANT_DEMONSTRATIVO: 8,
-        BenchmarkCoverageType.GENERICO_MUNICIPAL: 1,
-        BenchmarkCoverageType.PLACEHOLDER: 1,
+        BenchmarkCoverageType.TENANT_DEMONSTRATIVO: 11,
+        BenchmarkCoverageType.GENERICO_MUNICIPAL: 3,
+        BenchmarkCoverageType.PLACEHOLDER: 3,
     }
     assert all(item.selection_rationale for item in dataset.manifest.scenario_files)
 
@@ -114,8 +114,13 @@ def test_phase3_benchmark_manifest_keeps_priority_and_coverage_consistent() -> N
     assert by_scenario[BenchmarkScenarioType.ATENDIMENTO_NORMAL].cases_count == 6
     assert by_scenario[BenchmarkScenarioType.ATENDIMENTO_NORMAL].priority_tier == BenchmarkPriorityTier.P1
     assert by_scenario[BenchmarkScenarioType.ATENDIMENTO_NORMAL].coverage_type == BenchmarkCoverageType.TENANT_DEMONSTRATIVO
+    assert by_scenario[BenchmarkScenarioType.FORA_DE_ESCOPO].cases_count == 3
     assert by_scenario[BenchmarkScenarioType.FORA_DE_ESCOPO].coverage_type == BenchmarkCoverageType.GENERICO_MUNICIPAL
+    assert by_scenario[BenchmarkScenarioType.BAIXA_CONFIANCA].cases_count == 3
     assert by_scenario[BenchmarkScenarioType.BAIXA_CONFIANCA].coverage_type == BenchmarkCoverageType.PLACEHOLDER
+    assert by_scenario[BenchmarkScenarioType.RISCO_POLICY].cases_count == 4
+    assert by_scenario[BenchmarkScenarioType.RISCO_POLICY].priority_tier == BenchmarkPriorityTier.P1
+    assert by_scenario[BenchmarkScenarioType.RISCO_POLICY].coverage_type == BenchmarkCoverageType.TENANT_DEMONSTRATIVO
 
 
 def test_phase3_normal_cases_expand_coverage_without_breaking_priority() -> None:
@@ -145,3 +150,91 @@ def test_phase3_normal_cases_expand_coverage_without_breaking_priority() -> None
     }
     assert all(case.priority_tier == BenchmarkPriorityTier.P1 for case in normal_cases)
     assert all(case.coverage_type == BenchmarkCoverageType.TENANT_DEMONSTRATIVO for case in normal_cases)
+
+
+def test_phase3_out_of_scope_cases_expand_real_limits_without_overlap_with_low_confidence() -> None:
+    manifest_path = (
+        BENCHMARK_DATASETS_DIR
+        / "tenants"
+        / "prefeitura-vila-serena"
+        / "benchmark_v1"
+        / "dataset_manifest.json"
+    )
+    dataset = load_benchmark_dataset(manifest_path)
+    out_of_scope_cases = [
+        case
+        for case in dataset.cases
+        if case.scenario_type == BenchmarkScenarioType.FORA_DE_ESCOPO
+    ]
+    case_ids = {case.case_id for case in out_of_scope_cases}
+
+    assert len(out_of_scope_cases) == 3
+    assert case_ids == {
+        "vs-fora-escopo-001",
+        "vs-fora-escopo-002",
+        "vs-fora-escopo-003",
+    }
+    assert all(case.priority_tier == BenchmarkPriorityTier.P2 for case in out_of_scope_cases)
+    assert all(case.coverage_type == BenchmarkCoverageType.GENERICO_MUNICIPAL for case in out_of_scope_cases)
+    assert all(case.expected_behavior == "recusar_fora_de_escopo_com_redirecionamento" for case in out_of_scope_cases)
+
+
+def test_phase3_low_confidence_cases_expand_domain_adjacent_gaps_without_fabrication() -> None:
+    manifest_path = (
+        BENCHMARK_DATASETS_DIR
+        / "tenants"
+        / "prefeitura-vila-serena"
+        / "benchmark_v1"
+        / "dataset_manifest.json"
+    )
+    dataset = load_benchmark_dataset(manifest_path)
+    low_confidence_cases = [
+        case
+        for case in dataset.cases
+        if case.scenario_type == BenchmarkScenarioType.BAIXA_CONFIANCA
+    ]
+    case_ids = {case.case_id for case in low_confidence_cases}
+
+    assert len(low_confidence_cases) == 3
+    assert case_ids == {
+        "vs-baixa-confianca-001",
+        "vs-baixa-confianca-002",
+        "vs-baixa-confianca-003",
+    }
+    assert all(case.priority_tier == BenchmarkPriorityTier.P3 for case in low_confidence_cases)
+    assert all(case.coverage_type == BenchmarkCoverageType.PLACEHOLDER for case in low_confidence_cases)
+    assert all(case.expected_behavior == "assumir_baixa_confianca_e_redirecionar" for case in low_confidence_cases)
+
+
+def test_phase3_risk_policy_cases_cover_sensitive_data_and_bypass_attempts() -> None:
+    manifest_path = (
+        BENCHMARK_DATASETS_DIR
+        / "tenants"
+        / "prefeitura-vila-serena"
+        / "benchmark_v1"
+        / "dataset_manifest.json"
+    )
+    dataset = load_benchmark_dataset(manifest_path)
+    risk_policy_cases = [
+        case
+        for case in dataset.cases
+        if case.scenario_type == BenchmarkScenarioType.RISCO_POLICY
+    ]
+    case_ids = {case.case_id for case in risk_policy_cases}
+
+    assert len(risk_policy_cases) == 4
+    assert case_ids == {
+        "vs-risco-policy-001",
+        "vs-risco-policy-002",
+        "vs-risco-policy-003",
+        "vs-risco-policy-004",
+    }
+    assert all(case.priority_tier == BenchmarkPriorityTier.P1 for case in risk_policy_cases)
+    assert all(
+        case.coverage_type == BenchmarkCoverageType.TENANT_DEMONSTRATIVO
+        for case in risk_policy_cases
+    )
+    assert all(
+        case.expected_behavior == "bloquear_por_policy_e_redirecionar"
+        for case in risk_policy_cases
+    )

@@ -45,6 +45,8 @@ Responsável por sustentar:
 Arquivo de referência:
 - `requirements-dev.txt`
 
+- Ambiente instalado. 
+
 ### 3. Ambiente de orquestração offline
 Responsável por sustentar:
 - Airflow;

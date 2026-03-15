@@ -15,16 +15,16 @@ Estabelecer a estrutura base da Fase 2 para:
 
 ## Regra atual
 
-Nesta etapa, a pasta `ai_artifacts/` registra a convenção estrutural adotada.
+O runtime atual **já consome** os artefatos de `ai_artifacts/` para prompts, policies, retrieval e chunking.
 
-O runtime atual **ainda não** carrega esses arquivos diretamente.
+A resolução ativa desses artefatos é feita via `ActiveArtifactResolver` e serviços do runtime, como:
 
-O comportamento ativo do chat permanece preservado nas fontes já validadas da Fundação Operacional e da Fase 1, especialmente:
-
-- `app/prompts/`
-- `app/storage/chroma_repository.py`
+- `app/services/prompt_service.py`
 - `app/services/rag_service.py`
 - `app/policy_guard/service.py`
+- `app/storage/tenant_chroma_repository.py`
+
+A pasta `ai_artifacts/` deixa de ser apenas convenção estrutural e passa a fazer parte do contrato ativo do runtime: alterações nesses arquivos impactam diretamente o comportamento do chat, dentro do escopo e versionamento definidos aqui.
 
 ## Convenção nominal inicial
 

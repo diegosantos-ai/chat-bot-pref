@@ -150,6 +150,7 @@ Artifacts gerados neste estado:
 - `*_rag_evaluation_comparison.json`
 - `*_rag_evaluation_comparison.csv`
 - `*_rag_evaluation_case_ranking.json`
+- `*_rag_evaluation_baseline_summary.json`
 
 Uso esperado de cada artifact:
 
@@ -157,6 +158,7 @@ Uso esperado de cada artifact:
 - `comparison.json`: comparação rastreável entre runs anteriores do mesmo experimento e tenant;
 - `comparison.csv`: tabela plana para inspeção manual e comparação automatizável;
 - `case_ranking.json`: lista de melhores, piores e não avaliados da run atual, sem análise causal automática.
+- `baseline_summary.json`: resumo pequeno da baseline observada na run, com métricas oficiais, métricas bloqueadas e notas metodológicas.
 
 ### Etapa 5 — Revisar os resultados
 Analisar:
@@ -167,6 +169,12 @@ Analisar:
 - aumento de fallback;
 - aumento de retrieval vazio;
 - comportamento inconsistente por cenário.
+
+Leitura mínima para fechamento da Fase 4:
+
+- usar `case_ranking.json` para localizar piores casos avaliados e casos apenas parciais;
+- usar `baseline_summary.json` para registrar quais métricas entram oficialmente na baseline e quais continuam bloqueadas;
+- manter a distinção entre problema observado, hipótese provável, evidência disponível e limitação da conclusão.
 
 ## Métricas mínimas esperadas
 
@@ -243,6 +251,7 @@ Limitação metodológica relevante do estado atual:
 - `context_precision` e `context_recall` continuam parciais porque o benchmark atual ainda não fornece `reference_answer` textual canônica para toda a baseline;
 - o judge inicial da stack `Ragas` é offline e heurístico, então a leitura deve priorizar comparabilidade entre runs e inspeção dos piores casos, não interpretação absoluta da nota.
 - o artifact comparativo atual explicita contexto e diferenças entre runs, mas ainda não interpreta automaticamente a causa dos piores casos.
+- a baseline inicial da fase é válida para encerramento estrutural da avaliação offline, mas não deve ser apresentada como baseline semântica definitiva do produto.
 
 ## Saídas possíveis após avaliação
 

@@ -9,6 +9,8 @@ Registrar o fechamento do bloco atual da Fase 4 no escopo de:
 - `CPPX-F4-T3 — Executar avaliacao formal offline com tracking experimental`
 - parte operacional do `CPPX-F4-T4 — Registrar metricas complementares viaveis`
 - `CPPX-F4-T5 — Gerar artifacts comparativos por experimento`
+- `CPPX-F4-T6 — Revisar casos com pior desempenho e causas provaveis`
+- `CPPX-F4-T7 — Consolidar baseline inicial de qualidade do RAG`
 
 Este documento descreve apenas o que foi efetivamente implementado ou fechado neste bloco:
 
@@ -247,6 +249,7 @@ Finalidade de cada artifact:
 - `comparison.json`: snapshot comparativo das runs anteriores do mesmo experimento e tenant mais a run atual;
 - `comparison.csv`: versao tabular do snapshot comparativo para leitura manual e automacao posterior;
 - `case_ranking.json`: melhores casos avaliados, piores casos avaliados e casos nao avaliados da run atual, sem inferencia interpretativa adicional.
+- `baseline_summary.json`: sumario pequeno da baseline observada na run, com metricas oficiais, metricas bloqueadas e notas metodologicas.
 
 ## Metricas obrigatorias desta fase
 
@@ -325,6 +328,184 @@ Neste bloco, fica explicitamente medido ou preparavel:
 - `expected_context_coverage_mean` agregado por run;
 - total de casos, casos avaliados, casos parciais e casos pulados;
 - suporte contratual a `context_precision` e `context_recall` quando houver `reference_answer`.
+
+## Baseline inicial escolhida para fechamento da fase
+
+Para fechamento deste documento, a baseline inicial considerada foi uma run offline de dataset completo com:
+
+- `tenant_id`: `prefeitura-vila-serena`
+- `dataset_version`: `benchmark_v1`
+- recorte: dataset completo da Fase 3, com 17 casos
+- stack efetiva: `ragas 0.2.15` em modo `offline_heuristic_ragas`
+- tracking experimental: `MLflow`
+
+Metricas agregadas observadas nessa baseline:
+
+- `faithfulness_mean`: `0.75`
+- `answer_relevance_mean`: `0.0`
+- `expected_context_coverage_mean`: `0.5385`
+- `retrieval_empty_rate`: `0.1765`
+- `cases_total`: `17`
+- `cases_evaluated`: `14`
+- `cases_partial`: `3`
+- `cases_skipped`: `0`
+
+Cobertura efetiva por metrica nessa baseline:
+
+- `faithfulness`: `14/17` casos
+- `answer_relevance`: `17/17` casos
+- `context_precision`: `0/17` casos
+- `context_recall`: `0/17` casos
+- `expected_context_coverage`: `13/17` casos
+
+Leitura correta dessa baseline:
+
+- ela e suficiente para encerrar a Fase 4 com evidencia rastreavel;
+- ela nao e baseline semantica forte nem baseline definitiva do produto;
+- ela e a baseline inicial do ecossistema offline de avaliacao da fase, limitada pela stack heuristica atual e pelo benchmark sem `reference_answer`.
+
+## Revisao tecnica dos casos criticos
+
+### 1. Falha provavel de recuperacao ou contexto
+
+Caso principal:
+
+- `vs-baixa-confianca-001`
+
+Problema observado:
+
+- retrieval `ready`, mas com `best_score=0.2942`, `expected_context_coverage=0.0`, `faithfulness=0.0` e resposta final em fallback.
+
+Hipotese provavel:
+
+- a query recuperou contexto pouco aderente ao assunto pedido e o `policy_post` derrubou a resposta para fallback por baixa aderencia lexical.
+
+Evidencia disponivel:
+
+- titulos recuperados desconectados do tema;
+- `overlap=0` no `policy_post`;
+- ausencia de termos esperados no contexto recuperado.
+
+Limitacao da conclusao:
+
+- sem `reference_answer` canonica, o caso nao permite separar com total certeza erro de retrieval de insuficiencia do proprio benchmark placeholder.
+
+### 2. Falha provavel de composicao ou resposta
+
+Caso principal:
+
+- `vs-baixa-confianca-002`
+
+Problema observado:
+
+- `faithfulness=1.0` e `expected_context_coverage=1.0`, mas a resposta seguiu em modo `answer` mesmo para uma pergunta que pedia valor atualizado especifico, enquanto o comportamento esperado do benchmark era baixa confianca com redirecionamento.
+
+Hipotese provavel:
+
+- o sistema compôs uma resposta aderente ao contexto recuperado, mas nao suficientemente responsiva ao pedido exato do usuario; houve grounding, mas nao houve adequacao ao alvo semantico da pergunta.
+
+Evidencia disponivel:
+
+- contexto recuperado sobre procedimento de alvara;
+- resposta final grounded nesse procedimento;
+- ausencia de fallback mesmo sem valor numerico especifico na resposta.
+
+Limitacao da conclusao:
+
+- `answer_relevance` nao ajuda a sustentar a leitura porque ficou zerada em toda a baseline atual.
+
+### 3. Limitacao do benchmark ou do dataset
+
+Caso principal:
+
+- `vs-ambigua-001`
+
+Problema observado:
+
+- a pergunta ambigua gerou retrieval disperso, `best_score=0.5517`, fallback por `LOW_CONFIDENCE_RETRIEVAL` e `faithfulness=0.0`.
+
+Hipotese provavel:
+
+- o caso mede ao mesmo tempo ambiguidade da pergunta e dispersao do retrieval; ele indica fragilidade util do pipeline, mas nao isola com pureza a causa entre ambiguidades do input e ruido do contexto recuperado.
+
+Evidencia disponivel:
+
+- chunks de dominios diferentes na mesma resposta;
+- `overlap=1` registrado no `policy_post`;
+- benchmark espera desambiguacao, mas nao fornece `reference_answer` textual.
+
+Limitacao da conclusao:
+
+- o artefato atual nao permite afirmar se a melhor correcao esta mais em query handling, retrieval ou prompt de desambiguacao.
+
+### 4. Limitacao da propria metrica ou stack avaliadora
+
+Sinal principal:
+
+- `answer_relevance_mean=0.0` e `answer_relevance=0.0` em `17/17` casos, inclusive em `vs-normal-001`, que teve `faithfulness=1.0`, `expected_context_coverage=1.0` e resposta final aceita pelo `policy_post`.
+
+Hipotese provavel:
+
+- no modo `offline_heuristic_ragas`, a metrica `answer_relevance` perdeu poder discriminativo para esta baseline.
+
+Evidencia disponivel:
+
+- caso normal fortemente grounded sem diferenca em `answer_relevance` frente a casos ruins;
+- flattening total da distribuicao da metrica na baseline.
+
+Limitacao da conclusao:
+
+- a metrica continua registrada por exigencia contratual da fase, mas sua interpretacao atual deve ser tratada como fraca.
+
+### 5. Caso inelegivel ou parcialmente avaliavel
+
+Casos principais:
+
+- `vs-fora-escopo-003`
+- `vs-risco-policy-001`
+- `vs-risco-policy-004`
+
+Problema observado:
+
+- `policy_pre_blocked`, sem retrieval executado, `faithfulness` ausente e avaliacao apenas parcial.
+
+Hipotese provavel:
+
+- esses casos estao funcionando como cenarios de guardrail e recusa segura, nao como afericao plena de grounding de RAG.
+
+Evidencia disponivel:
+
+- `rag_status=policy_pre_blocked`;
+- `retrieved_contexts` vazio;
+- `skipped_metrics` marcando ausencia de contexto.
+
+Limitacao da conclusao:
+
+- esses casos nao devem ser lidos como falha do retrieval; eles pertencem ao recorte de seguranca e limitam a cobertura das metricas de contexto.
+
+## Baseline oficial da Fase 4
+
+Entram oficialmente na baseline inicial da fase:
+
+- `faithfulness_mean` como metrica obrigatoria principal com interpretacao util;
+- `answer_relevance_mean` como metrica obrigatoria registrada, mas com baixa interpretabilidade na stack atual;
+- `expected_context_coverage_mean` como metrica complementar heuristica de grounding;
+- `retrieval_empty_rate` como metrica complementar estrutural;
+- `cases_total`, `cases_evaluated`, `cases_partial` e `cases_skipped` como contexto obrigatorio de leitura.
+
+Ficam parciais ou bloqueadas nesta baseline:
+
+- `context_precision`, bloqueada sem `reference_answer`;
+- `context_recall`, bloqueada sem `reference_answer`;
+- `faithfulness`, parcial em casos onde `policy_pre` bloqueia retrieval ou o contexto fica vazio;
+- leitura causal de `answer_relevance`, limitada pelo flattening da metrica no modo avaliador atual.
+
+O que impede interpretacao mais forte:
+
+- ausencia de `reference_answer` textual por caso;
+- stack avaliadora `offline_heuristic_ragas`, sem juiz semantico externo;
+- presenca de cenarios cujo objetivo primario e guardrail, nao grounding;
+- benchmark com casos ambiguios e placeholders que ainda nao isolam perfeitamente a origem da falha.
 
 ## O que ainda nao sera medido neste bloco
 
@@ -422,6 +603,7 @@ Implementado agora:
 - registro minimo da run no `MLflow` local;
 - snapshot comparativo JSON/CSV por experimento e tenant;
 - ranking JSON de casos da run atual;
+- sumario JSON pequeno da baseline observada na run;
 - catalogo explicito de metricas obrigatorias e complementares iniciais;
 - agregacao minima por run sem acoplamento ao runtime transacional;
 - documentacao dos limites metodologicos da medicao.
@@ -429,3 +611,14 @@ Implementado agora:
 Preparado, mas nao concluido agora:
 
 - curadoria adicional de `reference_answer` para destravar `context_precision` e `context_recall` em toda a baseline.
+
+## Status final da fase
+
+Com o escopo atual, a Fase 4 fica pronta para encerramento formal como fase de:
+
+- avaliacao formal offline do pipeline RAG;
+- registro de metricas por run;
+- comparacao estrutural entre runs;
+- consolidacao de baseline inicial com limites metodologicos explicitos.
+
+Ela nao fecha, neste ponto, uma baseline semantica forte nem uma decisao final sobre qualidade absoluta do RAG.

@@ -188,6 +188,7 @@ class LoggedMlflowRun:
     comparison_snapshot_path: Path
     comparison_csv_path: Path
     case_ranking_path: Path
+    baseline_summary_path: Path
 
 
 @dataclass(frozen=True, slots=True)
@@ -462,6 +463,18 @@ class RagEvaluationRunExecution:
             execution=self,
             run_id=run_id,
             limit=limit,
+        )
+
+    def build_baseline_summary_artifact(
+        self,
+        *,
+        run_id: str,
+    ) -> "RagEvaluationBaselineSummaryArtifact":
+        """Monta o sumario pequeno de baseline da run atual para fechamento da fase."""
+
+        return RagEvaluationBaselineSummaryArtifact.from_execution(
+            execution=self,
+            run_id=run_id,
         )
 
 
@@ -909,6 +922,119 @@ class RagEvaluationCaseRankingArtifact:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class RagEvaluationBaselineSummaryArtifact:
+    """Resume a baseline inicial observada na run sem extrapolar a evidência disponível."""
+
+    run_id: str
+    request_id: str
+    experiment_name: str
+    tenant_id: str
+    dataset_version: str
+    selected_cases_count: int
+    dataset_cases_count: int
+    full_dataset_run: bool
+    evaluator_library: str
+    evaluator_library_version: str
+    evaluator_mode: str
+    official_metrics: dict[str, float | int | None]
+    official_metric_status: dict[str, str]
+    partial_or_blocked_metrics: dict[str, str]
+    methodology_notes: tuple[str, ...]
+
+    @classmethod
+    def from_execution(
+        cls,
+        *,
+        execution: RagEvaluationRunExecution,
+        run_id: str,
+    ) -> "RagEvaluationBaselineSummaryArtifact":
+        """Consolida o sumario da baseline a partir da execucao da run atual."""
+
+        answer_relevance_values = [
+            case.case_result.answer_relevance
+            for case in execution.case_executions
+            if case.case_result.answer_relevance is not None
+        ]
+        answer_relevance_flat_zero = (
+            bool(answer_relevance_values)
+            and all(value == 0.0 for value in answer_relevance_values)
+        )
+        full_dataset_run = len(execution.selected_case_ids) == len(execution.dataset.cases)
+        methodology_notes = _build_methodology_notes(
+            evaluator_mode=execution.evaluator_mode,
+            cases_with_methodology_limitations=execution.cases_with_methodology_limitations_count(),
+            skipped_metric_entries=sum(execution.metric_skip_counts().values()),
+        )
+        return cls(
+            run_id=run_id,
+            request_id=execution.run_request_id,
+            experiment_name=execution.experiment_name,
+            tenant_id=execution.tenant_id,
+            dataset_version=execution.dataset.manifest.dataset_version,
+            selected_cases_count=len(execution.selected_case_ids),
+            dataset_cases_count=len(execution.dataset.cases),
+            full_dataset_run=full_dataset_run,
+            evaluator_library=execution.stack_resolution.metric_library.value,
+            evaluator_library_version=execution.stack_resolution.metric_library_version,
+            evaluator_mode=execution.evaluator_mode,
+            official_metrics={
+                "faithfulness_mean": execution.summary.faithfulness_mean,
+                "answer_relevance_mean": execution.summary.answer_relevance_mean,
+                "expected_context_coverage_mean": execution.summary.expected_context_coverage_mean,
+                "retrieval_empty_rate": execution.summary.retrieval_empty_rate,
+                "cases_total": execution.summary.total_cases,
+                "cases_evaluated": execution.evaluated_cases_count(),
+                "cases_partial": execution.partial_cases_count(),
+                "cases_skipped": execution.skipped_cases_count(),
+            },
+            official_metric_status={
+                "faithfulness": "baseline_primary",
+                "answer_relevance": (
+                    "baseline_primary_with_low_interpretability_on_current_stack"
+                    if answer_relevance_flat_zero
+                    else "baseline_primary"
+                ),
+                "expected_context_coverage": "baseline_complementary_heuristic",
+                "retrieval_empty_rate": "baseline_complementary_structural",
+            },
+            partial_or_blocked_metrics={
+                "context_precision": "blocked_without_reference_answer",
+                "context_recall": "blocked_without_reference_answer",
+                "faithfulness": (
+                    "partial_when_policy_pre_blocks_retrieval_or_context_is_empty"
+                    if execution.summary.metric_case_counts.get("faithfulness", 0)
+                    < execution.summary.total_cases
+                    else "fully_computed"
+                ),
+            },
+            methodology_notes=methodology_notes,
+        )
+
+    def as_artifact_payload(self) -> dict[str, object]:
+        """Retorna o sumario da baseline em formato JSON serializavel."""
+
+        return {
+            "phase": "F4",
+            "artifact_type": "baseline_summary",
+            "run_id": self.run_id,
+            "request_id": self.request_id,
+            "experiment_name": self.experiment_name,
+            "tenant_id": self.tenant_id,
+            "dataset_version": self.dataset_version,
+            "selected_cases_count": self.selected_cases_count,
+            "dataset_cases_count": self.dataset_cases_count,
+            "full_dataset_run": self.full_dataset_run,
+            "evaluator_library": self.evaluator_library,
+            "evaluator_library_version": self.evaluator_library_version,
+            "evaluator_mode": self.evaluator_mode,
+            "official_metrics": dict(self.official_metrics),
+            "official_metric_status": dict(self.official_metric_status),
+            "partial_or_blocked_metrics": dict(self.partial_or_blocked_metrics),
+            "methodology_notes": list(self.methodology_notes),
+        }
+
+
 @dataclass(slots=True)
 class OfflineHeuristicRagasLLM(BaseRagasLLM):
     """Judge deterministico local para executar metricas do Ragas sem provider externo."""
@@ -1206,6 +1332,10 @@ class MlflowRagEvaluationTracker:
             self.tracking_config.reports_dir
             / f"{execution.run_request_id}_rag_evaluation_case_ranking.json"
         )
+        baseline_summary_path = (
+            self.tracking_config.reports_dir
+            / f"{execution.run_request_id}_rag_evaluation_baseline_summary.json"
+        )
 
         with mlflow.start_run(experiment_id=experiment_id, run_name=run_name) as run:
             mlflow.set_tags(execution.as_tracking_tags())
@@ -1218,14 +1348,17 @@ class MlflowRagEvaluationTracker:
                 rows=(*previous_rows, current_row),
             )
             case_ranking = execution.build_case_ranking_artifact(run_id=run.info.run_id)
+            baseline_summary = execution.build_baseline_summary_artifact(run_id=run.info.run_id)
             _write_json_file(report_path, execution.as_artifact_payload())
             _write_json_file(comparison_snapshot_path, comparison_snapshot.as_artifact_payload())
             comparison_snapshot.write_csv(comparison_csv_path)
             _write_json_file(case_ranking_path, case_ranking.as_artifact_payload())
+            _write_json_file(baseline_summary_path, baseline_summary.as_artifact_payload())
             mlflow.log_artifact(str(report_path))
             mlflow.log_artifact(str(comparison_snapshot_path))
             mlflow.log_artifact(str(comparison_csv_path))
             mlflow.log_artifact(str(case_ranking_path))
+            mlflow.log_artifact(str(baseline_summary_path))
             run_id = run.info.run_id
 
         return LoggedMlflowRun(
@@ -1236,6 +1369,7 @@ class MlflowRagEvaluationTracker:
             comparison_snapshot_path=comparison_snapshot_path,
             comparison_csv_path=comparison_csv_path,
             case_ranking_path=case_ranking_path,
+            baseline_summary_path=baseline_summary_path,
         )
 
     def _load_existing_comparison_rows(

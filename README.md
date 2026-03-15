@@ -33,11 +33,13 @@ O projeto foi estruturado para demonstrar, de forma prática:
 - canal real de operação via **Telegram**, com webhook HTTPS ativo no ambiente remoto demonstrativo
 - evolução para **CI/CD** e **deploy em AWS com Terraform**
 
-Com a consolidação da **Fundação Operacional**, o projeto entra agora em uma nova etapa: a construção da camada de **LLMOps, avaliação formal, governança e observabilidade avançada**.
+Com a consolidação da **Fundação Operacional**, o projeto entrou em uma nova etapa: a construção da camada de **LLMOps, avaliação formal, governança e observabilidade avançada**.
 
 O foco atual deixa de ser apenas a sustentação de uma base funcional e passa a ser a evolução para uma plataforma de IA mais **rastreável, avaliável, governável e tecnicamente demonstrável**.
 
 O objetivo desta nova etapa continua o mesmo em essência: provar **GenAI com método**, agora com uma camada explícita de experimentação, benchmark, versionamento e governança técnica.
+
+No recorte atual da branch de desenvolvimento, as **Fases 1 a 4** desse ciclo foram consolidadas na camada **offline/experimental**, com tracking por tenant, benchmark reproduzível, avaliação formal offline de RAG, artifacts comparativos e baseline inicial rastreável.
 
 ---
 
@@ -94,6 +96,10 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 - geração de evidências de funcionamento
 - workflow de CI versionado com quality gates mínimos
 - deploy mínimo em AWS validado com Terraform e proxy HTTPS público
+- tracking experimental offline por tenant em `MLflow`
+- versionamento experimental de prompts, policies e configurações de RAG
+- benchmark reproduzível e tenant-aware para avaliação offline
+- avaliação formal offline de RAG com métricas por run, artifacts comparativos e baseline inicial documentada
 
 ### Não incluído neste momento
 - produto enterprise finalizado
@@ -103,6 +109,7 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 - painel administrativo completo por tenant
 - benchmark acadêmico avançado de modelos
 - arquitetura distribuída complexa em nuvem
+- avaliação formal acoplada ao runtime transacional
 
 ---
 
@@ -308,9 +315,9 @@ Na branch de desenvolvimento, este README passa a cumprir dois papéis:
 1. resumir a base já validada da fundação operacional;
 2. posicionar a nova fase de evolução do projeto, focada em **LLMOps, avaliação formal, governança e observabilidade avançada**.
 
-**Base consolidada:** Fundação Operacional concluída e validada localmente, na CI e no deploy remoto.  
-**Nova fase em andamento:** Fase 1 — GenAI com Método: LLMOps, Avaliação e Governança.  
-**Eixo transversal já consolidado:** Guardrail Rastreável distribuído entre as fases finais da fundação operacional.
+- **Base consolidada:** Fundação Operacional concluída e validada localmente, na CI e no deploy remoto.
+- **Nova fase em andamento:** Fase 1 — GenAI com Método: LLMOps, Avaliação e Governança, com **Fases 1 a 4 já consolidadas neste escopo offline/experimental**.
+- **Eixo transversal já consolidado:** Guardrail Rastreável distribuído entre as fases finais da fundação operacional.
 
 ### Já existe
 
@@ -335,10 +342,14 @@ Na branch de desenvolvimento, este README passa a cumprir dois papéis:
 
 ### Em evolução na nova fase
 
-* rastreabilidade experimental por tenant
-* versionamento formal de prompts, policies e configurações de RAG
-* benchmark reproduzível por tenant
-* avaliação formal de RAG
+* tracking experimental por tenant em `MLflow`, separado da auditoria operacional
+* versionamento formal de prompts, policies e configurações de retrieval/chunking
+* benchmark reproduzível por tenant com dataset versionado da Fase 3
+* avaliação formal offline de RAG com `faithfulness`, `answer_relevance` e métricas complementares viáveis
+* artifacts comparativos por run/experimento e baseline inicial rastreável da Fase 4
+
+### Ainda em evolução após a conclusão da Fase 4
+
 * comparação entre estratégias de retrieval e modelos
 * observabilidade ampliada de qualidade, latência e custo
 * orquestração offline com Airflow
@@ -348,9 +359,11 @@ Na branch de desenvolvimento, este README passa a cumprir dois papéis:
 ### Limites declarados do estado atual
 
 * `LLM_PROVIDER=mock` continua sendo o baseline reproduzível da base operacional
-* a camada de LLMOps está em implantação e ainda não deve ser tratada como plenamente ativa no runtime
+* a camada de LLMOps já possui benchmark e avaliação formal offline, mas ainda não deve ser tratada como plenamente ativa no runtime transacional
 * o Telegram público do ambiente remoto depende de secrets externos não versionados
 * o deploy remoto validado usa `sslip.io`, sem domínio próprio, rotação de secrets ou CD completo
+* a baseline inicial da Fase 4 usa `ragas` em modo `offline_heuristic_ragas`, útil para comparabilidade técnica entre runs, mas não equivalente a uma avaliação semântica forte com juiz externo
+* `context_precision` e `context_recall` continuam bloqueadas no baseline atual quando falta `reference_answer` no benchmark
 
 ### Limites declarados do recorte final
 
@@ -407,6 +420,11 @@ O projeto passa a ser organizado em dois ciclos complementares:
 * Fase 10 — Multi-LLM, fallback e avaliação comparativa de provedores
 * Fase 11 — Governança, explicabilidade e evidência de decisão
 * Fase 12 — Alinhamento final com a vaga e material de demonstração
+
+Estado atual deste ciclo na branch `feat/avaliacao-rag-metricas-de-qualidade`:
+
+* Fases 1 a 4 concluídas neste escopo
+* Fase 4 encerrada com benchmark conectado ao executor offline, tracking experimental em `MLflow`, artifacts comparativos e baseline inicial documentada em `docs-LLMOps/fases/FASE4-AVALIACAO-FORMAL-RAG.md`
 ---
 
 ## Critério de Aceite do Projeto

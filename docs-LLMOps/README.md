@@ -117,3 +117,4 @@ A sequência recomendada de leitura desta pasta é:
 Fase 1 concluída com evidência local.
 Fase 2 consolidada neste escopo na branch `feat/fase2-rag-prompts`.
 Fase 3 consolidada neste escopo na branch `feat/dataset-avaliacao`, com baseline inicial de benchmark reproduzível para o tenant demonstrativo.
+Fase 4 consolidada neste escopo na branch `feat/avaliacao-rag-metricas-de-qualidade`, com avaliação formal offline, artifacts comparativos e baseline inicial rastreável do RAG.

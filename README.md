@@ -419,7 +419,7 @@ O projeto passa a ser organizado em dois ciclos complementares:
 * Fase 9 — Deriva semântica e saúde da base vetorial
 * Fase 10 — Multi-LLM, fallback e avaliação comparativa de provedores
 * Fase 11 — Governança, explicabilidade e evidência de decisão
-* Fase 12 — Alinhamento final com a vaga e material de demonstração
+* Fase 12 — Alinhamento final da narrativa técnica e material de demonstração
 
 Estado atual deste ciclo na branch `feat/avaliacao-rag-metricas-de-qualidade`:
 
@@ -579,7 +579,7 @@ Na branch atual, esse canal já possui dois modos de operação validados:
 
 ## Observabilidade, Auditoria e Evidências
 
-O projeto oferece visibilidade mínima sobre o fluxo do atendimento já validado na Fundação Operacional e passa a evoluir, na nova fase, para uma camada mais formal de tracking experimental e avaliação.
+O projeto já combina a visibilidade operacional validada na Fundação Operacional com uma camada offline/experimental de tracking e avaliação formal consolidada até a Fase 4 da trilha de LLMOps.
 
 Na base ativa já validada, a evidência operacional inclui:
 - auditoria versionada `audit.v1`
@@ -589,19 +589,25 @@ Na base ativa já validada, a evidência operacional inclui:
 - métricas expostas em `/metrics`
 - traces correlacionados por `request_id`
 
-Na nova fase, o projeto passa a estruturar também:
-- experiment tracking por tenant
-- benchmark reproduzível
-- avaliação formal de RAG
-- comparação entre versões
-- leitura de deriva semântica
+Na camada offline/experimental já consolidada nesta branch, o projeto também registra:
+- experiment tracking por tenant em `MLflow`, separado da auditoria operacional
+- benchmark reproduzível e tenant-aware
+- avaliação formal offline de RAG
+- comparação entre runs por métricas e parâmetros
+- artifacts comparativos por experimento
+- baseline inicial rastreável da qualidade do RAG
+
+Ainda não está consolidado neste recorte:
+- leitura de deriva semântica ativa
+- observabilidade ampliada de custo e latência por tenant
+- interpretação semântica forte com juiz externo como baseline oficial
 
 Para leitura humana mais direta do case e da nova fase, use também:
 
 * `docs-fundacao-operacional/`
 * `docs-LLMOps/`
 
-### Evidências esperadas
+### Evidências disponíveis no recorte atual
 
 * logs estruturados
 * eventos de auditoria
@@ -610,6 +616,7 @@ Para leitura humana mais direta do case e da nova fase, use também:
 * benchmark por tenant
 * métricas experimentais comparáveis
 * artifacts de avaliação
+* baseline inicial documentada da Fase 4
 * matriz de cenários validados
 
 ### Valor desta camada
@@ -617,8 +624,8 @@ Para leitura humana mais direta do case e da nova fase, use também:
 A observabilidade não existe apenas para operação; ela também serve para:
 
 * provar funcionamento
-* gerar material de portfólio
-* sustentar explicação técnica em entrevista
+* gerar material técnico de apresentação
+* sustentar leitura técnica por terceiros
 * aumentar confiança no comportamento do sistema
 * apoiar evolução de IA com método
 
@@ -626,20 +633,21 @@ A observabilidade não existe apenas para operação; ela também serve para:
 
 ## CI/CD e Próximos Passos de Infraestrutura
 
-Após a estabilização da demonstração funcional, o projeto evolui para uma trilha de entrega mais madura.
+Com a demonstração funcional estabilizada, o projeto já possui um corte mínimo validado de CI e deploy remoto, mantendo a evolução de infraestrutura deliberadamente enxuta.
 
 ### GitHub Actions
 
-A branch atual ja possui workflow de CI versionado em `.github/workflows/ci.yml`, cobrindo:
+A branch atual já possui workflow de CI versionado em `.github/workflows/ci.yml`, cobrindo:
 
-* lint minimo do runtime
+* lint mínimo do runtime
+* `compileall`
 * `pytest`
-* validacao de `docker compose config`
+* validação de `docker compose config` para `docker-compose.yml` e `docker-compose.local.yml`
 * build Docker
-* varredura de termos proibidos e residuos historicos
-* smoke `prod` reduzido com upload de artefato
+* varredura de resíduos históricos
+* smoke `prod` reduzido com upload de artefato JSON
 
-No corte atual, esse workflow nao exige secrets novos. Os secrets `DEPLOY_WEBHOOK_URL` e `DEPLOY_WEBHOOK_TOKEN` continuam restritos ao workflow manual de deploy.
+No corte atual, esse workflow não exige secrets novos. Os secrets `DEPLOY_WEBHOOK_URL` e `DEPLOY_WEBHOOK_TOKEN` continuam restritos ao workflow manual de deploy em `.github/workflows/deploy.yml`.
 
 ### AWS + Terraform
 
@@ -647,13 +655,14 @@ Na branch atual, a Fase 13 já validou um corte mínimo e explicável em AWS `us
 
 * VPC dedicada mínima
 * subnet pública
-* Security Group na porta `8000`
+* Security Group com acesso às portas da API e do proxy HTTPS
 * perfil IAM com SSM
 * EC2 única
 * Elastic IP
 * proxy HTTPS público com Caddy e hostname `sslip.io` derivado do IP
 * bootstrap via `user_data` + `docker compose`
 * smoke remoto aprovado em `GET /`, `GET /health`, `GET /metrics` e `POST /api/chat`
+* webhook HTTPS ativo para o canal demonstrativo do Telegram
 
 O recorte continua enxuto de propósito: entrega real, baixo custo e operação explicável antes de domínio próprio, ECS ou backend remoto de Terraform.
 
@@ -666,13 +675,12 @@ O recorte continua enxuto de propósito: entrega real, baixo custo e operação 
 * manter a coerência entre operação local, CI e deploy remoto
 
 ### Nova fase — LLMOps
-* preparar ambiente base, ambiente dev e ambiente offline conforme o planejamento
-* introduzir experiment tracking com segregação por tenant
-* formalizar benchmark reproduzível e avaliação de RAG
-* versionar prompts, policies e configurações críticas
-* ampliar observabilidade para qualidade, custo e latência
+* fortalecer a baseline inicial da Fase 4 com `reference_answer` e métricas de contexto hoje bloqueadas
+* comparar estratégias de retrieval, reranking e versões de prompt sobre a baseline já formalizada
+* ampliar observabilidade experimental para qualidade, custo e latência por tenant
 * introduzir orquestração offline de ingestão, benchmark e reindexação
-* consolidar material técnico de demonstração orientado à vaga-alvo
+* evoluir para leitura de deriva semântica da base vetorial
+* consolidar material técnico de demonstração com a Fase 4 já encerrada
 
 ### Evolução opcional de infraestrutura
 * endurecer a operação remota com domínio próprio, rotação de secrets e CD

@@ -48,7 +48,7 @@ class HashEmbeddingFunction(EmbeddingFunction[Documents]):
 
     @staticmethod
     def name() -> str:
-        return "hash-embedding-v1"
+        return settings.RAG_EMBEDDING_VERSION
 
     def get_config(self) -> dict[str, int]:
         return {"dimensions": self.dimensions}
@@ -89,6 +89,16 @@ class TenantChromaRepository:
         self.legacy_prefixes = legacy_prefixes or settings.CHROMA_LEGACY_COLLECTION_PREFIXES
         self.client = chromadb.PersistentClient(path=str(self.base_dir))
         self.embedding_function = HashEmbeddingFunction()
+
+    def retriever_version(self) -> str:
+        """Retorna a versão lógica da estratégia de retrieval usada no runtime atual."""
+
+        return settings.RAG_RETRIEVER_VERSION
+
+    def embedding_version(self) -> str:
+        """Retorna a versão lógica do embedding usado no runtime atual."""
+
+        return self.embedding_function.name()
 
     def collection_name(self, tenant_id: str) -> str:
         normalized_tenant = self._normalize_tenant(tenant_id)

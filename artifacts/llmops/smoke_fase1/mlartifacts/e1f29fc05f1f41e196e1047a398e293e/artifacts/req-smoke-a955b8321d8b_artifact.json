@@ -1,0 +1,18 @@
+{
+  "phase": "F1",
+  "purpose": "smoke_test",
+  "tracking_backend": "sqlite:////media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/smoke_fase1/mlflow.db",
+  "boundary": "experimental_tracking",
+  "tenant_id": "tenant-smoke",
+  "request_id": "req-smoke-a955b8321d8b",
+  "prompt_version": "base_v1",
+  "policy_version": "policy_v1",
+  "retriever_version": "tenant_chroma.v1",
+  "embedding_version": "default_embedding.v1",
+  "dataset_version": "smoke.dataset.v1",
+  "model_provider": "mock",
+  "model_name": "mock-compose-v1",
+  "top_k": 3,
+  "latency_ms": 18.712,
+  "estimated_cost": 0.0
+}

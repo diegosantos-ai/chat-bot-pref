@@ -1,0 +1,71 @@
+{
+  "repo_root": ".",
+  "branch": "setup/fundacao-llmops",
+  "summary": {
+    "pass": 22,
+    "warn": 14,
+    "fail": 1
+  },
+  "tasks": [
+    {
+      "task": "CPPX-F1-T1",
+      "status": "OK",
+      "evidence": "Estratégia MLflow aparece na documentação."
+    },
+    {
+      "task": "CPPX-F1-T2",
+      "status": "PARCIAL",
+      "evidence": "Há tenant_id e sinais de tracking; isolamento experimental ainda exige revisão humana."
+    },
+    {
+      "task": "CPPX-F1-T3",
+      "status": "OK",
+      "evidence": "Separação auditoria operacional x tracking experimental apareceu nos docs."
+    },
+    {
+      "task": "CPPX-F1-T4",
+      "status": "OK",
+      "evidence": "Contrato de run/params/metrics/artifacts aparece nos docs."
+    },
+    {
+      "task": "CPPX-F1-T5",
+      "status": "PARCIAL",
+      "evidence": "Há sinais de versionamento/artefatos, mas o contrato formal ainda pede revisão."
+    },
+    {
+      "task": "CPPX-F1-T6",
+      "status": "PARCIAL",
+      "evidence": "Há evidência estrutural para instrumentação; falta fechar mapeamento formal."
+    },
+    {
+      "task": "CPPX-F1-T7",
+      "status": "OK",
+      "evidence": "Arquitetura alvo tenant-aware aparece documentada."
+    },
+    {
+      "task": "CPPX-F1-T8",
+      "status": "OK",
+      "evidence": "requirements.txt existe e não está vazio."
+    },
+    {
+      "task": "CPPX-F1-T9",
+      "status": "OK",
+      "evidence": "requirements-dev.txt existe e não está vazio."
+    },
+    {
+      "task": "CPPX-F1-T10",
+      "status": "PENDENTE",
+      "evidence": "Ambiente base não parece instalado corretamente."
+    },
+    {
+      "task": "CPPX-F1-T11",
+      "status": "PENDENTE",
+      "evidence": "Ambiente dev não parece instalado de forma consistente."
+    },
+    {
+      "task": "CPPX-F1-T12",
+      "status": "PENDENTE",
+      "evidence": "Compatibilidade mínima ainda não passou na checagem heurística."
+    }
+  ]
+}

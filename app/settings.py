@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     PROMPT_BASE_VERSION: str = "base_v1"
     PROMPT_FALLBACK_VERSION: str = "fallback_v1"
     POLICY_TEXT_VERSION: str = "policy_v1"
+    RAG_RETRIEVER_VERSION: str = "tenant_chroma_hash_v1"
+    RAG_EMBEDDING_VERSION: str = "hash_embedding_v1"
     LLM_MIN_CONTEXT_SCORE: float = 0.2
     LLM_CONTEXT_TOP_K: int = 3
     CORS_ORIGINS: list[str] = Field(
@@ -117,6 +119,8 @@ class Settings(BaseSettings):
         "PROMPT_BASE_VERSION",
         "PROMPT_FALLBACK_VERSION",
         "POLICY_TEXT_VERSION",
+        "RAG_RETRIEVER_VERSION",
+        "RAG_EMBEDDING_VERSION",
         mode="before",
     )
     @classmethod

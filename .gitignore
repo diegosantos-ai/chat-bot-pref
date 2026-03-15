@@ -79,6 +79,11 @@ log/
 artifacts/backups/
 artifacts/logs/
 
+# MLflow runtime artifacts (gerados localmente - não versionar)
+artifacts/llmops/**/mlruns/
+artifacts/llmops/**/mlartifacts/
+artifacts/llmops/**/mlflow.db
+
 # OS
 .DS_Store
 Thumbs.db

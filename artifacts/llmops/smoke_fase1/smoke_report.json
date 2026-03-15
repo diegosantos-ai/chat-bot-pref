@@ -1,7 +1,7 @@
 {
   "phase": "F1",
-  "repo_root": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref",
-  "python_executable": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/.venv/bin/python",
+  "repo_root": ".",
+  "python_executable": ".venv/bin/python",
   "summary": {
     "pass": 34,
     "fail": 0
@@ -10,7 +10,7 @@
     {
       "name": "virtualenv",
       "status": "PASS",
-      "detail": "Interpretador ativo: /media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/.venv/bin/python"
+      "detail": "Interpretador ativo: .venv/bin/python"
     },
     {
       "name": "path",
@@ -150,7 +150,7 @@
     {
       "name": "mlflow",
       "status": "PASS",
-      "detail": "Tracking URI SQLite local validado: sqlite:////media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/smoke_fase1/mlflow.db"
+      "detail": "Tracking URI SQLite local validado: sqlite:///artifacts/llmops/smoke_fase1/mlflow.db"
     },
     {
       "name": "mlflow",

@@ -169,7 +169,7 @@ Esta ADR se conecta diretamente com:
 ## Referências internas
 - `docs-LLMOps/CONTEXTO-LLMOps.md`
 - `docs-LLMOps/ARQUITETURA-LLMOps.md`
-- `docs-LLMOps/PLANEJAMENTO_LLMOps.md`
+- `docs-LLMOps/PLANEJAMENTO-LLMOps.md`
 - `docs-LLMOps/runbooks/avaliacao-rag.md`
 - `docs-LLMOps/adrs/ADR-001-separacao-auditoria-vs-tracking.md`
 - `docs-LLMOps/adrs/ADR-002-mlflow-como-stack-de-experimentacao.md`

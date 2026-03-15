@@ -290,7 +290,7 @@ chat-bot-pref/
 - `docs-LLMOps/README.md`: visão geral da nova fase
 - `docs-LLMOps/CONTEXTO-LLMOps.md`: motivação, objetivo e critérios da fase
 - `docs-LLMOps/ARQUITETURA-LLMOps.md`: arquitetura-alvo da camada de LLMOps
-- `docs-LLMOps/PLANEJAMENTO_LLMOps.md`: planejamento macro da nova fase
+- `docs-LLMOps/PLANEJAMENTO-LLMOps.md`: planejamento macro da nova fase
 - `docs-LLMOps/adrs/`: decisões arquiteturais da fase
 - `docs-LLMOps/runbooks/`: preparação de ambiente, avaliação de RAG e operação offline
 

@@ -192,7 +192,7 @@ Este runbook deve ser lido em conjunto com:
 * `README.md`
 * `CONTEXTO-LLMOps.md`
 * `ARQUITETURA-LLMOps.md`
-* `PLANEJAMENTO_LLMOps.md`
+* `PLANEJAMENTO-LLMOps.md`
 
 ## Status
 

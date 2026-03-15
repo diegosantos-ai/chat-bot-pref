@@ -178,5 +178,5 @@ Esta ADR depende diretamente da separação entre auditoria operacional e experi
 ## Referências internas
 - `docs-LLMOps/CONTEXTO-LLMOps.md`
 - `docs-LLMOps/ARQUITETURA-LLMOps.md`
-- `docs-LLMOps/PLANEJAMENTO_LLMOps.md`
+- `docs-LLMOps/PLANEJAMENTO-LLMOps.md`
 - `docs-LLMOps/adrs/ADR-001-separacao-auditoria-vs-tracking.md`

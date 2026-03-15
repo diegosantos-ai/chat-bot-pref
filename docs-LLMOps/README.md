@@ -1,4 +1,4 @@
-# Chat Pref — Fase 1: LLMOps, Avaliação e Governança
+# Chat Pref — LLMOps, Avaliação e Governança
 
 ## Visão geral
 
@@ -36,16 +36,16 @@ A documentação anterior, relativa à fundação operacional do projeto, perman
 
 ## Estrutura da pasta
 
-```
+```text
 docs-LLMOps/
 ├── README.md
 ├── CONTEXTO-LLMOps.md
 ├── ARQUITETURA-LLMOps.md
-├── PLANEJAMENTO_LLMOps.md
+├── PLANEJAMENTO-LLMOps.md
 ├── fases/
 ├── adrs/
 └── runbooks/
-````
+```
 
 ## Papel de cada documento
 
@@ -61,7 +61,7 @@ Formaliza a abertura da nova fase, explicando motivação, objetivos, limites, c
 
 Descreve a arquitetura-alvo da nova fase, deixando explícito o que já está validado, o que permanece como contrato ativo e o que será introduzido ao longo do novo ciclo.
 
-### `PLANEJAMENTO_LLMOps.md`
+### `PLANEJAMENTO-LLMOps.md`
 
 Concentra o planejamento macro da fase, com frentes, critérios de aceite, tasks e ordem de execução.
 
@@ -76,6 +76,12 @@ Armazena procedimentos operacionais, setup de ambiente, rotinas de avaliação e
 ### `fases/`
 
 Pode ser usado para detalhamento adicional de fases ou frentes específicas quando o nível de complexidade ultrapassar o escopo do planejamento macro.
+
+Documentos já consolidados nesta pasta:
+
+- `fases/FASE1-LLMOPS.md`
+- `fases/FASE2-ARTEFATOS-VERSIONAVEIS.md`
+- `fases/FASE2-LLMOPS.md`
 
 ## Diretriz de manutenção
 
@@ -99,11 +105,12 @@ A sequência recomendada de leitura desta pasta é:
 
 1. `CONTEXTO-LLMOps.md`
 2. `ARQUITETURA-LLMOps.md`
-3. `PLANEJAMENTO_LLMOps.md`
+3. `PLANEJAMENTO-LLMOps.md`
+4. `fases/FASE1-LLMOPS.md`
+5. `fases/FASE2-LLMOPS.md`
 
 ## Status
 
-Fase em abertura documental e estrutural.
-Planejamento macro já definido.
-Próximo passo: formalização do contexto da nova fase.
-
+Fase 1 concluída com evidência local.
+Fase 2 consolidada neste escopo na branch `feat/fase2-rag-prompts`.
+Próximo passo macro: avançar para a Fase 3 com benchmark reproduzível sobre a convenção de artefatos já estabilizada.

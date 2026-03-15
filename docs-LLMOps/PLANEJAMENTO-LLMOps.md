@@ -79,7 +79,7 @@ Projeto com ambiente técnico preparado para evolução da camada de LLMOps, con
 
 Esta fase deixa de ser apenas conceitual e passa a incorporar a preparação formal do ambiente, reduzindo risco de acoplamento indevido, improviso de setup e divergência entre execução local, testes e experimentação.
 
-#### Tasks — Fase 1
+#### Tasks — Fase 1 - (CONCLUIDA)
 
 * `CPPX-F1-T1 — Definir estratégia de adoção do MLflow no projeto`
 * `CPPX-F1-T2 — Definir modelo de segregação experimental por tenant_id`

@@ -142,7 +142,7 @@ Os principais artefatos documentais desta fase são:
 - `README.md`
 - `CONTEXTO-LLMOps.md`
 - `ARQUITETURA-LLMOps.md`
-- `PLANEJAMENTO_LLMOps.md`
+- `PLANEJAMENTO-LLMOps.md`
 - ADRs em `adrs/`
 - runbooks em `runbooks/`
 - detalhamentos adicionais em `fases/`, quando necessário
@@ -151,7 +151,7 @@ Os principais artefatos documentais desta fase são:
 
 A execução macro desta fase está detalhada em:
 
-- `PLANEJAMENTO_LLMOps.md`
+- `PLANEJAMENTO-LLMOps.md`
 
 A arquitetura-alvo e a distinção entre estado atual e estado planejado devem ser mantidas em:
 

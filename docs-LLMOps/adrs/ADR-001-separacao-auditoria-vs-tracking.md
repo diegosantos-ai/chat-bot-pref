@@ -139,4 +139,4 @@ Sem ela, o projeto corre risco de introduzir MLflow, benchmark e avaliação for
 ## Referências internas
 - `docs-LLMOps/CONTEXTO-LLMOps.md`
 - `docs-LLMOps/ARQUITETURA-LLMOps.md`
-- `docs-LLMOps/PLANEJAMENTO_LLMOps.md`
+- `docs-LLMOps/PLANEJAMENTO-LLMOps.md`

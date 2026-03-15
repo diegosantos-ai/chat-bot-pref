@@ -42,7 +42,7 @@ A execução da avaliação formal depende, no mínimo, de:
 - `requirements.txt`
 - `requirements-dev.txt`
 
-A instalação dessas dependências deve ocorrer na **Fase 1**, conforme definido em `PLANEJAMENTO_LLMOps.md`.
+A instalação dessas dependências deve ocorrer na **Fase 1**, conforme definido em `PLANEJAMENTO-LLMOps.md`.
 
 ## Objetos mínimos de avaliação
 
@@ -208,7 +208,7 @@ Este runbook deve ser lido em conjunto com:
 - `README.md`
 - `CONTEXTO-LLMOps.md`
 - `ARQUITETURA-LLMOps.md`
-- `PLANEJAMENTO_LLMOps.md`
+- `PLANEJAMENTO-LLMOps.md`
 
 ## Status
 

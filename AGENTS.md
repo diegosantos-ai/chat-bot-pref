@@ -98,7 +98,7 @@ Ler também:
 - `docs-LLMOps/README.md`
 - `docs-LLMOps/CONTEXTO-LLMOps.md`
 - `docs-LLMOps/ARQUITETURA-LLMOps.md`
-- `docs-LLMOps/PLANEJAMENTO_LLMOps.md`
+- `docs-LLMOps/PLANEJAMENTO-LLMOps.md`
 
 ### Se a alteração tocar decisões arquiteturais da fase LLMOps
 Ler também os ADRs aplicáveis em:
@@ -152,7 +152,7 @@ Se a alteração estiver ligada a uma fase específica, o agente deve identifica
 - visão geral da fase: `docs-LLMOps/README.md`
 - contexto da fase: `docs-LLMOps/CONTEXTO-LLMOps.md`
 - arquitetura-alvo da fase: `docs-LLMOps/ARQUITETURA-LLMOps.md`
-- planejamento da fase: `docs-LLMOps/PLANEJAMENTO_LLMOps.md`
+- planejamento da fase: `docs-LLMOps/PLANEJAMENTO-LLMOps.md`
 - decisões arquiteturais: `docs-LLMOps/adrs/`
 - runbooks operacionais: `docs-LLMOps/runbooks/`
 

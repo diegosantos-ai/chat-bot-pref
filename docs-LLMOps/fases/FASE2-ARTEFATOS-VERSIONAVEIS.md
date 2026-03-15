@@ -235,12 +235,13 @@ Os pontos abaixo continuam intencionalmente fora do escopo deste bloco:
 - o endpoint público `POST /api/rag/query` mantém seu schema próprio de entrada e não promove `top_k_default` automaticamente quando o cliente envia um valor explícito;
 - a emissão em MLflow continua restrita ao caminho offline/local de smoke e scripts experimentais, não ao runtime transacional;
 - `embedding_version` continua sendo emitido como versão lógica do runtime, ainda sem sidecar versionado próprio;
-- convenção de promoção/rollback permanece para as próximas tasks da Fase 2.
+- a convenção de promoção/rollback foi consolidada em documentação própria e continua sem automação no runtime.
 
 ## Próximo passo lógico
 
-Usar essa estrutura como base para:
+Com a estrutura, a integração ao tracking e a política de promoção/rollback já documentadas, o próximo passo lógico é encerrar a Fase 2 e usar essa base na **Fase 3 — Dataset de Avaliação e Benchmark Reproduzível**.
 
-- integrar versões e seus metadados ao tracking experimental offline;
-- definir política explícita de promoção e rollback;
-- conectar a convenção de artefatos às tasks seguintes da Fase 2 sem acoplar o runtime principal.
+## Referências complementares da fase
+
+- `docs-LLMOps/fases/FASE2-LLMOPS.md`
+- `docs-LLMOps/adrs/ADR-007-promocao-e-rollback-de-artefatos-versionados.md`

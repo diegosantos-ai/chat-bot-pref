@@ -497,7 +497,7 @@ Os seguintes contratos passam a ser estruturais na nova fase:
 
 A execução desta arquitetura-alvo está organizada em fases no documento:
 
-* `PLANEJAMENTO_LLMOps.md`
+* `PLANEJAMENTO-LLMOps.md`
 
 A ordem de implantação deve respeitar o princípio de fundação antes de otimização:
 
@@ -527,8 +527,7 @@ Arquitetura-alvo formalizada para início da fase.
 
 Base herdada preservada.
 Novas camadas definidas conceitualmente.
-Próximo passo: iniciar execução da Fase 1 conforme `PLANEJAMENTO_LLMOps.md`.
+Próximo passo: iniciar execução da Fase 1 conforme `PLANEJAMENTO-LLMOps.md`.
 
 ````
-
 

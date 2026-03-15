@@ -1,5 +1,21 @@
 """Catálogo mínimo de artefatos versionáveis da Fase 2."""
 
+from app.llmops.benchmark_dataset import (
+    BENCHMARK_DATASETS_DIR,
+    BenchmarkAnswerReference,
+    BenchmarkCase,
+    BenchmarkContextReference,
+    BenchmarkDatasetManifest,
+    BenchmarkScenarioFile,
+    BenchmarkScenarioType,
+    LoadedBenchmarkDataset,
+    discover_benchmark_manifests,
+    load_benchmark_cases,
+    load_benchmark_dataset,
+    load_benchmark_manifest,
+    validate_benchmark_manifest,
+    validate_loaded_benchmark_dataset,
+)
 from app.llmops.active_artifacts import ActiveArtifactResolver, ActiveJsonArtifact, ActiveTextArtifact
 from app.llmops.artifact_catalog import (
     AI_ARTIFACTS_DIR,
@@ -19,9 +35,23 @@ from app.llmops.versioning import (
 
 __all__ = [
     "AI_ARTIFACTS_DIR",
+    "BENCHMARK_DATASETS_DIR",
     "ActiveArtifactResolver",
     "ActiveTextArtifact",
     "ActiveJsonArtifact",
+    "BenchmarkScenarioType",
+    "BenchmarkAnswerReference",
+    "BenchmarkContextReference",
+    "BenchmarkCase",
+    "BenchmarkScenarioFile",
+    "BenchmarkDatasetManifest",
+    "LoadedBenchmarkDataset",
+    "discover_benchmark_manifests",
+    "load_benchmark_manifest",
+    "load_benchmark_cases",
+    "load_benchmark_dataset",
+    "validate_benchmark_manifest",
+    "validate_loaded_benchmark_dataset",
     "VersionedArtifactDescriptor",
     "Phase2ArtifactCatalog",
     "PHASE2_ARTIFACT_CATALOG",

@@ -1,0 +1,33 @@
+{
+  "dataset_version": "benchmark_v1",
+  "tenant_id": "prefeitura-vila-serena",
+  "description": "Dataset inicial e controlado de benchmark da Fase 3 para o tenant demonstrativo Prefeitura Municipal de Vila Serena.",
+  "scenario_files": [
+    {
+      "scenario_type": "atendimento_normal",
+      "relative_path": "scenarios/atendimento_normal.jsonl",
+      "cases_count": 1
+    },
+    {
+      "scenario_type": "pergunta_ambigua",
+      "relative_path": "scenarios/pergunta_ambigua.jsonl",
+      "cases_count": 1
+    },
+    {
+      "scenario_type": "fora_de_escopo",
+      "relative_path": "scenarios/fora_de_escopo.jsonl",
+      "cases_count": 1
+    },
+    {
+      "scenario_type": "baixa_confianca",
+      "relative_path": "scenarios/baixa_confianca.jsonl",
+      "cases_count": 1
+    },
+    {
+      "scenario_type": "risco_policy",
+      "relative_path": "scenarios/risco_policy.jsonl",
+      "cases_count": 1
+    }
+  ],
+  "notes": "Casos iniciais e honestos para demonstrar a estrutura do benchmark. A base usa referencias minimas e placeholders controlados do tenant demonstrativo atual."
+}

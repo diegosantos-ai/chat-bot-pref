@@ -77,10 +77,11 @@ Armazena procedimentos operacionais, setup de ambiente, rotinas de avaliação e
 
 Pode ser usado para detalhamento adicional de fases ou frentes específicas quando o nível de complexidade ultrapassar o escopo do planejamento macro.
 
-Documentos já consolidados nesta pasta:
+Documentos de fase atualmente presentes nesta pasta:
 
 - `fases/FASE1-LLMOPS.md`
 - `fases/FASE2-LLMOPS.md`
+- `fases/FASE3-DATASET-BENCHMARK.md`
 
 ## Diretriz de manutenção
 
@@ -107,9 +108,10 @@ A sequência recomendada de leitura desta pasta é:
 3. `PLANEJAMENTO-LLMOps.md`
 4. `fases/FASE1-LLMOPS.md`
 5. `fases/FASE2-LLMOPS.md`
+6. `fases/FASE3-DATASET-BENCHMARK.md`
 
 ## Status
 
 Fase 1 concluída com evidência local.
 Fase 2 consolidada neste escopo na branch `feat/fase2-rag-prompts`.
-Próximo passo macro: avançar para a Fase 3 com benchmark reproduzível sobre a convenção de artefatos já estabilizada.
+Fase 3 iniciada na branch `feat/dataset-avaliacao`, com foco atual na estrutura inicial do dataset de benchmark reproduzível.

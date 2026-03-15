@@ -80,7 +80,6 @@ Pode ser usado para detalhamento adicional de fases ou frentes específicas quan
 Documentos já consolidados nesta pasta:
 
 - `fases/FASE1-LLMOPS.md`
-- `fases/FASE2-ARTEFATOS-VERSIONAVEIS.md`
 - `fases/FASE2-LLMOPS.md`
 
 ## Diretriz de manutenção

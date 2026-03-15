@@ -50,9 +50,33 @@ Foram estruturados artefatos versionáveis para:
 - configuração de retrieval;
 - configuração de chunking.
 
-Referência técnica:
+Estrutura consolidada nesta fase:
 
-- `docs-LLMOps/fases/FASE2-ARTEFATOS-VERSIONAVEIS.md`
+```text
+ai_artifacts/
+├── prompts/
+│   ├── composer/
+│   │   └── base_v1.txt
+│   └── fallback/
+│       └── fallback_v1.txt
+├── guardrails/
+│   └── policies/
+│       └── policy_v1.md
+└── rag/
+    ├── retrieval/
+    │   └── tenant_chroma_hash_v1.json
+    └── chunking/
+        └── paragraph_split_v1.json
+```
+
+Convenção nominal adotada:
+
+- prompts: `<nome>_vN.txt`
+- policies textuais: `<nome>_vN.md`
+- configuração RAG: `<nome>_vN.json`
+- metadados da versão: `<nome>_vN.<ext>.meta.json`
+
+Os artefatos ficam separados do código de aplicação e mantêm o runtime tenant-aware sem acoplamento com banco ou MLflow.
 
 ### 2. IDs e metadados
 
@@ -69,6 +93,44 @@ Cada artefato relevante passou a ter:
 
 O identificador comparável é estável e calculado a partir do conteúdo relevante do artefato.
 
+O catálogo técnico da fase foi centralizado em:
+
+- `app/llmops/artifact_catalog.py`
+- `app/llmops/versioning.py`
+
+Regra de geração do identificador:
+
+1. ler apenas o conteúdo relevante do artefato;
+2. canonizar o conteúdo antes do hash;
+3. gerar `content_hash` com SHA-256;
+4. gerar `version_id` a partir de `artifact_type`, `artifact_name`, `version_label` e `content_hash`.
+
+Canonização adotada:
+
+- arquivos `.json`: serialização ordenada por chave, sem whitespace irrelevante;
+- arquivos de texto: normalização de quebras de linha e remoção de whitespace apenas no final de cada linha.
+
+Formato final:
+
+```text
+<artifact_type>.<artifact_name>.<version_label>.<sha12>
+```
+
+Exemplo resumido de sidecar:
+
+```json
+{
+  "artifact_type": "prompt",
+  "artifact_name": "composer_base",
+  "version_label": "base_v1",
+  "version_id": "prompt.composer_base.base_v1.4183563896f8",
+  "content_hash": "f4e0f46451e4d650b973fe5152b09d6e8204fd1b02e95a608d96b769a862b975",
+  "status": "candidate",
+  "created_at": "2026-03-15T00:00:00Z",
+  "notes": "Versao inicial da estrutura versionavel do prompt base de composicao."
+}
+```
+
 ### 3. Integração ao runtime
 
 O runtime atual passou a resolver explicitamente:
@@ -82,6 +144,24 @@ O runtime atual passou a resolver explicitamente:
 
 Essa resolução foi mantida mínima, tenant-aware e sem mudança funcional relevante no chat.
 
+O carregamento explícito foi centralizado em:
+
+- `app/llmops/active_artifacts.py`
+
+Pontos de integração atuais:
+
+- `app/services/prompt_service.py` resolve o prompt principal, o fallback e a policy textual ativos;
+- `app/policy_guard/service.py` deriva `policy_version` da policy textual ativa, mantendo a lógica de guardrail em Python;
+- `app/services/chat_service.py` resolve o `top_k` ativo a partir da configuração versionada de retrieval;
+- `app/services/rag_service.py` resolve estratégia de chunking, `section_id_template` e fallback de conteúdo vazio;
+- `app/storage/chroma_repository.py` expõe `retriever_version` e `embedding_version` a partir da configuração ativa.
+
+Fallbacks explícitos preservados:
+
+- `PromptService` continua aceitando `prompts_dir` alternativo em testes;
+- `top_k_default` cai para `settings.LLM_CONTEXT_TOP_K` apenas se a chave não existir no JSON ativo;
+- chunking aceita apenas a estratégia já suportada pelo runtime, falhando de forma explícita para variações ainda não implementadas.
+
 ### 4. Integração ao tracking experimental
 
 O tracking experimental local passou a registrar, no smoke de MLflow:
@@ -92,6 +172,26 @@ O tracking experimental local passou a registrar, no smoke de MLflow:
 - métricas técnicas básicas da run experimental.
 
 Essa integração continua fora da auditoria operacional e fora do caminho síncrono principal do runtime.
+
+Contrato técnico mínimo centralizado em:
+
+- `app/llmops/tracking_integration.py`
+
+Campos emitidos no tracking local:
+
+- tags: `tenant_id`, `request_id`, `prompt_version_id`, `policy_version_id`, `retriever_version_id`, `chunking_version_id`
+- params: `prompt_version`, `policy_version`, `retriever_version`, `embedding_version`, `dataset_version`, `model_provider`, `model_name`, `top_k`, `chunking_version`
+- metrics: `latency_ms`, `estimated_cost`
+- artifact payload: contrato mínimo da Fase 1 combinado com `prompt_version_id`, `policy_version_id`, `retriever_version_id`, `chunking_version` e `chunking_version_id`
+
+Pontos de instrumentação usados:
+
+- prompt efetivamente usado: `app/services/prompt_service.py`
+- policy ativa: `app/policy_guard/service.py`
+- retrieval e embedding ativos: `app/storage/chroma_repository.py`
+- chunking e `top_k` ativos: `app/llmops/active_artifacts.py` e `app/services/chat_service.py`
+
+O caminho mínimo de evidência continua sendo o smoke local em `scripts/smoke_fase1_llmops.py`.
 
 ## Estado atual vs. limite da fase
 
@@ -216,6 +316,16 @@ Se uma versão ainda não chegou a ser usada como referência ativa e falhou ape
 | Tracking experimental | Registrar metadados comparativos, params, metrics e artifacts por tenant |
 | Auditoria operacional | Registrar fatos do atendimento e decisões operacionais, sem artifacts experimentais |
 | Documentação | Registrar convenção, estado atual, critérios de promoção/rollback e checklist da fase |
+
+## Débitos técnicos explícitos
+
+Os pontos abaixo continuam intencionalmente fora do escopo implementado desta fase:
+
+- a semântica de `policy_pre` e `policy_post` ainda permanece codificada em Python; o arquivo textual versionado identifica a versão ativa, mas ainda não dirige a lógica do guardrail;
+- o endpoint público `POST /api/rag/query` mantém seu schema próprio de entrada e não promove `top_k_default` automaticamente quando o cliente envia um valor explícito;
+- a emissão em MLflow continua restrita ao caminho offline/local de smoke e scripts experimentais, não ao runtime transacional;
+- `embedding_version` continua sendo emitido como versão lógica do runtime, ainda sem sidecar versionado próprio;
+- a política de promoção e rollback continua documental e operacional, sem automação no runtime.
 
 ## Status por task da Fase 2
 

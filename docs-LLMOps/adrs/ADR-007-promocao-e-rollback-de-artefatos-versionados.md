@@ -104,6 +104,5 @@ Esta ADR complementa:
 
 ## Referências internas
 
-- `docs-LLMOps/fases/FASE2-ARTEFATOS-VERSIONAVEIS.md`
 - `docs-LLMOps/fases/FASE2-LLMOPS.md`
 - `docs-LLMOps/PLANEJAMENTO-LLMOps.md`

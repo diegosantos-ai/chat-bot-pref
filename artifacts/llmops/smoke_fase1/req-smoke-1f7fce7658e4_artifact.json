@@ -1,7 +1,7 @@
 {
   "phase": "F1",
   "purpose": "smoke_test",
-  "tracking_backend": "sqlite:////media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/smoke_fase1/mlflow.db",
+  "tracking_backend": "sqlite:///artifacts/llmops/smoke_fase1/mlflow.db",
   "boundary": "experimental_tracking",
   "tenant_segregation_rule": "Toda run experimental da Fase 1 deve ser filtrável por tenant_id e correlacionável por request_id.",
   "instrumentation_points": {

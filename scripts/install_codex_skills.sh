@@ -10,6 +10,6 @@ mkdir -p "$target_root"
 for skill_dir in "$skills_root"/chat-pref-*; do
   [ -d "$skill_dir" ] || continue
   skill_name="$(basename "$skill_dir")"
-  ln -sfnT "$skill_dir" "$target_root/$skill_name"
+  ln -sfn "$skill_dir" "$target_root/$skill_name"
   printf 'installed %s -> %s\n' "$target_root/$skill_name" "$skill_dir"
 done

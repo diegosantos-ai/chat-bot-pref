@@ -79,12 +79,13 @@ log/
 artifacts/backups/
 artifacts/logs/
 
-# LLMOps generated artifacts (contêm paths absolutos do ambiente local)
+# MLflow runtime artifacts (gerados localmente - não versionar)
+artifacts/llmops/**/mlruns/
+artifacts/llmops/**/mlartifacts/
+artifacts/llmops/**/mlflow.db
 artifacts/llmops/_tmp_mlflow_probe/
-artifacts/llmops/smoke_fase1/mlruns/
-artifacts/llmops/smoke_fase1/mlartifacts/
-artifacts/llmops/smoke_fase1/smoke_report.json
-artifacts/llmops/smoke_fase1/req-smoke-*_artifact.json
+artifacts/llmops/**/smoke_report.json
+artifacts/llmops/**/req-smoke-*_artifact.json
 
 # OS
 .DS_Store

@@ -1,7 +1,9 @@
 """Testes da execucao offline da Fase 4 com benchmark, avaliacao e tracking."""
 
 import asyncio
+import csv
 from dataclasses import dataclass
+import json
 from pathlib import Path
 from typing import Any
 
@@ -139,12 +141,85 @@ def test_phase4_executor_logs_minimum_tracking_run_in_mlflow(tmp_path) -> None:
     assert run.data.params["selected_cases_count"] == "1"
     assert run.data.metrics["cases_total"] == 1.0
     assert run.data.metrics["cases_evaluated"] == 1.0
+    assert run.data.metrics["faithfulness_cases"] == 1.0
+    assert run.data.metrics["answer_relevance_cases"] == 1.0
     assert "answer_relevance_mean" in run.data.metrics
     assert "faithfulness_mean" in run.data.metrics
 
     artifact_names = {item.path for item in client.list_artifacts(logged_run.run_id)}
     assert logged_run.report_path.name in artifact_names
+    assert logged_run.comparison_snapshot_path.name in artifact_names
+    assert logged_run.comparison_csv_path.name in artifact_names
+    assert logged_run.case_ranking_path.name in artifact_names
     assert logged_run.report_path.is_file()
+    assert logged_run.comparison_snapshot_path.is_file()
+    assert logged_run.comparison_csv_path.is_file()
+    assert logged_run.case_ranking_path.is_file()
+
+
+def test_phase4_executor_generates_comparison_artifacts_with_required_fields(tmp_path) -> None:
+    _bootstrap_demo_knowledge_base(tmp_path)
+    executor = _build_executor(tmp_path)
+
+    _, first_logged_run = asyncio.run(
+        executor.execute_and_track(
+            manifest_path=_manifest_path(),
+            case_ids=("vs-normal-001",),
+        )
+    )
+    _, second_logged_run = asyncio.run(
+        executor.execute_and_track(
+            manifest_path=_manifest_path(),
+            case_ids=("vs-normal-001", "vs-risco-policy-001"),
+        )
+    )
+
+    comparison_snapshot = json.loads(
+        second_logged_run.comparison_snapshot_path.read_text(encoding="utf-8")
+    )
+    case_ranking = json.loads(
+        second_logged_run.case_ranking_path.read_text(encoding="utf-8")
+    )
+
+    assert comparison_snapshot["artifact_type"] == "comparison_snapshot"
+    assert comparison_snapshot["experiment_name"] == "phase4-test-experiment"
+    assert comparison_snapshot["tenant_id"] == "prefeitura-vila-serena"
+    assert comparison_snapshot["runs_compared"] == 2
+    assert "scores_from_offline_heuristic_ragas_are_not_external_semantic_judgments" in comparison_snapshot["methodology_notes"]
+
+    rows_by_run_id = {row["run_id"]: row for row in comparison_snapshot["runs"]}
+    assert first_logged_run.run_id in rows_by_run_id
+    assert second_logged_run.run_id in rows_by_run_id
+
+    first_row = rows_by_run_id[first_logged_run.run_id]
+    second_row = rows_by_run_id[second_logged_run.run_id]
+    for row in (first_row, second_row):
+        assert row["tenant_id"] == "prefeitura-vila-serena"
+        assert row["dataset_version"] == "benchmark_v1"
+        assert row["evaluator_library"] == "ragas"
+        assert row["evaluator_mode"] == "offline_heuristic_ragas"
+        assert row["prompt_version"]
+        assert row["policy_version"]
+        assert row["retriever_version"]
+        assert row["chunking_version"]
+        assert row["vectorstore_fingerprint"]
+
+    assert first_row["faithfulness_cases"] == 1
+    assert second_row["cases_partial"] == 1
+    assert second_row["cases_with_methodology_limitations"] == 2
+
+    with second_logged_run.comparison_csv_path.open(encoding="utf-8", newline="") as csv_file:
+        csv_rows = list(csv.DictReader(csv_file))
+    assert len(csv_rows) == 2
+    assert {"run_id", "tenant_id", "dataset_version", "vectorstore_fingerprint", "cases_partial"} <= set(
+        csv_rows[0].keys()
+    )
+
+    assert case_ranking["artifact_type"] == "case_ranking"
+    assert case_ranking["status_counts"]["evaluated"] == 1
+    assert case_ranking["status_counts"]["partial"] == 1
+    assert case_ranking["best_evaluated_cases"][0]["case_id"] == "vs-normal-001"
+    assert case_ranking["non_evaluated_cases"][0]["case_id"] == "vs-risco-policy-001"
 
 
 @dataclass

@@ -130,7 +130,7 @@ Saída esperada:
 
 - resumo JSON curto no terminal;
 - criação do backend local do `MLflow` em `artifacts/llmops/fase4_rag_evaluation/`;
-- geração de um relatório JSON por run em `artifacts/llmops/fase4_rag_evaluation/run_reports/`.
+- geração de artifacts por run em `artifacts/llmops/fase4_rag_evaluation/run_reports/`.
 
 ### Etapa 4 — Registrar métricas e artifacts
 Persistir os resultados no sistema de tracking adotado, incluindo métricas e artifacts comparativos.
@@ -143,6 +143,20 @@ No estado atual da Fase 4, a run já registra no `MLflow`:
 - `faithfulness_mean`, `answer_relevance_mean`, `expected_context_coverage_mean`, `retrieval_empty_rate`;
 - `cases_total`, `cases_evaluated`, `cases_partial`, `cases_skipped`, `cases_with_methodology_limitations`;
 - contadores de skip por métrica e um relatório JSON consolidado da run.
+
+Artifacts gerados neste estado:
+
+- `*_rag_evaluation_run.json`
+- `*_rag_evaluation_comparison.json`
+- `*_rag_evaluation_comparison.csv`
+- `*_rag_evaluation_case_ranking.json`
+
+Uso esperado de cada artifact:
+
+- `run.json`: leitura completa da run atual;
+- `comparison.json`: comparação rastreável entre runs anteriores do mesmo experimento e tenant;
+- `comparison.csv`: tabela plana para inspeção manual e comparação automatizável;
+- `case_ranking.json`: lista de melhores, piores e não avaliados da run atual, sem análise causal automática.
 
 ### Etapa 5 — Revisar os resultados
 Analisar:
@@ -228,6 +242,7 @@ Limitação metodológica relevante do estado atual:
 
 - `context_precision` e `context_recall` continuam parciais porque o benchmark atual ainda não fornece `reference_answer` textual canônica para toda a baseline;
 - o judge inicial da stack `Ragas` é offline e heurístico, então a leitura deve priorizar comparabilidade entre runs e inspeção dos piores casos, não interpretação absoluta da nota.
+- o artifact comparativo atual explicita contexto e diferenças entre runs, mas ainda não interpreta automaticamente a causa dos piores casos.
 
 ## Saídas possíveis após avaliação
 
@@ -261,4 +276,4 @@ Runbook atualizado com a execução offline mínima da Fase 4.
 Próximo passo:
 - ampliar a baseline executada;
 - destravar `context_precision` e `context_recall` com `reference_answer`;
-- evoluir para comparação controlada entre múltiplas runs.
+- evoluir da comparação estrutural para leitura técnica dos casos críticos.

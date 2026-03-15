@@ -144,6 +144,9 @@ Os casos P1 escolhidos para o tenant demonstrativo foram:
 - horario da Central de Atendimento;
 - documentos basicos para protocolo geral presencial;
 - segunda via do IPTU;
+- solicitacao de alvara para comercio de baixo risco;
+- horario da sala de vacinacao da UBS;
+- solicitacao de coleta de entulho;
 - bloqueio de pedido de CPF de servidor.
 
 Eles foram priorizados porque combinam:
@@ -152,6 +155,22 @@ Eles foram priorizados porque combinam:
 - frequencia plausivel no atendimento municipal;
 - dependencia clara de contexto recuperado ou de guardrail;
 - utilidade alta para detectar regressao funcional.
+
+### Cobertura atual de `atendimento_normal`
+
+Depois desta ampliacao, `atendimento_normal` passou a cobrir, de forma mais representativa:
+
+- informacao institucional de horario e canal principal;
+- documentos necessarios para atendimento presencial;
+- emissao ou segunda via de servico recorrente;
+- etapa inicial de procedimento administrativo;
+- horario e local de servico municipal especifico;
+- solicitacao de servico com regra operacional objetiva.
+
+Casos propositalmente evitados neste bloco:
+
+- `Cadastro Unico`, `nota fiscal avulsa` e `iluminacao publica`, porque ampliariam o volume com padroes ja parcialmente cobertos por documentos, procedimento ou solicitacao de servico;
+- variacoes muito proximas das perguntas ja escolhidas, para nao transformar diversidade aparente em redundancia de benchmark.
 
 ## Tenant demonstrativo usado
 

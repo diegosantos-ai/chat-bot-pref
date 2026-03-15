@@ -40,7 +40,7 @@ def test_phase3_benchmark_dataset_has_required_structure_and_tenant_isolation() 
     assert dataset.manifest.dataset_version == "benchmark_v1"
     assert dataset.manifest.tenant_id == "prefeitura-vila-serena"
     assert dataset.manifest.selection_hypotheses
-    assert len(dataset.cases) == 7
+    assert len(dataset.cases) == 10
     assert len(case_ids) == len(dataset.cases)
     assert scenario_types == {
         BenchmarkScenarioType.ATENDIMENTO_NORMAL,
@@ -53,12 +53,12 @@ def test_phase3_benchmark_dataset_has_required_structure_and_tenant_isolation() 
     assert all(case.expected_answer_reference.summary for case in dataset.cases)
     assert all(case.expected_context_reference.document_hints for case in dataset.cases)
     assert priorities == {
-        BenchmarkPriorityTier.P1: 4,
+        BenchmarkPriorityTier.P1: 7,
         BenchmarkPriorityTier.P2: 2,
         BenchmarkPriorityTier.P3: 1,
     }
     assert coverage_types == {
-        BenchmarkCoverageType.TENANT_DEMONSTRATIVO: 5,
+        BenchmarkCoverageType.TENANT_DEMONSTRATIVO: 8,
         BenchmarkCoverageType.GENERICO_MUNICIPAL: 1,
         BenchmarkCoverageType.PLACEHOLDER: 1,
     }
@@ -111,8 +111,37 @@ def test_phase3_benchmark_manifest_keeps_priority_and_coverage_consistent() -> N
     dataset = load_benchmark_dataset(manifest_path)
     by_scenario = {item.scenario_type: item for item in dataset.manifest.scenario_files}
 
-    assert by_scenario[BenchmarkScenarioType.ATENDIMENTO_NORMAL].cases_count == 3
+    assert by_scenario[BenchmarkScenarioType.ATENDIMENTO_NORMAL].cases_count == 6
     assert by_scenario[BenchmarkScenarioType.ATENDIMENTO_NORMAL].priority_tier == BenchmarkPriorityTier.P1
     assert by_scenario[BenchmarkScenarioType.ATENDIMENTO_NORMAL].coverage_type == BenchmarkCoverageType.TENANT_DEMONSTRATIVO
     assert by_scenario[BenchmarkScenarioType.FORA_DE_ESCOPO].coverage_type == BenchmarkCoverageType.GENERICO_MUNICIPAL
     assert by_scenario[BenchmarkScenarioType.BAIXA_CONFIANCA].coverage_type == BenchmarkCoverageType.PLACEHOLDER
+
+
+def test_phase3_normal_cases_expand_coverage_without_breaking_priority() -> None:
+    manifest_path = (
+        BENCHMARK_DATASETS_DIR
+        / "tenants"
+        / "prefeitura-vila-serena"
+        / "benchmark_v1"
+        / "dataset_manifest.json"
+    )
+    dataset = load_benchmark_dataset(manifest_path)
+    normal_cases = [
+        case
+        for case in dataset.cases
+        if case.scenario_type == BenchmarkScenarioType.ATENDIMENTO_NORMAL
+    ]
+    normal_case_ids = {case.case_id for case in normal_cases}
+
+    assert len(normal_cases) == 6
+    assert normal_case_ids == {
+        "vs-normal-001",
+        "vs-normal-002",
+        "vs-normal-003",
+        "vs-normal-004",
+        "vs-normal-005",
+        "vs-normal-006",
+    }
+    assert all(case.priority_tier == BenchmarkPriorityTier.P1 for case in normal_cases)
+    assert all(case.coverage_type == BenchmarkCoverageType.TENANT_DEMONSTRATIVO for case in normal_cases)

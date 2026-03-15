@@ -11,10 +11,10 @@
     {
       "scenario_type": "atendimento_normal",
       "relative_path": "scenarios/atendimento_normal.jsonl",
-      "cases_count": 3,
+      "cases_count": 6,
       "priority_tier": "p1",
       "coverage_type": "tenant_demonstrativo",
-      "selection_rationale": "Agrupa demandas institucionais centrais, frequentes e diretamente suportadas pela base documental atual do tenant demonstrativo."
+      "selection_rationale": "Agrupa demandas institucionais centrais, frequentes e diretamente suportadas pela base documental atual do tenant demonstrativo, cobrindo horario/local, documentos, procedimento e solicitacao de servico."
     },
     {
       "scenario_type": "pergunta_ambigua",
@@ -49,5 +49,5 @@
       "selection_rationale": "Protege um comportamento critico de guardrail e regressao funcional do atendimento institucional."
     }
   ],
-  "notes": "Selecao inicial de cenarios priorizados para benchmark recorrente do tenant demonstrativo. O dataset mantem cobertura pequena, mas intencional."
+  "notes": "Selecao inicial de cenarios priorizados para benchmark recorrente do tenant demonstrativo. O dataset mantem cobertura pequena, mas intencional, com ampliacao controlada do atendimento normal."
 }

@@ -1,7 +1,7 @@
 {
   "phase": "F1",
   "purpose": "smoke_test",
-  "tracking_backend": "sqlite:////media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/smoke_fase1/mlflow.db",
+  "tracking_backend": "sqlite:///artifacts/llmops/smoke_fase1/mlflow.db",
   "boundary": "experimental_tracking",
   "tenant_segregation_rule": "Toda run experimental da Fase 1 deve ser filtrável por tenant_id e correlacionável por request_id.",
   "instrumentation_points": {
@@ -16,7 +16,7 @@
     ]
   },
   "tenant_id": "tenant-smoke",
-  "request_id": "req-smoke-769271fce8fd",
+  "request_id": "req-smoke-example",
   "prompt_version": "base_v1",
   "policy_version": "policy_v1",
   "retriever_version": "tenant_chroma_hash_v1",
@@ -25,6 +25,6 @@
   "model_provider": "mock",
   "model_name": "mock-compose-v1",
   "top_k": 3,
-  "latency_ms": 40.049,
+  "latency_ms": 0.0,
   "estimated_cost": 0.0
 }

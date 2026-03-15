@@ -79,6 +79,13 @@ log/
 artifacts/backups/
 artifacts/logs/
 
+# LLMOps generated artifacts (contêm paths absolutos do ambiente local)
+artifacts/llmops/_tmp_mlflow_probe/
+artifacts/llmops/smoke_fase1/mlruns/
+artifacts/llmops/smoke_fase1/mlartifacts/
+artifacts/llmops/smoke_fase1/smoke_report.json
+artifacts/llmops/smoke_fase1/req-smoke-*_artifact.json
+
 # OS
 .DS_Store
 Thumbs.db

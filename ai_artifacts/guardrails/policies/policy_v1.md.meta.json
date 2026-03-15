@@ -1,0 +1,10 @@
+{
+  "artifact_type": "policy",
+  "artifact_name": "institutional_policy",
+  "version_label": "policy_v1",
+  "version_id": "policy.institutional_policy.policy_v1.2803a9fb52c4",
+  "content_hash": "6177a328fa7ff92410e621b80806efba1cf859daec83df77e259af6f718a6e54",
+  "status": "candidate",
+  "created_at": "2026-03-15T00:00:00Z",
+  "notes": "Versao inicial da policy textual versionavel para guardrails institucionais."
+}

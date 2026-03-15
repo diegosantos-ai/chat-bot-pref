@@ -1,0 +1,4 @@
+interface:
+  display_name: "Chat Pref QA"
+  short_description: "Validacao e risco de regressao no Chat Pref"
+  default_prompt: "Use $chat-pref-qa-validation para definir e executar a menor validacao confiavel para esta mudanca no Chat Pref."

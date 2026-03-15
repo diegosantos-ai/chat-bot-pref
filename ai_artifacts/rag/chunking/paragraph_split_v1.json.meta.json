@@ -1,0 +1,10 @@
+{
+  "artifact_type": "chunking_config",
+  "artifact_name": "paragraph_split",
+  "version_label": "paragraph_split_v1",
+  "version_id": "chunking_config.paragraph_split.paragraph_split_v1.38126ab04c99",
+  "content_hash": "c994aca229446660a828b69b680f3474e895a9cc1fe27ea236d056de8e492a2e",
+  "status": "candidate",
+  "created_at": "2026-03-15T00:00:00Z",
+  "notes": "Versao inicial da configuracao de chunking por paragrafos duplos."
+}

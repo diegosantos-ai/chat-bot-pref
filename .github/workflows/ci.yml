@@ -40,7 +40,10 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-dev.txt
 
       - name: Lint minimo do runtime
         run: python scripts/lint_runtime.py
@@ -71,7 +74,9 @@ jobs:
           cache: "pip"
 
       - name: Install dependencies
-        run: python -m pip install -r requirements.txt
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
 
       - name: Validate docker compose
         run: |

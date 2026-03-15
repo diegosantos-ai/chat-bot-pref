@@ -4,6 +4,7 @@ from dataclasses import dataclass
 import re
 
 from app.contracts.dto import PolicyDecision, RagQueryResponse
+from app.llmops import ActiveArtifactResolver
 from app.services.tenant_profile_service import TenantProfile
 from app.settings import settings
 
@@ -86,10 +87,13 @@ class PolicyGuardService:
     def __init__(
         self,
         *,
+        artifact_resolver: ActiveArtifactResolver | None = None,
         policy_version: str | None = None,
         min_context_score: float | None = None,
     ) -> None:
-        self.policy_version = (policy_version or settings.POLICY_TEXT_VERSION).strip()
+        self.artifact_resolver = artifact_resolver or ActiveArtifactResolver()
+        resolved_policy_version = policy_version or self.artifact_resolver.resolve_policy_text().version
+        self.policy_version = resolved_policy_version.strip()
         self.min_context_score = (
             min_context_score if min_context_score is not None else settings.LLM_MIN_CONTEXT_SCORE
         )

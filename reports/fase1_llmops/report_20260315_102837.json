@@ -1,0 +1,71 @@
+{
+  "repo_root": ".",
+  "branch": "setup/fundacao-llmops",
+  "summary": {
+    "pass": 30,
+    "warn": 0,
+    "fail": 0
+  },
+  "tasks": [
+    {
+      "task": "CPPX-F1-T1",
+      "status": "OK",
+      "evidence": "Estratégia MLflow aparece na documentação."
+    },
+    {
+      "task": "CPPX-F1-T2",
+      "status": "OK",
+      "evidence": "Segregação experimental por tenant_id/request_id está explícita em contrato e validada no smoke."
+    },
+    {
+      "task": "CPPX-F1-T3",
+      "status": "OK",
+      "evidence": "Separação auditoria operacional x tracking experimental apareceu nos docs."
+    },
+    {
+      "task": "CPPX-F1-T4",
+      "status": "OK",
+      "evidence": "Contrato de run/params/metrics/artifacts aparece nos docs."
+    },
+    {
+      "task": "CPPX-F1-T5",
+      "status": "OK",
+      "evidence": "Prompt, retriever e embeddings possuem versionamento mínimo explícito e importável."
+    },
+    {
+      "task": "CPPX-F1-T6",
+      "status": "OK",
+      "evidence": "Pontos mínimos de instrumentação em app/audit e app/rag estão formalizados e refletem o smoke."
+    },
+    {
+      "task": "CPPX-F1-T7",
+      "status": "OK",
+      "evidence": "Arquitetura alvo tenant-aware aparece documentada."
+    },
+    {
+      "task": "CPPX-F1-T8",
+      "status": "OK",
+      "evidence": "requirements.txt existe e não está vazio."
+    },
+    {
+      "task": "CPPX-F1-T9",
+      "status": "OK",
+      "evidence": "requirements-dev.txt existe e não está vazio."
+    },
+    {
+      "task": "CPPX-F1-T10",
+      "status": "OK",
+      "evidence": "Ambiente base validado no interpretador atual e confirmado pelo smoke oficial."
+    },
+    {
+      "task": "CPPX-F1-T11",
+      "status": "OK",
+      "evidence": "Ambiente dev validado com MLflow e smoke oficial executado no venv."
+    },
+    {
+      "task": "CPPX-F1-T12",
+      "status": "OK",
+      "evidence": "Smoke oficial da Fase 1 executado com sucesso no venv e compatibilidade mínima confirmada."
+    }
+  ]
+}

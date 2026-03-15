@@ -1,0 +1,10 @@
+{
+  "artifact_type": "retrieval_config",
+  "artifact_name": "tenant_chroma_hash",
+  "version_label": "tenant_chroma_hash_v1",
+  "version_id": "retrieval_config.tenant_chroma_hash.tenant_chroma_hash_v1.8eb5b6037b1e",
+  "content_hash": "58590a294d62ca8fa5f755192ee99fd4e58fc1bfaa6111697e4b94bda5e129bf",
+  "status": "candidate",
+  "created_at": "2026-03-15T00:00:00Z",
+  "notes": "Versao inicial da configuracao tenant-aware de retrieval com Chroma."
+}

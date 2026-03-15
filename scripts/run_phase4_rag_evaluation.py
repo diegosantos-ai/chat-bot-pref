@@ -96,6 +96,7 @@ async def run() -> int:
                 "comparison_snapshot_path": str(logged_run.comparison_snapshot_path),
                 "comparison_csv_path": str(logged_run.comparison_csv_path),
                 "case_ranking_path": str(logged_run.case_ranking_path),
+                "baseline_summary_path": str(logged_run.baseline_summary_path),
             },
             ensure_ascii=False,
             indent=2,

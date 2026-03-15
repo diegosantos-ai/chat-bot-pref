@@ -151,10 +151,12 @@ def test_phase4_executor_logs_minimum_tracking_run_in_mlflow(tmp_path) -> None:
     assert logged_run.comparison_snapshot_path.name in artifact_names
     assert logged_run.comparison_csv_path.name in artifact_names
     assert logged_run.case_ranking_path.name in artifact_names
+    assert logged_run.baseline_summary_path.name in artifact_names
     assert logged_run.report_path.is_file()
     assert logged_run.comparison_snapshot_path.is_file()
     assert logged_run.comparison_csv_path.is_file()
     assert logged_run.case_ranking_path.is_file()
+    assert logged_run.baseline_summary_path.is_file()
 
 
 def test_phase4_executor_generates_comparison_artifacts_with_required_fields(tmp_path) -> None:
@@ -179,6 +181,9 @@ def test_phase4_executor_generates_comparison_artifacts_with_required_fields(tmp
     )
     case_ranking = json.loads(
         second_logged_run.case_ranking_path.read_text(encoding="utf-8")
+    )
+    baseline_summary = json.loads(
+        second_logged_run.baseline_summary_path.read_text(encoding="utf-8")
     )
 
     assert comparison_snapshot["artifact_type"] == "comparison_snapshot"
@@ -220,6 +225,14 @@ def test_phase4_executor_generates_comparison_artifacts_with_required_fields(tmp
     assert case_ranking["status_counts"]["partial"] == 1
     assert case_ranking["best_evaluated_cases"][0]["case_id"] == "vs-normal-001"
     assert case_ranking["non_evaluated_cases"][0]["case_id"] == "vs-risco-policy-001"
+
+    assert baseline_summary["artifact_type"] == "baseline_summary"
+    assert baseline_summary["tenant_id"] == "prefeitura-vila-serena"
+    assert baseline_summary["dataset_version"] == "benchmark_v1"
+    assert baseline_summary["full_dataset_run"] is False
+    assert baseline_summary["official_metrics"]["cases_total"] == 2
+    assert baseline_summary["partial_or_blocked_metrics"]["context_precision"] == "blocked_without_reference_answer"
+    assert baseline_summary["official_metric_status"]["answer_relevance"] == "baseline_primary_with_low_interpretability_on_current_stack"
 
 
 @dataclass

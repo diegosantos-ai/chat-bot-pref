@@ -20,7 +20,7 @@ import json
 import os
 import sys
 import time
-from dataclasses import asdict, dataclass, replace
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Iterable
 from uuid import uuid4
@@ -32,10 +32,10 @@ if str(REPO_ROOT) not in sys.path:
 from app.audit import (  # noqa: E402
     EXPERIMENT_TRACKING_BOUNDARY,
     OPERATIONAL_AUDIT_BOUNDARY,
-    ExperimentalRunContract,
     PHASE1_AUDIT_INSTRUMENTATION_POINTS,
     PHASE1_TENANT_SEGREGATION,
 )
+from app.llmops.tracking_integration import build_phase2_tracking_run  # noqa: E402
 from app.rag import PHASE1_RAG_ARTIFACT_VERSIONS, PHASE1_RAG_INSTRUMENTATION_POINTS  # noqa: E402
 from app.settings import settings  # noqa: E402
 
@@ -297,21 +297,16 @@ def run_mlflow_smoke() -> list[CheckResult]:
         experiment_id = experiment.experiment_id
 
     request_id = f"req-smoke-{uuid4().hex[:12]}"
-    base_contract = ExperimentalRunContract(
+    tracking_run = build_phase2_tracking_run(
         tenant_id="tenant-smoke",
         request_id=request_id,
-        prompt_version=settings.PROMPT_BASE_VERSION,
-        policy_version=settings.POLICY_TEXT_VERSION,
-        retriever_version=PHASE1_RAG_ARTIFACT_VERSIONS.retriever_version,
-        embedding_version=PHASE1_RAG_ARTIFACT_VERSIONS.embedding_version,
         dataset_version="smoke.dataset.v1",
         model_provider=settings.LLM_PROVIDER,
         model_name=settings.LLM_MODEL,
-        top_k=settings.LLM_CONTEXT_TOP_K,
         latency_ms=0.0,
         estimated_cost=0.0,
     )
-    PHASE1_TENANT_SEGREGATION.validate(base_contract)
+    PHASE1_TENANT_SEGREGATION.validate(tracking_run.run_contract)
 
     with mlflow.start_run(experiment_id=experiment_id, run_name="fase1_smoke_test") as run:
         start = time.perf_counter()
@@ -319,17 +314,28 @@ def run_mlflow_smoke() -> list[CheckResult]:
             {
                 "phase": "F1",
                 "run_kind": "smoke_test",
-                **base_contract.as_tags(),
+                **tracking_run.as_tags(),
             }
         )
-        mlflow.log_params(base_contract.as_params())
+        mlflow.log_params(tracking_run.as_params())
 
         elapsed_ms = round((time.perf_counter() - start) * 1000, 3)
-        final_contract = replace(base_contract, latency_ms=elapsed_ms)
+        final_tracking_run = build_phase2_tracking_run(
+            tenant_id=tracking_run.run_contract.tenant_id,
+            request_id=tracking_run.run_contract.request_id,
+            dataset_version=tracking_run.run_contract.dataset_version,
+            prompt_version=tracking_run.run_contract.prompt_version,
+            policy_version=tracking_run.run_contract.policy_version,
+            model_provider=tracking_run.run_contract.model_provider,
+            model_name=tracking_run.run_contract.model_name,
+            top_k=tracking_run.run_contract.top_k,
+            latency_ms=elapsed_ms,
+            estimated_cost=tracking_run.run_contract.estimated_cost,
+        )
 
-        mlflow.log_metrics({**final_contract.as_metrics(), "smoke_success": 1.0})
+        mlflow.log_metrics({**final_tracking_run.as_metrics(), "smoke_success": 1.0})
 
-        artifact_file = ARTIFACTS_DIR / f"{final_contract.request_id}_artifact.json"
+        artifact_file = ARTIFACTS_DIR / f"{final_tracking_run.run_contract.request_id}_artifact.json"
         artifact_file.write_text(
             json.dumps(
                 {
@@ -342,7 +348,7 @@ def run_mlflow_smoke() -> list[CheckResult]:
                         "audit": [point.name for point in PHASE1_AUDIT_INSTRUMENTATION_POINTS],
                         "rag": [point.name for point in PHASE1_RAG_INSTRUMENTATION_POINTS],
                     },
-                    **final_contract.as_artifact_payload(),
+                    **final_tracking_run.as_artifact_payload(),
                 },
                 ensure_ascii=False,
                 indent=2,
@@ -382,19 +388,19 @@ def run_mlflow_smoke() -> list[CheckResult]:
         "Tag run_kind não foi registrada corretamente.",
     )
 
-    for key, expected_value in base_contract.as_tags().items():
+    for key, expected_value in tracking_run.as_tags().items():
         ensure(
             fetched_run.data.tags.get(key) == expected_value,
             f"Tag obrigatória '{key}' não foi registrada corretamente.",
         )
 
-    for key, expected_value in base_contract.as_params().items():
+    for key, expected_value in tracking_run.as_params().items():
         ensure(
             fetched_run.data.params.get(key) == expected_value,
             f"Param obrigatório '{key}' não foi registrado corretamente.",
         )
 
-    for key, expected_value in final_contract.as_metrics().items():
+    for key, expected_value in final_tracking_run.as_metrics().items():
         metric_value = fetched_run.data.metrics.get(key)
         ensure(metric_value is not None, f"Métrica obrigatória '{key}' não foi registrada.")
         ensure(
@@ -414,6 +420,11 @@ def run_mlflow_smoke() -> list[CheckResult]:
         CheckResult("mlflow", "PASS", f"Run criada, recuperada e correlacionada: {run_id}"),
         CheckResult("mlflow", "PASS", f"Artifact mínimo registrado via MLflow: {artifact_file.name}"),
         CheckResult("mlflow", "PASS", f"Segregação experimental validada por {PHASE1_TENANT_SEGREGATION.tenant_field}/{PHASE1_TENANT_SEGREGATION.request_field}"),
+        CheckResult(
+            "mlflow",
+            "PASS",
+            "Versões de prompt, policy, retrieval e chunking emitidas no tracking experimental.",
+        ),
     ]
 
 

@@ -183,6 +183,41 @@ O fallback local desta etapa permanece controlado e explícito:
 - `top_k_default` cai para `settings.LLM_CONTEXT_TOP_K` apenas se a chave não existir no JSON ativo;
 - chunking aceita apenas a estratégia atualmente suportada pelo runtime (`double_newline_paragraphs`), falhando de forma explícita para variações ainda não implementadas.
 
+## Integração com tracking experimental
+
+Nesta etapa, a integração entre versionamento e tracking experimental foi mantida fora da auditoria operacional e fora do caminho transacional principal.
+
+O contrato técnico mínimo foi centralizado em:
+
+- `app/llmops/tracking_integration.py`
+
+Esse contrato:
+
+- reutiliza `ExperimentalRunContract` da Fase 1 como base mínima de `runs`, `params`, `metrics` e `artifacts`;
+- resolve as versões ativas via `ActiveArtifactResolver`;
+- preserva `tenant_id` e `request_id` como tags mínimas de correlação;
+- acrescenta ao tracking os metadados comparativos da Fase 2 sem gravá-los na auditoria operacional.
+
+Campos emitidos no tracking local desta etapa:
+
+- tags: `tenant_id`, `request_id`, `prompt_version_id`, `policy_version_id`, `retriever_version_id`, `chunking_version_id`
+- params: `prompt_version`, `policy_version`, `retriever_version`, `embedding_version`, `dataset_version`, `model_provider`, `model_name`, `top_k`, `chunking_version`
+- metrics: `latency_ms`, `estimated_cost`
+- artifact payload: combinação do contrato mínimo da Fase 1 com `prompt_version_id`, `policy_version_id`, `retriever_version_id`, `chunking_version` e `chunking_version_id`
+
+Pontos de instrumentação usados para montar esse payload:
+
+- prompt efetivamente usado: `app/services/prompt_service.py`
+- policy ativa: `app/policy_guard/service.py`
+- retrieval e embedding ativos: `app/storage/chroma_repository.py`
+- chunking e `top_k` ativos: `app/llmops/active_artifacts.py` e `app/services/chat_service.py`
+
+O caminho mínimo de evidência local foi ligado ao smoke de MLflow já existente em:
+
+- `scripts/smoke_fase1_llmops.py`
+
+Esse smoke continua local e offline, mas agora registra também o vínculo entre as versões ativas de artefato e a run experimental.
+
 ## Limite desta entrega
 
 Esta etapa não:
@@ -198,7 +233,9 @@ Os pontos abaixo continuam intencionalmente fora do escopo deste bloco:
 
 - a semântica de `policy_pre` e `policy_post` ainda permanece codificada em Python; o arquivo textual versionado identifica a versão ativa, mas ainda não dirige a lógica do guardrail;
 - o endpoint público `POST /api/rag/query` mantém seu schema próprio de entrada e não promove `top_k_default` automaticamente quando o cliente envia um valor explícito;
-- a integração dessas versões com tracking experimental e convenção de promoção/rollback permanece para as próximas tasks da Fase 2.
+- a emissão em MLflow continua restrita ao caminho offline/local de smoke e scripts experimentais, não ao runtime transacional;
+- `embedding_version` continua sendo emitido como versão lógica do runtime, ainda sem sidecar versionado próprio;
+- convenção de promoção/rollback permanece para as próximas tasks da Fase 2.
 
 ## Próximo passo lógico
 

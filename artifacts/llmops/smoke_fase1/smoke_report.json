@@ -3,7 +3,7 @@
   "repo_root": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref",
   "python_executable": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/.venv/bin/python",
   "summary": {
-    "pass": 33,
+    "pass": 34,
     "fail": 0
   },
   "results": [
@@ -135,12 +135,12 @@
     {
       "name": "contract",
       "status": "PASS",
-      "detail": "tenant_id encontrado em app/ (376 ocorrências)"
+      "detail": "tenant_id encontrado em app/ (379 ocorrências)"
     },
     {
       "name": "contract",
       "status": "PASS",
-      "detail": "request_id encontrado em app/ (149 ocorrências)"
+      "detail": "request_id encontrado em app/ (152 ocorrências)"
     },
     {
       "name": "contract",
@@ -160,17 +160,22 @@
     {
       "name": "mlflow",
       "status": "PASS",
-      "detail": "Run criada, recuperada e correlacionada: 334bee6b69144d62887a499161a85b40"
+      "detail": "Run criada, recuperada e correlacionada: 0b731c95813b4f119f8a1acd4738207b"
     },
     {
       "name": "mlflow",
       "status": "PASS",
-      "detail": "Artifact mínimo registrado via MLflow: req-smoke-6ef819baf9f3_artifact.json"
+      "detail": "Artifact mínimo registrado via MLflow: req-smoke-56301bc09fbf_artifact.json"
     },
     {
       "name": "mlflow",
       "status": "PASS",
       "detail": "Segregação experimental validada por tenant_id/request_id"
+    },
+    {
+      "name": "mlflow",
+      "status": "PASS",
+      "detail": "Versões de prompt, policy, retrieval e chunking emitidas no tracking experimental."
     }
   ]
 }

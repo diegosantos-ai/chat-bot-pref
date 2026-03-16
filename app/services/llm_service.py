@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 from typing import Protocol
 
 import httpx
@@ -72,6 +73,12 @@ class MockLLMProvider:
                 "informacoes carregadas para responder com seguranca. Procure os canais oficiais da prefeitura."
             )
         if reason_code == "LOW_CONFIDENCE_RETRIEVAL":
+            if self._looks_like_greeting_or_under_specified_query(request.question):
+                return (
+                    f"Posso orientar sobre servicos e informacoes institucionais de {profile.client_name}. "
+                    "Descreva o assunto ou servico que voce quer consultar, por exemplo: horario de atendimento, "
+                    "alvara, protocolo, IPTU ou vacinacao."
+                )
             return (
                 f"Nao encontrei contexto institucional suficiente em {profile.client_name} para responder com seguranca. "
                 "Procure os canais oficiais da prefeitura para orientacao confirmada."
@@ -110,6 +117,23 @@ class MockLLMProvider:
             f"Posso oferecer apenas orientacao institucional geral sobre {profile.client_name}. "
             "Se precisar, procure os canais oficiais da prefeitura."
         )
+
+    def _looks_like_greeting_or_under_specified_query(self, question: str) -> bool:
+        normalized = " ".join(question.lower().strip().split())
+        if not normalized:
+            return True
+        if len(re.findall(r"\w+", normalized)) <= 2:
+            return True
+        greeting_patterns = (
+            r"^oi+$",
+            r"^ola+$",
+            r"^ol[aá]$",
+            r"^bom dia$",
+            r"^boa tarde$",
+            r"^boa noite$",
+            r"^tudo bem$",
+        )
+        return any(re.fullmatch(pattern, normalized) for pattern in greeting_patterns)
 
     def _select_sentences(
         self,

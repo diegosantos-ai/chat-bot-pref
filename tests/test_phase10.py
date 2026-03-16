@@ -125,6 +125,49 @@ def test_policy_post_falls_back_on_low_confidence_retrieval(tmp_path) -> None:
     assert rewrite_event["payload"]["prompt_version"] == "fallback_v1"
 
 
+def test_short_greeting_uses_clarifying_low_confidence_message(tmp_path) -> None:
+    rag_service = _build_rag_service(tmp_path)
+    rag_service.create_document(
+        type("Request", (), {
+            "tenant_id": "prefeitura-demo",
+            "title": "Horario Alvara",
+            "content": "O setor de alvará atende das 8h às 17h.",
+            "keywords": ["alvara", "horario"],
+            "intents": ["INFO_REQUEST"],
+        })()
+    )
+    rag_service.ingest(
+        type("Request", (), {"tenant_id": "prefeitura-demo", "reset_collection": True})()
+    )
+
+    original_service = chat_api.chat_service
+    chat_api.chat_service = ChatService(
+        repository=FileChatRepository(base_dir=tmp_path / "runtime"),
+        audit_repository=FileAuditRepository(base_dir=tmp_path / "runtime"),
+        rag_service=rag_service,
+    )
+
+    try:
+        response = client.post(
+            "/api/chat",
+            json={"tenant_id": "prefeitura-demo", "message": "Oi"},
+        )
+    finally:
+        chat_api.chat_service = original_service
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert "Posso orientar sobre servicos e informacoes institucionais" in payload["message"]
+    assert "Descreva o assunto ou servico" in payload["message"]
+
+    events = _load_audit_events(tmp_path, "prefeitura-demo", payload["session_id"])
+    post_event = next(event for event in events if event["event_type"] == "policy_post_evaluated")
+    rewrite_event = next(event for event in events if event["event_type"] == "llm_response_rewritten")
+    assert post_event["policy_decision"]["decision"] == "fallback"
+    assert post_event["policy_decision"]["reason_codes"] == ["LOW_CONFIDENCE_RETRIEVAL"]
+    assert rewrite_event["payload"]["prompt_version"] == "fallback_v1"
+
+
 def test_supported_question_uses_base_prompt_and_allows_policy_post(tmp_path) -> None:
     rag_service = _build_rag_service(tmp_path)
     rag_service.create_document(

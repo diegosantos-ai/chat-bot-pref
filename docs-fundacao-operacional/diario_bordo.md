@@ -22,6 +22,31 @@ Cada registro abaixo tenta responder quatro perguntas:
 
 ## Linha do tempo
 
+### 2026-03-16 - Hotfix operacional do Telegram para mensagens curtas
+
+**Marco**
+
+Um diagnostico remoto via AWS SSM confirmou que o canal Telegram publico estava chegando ao backend correto, com tenant `prefeitura-vila-serena`, webhook HTTPS ativo e base RAG carregada, mas saudações e mensagens curtas como `Oi` estavam caindo em `policy_post=fallback` com `reason_codes=["LOW_CONFIDENCE_RETRIEVAL"]`.
+
+**Por que isso importa**
+
+Na prática, o bot parecia "sem base" mesmo quando a base documental estava saudável. O problema real nao era ingest, tenant nem Chroma remoto, e sim a mensagem de fallback para perguntas subespecificadas, que era pouco explicativa para o canal demonstrativo.
+
+**Validacao principal**
+
+- `GET /api/rag/status` remoto retornando `ready=true`, `documents_count=14` e `chunks_count=28`
+- `getWebhookInfo` do bot apontando para `https://52-205-207-194.sslip.io/api/telegram/webhook`
+- auditoria remota do chat `telegram-7926733286` mostrando `policy_post=fallback` por `LOW_CONFIDENCE_RETRIEVAL`, e nao `NO_KNOWLEDGE_BASE`
+- hotfix no runtime para responder com orientacao de reformulacao em saudações e entradas muito curtas
+- rebuild remoto via SSM e validacao publica reaprovada em `POST /api/chat` para `Oi` e para pergunta institucional concreta
+
+**Evidencias**
+
+- [arquitetura.md](./arquitetura.md)
+- [fase_13_aws_deploy.md](./fase_13_aws_deploy.md)
+- [deploy_aws_instance.sh](../scripts/deploy_aws_instance.sh)
+- [llm_service.py](../app/services/llm_service.py)
+
 ### 2026-03-14 - Telegram ficou publico com HTTPS estavel no ambiente remoto
 
 **Marco**

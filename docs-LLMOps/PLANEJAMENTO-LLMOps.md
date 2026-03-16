@@ -286,9 +286,11 @@ Nenhuma instalação nova deve ocorrer nesta fase. Toda evolução deve ser guia
 Na branch `feat/fase5-retrieval-query-reranking`, este planejamento passa a ter o seguinte recorte fechado:
 
 - `CPPX-F5-T1` documentado em `docs-LLMOps/fases/FASE5-RETRIEVAL-HIBRIDO.md`;
+- `CPPX-F5-T2` implementado com camada lexical complementar real por full scan da collection do tenant;
+- `CPPX-F5-T3` implementado com query expansion heurística opt-in baseada em metadados `keywords` do tenant;
 - baseline atual do retrieval explicitado sem troca de comportamento default;
-- contrato preparatório mínimo adicionado apenas para nome da estratégia ativa, pesos do score baseline e `candidate_pool_multiplier`;
-- `CPPX-F5-T2` a `CPPX-F5-T7` permanecem pendentes e fora deste bloco.
+- tracking e benchmark passam a distinguir a execução por `retrieval_strategy_name` e `query_transform_strategy_name`;
+- `CPPX-F5-T4` a `CPPX-F5-T7` permanecem pendentes e fora deste bloco.
 
 ---
 

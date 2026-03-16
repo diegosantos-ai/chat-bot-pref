@@ -4,12 +4,27 @@
   "collection_strategy": "tenant_collection_name",
   "embedding_version": "hash_embedding_v1",
   "min_score_default": 0.0,
+  "query_transform_params": {
+    "max_added_terms": 4,
+    "source_fields": [
+      "keywords"
+    ]
+  },
+  "query_transform_strategy_name": "no_query_transformation_v1",
   "score_weights": {
     "lexical": 0.75,
     "semantic": 0.25
   },
   "scope": "tenant_aware",
+  "supported_query_transform_strategies": [
+    "no_query_transformation_v1",
+    "tenant_keyword_query_expansion_v1"
+  ],
   "strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
+  "supported_strategies": [
+    "semantic_candidates_with_lexical_rescoring_v1",
+    "semantic_plus_full_collection_lexical_candidates_v1"
+  ],
   "top_k_default": 3,
   "vector_store": "chroma"
 }

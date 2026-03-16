@@ -3,13 +3,18 @@ import math
 import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import chromadb
 from chromadb.api.types import Documents, EmbeddingFunction
 
 from app.llmops import ActiveArtifactResolver
 from app.rag.retrieval_scoring import (
+    BASELINE_RETRIEVAL_STRATEGY_NAME,
+    HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
+    RetrievalScoreWeights,
     build_candidate_pool_size,
+    compute_lexical_overlap_score,
     compute_weighted_retrieval_score,
     tokenize_retrieval_text,
 )
@@ -112,10 +117,7 @@ class TenantChromaRepository:
     def collection_stats(self) -> list[tuple[str, int]]:
         stats: list[tuple[str, int]] = []
         for collection_name in self.list_collection_names():
-            collection = self.client.get_collection(
-                name=collection_name,
-                embedding_function=self.embedding_function,
-            )
+            collection = self.client.get_collection(name=collection_name)
             stats.append((collection_name, collection.count()))
         return stats
 
@@ -152,13 +154,58 @@ class TenantChromaRepository:
         query_text: str,
         limit: int,
         min_score: float,
+        strategy_name: str | None = None,
     ) -> list[RetrievedChunk]:
         collection = self._get_collection_if_exists(tenant_id)
         if collection is None or collection.count() == 0:
             return []
 
+        resolved_strategy_name = self.artifact_resolver.resolve_retrieval_strategy_name(strategy_name)
+        query_tokens = tokenize_retrieval_text(query_text)
+        score_weights = self.artifact_resolver.retrieval_score_weights()
+        if resolved_strategy_name == BASELINE_RETRIEVAL_STRATEGY_NAME:
+            scored_results = self._query_semantic_candidates(
+                collection=collection,
+                query_text=query_text,
+                query_tokens=query_tokens,
+                limit=limit,
+                score_weights=score_weights,
+            )
+        elif resolved_strategy_name == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME:
+            semantic_candidates = self._query_semantic_candidates(
+                collection=collection,
+                query_text=query_text,
+                query_tokens=query_tokens,
+                limit=limit,
+                score_weights=score_weights,
+            )
+            lexical_candidates = self._query_full_collection_lexical_candidates(
+                collection=collection,
+                query_tokens=query_tokens,
+                limit=limit,
+                score_weights=score_weights,
+            )
+            scored_results = self._merge_candidates(semantic_candidates, lexical_candidates)
+        else:
+            raise ValueError(f"strategy_name de retrieval nao suportada: {resolved_strategy_name}")
+
+        scored_results = [item for item in scored_results if item.score >= min_score]
+        scored_results.sort(key=lambda item: (-item.score, item.title, item.chunk_id))
+        return scored_results[:limit]
+
+    def _query_semantic_candidates(
+        self,
+        *,
+        collection: Any,
+        query_text: str,
+        query_tokens: list[str],
+        limit: int,
+        score_weights: RetrievalScoreWeights,
+    ) -> list[RetrievedChunk]:
+        """Recupera candidatos do Chroma usando o baseline semantico atual."""
+
         result = collection.query(
-            query_texts=[query_text],
+            query_embeddings=[self.embedding_function([query_text])[0]],
             n_results=build_candidate_pool_size(
                 top_k=limit,
                 multiplier=self.artifact_resolver.retrieval_candidate_pool_multiplier(),
@@ -169,8 +216,6 @@ class TenantChromaRepository:
         metadatas = result.get("metadatas", [[]])[0]
         distances = result.get("distances", [[]])[0]
 
-        query_tokens = tokenize_retrieval_text(query_text)
-        score_weights = self.artifact_resolver.retrieval_score_weights()
         scored_results: list[RetrievedChunk] = []
         for chunk_id, text, metadata, distance in zip(ids, documents, metadatas, distances):
             score = compute_weighted_retrieval_score(
@@ -179,23 +224,96 @@ class TenantChromaRepository:
                 distance=distance,
                 weights=score_weights,
             )
-            if score < min_score:
-                continue
             scored_results.append(
-                RetrievedChunk(
+                self._build_retrieved_chunk(
                     chunk_id=chunk_id,
-                    document_id=str((metadata or {}).get("document_id", "")),
-                    title=str((metadata or {}).get("title", "")),
-                    section=str((metadata or {}).get("section", "")),
-                    source=str((metadata or {}).get("source", "")),
                     text=text,
-                    tags=self._split_tags(str((metadata or {}).get("tags", ""))),
+                    metadata=metadata,
+                    score=score,
+                )
+            )
+        return scored_results
+
+    def _query_full_collection_lexical_candidates(
+        self,
+        *,
+        collection: Any,
+        query_tokens: list[str],
+        limit: int,
+        score_weights: RetrievalScoreWeights,
+    ) -> list[RetrievedChunk]:
+        """Executa busca lexical simples sobre todos os chunks persistidos do tenant."""
+
+        if not query_tokens:
+            return []
+
+        result = collection.get(include=["documents", "metadatas"])
+        candidate_limit = build_candidate_pool_size(
+            top_k=limit,
+            multiplier=self.artifact_resolver.retrieval_candidate_pool_multiplier(),
+        )
+        ids = result.get("ids", [])
+        documents = result.get("documents", [])
+        metadatas = result.get("metadatas", [])
+
+        scored_results: list[RetrievedChunk] = []
+        for chunk_id, text, metadata in zip(ids, documents, metadatas):
+            lexical_overlap = compute_lexical_overlap_score(query_tokens=query_tokens, text=str(text))
+            if lexical_overlap <= 0.0:
+                continue
+            score = compute_weighted_retrieval_score(
+                query_tokens=query_tokens,
+                text=str(text),
+                distance=None,
+                weights=score_weights,
+            )
+            scored_results.append(
+                self._build_retrieved_chunk(
+                    chunk_id=chunk_id,
+                    text=str(text),
+                    metadata=metadata,
                     score=score,
                 )
             )
 
         scored_results.sort(key=lambda item: (-item.score, item.title, item.chunk_id))
-        return scored_results[:limit]
+        return scored_results[:candidate_limit]
+
+    def _merge_candidates(
+        self,
+        *candidate_groups: list[RetrievedChunk],
+    ) -> list[RetrievedChunk]:
+        """Combina candidatos de multiplas fontes preservando o melhor score por chunk."""
+
+        merged_candidates: dict[str, RetrievedChunk] = {}
+        for candidate_group in candidate_groups:
+            for candidate in candidate_group:
+                current = merged_candidates.get(candidate.chunk_id)
+                if current is None or candidate.score > current.score:
+                    merged_candidates[candidate.chunk_id] = candidate
+        return list(merged_candidates.values())
+
+    def _build_retrieved_chunk(
+        self,
+        *,
+        chunk_id: str,
+        text: str,
+        metadata: dict[str, Any] | None,
+        score: float,
+    ) -> RetrievedChunk:
+        """Normaliza um chunk recuperado em formato estável do repositório."""
+
+        payload = metadata or {}
+        return RetrievedChunk(
+            chunk_id=str(chunk_id),
+            document_id=str(payload.get("document_id", "")),
+            title=str(payload.get("title", "")),
+            section=str(payload.get("section", "")),
+            source=str(payload.get("source", "")),
+            text=str(text),
+            tags=self._split_tags(str(payload.get("tags", ""))),
+            score=score,
+        )
 
     def reset_tenant_collection(self, tenant_id: str) -> list[str]:
         removed_collections: list[str] = []
@@ -226,10 +344,7 @@ class TenantChromaRepository:
         collection_name = self.collection_name(tenant_id)
         if collection_name not in self.list_collection_names():
             return None
-        return self.client.get_collection(
-            name=collection_name,
-            embedding_function=self.embedding_function,
-        )
+        return self.client.get_collection(name=collection_name)
 
     def _get_or_create_collection(self, tenant_id: str):
         return self.client.get_or_create_collection(

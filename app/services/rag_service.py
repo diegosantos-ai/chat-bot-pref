@@ -13,12 +13,14 @@ from app.contracts.dto import (
     RagQueryParamsUsed,
     RagQueryRequest,
     RagQueryResponse,
+    RagQueryTransformationUsed,
     RagResetRequest,
     RagResetResponse,
     RagRetrievedChunk,
     RagStatusResponse,
 )
 from app.llmops import ActiveArtifactResolver
+from app.rag.query_transformation import QueryTransformationResult, QueryTransformationService
 from app.storage.chroma_repository import IngestChunk
 from app.storage.chroma_repository import TenantChromaRepository
 from app.storage.document_repository import FileDocumentRepository
@@ -42,6 +44,7 @@ class RagService:
         self.chroma_repository = chroma_repository or TenantChromaRepository(
             artifact_resolver=self.artifact_resolver
         )
+        self.query_transformation_service = QueryTransformationService()
 
     def list_documents(self, tenant_id: str) -> RagDocumentListResponse:
         documents = self.document_repository.list_documents(tenant_id)
@@ -175,11 +178,22 @@ class RagService:
     def query(self, request: RagQueryRequest) -> RagQueryResponse:
         tenant_id = request.tenant_id or ""
         status = self.status(tenant_id)
+        strategy_name = self.artifact_resolver.resolve_retrieval_strategy_name(request.strategy_name)
+        query_transform_strategy_name = self.artifact_resolver.resolve_query_transform_strategy_name(
+            request.query_transform_strategy_name
+        )
+        query_transformation = self.query_transformation_service.transform_query(
+            query_text=request.query,
+            documents=self.document_repository.list_documents(tenant_id),
+            strategy_name=query_transform_strategy_name,
+            config=self.artifact_resolver.query_transformation_config(),
+        )
         chunks = self.chroma_repository.query_chunks(
             tenant_id=tenant_id,
-            query_text=request.query,
+            query_text=query_transformation.retrieval_query,
             limit=request.top_k,
             min_score=request.min_score,
+            strategy_name=strategy_name,
         )
         if not status.ready or not chunks:
             message = status.message if not status.ready else (
@@ -199,7 +213,8 @@ class RagService:
                     top_k=request.top_k,
                     boost_enabled=request.boost_enabled,
                     collection=self.chroma_repository.collection_name(tenant_id),
-                    strategy_name=self.artifact_resolver.retrieval_strategy_name(),
+                    strategy_name=strategy_name,
+                    query_transformation=self._to_query_transformation_used(query_transformation),
                 ),
             )
 
@@ -228,8 +243,25 @@ class RagService:
                 top_k=request.top_k,
                 boost_enabled=request.boost_enabled,
                 collection=self.chroma_repository.collection_name(tenant_id),
-                strategy_name=self.artifact_resolver.retrieval_strategy_name(),
+                strategy_name=strategy_name,
+                query_transformation=self._to_query_transformation_used(query_transformation),
             ),
+        )
+
+    def _to_query_transformation_used(
+        self,
+        query_transformation: QueryTransformationResult,
+    ) -> RagQueryTransformationUsed:
+        """Converte o resultado interno da transformacao em payload tecnico do contrato."""
+
+        return RagQueryTransformationUsed(
+            strategy_name=query_transformation.strategy_name,
+            applied=query_transformation.applied,
+            original_query=query_transformation.original_query,
+            retrieval_query=query_transformation.retrieval_query,
+            added_terms=list(query_transformation.added_terms),
+            source_fields=list(query_transformation.source_fields),
+            max_added_terms=query_transformation.max_added_terms,
         )
 
     def _build_chunks(self, documents: list[RagDocumentRecord]) -> list[IngestChunk]:

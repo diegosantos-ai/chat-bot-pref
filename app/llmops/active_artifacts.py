@@ -10,6 +10,11 @@ from typing import Any
 from app.llmops.artifact_catalog import AI_ARTIFACTS_DIR, PHASE2_ARTIFACT_CATALOG, Phase2ArtifactCatalog
 from app.llmops.artifact_catalog import VersionedArtifactDescriptor
 from app.rag.retrieval_scoring import RetrievalScoreWeights
+from app.rag.query_transformation import (
+    NO_QUERY_TRANSFORM_STRATEGY_NAME,
+    QueryTransformationConfig,
+    SUPPORTED_QUERY_TRANSFORM_SOURCE_FIELDS,
+)
 from app.llmops.versioning import ArtifactVersionMetadata, build_content_hash, load_artifact_metadata
 from app.settings import settings
 
@@ -120,6 +125,39 @@ class ActiveArtifactResolver:
             raise ValueError("strategy_name do retrieval nao pode ser vazio.")
         return raw_value
 
+    def retrieval_supported_strategy_names(self) -> tuple[str, ...]:
+        """Retorna as estrategias de retrieval declaradas pelo artefato ativo."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_values = payload.get("supported_strategies")
+        active_strategy = self.retrieval_strategy_name()
+        if raw_values in (None, []):
+            return (active_strategy,)
+        if not isinstance(raw_values, list):
+            raise ValueError("supported_strategies do retrieval deve ser uma lista JSON.")
+
+        normalized_values: list[str] = []
+        for item in raw_values:
+            normalized_item = str(item).strip()
+            if normalized_item and normalized_item not in normalized_values:
+                normalized_values.append(normalized_item)
+        if not normalized_values:
+            raise ValueError("supported_strategies do retrieval nao pode ficar vazia.")
+        if active_strategy not in normalized_values:
+            raise ValueError("A strategy_name ativa precisa constar em supported_strategies.")
+        return tuple(normalized_values)
+
+    def resolve_retrieval_strategy_name(self, strategy_name: str | None = None) -> str:
+        """Resolve a strategy_name efetivamente usada na execucao."""
+
+        desired_strategy = str(strategy_name or self.retrieval_strategy_name()).strip()
+        if not desired_strategy:
+            raise ValueError("strategy_name do retrieval nao pode ser vazia.")
+        supported_strategies = self.retrieval_supported_strategy_names()
+        if desired_strategy not in supported_strategies:
+            raise ValueError(f"strategy_name de retrieval nao suportada: {desired_strategy}")
+        return desired_strategy
+
     def retrieval_candidate_pool_multiplier(self) -> int:
         """Retorna o multiplicador do pool inicial de candidatos do retrieval."""
 
@@ -141,6 +179,84 @@ class ActiveArtifactResolver:
         lexical = float(raw_weights.get("lexical", 0.75))
         semantic = float(raw_weights.get("semantic", 0.25))
         return RetrievalScoreWeights(lexical=lexical, semantic=semantic)
+
+    def query_transform_strategy_name(self) -> str:
+        """Retorna o nome tecnico da estrategia ativa de query transformation."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_value = str(payload.get("query_transform_strategy_name", NO_QUERY_TRANSFORM_STRATEGY_NAME)).strip()
+        if not raw_value:
+            raise ValueError("query_transform_strategy_name nao pode ser vazio.")
+        return raw_value
+
+    def query_transform_supported_strategy_names(self) -> tuple[str, ...]:
+        """Retorna as estrategias de query transformation declaradas no artefato ativo."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_values = payload.get("supported_query_transform_strategies")
+        active_strategy = self.query_transform_strategy_name()
+        if raw_values in (None, []):
+            return (active_strategy,)
+        if not isinstance(raw_values, list):
+            raise ValueError("supported_query_transform_strategies deve ser uma lista JSON.")
+
+        normalized_values: list[str] = []
+        for item in raw_values:
+            normalized_item = str(item).strip()
+            if normalized_item and normalized_item not in normalized_values:
+                normalized_values.append(normalized_item)
+        if not normalized_values:
+            raise ValueError("supported_query_transform_strategies nao pode ficar vazia.")
+        if active_strategy not in normalized_values:
+            raise ValueError(
+                "A query_transform_strategy_name ativa precisa constar em supported_query_transform_strategies."
+            )
+        return tuple(normalized_values)
+
+    def resolve_query_transform_strategy_name(self, strategy_name: str | None = None) -> str:
+        """Resolve a estrategia de query transformation usada na execucao."""
+
+        desired_strategy = str(strategy_name or self.query_transform_strategy_name()).strip()
+        if not desired_strategy:
+            raise ValueError("query_transform_strategy_name nao pode ser vazia.")
+        supported_strategies = self.query_transform_supported_strategy_names()
+        if desired_strategy not in supported_strategies:
+            raise ValueError(
+                f"strategy_name de query transformation nao suportada: {desired_strategy}"
+            )
+        return desired_strategy
+
+    def query_transformation_config(self) -> QueryTransformationConfig:
+        """Retorna os parametros ativos da etapa de query transformation."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_params = payload.get("query_transform_params", {})
+        if raw_params is None:
+            raw_params = {}
+        if not isinstance(raw_params, dict):
+            raise ValueError("query_transform_params deve ser um objeto JSON.")
+
+        max_added_terms = int(raw_params.get("max_added_terms", 4))
+        raw_source_fields = raw_params.get("source_fields", ["keywords"])
+        if not isinstance(raw_source_fields, list):
+            raise ValueError("query_transform_params.source_fields deve ser uma lista JSON.")
+
+        normalized_source_fields: list[str] = []
+        for item in raw_source_fields:
+            normalized_item = str(item).strip()
+            if not normalized_item:
+                continue
+            if normalized_item not in SUPPORTED_QUERY_TRANSFORM_SOURCE_FIELDS:
+                raise ValueError(
+                    f"source_field de query transformation nao suportado: {normalized_item}"
+                )
+            if normalized_item not in normalized_source_fields:
+                normalized_source_fields.append(normalized_item)
+
+        return QueryTransformationConfig(
+            max_added_terms=max_added_terms,
+            source_fields=tuple(normalized_source_fields or ("keywords",)),
+        )
 
     def chunk_split_strategy(self) -> str:
         """Retorna a estratégia ativa de fracionamento textual."""

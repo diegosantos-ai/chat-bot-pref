@@ -93,6 +93,8 @@ def build_phase2_tracking_run(
     dataset_version: str,
     prompt_version: str | None = None,
     policy_version: str | None = None,
+    retrieval_strategy_name: str | None = None,
+    query_transform_strategy_name: str | None = None,
     model_provider: str | None = None,
     model_name: str | None = None,
     top_k: int | None = None,
@@ -116,6 +118,10 @@ def build_phase2_tracking_run(
         prompt_version=prompt_artifact.version,
         policy_version=policy_artifact.version,
         retriever_version=repository.retriever_version(),
+        retrieval_strategy_name=resolver.resolve_retrieval_strategy_name(retrieval_strategy_name),
+        query_transform_strategy_name=resolver.resolve_query_transform_strategy_name(
+            query_transform_strategy_name
+        ),
         embedding_version=repository.embedding_version(),
         dataset_version=dataset_version,
         model_provider=(model_provider or settings.LLM_PROVIDER).strip(),

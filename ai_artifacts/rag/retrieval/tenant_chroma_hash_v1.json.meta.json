@@ -2,9 +2,9 @@
   "artifact_type": "retrieval_config",
   "artifact_name": "tenant_chroma_hash",
   "version_label": "tenant_chroma_hash_v1",
-  "version_id": "retrieval_config.tenant_chroma_hash.tenant_chroma_hash_v1.c20dfdd74f3f",
-  "content_hash": "33724cb9fd7a06e8736bdd2782f5443f2ce2349114553f1edc0c4383d5bda50d",
+  "version_id": "retrieval_config.tenant_chroma_hash.tenant_chroma_hash_v1.366b06896be3",
+  "content_hash": "274086144e8c7d22346dd769a6e76edf436ea849d16de9b2fcbfd72fca776788",
   "status": "candidate",
   "created_at": "2026-03-15T00:00:00Z",
-  "notes": "Versao inicial da configuracao tenant-aware de retrieval com baseline explicito de candidate pool e score combinado."
+  "notes": "Configuracao tenant-aware de retrieval com baseline explicito, variante lexical complementar opt-in e query expansion heuristica controlada."
 }

@@ -55,6 +55,8 @@ class ExperimentalRunContract:
     prompt_version: str
     policy_version: str
     retriever_version: str
+    retrieval_strategy_name: str
+    query_transform_strategy_name: str
     embedding_version: str
     dataset_version: str
     model_provider: str
@@ -72,6 +74,8 @@ class ExperimentalRunContract:
             "prompt_version": self.prompt_version,
             "policy_version": self.policy_version,
             "retriever_version": self.retriever_version,
+            "retrieval_strategy_name": self.retrieval_strategy_name,
+            "query_transform_strategy_name": self.query_transform_strategy_name,
             "embedding_version": self.embedding_version,
             "dataset_version": self.dataset_version,
             "model_provider": self.model_provider,
@@ -102,6 +106,8 @@ class ExperimentalRunContract:
             "prompt_version": self.prompt_version,
             "policy_version": self.policy_version,
             "retriever_version": self.retriever_version,
+            "retrieval_strategy_name": self.retrieval_strategy_name,
+            "query_transform_strategy_name": self.query_transform_strategy_name,
             "embedding_version": self.embedding_version,
             "dataset_version": self.dataset_version,
             "model_provider": self.model_provider,
@@ -126,6 +132,8 @@ class ExperimentalRunContract:
             "prompt_version": self.prompt_version,
             "policy_version": self.policy_version,
             "retriever_version": self.retriever_version,
+            "retrieval_strategy_name": self.retrieval_strategy_name,
+            "query_transform_strategy_name": self.query_transform_strategy_name,
             "embedding_version": self.embedding_version,
             "dataset_version": self.dataset_version,
             "model_provider": self.model_provider,

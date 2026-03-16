@@ -330,10 +330,12 @@ class RagQueryRequest(BaseModel):
     min_score: float = Field(default=0.0, ge=0.0, le=1.0)
     top_k: int = Field(default=5, ge=1, le=20)
     boost_enabled: bool = False
+    strategy_name: Optional[str] = None
+    query_transform_strategy_name: Optional[str] = None
 
-    @field_validator("tenant_id", mode="before")
+    @field_validator("tenant_id", "strategy_name", "query_transform_strategy_name", mode="before")
     @classmethod
-    def normalize_tenant_id(cls, value: Optional[str]) -> Optional[str]:
+    def normalize_optional_identifiers(cls, value: Optional[str]) -> Optional[str]:
         return _normalize_optional_identifier(value)
 
     @field_validator("query", mode="before")
@@ -352,12 +354,23 @@ class RagRetrievedChunk(BaseModel):
     tags: list[str]
 
 
+class RagQueryTransformationUsed(BaseModel):
+    strategy_name: str
+    applied: bool
+    original_query: str
+    retrieval_query: str
+    added_terms: list[str] = Field(default_factory=list)
+    source_fields: list[str] = Field(default_factory=list)
+    max_added_terms: int
+
+
 class RagQueryParamsUsed(BaseModel):
     min_score: float
     top_k: int
     boost_enabled: bool
     collection: str
     strategy_name: str
+    query_transformation: RagQueryTransformationUsed
 
 
 class RagQueryResponse(BaseModel):

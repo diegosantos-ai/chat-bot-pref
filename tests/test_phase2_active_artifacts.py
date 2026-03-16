@@ -4,6 +4,14 @@ from pathlib import Path
 from app.contracts.dto import RagDocumentRecord
 from app.llmops import ActiveArtifactResolver, PHASE2_ARTIFACT_CATALOG, build_content_hash
 from app.llmops import build_version_id
+from app.rag.query_transformation import (
+    NO_QUERY_TRANSFORM_STRATEGY_NAME,
+    TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
+)
+from app.rag.retrieval_scoring import (
+    BASELINE_RETRIEVAL_STRATEGY_NAME,
+    HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
+)
 from app.services.prompt_service import PromptService
 from app.services.rag_service import RagService
 from app.settings import settings
@@ -59,10 +67,29 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
     assert retrieval.version == settings.RAG_RETRIEVER_VERSION
     assert retrieval.payload["top_k_default"] == settings.LLM_CONTEXT_TOP_K
     assert retrieval.payload["embedding_version"] == settings.RAG_EMBEDDING_VERSION
-    assert resolver.retrieval_strategy_name() == "semantic_candidates_with_lexical_rescoring_v1"
+    assert resolver.retrieval_strategy_name() == BASELINE_RETRIEVAL_STRATEGY_NAME
+    assert resolver.retrieval_supported_strategy_names() == (
+        BASELINE_RETRIEVAL_STRATEGY_NAME,
+        HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
+    )
+    assert resolver.query_transform_strategy_name() == NO_QUERY_TRANSFORM_STRATEGY_NAME
+    assert resolver.query_transform_supported_strategy_names() == (
+        NO_QUERY_TRANSFORM_STRATEGY_NAME,
+        TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
+    )
+    assert (
+        resolver.resolve_retrieval_strategy_name(HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME)
+        == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
+    )
+    assert (
+        resolver.resolve_query_transform_strategy_name(TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME)
+        == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
+    )
     assert resolver.retrieval_candidate_pool_multiplier() == 3
     assert resolver.retrieval_score_weights().lexical == 0.75
     assert resolver.retrieval_score_weights().semantic == 0.25
+    assert resolver.query_transformation_config().max_added_terms == 4
+    assert resolver.query_transformation_config().source_fields == ("keywords",)
     assert chunking.version == PHASE2_ARTIFACT_CATALOG.chunking_config.version
     assert chunking.payload["split_strategy"] == "double_newline_paragraphs"
 
@@ -93,8 +120,17 @@ def test_retrieval_top_k_default_falls_back_to_settings_when_config_key_is_missi
                 "collection_strategy": "tenant_collection_name",
                 "embedding_version": settings.RAG_EMBEDDING_VERSION,
                 "min_score_default": 0.0,
+                "query_transform_strategy_name": NO_QUERY_TRANSFORM_STRATEGY_NAME,
+                "supported_query_transform_strategies": [
+                    NO_QUERY_TRANSFORM_STRATEGY_NAME,
+                    TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
+                ],
                 "scope": "tenant_aware",
-                "strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
+                "strategy_name": BASELINE_RETRIEVAL_STRATEGY_NAME,
+                "supported_strategies": [
+                    BASELINE_RETRIEVAL_STRATEGY_NAME,
+                    HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
+                ],
                 "vector_store": "chroma",
             },
             ensure_ascii=False,
@@ -113,7 +149,8 @@ def test_retrieval_top_k_default_falls_back_to_settings_when_config_key_is_missi
 
     assert resolver.retrieval_top_k_default() == settings.LLM_CONTEXT_TOP_K
     assert resolver.retrieval_candidate_pool_multiplier() == 3
-    assert resolver.retrieval_strategy_name() == "semantic_candidates_with_lexical_rescoring_v1"
+    assert resolver.retrieval_strategy_name() == BASELINE_RETRIEVAL_STRATEGY_NAME
+    assert resolver.query_transform_strategy_name() == NO_QUERY_TRANSFORM_STRATEGY_NAME
 
 
 def test_rag_runtime_uses_active_chunking_and_retriever_versions(tmp_path) -> None:

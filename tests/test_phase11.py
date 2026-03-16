@@ -55,6 +55,14 @@ def test_metrics_endpoint_exposes_phase11_series(tmp_path, monkeypatch) -> None:
     assert "chatpref_retrieval_total" in payload
     assert "chatpref_llm_compositions_total" in payload
     assert "chatpref_llm_compose_latency_seconds" in payload
+    assert "chatpref_pipeline_stage_latency_seconds" in payload
+    assert 'tenant_id="prefeitura-demo"' in payload
+    assert 'stage_name="policy_pre"' in payload
+    assert 'stage_name="query_expansion"' in payload
+    assert 'stage_name="retrieval"' in payload
+    assert 'stage_name="composer"' in payload
+    assert 'stage_name="policy_post"' in payload
+    assert 'stage_name="response_final"' in payload
 
 
 def test_structured_logs_include_request_id_and_event_type(tmp_path) -> None:

@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from time import perf_counter
+
 from prometheus_client import CONTENT_TYPE_LATEST, CollectorRegistry, Counter, Histogram, generate_latest
+
+from app.observability.phase6_contracts import PipelineStageName
 
 
 REGISTRY = CollectorRegistry()
@@ -37,6 +43,13 @@ LLM_COMPOSE_LATENCY_SECONDS = Histogram(
     "chatpref_llm_compose_latency_seconds",
     "Latencia da composicao ou fallback do adaptador LLM.",
     labelnames=("provider", "mode", "channel"),
+    registry=REGISTRY,
+)
+
+PIPELINE_STAGE_LATENCY_SECONDS = Histogram(
+    "chatpref_pipeline_stage_latency_seconds",
+    "Latencia por estagio do pipeline transacional por tenant.",
+    labelnames=("tenant_id", "stage_name", "channel", "status"),
     registry=REGISTRY,
 )
 
@@ -80,6 +93,61 @@ def record_llm_composition(
     }
     LLM_COMPOSITIONS_TOTAL.labels(**labels).inc()
     LLM_COMPOSE_LATENCY_SECONDS.labels(**labels).observe(max(latency_seconds, 0.0))
+
+
+def record_pipeline_stage_latency(
+    *,
+    tenant_id: str,
+    stage_name: str | PipelineStageName,
+    channel: str,
+    status: str,
+    latency_seconds: float,
+) -> None:
+    """Registra a latencia de um estagio do pipeline com labels de baixa cardinalidade."""
+
+    resolved_stage_name = stage_name.value if isinstance(stage_name, PipelineStageName) else stage_name
+    PIPELINE_STAGE_LATENCY_SECONDS.labels(
+        tenant_id=tenant_id or "unknown",
+        stage_name=resolved_stage_name or "unknown",
+        channel=channel or "unknown",
+        status=status or "unknown",
+    ).observe(max(latency_seconds, 0.0))
+
+
+@contextmanager
+def track_pipeline_stage_latency(
+    *,
+    tenant_id: str,
+    stage_name: str | PipelineStageName,
+    channel: str,
+    default_status: str = "ok",
+    error_status: str = "error",
+) -> Iterator[Callable[[str], None]]:
+    """Mede latencia por estagio e permite ajustar o status final do ponto instrumentado."""
+
+    started_at = perf_counter()
+    status = default_status
+
+    def set_status(next_status: str) -> None:
+        nonlocal status
+        normalized = str(next_status).strip()
+        if normalized:
+            status = normalized
+
+    try:
+        yield set_status
+    except Exception:
+        status = error_status
+        raise
+    finally:
+        latency_seconds = perf_counter() - started_at
+        record_pipeline_stage_latency(
+            tenant_id=tenant_id,
+            stage_name=stage_name,
+            channel=channel,
+            status=status,
+            latency_seconds=latency_seconds,
+        )
 
 
 def render_metrics() -> tuple[bytes, str]:

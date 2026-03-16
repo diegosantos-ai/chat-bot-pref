@@ -13,6 +13,7 @@ from app.contracts.dto import (
     RagQueryParamsUsed,
     RagQueryRequest,
     RagQueryResponse,
+    RagQueryTransformationUsed,
 )
 from app.llmops import ActiveArtifactResolver
 from app.observability.context import update_correlation_context
@@ -487,6 +488,7 @@ class ChatService:
         )
 
     def _build_empty_rag_response(self, tenant_id: str, query: str) -> RagQueryResponse:
+        query_transformation_config = self.artifact_resolver.query_transformation_config()
         return RagQueryResponse(
             tenant_id=tenant_id,
             query=query,
@@ -501,6 +503,15 @@ class ChatService:
                 boost_enabled=False,
                 collection=self.rag_service.chroma_repository.collection_name(tenant_id),
                 strategy_name=self.artifact_resolver.retrieval_strategy_name(),
+                query_transformation=RagQueryTransformationUsed(
+                    strategy_name=self.artifact_resolver.query_transform_strategy_name(),
+                    applied=False,
+                    original_query=query,
+                    retrieval_query=query,
+                    added_terms=[],
+                    source_fields=list(query_transformation_config.source_fields),
+                    max_added_terms=query_transformation_config.max_added_terms,
+                ),
             ),
         )
 

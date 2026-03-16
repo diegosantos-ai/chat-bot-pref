@@ -2,9 +2,11 @@
 
 ## Objetivo deste documento
 
-Registrar o fechamento estrutural do bloco:
+Registrar o fechamento estrutural dos blocos:
 
 - `CPPX-F5-T1 — Definir arquitetura alvo de retrieval híbrido`
+- `CPPX-F5-T2 — Implementar camada lexical complementar`
+- `CPPX-F5-T3 — Implementar query rewriting ou expansion controlado`
 
 Este documento descreve:
 
@@ -16,8 +18,6 @@ Este documento descreve:
 
 Este documento nao declara como implementado:
 
-- retrieval híbrido completo em runtime;
-- query rewriting ativo no request path;
 - reranking ativo no runtime ou no benchmark;
 - promoção de nova estratégia como default.
 
@@ -26,8 +26,11 @@ Este documento nao declara como implementado:
 - ciclo atual: Fase 1 — LLMOps, avaliação e governança
 - fase ativa: Fase 5 — Retrieval híbrido, query rewriting e reranking
 - branch de trabalho: `feat/fase5-retrieval-query-reranking`
-- task coberta agora: `CPPX-F5-T1`
-- critério de aceite do bloco: arquitetura-alvo pequena, incremental, tenant-aware e comparável por benchmark/tracking
+- tasks cobertas agora:
+  - `CPPX-F5-T1`
+  - `CPPX-F5-T2`
+  - `CPPX-F5-T3`
+- critério de aceite do bloco: arquitetura-alvo pequena, incremental, tenant-aware, com variante lexical real, query expansion opt-in e comparabilidade por benchmark/tracking
 - validação mínima deste bloco:
   - leitura cruzada entre `ARQUITETURA-LLMOps.md`, `PLANEJAMENTO-LLMOps.md` e o código do retrieval;
   - checagem de contratos do runtime e do executor offline;
@@ -60,10 +63,11 @@ O executor offline de Fase 4 em `app/llmops/rag_evaluation_runner.py`:
 - reproduz o retrieval por tenant fora do endpoint HTTP;
 - usa `build_phase2_tracking_run(...)` para registrar `tenant_id`, `dataset_version`, `retriever_version`, `retriever_version_id`, `top_k` e demais versões ativas no `MLflow`.
 
-Ponto relevante para a Fase 5:
+Pontos relevantes para a Fase 5:
 
 - antes deste bloco, o executor offline repetia parte da lógica de candidate pool e do score lexical+semântico;
 - isso aumentava o risco de divergência entre baseline do runtime e baseline do benchmark.
+- antes deste bloco, nao existia geração lexical de candidatos fora do pool devolvido pelo Chroma.
 
 ## Pontos de extensão corretos no código
 
@@ -163,7 +167,7 @@ Retrieval híbrido futuro deve ser introduzido em camadas pequenas:
 Ordem escolhida:
 
 - primeiro tornar o baseline observável e configurável;
-- depois adicionar candidatos lexicais;
+- depois adicionar candidatos lexicais reais por varredura da collection do tenant;
 - só então avaliar rewriting e reranking sobre um pool já comparável.
 
 ### Decisão estrutural 3
@@ -193,6 +197,7 @@ Ele deve operar sobre um pool já recuperado, com:
 Parametros que passam a ter local previsível de resolução:
 
 - `strategy_name`
+- `supported_strategies`
 - `top_k_default`
 - `min_score_default`
 - `candidate_pool_multiplier`
@@ -215,7 +220,41 @@ Parametros previstos para próximos blocos, ainda nao criados como contrato ativ
 Regra:
 
 - novos parâmetros só devem virar artefato ativo quando houver implementação mínima comparável;
-- este bloco nao cria artefatos novos de rewriting ou reranking.
+- este bloco ainda nao cria artefatos novos de rewriting ou reranking.
+
+## O que foi implementado em `CPPX-F5-T2` e `CPPX-F5-T3`
+
+- uma variante opcional de retrieval chamada `semantic_plus_full_collection_lexical_candidates_v1`;
+- geração lexical real de candidatos por varredura de todos os chunks da collection já persistida do tenant;
+- união entre:
+  - candidatos do baseline semântico do Chroma;
+  - candidatos lexicais recuperados pelo full scan da collection;
+- reaproveitamento da mesma lógica da variante no runtime e no executor offline.
+
+Implementação factual:
+
+- o baseline continua usando apenas candidatos vindos da consulta semântica do Chroma, com rescoring lexical simples;
+- a nova variante faz `collection.get(...)` da collection do tenant, calcula overlap lexical simples chunk a chunk e monta um pool lexical complementar;
+- o resultado final da variante híbrida do bloco é a união deduplicada entre candidatos semânticos e candidatos lexicais, preservando o maior score por chunk.
+- a etapa de query transformation ficou separada do retrieval e foi resolvida como eixo próprio de configuração, sem renomear artificialmente as variantes de retrieval;
+- a estratégia `tenant_keyword_query_expansion_v1` usa apenas metadados `keywords` dos documentos do tenant para adicionar poucos termos novos quando houver overlap com a query original;
+- a query original continua íntegra no contrato de resposta e a query efetivamente usada no retrieval passa a ser registrada em `params_used.query_transformation.retrieval_query`.
+
+## Limitações atuais da query expansion
+
+- a expansão atual é heurística e local; ela nao usa LLM, embeddings extras nem biblioteca externa;
+- ela só consulta metadados de documentos já persistidos localmente por tenant;
+- por padrão, a fonte ativa de expansão fica restrita a `keywords`, justamente para reduzir ruído e distorção de intenção;
+- se nao houver overlap suficiente entre query e metadados do tenant, a estratégia continua registrada, mas nao transforma a query;
+- a expansão atual melhora recall potencial, mas nao implica melhoria automática de grounding, precisão ou latência.
+
+## Limitações atuais da camada lexical
+
+- a recuperação lexical atual nao usa BM25, inverted index nem biblioteca externa;
+- ela faz varredura completa da collection já persistida no Chroma do tenant;
+- o score lexical continua simples e baseado em tokenizer local + overlap de termos;
+- chunks lexicais sem evidência semântica recebem score apenas lexical ponderado pelos pesos atuais do baseline;
+- essa camada melhora cobertura de candidatos, mas ainda nao implementa fusão sofisticada, query rewriting nem reranking.
 
 ## Como comparar estratégias experimentalmente
 
@@ -233,7 +272,13 @@ A comparação experimental deve continuar separada da auditoria operacional e u
 No estado atual:
 
 - a variante continua identificada no tracking por `retriever_version` e `retriever_version_id`;
-- o resultado técnico do retrieval passa a expor `params_used.strategy_name` para tornar o baseline visível no payload.
+- o resultado técnico do retrieval expõe `params_used.strategy_name`;
+- o resultado técnico do retrieval expõe `params_used.query_transformation` com:
+  - query original;
+  - query usada no retrieval;
+  - termos adicionados;
+  - strategy_name aplicada;
+- o tracking experimental da run passa a registrar `retrieval_strategy_name` e `query_transform_strategy_name` para distinguir a variante semântica/híbrida da etapa de expansão dentro do mesmo `retriever_version`.
 
 ### Benchmark
 
@@ -258,13 +303,15 @@ Critérios mínimos de leitura:
 - arquitetura-alvo incremental da Fase 5 documentada;
 - pontos corretos de extensão no código identificados;
 - baseline atual descrito sem vender como retrieval híbrido completo;
-- contrato mínimo preparatório no artefato de retrieval para nome da estratégia, pesos e candidate pool;
-- remoção da duplicação principal entre runtime e executor offline no cálculo baseline do retrieval.
+- contrato mínimo do artefato de retrieval ampliado para listar estratégias suportadas;
+- camada lexical complementar real por full scan da collection do tenant;
+- integração opcional da nova estratégia no runtime RAG e no benchmark offline;
+- query expansion heurística opt-in baseada em `keywords` do tenant;
+- separação explícita entre query original e query efetivamente usada no retrieval;
+- redução adicional de duplicação entre runtime e executor offline ao reaproveitar o repositório de retrieval.
 
 ## O que fica explicitamente para os próximos blocos
 
-- `CPPX-F5-T2`: camada lexical complementar real;
-- `CPPX-F5-T3`: query rewriting ou expansion controlado;
 - `CPPX-F5-T4`: reranking pós-recuperação;
 - `CPPX-F5-T5`: exposição ampliada dos parâmetros experimentais novos;
 - `CPPX-F5-T6`: comparação formal entre variantes;
@@ -273,7 +320,8 @@ Critérios mínimos de leitura:
 ## Riscos e limites identificados
 
 - o baseline atual nao e puramente semântico; ele já tem rescoring lexical simples, o que exige cuidado na nomenclatura das variantes futuras;
-- o benchmark offline ainda depende de espelho manual do retrieval, mesmo após a redução de duplicação;
-- query rewriting mal calibrado pode distorcer intenção e mascarar ganho artificial em cobertura;
+- a camada lexical atual depende de full scan da collection, o que é honesto para este bloco, mas ainda nao escala como um índice lexical dedicado;
+- a query expansion atual depende da qualidade e da cobertura dos `keywords` cadastrados no tenant;
+- query rewriting mal calibrado pode distorcer intenção e mascarar ganho artificial em cobertura, por isso a etapa continua opt-in e rastreável;
 - reranking pode melhorar relevância e ainda assim piorar custo/latência sem benefício suficiente;
 - promover estratégia nova sem trocar o `retriever_version` ou sem registrar seus parâmetros quebraria comparabilidade.

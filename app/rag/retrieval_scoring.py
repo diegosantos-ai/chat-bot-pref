@@ -7,6 +7,10 @@ import re
 from typing import Sequence
 
 TOKEN_PATTERN = re.compile(r"[a-z0-9]+", re.IGNORECASE)
+BASELINE_RETRIEVAL_STRATEGY_NAME = "semantic_candidates_with_lexical_rescoring_v1"
+HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME = (
+    "semantic_plus_full_collection_lexical_candidates_v1"
+)
 
 
 @dataclass(frozen=True, slots=True)

@@ -87,4 +87,7 @@ async def reset_rag(request: RagResetRequest) -> RagResetResponse:
 @router.post("/rag/query", response_model=RagQueryResponse)
 async def query_rag(request: RagQueryRequest) -> RagQueryResponse:
     request.tenant_id = _require_tenant(request.tenant_id)
-    return rag_service.query(request)
+    try:
+        return rag_service.query(request)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc

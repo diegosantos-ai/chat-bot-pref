@@ -332,8 +332,15 @@ class RagQueryRequest(BaseModel):
     boost_enabled: bool = False
     strategy_name: Optional[str] = None
     query_transform_strategy_name: Optional[str] = None
+    rerank_strategy_name: Optional[str] = None
 
-    @field_validator("tenant_id", "strategy_name", "query_transform_strategy_name", mode="before")
+    @field_validator(
+        "tenant_id",
+        "strategy_name",
+        "query_transform_strategy_name",
+        "rerank_strategy_name",
+        mode="before",
+    )
     @classmethod
     def normalize_optional_identifiers(cls, value: Optional[str]) -> Optional[str]:
         return _normalize_optional_identifier(value)
@@ -351,6 +358,8 @@ class RagRetrievedChunk(BaseModel):
     title: str
     section: str
     score: float
+    retrieval_score: Optional[float] = None
+    rerank_score: Optional[float] = None
     tags: list[str]
 
 
@@ -364,6 +373,16 @@ class RagQueryTransformationUsed(BaseModel):
     max_added_terms: int
 
 
+class RagRerankingUsed(BaseModel):
+    strategy_name: str
+    applied: bool
+    input_query: str
+    reranked_candidates: int
+    total_candidates: int
+    max_candidates: int
+    score_weights: dict[str, float] = Field(default_factory=dict)
+
+
 class RagQueryParamsUsed(BaseModel):
     min_score: float
     top_k: int
@@ -371,6 +390,7 @@ class RagQueryParamsUsed(BaseModel):
     collection: str
     strategy_name: str
     query_transformation: RagQueryTransformationUsed
+    reranking: RagRerankingUsed
 
 
 class RagQueryResponse(BaseModel):

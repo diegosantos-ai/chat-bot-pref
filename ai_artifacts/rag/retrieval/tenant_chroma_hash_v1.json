@@ -11,11 +11,25 @@
     ]
   },
   "query_transform_strategy_name": "no_query_transformation_v1",
+  "rerank_params": {
+    "max_candidates": 5,
+    "score_weights": {
+      "retrieval_score": 0.35,
+      "tag_overlap": 0.2,
+      "text_density": 0.1,
+      "title_overlap": 0.35
+    }
+  },
+  "rerank_strategy_name": "no_rerank_v1",
   "score_weights": {
     "lexical": 0.75,
     "semantic": 0.25
   },
   "scope": "tenant_aware",
+  "supported_rerank_strategies": [
+    "no_rerank_v1",
+    "heuristic_post_retrieval_rerank_v1"
+  ],
   "supported_query_transform_strategies": [
     "no_query_transformation_v1",
     "tenant_keyword_query_expansion_v1"

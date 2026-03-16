@@ -28,6 +28,7 @@ from app.contracts.dto import (
     PolicyDecision,
     RagQueryParamsUsed,
     RagQueryResponse,
+    RagRerankingUsed,
     RagQueryTransformationUsed,
     RagRetrievedChunk,
 )
@@ -53,6 +54,12 @@ from app.rag.query_transformation import (
     QueryTransformationResult,
     QueryTransformationService,
     build_identity_query_transformation,
+)
+from app.rag.reranking import (
+    NO_RERANK_STRATEGY_NAME,
+    RerankingResult,
+    RerankingService,
+    build_identity_reranking,
 )
 from app.services.llm_service import LLMComposeService, LLMGenerationResponse
 from app.services.prompt_service import PromptService
@@ -220,6 +227,9 @@ class RagEvaluationCaseExecution:
     query_transformation_applied: bool
     retrieval_query: str
     added_query_terms: tuple[str, ...]
+    rerank_strategy_name: str
+    reranking_applied: bool
+    reranked_candidates: int
     retrieved_chunk_titles: tuple[str, ...]
     best_score: float
 
@@ -263,6 +273,9 @@ class RagEvaluationCaseExecution:
             "query_transformation_applied": self.query_transformation_applied,
             "retrieval_query": self.retrieval_query,
             "added_query_terms": list(self.added_query_terms),
+            "rerank_strategy_name": self.rerank_strategy_name,
+            "reranking_applied": self.reranking_applied,
+            "reranked_candidates": self.reranked_candidates,
             "pre_decision": self.pre_decision.model_dump(mode="json"),
             "post_decision": self.post_decision.model_dump(mode="json"),
             "metrics": self.case_result.as_artifact_payload(),
@@ -430,6 +443,7 @@ class RagEvaluationRunExecution:
             retriever_version=run_contract.retriever_version,
             retrieval_strategy_name=run_contract.retrieval_strategy_name,
             query_transform_strategy_name=run_contract.query_transform_strategy_name,
+            rerank_strategy_name=run_contract.rerank_strategy_name,
             retriever_version_id=tracking_metadata.retriever_version_id,
             embedding_version=run_contract.embedding_version,
             chunking_version=tracking_metadata.chunking_version,
@@ -511,6 +525,7 @@ class RagEvaluationComparisonRow:
     retriever_version: str
     retrieval_strategy_name: str
     query_transform_strategy_name: str
+    rerank_strategy_name: str
     retriever_version_id: str
     embedding_version: str
     chunking_version: str
@@ -562,6 +577,7 @@ class RagEvaluationComparisonRow:
             "retriever_version": self.retriever_version,
             "retrieval_strategy_name": self.retrieval_strategy_name,
             "query_transform_strategy_name": self.query_transform_strategy_name,
+            "rerank_strategy_name": self.rerank_strategy_name,
             "retriever_version_id": self.retriever_version_id,
             "embedding_version": self.embedding_version,
             "chunking_version": self.chunking_version,
@@ -654,6 +670,7 @@ class RagEvaluationComparisonRow:
                 "query_transform_strategy_name",
                 NO_QUERY_TRANSFORM_STRATEGY_NAME,
             ),
+            rerank_strategy_name=params.get("rerank_strategy_name", NO_RERANK_STRATEGY_NAME),
             retriever_version_id=tags.get("retriever_version_id", ""),
             embedding_version=params.get("embedding_version", ""),
             chunking_version=params.get("chunking_version", ""),
@@ -1433,6 +1450,7 @@ class OfflineRagEvaluationExecutor:
     tenant_profile_service: TenantProfileService | None = None
     metric_evaluator: RagMetricEvaluator | None = None
     query_transformation_service: QueryTransformationService | None = None
+    reranking_service: RerankingService | None = None
     tracking_config: MlflowTrackingConfig = MlflowTrackingConfig()
     experiment_name: str = DEFAULT_PHASE4_EXPERIMENT_NAME
     reference_answer_builder: Callable[[BenchmarkCase], str] | None = None
@@ -1449,6 +1467,7 @@ class OfflineRagEvaluationExecutor:
         self.query_transformation_service = (
             self.query_transformation_service or QueryTransformationService()
         )
+        self.reranking_service = self.reranking_service or RerankingService()
         if self.metric_evaluator is None:
             self.metric_evaluator = RagasOfflineMetricEvaluator(
                 stack_resolution=resolve_rag_evaluation_stack()
@@ -1463,6 +1482,7 @@ class OfflineRagEvaluationExecutor:
         max_cases: int | None = None,
         strategy_name: str | None = None,
         query_transform_strategy_name: str | None = None,
+        rerank_strategy_name: str | None = None,
     ) -> RagEvaluationRunExecution:
         """Executa uma run completa do benchmark e devolve o agregado experimental."""
 
@@ -1477,6 +1497,9 @@ class OfflineRagEvaluationExecutor:
             self.chroma_repository.artifact_resolver.resolve_query_transform_strategy_name(
                 query_transform_strategy_name
             )
+        )
+        resolved_rerank_strategy_name = self.chroma_repository.artifact_resolver.resolve_rerank_strategy_name(
+            rerank_strategy_name
         )
 
         selected_cases = _select_benchmark_cases(
@@ -1495,6 +1518,7 @@ class OfflineRagEvaluationExecutor:
                     benchmark_case,
                     strategy_name=resolved_strategy_name,
                     query_transform_strategy_name=resolved_query_transform_strategy_name,
+                    rerank_strategy_name=resolved_rerank_strategy_name,
                 )
             )
 
@@ -1525,6 +1549,7 @@ class OfflineRagEvaluationExecutor:
             prompt_version=primary_prompt_version,
             retrieval_strategy_name=resolved_strategy_name,
             query_transform_strategy_name=resolved_query_transform_strategy_name,
+            rerank_strategy_name=resolved_rerank_strategy_name,
             model_provider=observed_provider,
             model_name=observed_model,
             top_k=self.chroma_repository.artifact_resolver.retrieval_top_k_default(),
@@ -1565,6 +1590,7 @@ class OfflineRagEvaluationExecutor:
         max_cases: int | None = None,
         strategy_name: str | None = None,
         query_transform_strategy_name: str | None = None,
+        rerank_strategy_name: str | None = None,
     ) -> tuple[RagEvaluationRunExecution, LoggedMlflowRun]:
         """Executa o benchmark offline e registra a run no MLflow local."""
 
@@ -1575,6 +1601,7 @@ class OfflineRagEvaluationExecutor:
             max_cases=max_cases,
             strategy_name=strategy_name,
             query_transform_strategy_name=query_transform_strategy_name,
+            rerank_strategy_name=rerank_strategy_name,
         )
         tracker = MlflowRagEvaluationTracker(tracking_config=self.tracking_config)
         logged_run = tracker.log_run(execution)
@@ -1586,6 +1613,7 @@ class OfflineRagEvaluationExecutor:
         *,
         strategy_name: str | None = None,
         query_transform_strategy_name: str | None = None,
+        rerank_strategy_name: str | None = None,
     ) -> RagEvaluationCaseExecution:
         """Executa o fluxo offline de um caso do benchmark."""
 
@@ -1598,6 +1626,7 @@ class OfflineRagEvaluationExecutor:
             benchmark_case,
             strategy_name=strategy_name,
             query_transform_strategy_name=query_transform_strategy_name,
+            rerank_strategy_name=rerank_strategy_name,
         )
         llm_result: LLMGenerationResponse
         initial_reason_code = ""
@@ -1608,6 +1637,7 @@ class OfflineRagEvaluationExecutor:
                 query=benchmark_case.input_query,
                 strategy_name=strategy_name,
                 query_transform_strategy_name=query_transform_strategy_name,
+                rerank_strategy_name=rerank_strategy_name,
             )
             if rag_response.status == "ready":
                 llm_result = await self.llm_service.compose_answer(
@@ -1687,6 +1717,9 @@ class OfflineRagEvaluationExecutor:
             query_transformation_applied=rag_response.params_used.query_transformation.applied,
             retrieval_query=rag_response.params_used.query_transformation.retrieval_query,
             added_query_terms=tuple(rag_response.params_used.query_transformation.added_terms),
+            rerank_strategy_name=rag_response.params_used.reranking.strategy_name,
+            reranking_applied=rag_response.params_used.reranking.applied,
+            reranked_candidates=rag_response.params_used.reranking.reranked_candidates,
             retrieved_chunk_titles=tuple(chunk.title for chunk in rag_response.chunks),
             best_score=rag_response.best_score,
         )
@@ -1698,6 +1731,7 @@ class OfflineRagEvaluationExecutor:
         query: str,
         strategy_name: str | None = None,
         query_transform_strategy_name: str | None = None,
+        rerank_strategy_name: str | None = None,
     ) -> RagQueryResponse:
         """Executa retrieval offline sem tocar auditoria operacional nem depender do endpoint."""
 
@@ -1707,14 +1741,24 @@ class OfflineRagEvaluationExecutor:
         resolved_strategy_name = self.chroma_repository.artifact_resolver.resolve_retrieval_strategy_name(
             strategy_name
         )
+        resolved_rerank_strategy_name = self.chroma_repository.artifact_resolver.resolve_rerank_strategy_name(
+            rerank_strategy_name
+        )
         query_transformation = self._resolve_query_transformation(
             tenant_id=tenant_id,
             query=query,
             query_transform_strategy_name=query_transform_strategy_name,
         )
+        reranking_config = self.chroma_repository.artifact_resolver.reranking_config()
         documents_count = len(self.document_repository.list_documents(tenant_id))
         ingest_status = self.document_repository.read_ingest_status(tenant_id)
         chunks_count = int(ingest_status.get("chunks_count", 0) or 0)
+        reranking = build_identity_reranking(
+            query_text=query,
+            strategy_name=resolved_rerank_strategy_name,
+            total_candidates=0,
+            config=reranking_config,
+        )
 
         if documents_count == 0:
             return RagQueryResponse(
@@ -1732,6 +1776,7 @@ class OfflineRagEvaluationExecutor:
                     collection=collection_name,
                     strategy_name=resolved_strategy_name,
                     query_transformation=self._to_query_transformation_used(query_transformation),
+                    reranking=self._to_reranking_used(reranking),
                 ),
             )
         if chunks_count == 0 or collection_name not in self.chroma_repository.list_collection_names():
@@ -1752,9 +1797,30 @@ class OfflineRagEvaluationExecutor:
                     collection=collection_name,
                     strategy_name=resolved_strategy_name,
                     query_transformation=self._to_query_transformation_used(query_transformation),
+                    reranking=self._to_reranking_used(reranking),
                 ),
             )
 
+        retrieved_chunks = self.chroma_repository.query_chunks(
+            tenant_id=tenant_id,
+            query_text=query_transformation.retrieval_query,
+            limit=top_k,
+            min_score=min_score,
+            strategy_name=resolved_strategy_name,
+        )
+        reranking = build_identity_reranking(
+            query_text=query,
+            strategy_name=resolved_rerank_strategy_name,
+            total_candidates=len(retrieved_chunks),
+            config=reranking_config,
+        )
+        if retrieved_chunks:
+            retrieved_chunks, reranking = self.reranking_service.rerank_chunks(
+                query_text=query,
+                chunks=retrieved_chunks,
+                strategy_name=resolved_rerank_strategy_name,
+                config=reranking_config,
+            )
         selected_chunks = [
             RagRetrievedChunk(
                 id=chunk.chunk_id,
@@ -1763,15 +1829,11 @@ class OfflineRagEvaluationExecutor:
                 title=chunk.title,
                 section=chunk.section,
                 score=chunk.score,
+                retrieval_score=chunk.retrieval_score,
+                rerank_score=chunk.rerank_score,
                 tags=chunk.tags,
             )
-            for chunk in self.chroma_repository.query_chunks(
-                tenant_id=tenant_id,
-                query_text=query_transformation.retrieval_query,
-                limit=top_k,
-                min_score=min_score,
-                strategy_name=resolved_strategy_name,
-            )
+            for chunk in retrieved_chunks
         ]
         if not selected_chunks:
             return RagQueryResponse(
@@ -1789,6 +1851,7 @@ class OfflineRagEvaluationExecutor:
                     collection=collection_name,
                     strategy_name=resolved_strategy_name,
                     query_transformation=self._to_query_transformation_used(query_transformation),
+                    reranking=self._to_reranking_used(reranking),
                 ),
             )
 
@@ -1807,6 +1870,7 @@ class OfflineRagEvaluationExecutor:
                 collection=collection_name,
                 strategy_name=resolved_strategy_name,
                 query_transformation=self._to_query_transformation_used(query_transformation),
+                reranking=self._to_reranking_used(reranking),
             ),
         )
 
@@ -1816,6 +1880,7 @@ class OfflineRagEvaluationExecutor:
         *,
         strategy_name: str | None = None,
         query_transform_strategy_name: str | None = None,
+        rerank_strategy_name: str | None = None,
     ) -> RagQueryResponse:
         """Constroi a resposta tecnica de retrieval quando a policy_pre bloqueia o caso."""
 
@@ -1828,10 +1893,19 @@ class OfflineRagEvaluationExecutor:
                 query_transform_strategy_name
             )
         )
+        resolved_rerank_strategy_name = self.chroma_repository.artifact_resolver.resolve_rerank_strategy_name(
+            rerank_strategy_name
+        )
         query_transformation = build_identity_query_transformation(
             query_text=benchmark_case.input_query,
             strategy_name=resolved_query_transform_strategy_name,
             config=self.chroma_repository.artifact_resolver.query_transformation_config(),
+        )
+        reranking = build_identity_reranking(
+            query_text=benchmark_case.input_query,
+            strategy_name=resolved_rerank_strategy_name,
+            total_candidates=0,
+            config=self.chroma_repository.artifact_resolver.reranking_config(),
         )
         return RagQueryResponse(
             tenant_id=benchmark_case.tenant_id,
@@ -1848,6 +1922,7 @@ class OfflineRagEvaluationExecutor:
                 collection=collection_name,
                 strategy_name=resolved_strategy_name,
                 query_transformation=self._to_query_transformation_used(query_transformation),
+                reranking=self._to_reranking_used(reranking),
             ),
         )
 
@@ -1886,6 +1961,27 @@ class OfflineRagEvaluationExecutor:
             added_terms=list(query_transformation.added_terms),
             source_fields=list(query_transformation.source_fields),
             max_added_terms=query_transformation.max_added_terms,
+        )
+
+    def _to_reranking_used(
+        self,
+        reranking: RerankingResult,
+    ) -> RagRerankingUsed:
+        """Converte o resultado interno do reranking em payload tecnico do contrato offline."""
+
+        return RagRerankingUsed(
+            strategy_name=reranking.strategy_name,
+            applied=reranking.applied,
+            input_query=reranking.input_query,
+            reranked_candidates=reranking.reranked_candidates,
+            total_candidates=reranking.total_candidates,
+            max_candidates=reranking.max_candidates,
+            score_weights={
+                "retrieval_score": reranking.score_weights.retrieval_score,
+                "title_overlap": reranking.score_weights.title_overlap,
+                "tag_overlap": reranking.score_weights.tag_overlap,
+                "text_density": reranking.score_weights.text_density,
+            },
         )
 
     def _fallback_reason_from_rag(self, rag_response: RagQueryResponse) -> str:

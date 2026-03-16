@@ -13,6 +13,7 @@ from app.contracts.dto import (
     RagQueryParamsUsed,
     RagQueryRequest,
     RagQueryResponse,
+    RagRerankingUsed,
     RagQueryTransformationUsed,
     RagResetRequest,
     RagResetResponse,
@@ -21,6 +22,7 @@ from app.contracts.dto import (
 )
 from app.llmops import ActiveArtifactResolver
 from app.rag.query_transformation import QueryTransformationResult, QueryTransformationService
+from app.rag.reranking import RerankingResult, RerankingService, build_identity_reranking
 from app.storage.chroma_repository import IngestChunk
 from app.storage.chroma_repository import TenantChromaRepository
 from app.storage.document_repository import FileDocumentRepository
@@ -45,6 +47,7 @@ class RagService:
             artifact_resolver=self.artifact_resolver
         )
         self.query_transformation_service = QueryTransformationService()
+        self.reranking_service = RerankingService()
 
     def list_documents(self, tenant_id: str) -> RagDocumentListResponse:
         documents = self.document_repository.list_documents(tenant_id)
@@ -182,12 +185,16 @@ class RagService:
         query_transform_strategy_name = self.artifact_resolver.resolve_query_transform_strategy_name(
             request.query_transform_strategy_name
         )
+        rerank_strategy_name = self.artifact_resolver.resolve_rerank_strategy_name(
+            request.rerank_strategy_name
+        )
         query_transformation = self.query_transformation_service.transform_query(
             query_text=request.query,
             documents=self.document_repository.list_documents(tenant_id),
             strategy_name=query_transform_strategy_name,
             config=self.artifact_resolver.query_transformation_config(),
         )
+        reranking_config = self.artifact_resolver.reranking_config()
         chunks = self.chroma_repository.query_chunks(
             tenant_id=tenant_id,
             query_text=query_transformation.retrieval_query,
@@ -195,6 +202,19 @@ class RagService:
             min_score=request.min_score,
             strategy_name=strategy_name,
         )
+        reranking = build_identity_reranking(
+            query_text=request.query,
+            strategy_name=rerank_strategy_name,
+            total_candidates=len(chunks),
+            config=reranking_config,
+        )
+        if chunks:
+            chunks, reranking = self.reranking_service.rerank_chunks(
+                query_text=request.query,
+                chunks=chunks,
+                strategy_name=rerank_strategy_name,
+                config=reranking_config,
+            )
         if not status.ready or not chunks:
             message = status.message if not status.ready else (
                 f"Nenhum chunk do tenant '{tenant_id}' atingiu o score mínimo informado."
@@ -215,6 +235,7 @@ class RagService:
                     collection=self.chroma_repository.collection_name(tenant_id),
                     strategy_name=strategy_name,
                     query_transformation=self._to_query_transformation_used(query_transformation),
+                    reranking=self._to_reranking_used(reranking),
                 ),
             )
 
@@ -226,6 +247,8 @@ class RagService:
                 title=chunk.title,
                 section=chunk.section,
                 score=chunk.score,
+                retrieval_score=chunk.retrieval_score,
+                rerank_score=chunk.rerank_score,
                 tags=chunk.tags,
             )
             for chunk in chunks
@@ -245,6 +268,7 @@ class RagService:
                 collection=self.chroma_repository.collection_name(tenant_id),
                 strategy_name=strategy_name,
                 query_transformation=self._to_query_transformation_used(query_transformation),
+                reranking=self._to_reranking_used(reranking),
             ),
         )
 
@@ -262,6 +286,27 @@ class RagService:
             added_terms=list(query_transformation.added_terms),
             source_fields=list(query_transformation.source_fields),
             max_added_terms=query_transformation.max_added_terms,
+        )
+
+    def _to_reranking_used(
+        self,
+        reranking: RerankingResult,
+    ) -> RagRerankingUsed:
+        """Converte o resultado interno do reranking em payload tecnico do contrato."""
+
+        return RagRerankingUsed(
+            strategy_name=reranking.strategy_name,
+            applied=reranking.applied,
+            input_query=reranking.input_query,
+            reranked_candidates=reranking.reranked_candidates,
+            total_candidates=reranking.total_candidates,
+            max_candidates=reranking.max_candidates,
+            score_weights={
+                "retrieval_score": reranking.score_weights.retrieval_score,
+                "title_overlap": reranking.score_weights.title_overlap,
+                "tag_overlap": reranking.score_weights.tag_overlap,
+                "text_density": reranking.score_weights.text_density,
+            },
         )
 
     def _build_chunks(self, documents: list[RagDocumentRecord]) -> list[IngestChunk]:

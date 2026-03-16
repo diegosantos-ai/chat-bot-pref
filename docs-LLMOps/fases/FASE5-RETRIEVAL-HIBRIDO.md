@@ -7,6 +7,7 @@ Registrar o fechamento estrutural dos blocos:
 - `CPPX-F5-T1 — Definir arquitetura alvo de retrieval híbrido`
 - `CPPX-F5-T2 — Implementar camada lexical complementar`
 - `CPPX-F5-T3 — Implementar query rewriting ou expansion controlado`
+- `CPPX-F5-T4 — Integrar reranker ao pipeline de recuperação`
 
 Este documento descreve:
 
@@ -18,8 +19,8 @@ Este documento descreve:
 
 Este documento nao declara como implementado:
 
-- reranking ativo no runtime ou no benchmark;
-- promoção de nova estratégia como default.
+- promoção de nova estratégia como default;
+- comparação formal consolidada entre todas as variantes da fase.
 
 ## Enquadramento do bloco
 
@@ -30,7 +31,8 @@ Este documento nao declara como implementado:
   - `CPPX-F5-T1`
   - `CPPX-F5-T2`
   - `CPPX-F5-T3`
-- critério de aceite do bloco: arquitetura-alvo pequena, incremental, tenant-aware, com variante lexical real, query expansion opt-in e comparabilidade por benchmark/tracking
+  - `CPPX-F5-T4`
+- critério de aceite do bloco: arquitetura-alvo pequena, incremental, tenant-aware, com variante lexical real, query expansion opt-in, reranking pós-recuperação e comparabilidade por benchmark/tracking
 - validação mínima deste bloco:
   - leitura cruzada entre `ARQUITETURA-LLMOps.md`, `PLANEJAMENTO-LLMOps.md` e o código do retrieval;
   - checagem de contratos do runtime e do executor offline;
@@ -222,7 +224,7 @@ Regra:
 - novos parâmetros só devem virar artefato ativo quando houver implementação mínima comparável;
 - este bloco ainda nao cria artefatos novos de rewriting ou reranking.
 
-## O que foi implementado em `CPPX-F5-T2` e `CPPX-F5-T3`
+## O que foi implementado em `CPPX-F5-T2`, `CPPX-F5-T3` e `CPPX-F5-T4`
 
 - uma variante opcional de retrieval chamada `semantic_plus_full_collection_lexical_candidates_v1`;
 - geração lexical real de candidatos por varredura de todos os chunks da collection já persistida do tenant;
@@ -239,6 +241,17 @@ Implementação factual:
 - a etapa de query transformation ficou separada do retrieval e foi resolvida como eixo próprio de configuração, sem renomear artificialmente as variantes de retrieval;
 - a estratégia `tenant_keyword_query_expansion_v1` usa apenas metadados `keywords` dos documentos do tenant para adicionar poucos termos novos quando houver overlap com a query original;
 - a query original continua íntegra no contrato de resposta e a query efetivamente usada no retrieval passa a ser registrada em `params_used.query_transformation.retrieval_query`.
+- a etapa de reranking ficou separada do retrieval base e da query transformation, com strategy própria chamada `heuristic_post_retrieval_rerank_v1`;
+- o reranker atual opera apenas sobre os candidatos já recuperados, sem ampliar o universo de busca;
+- o reranking usa a query original do usuário, e nao a query expandida, para recentrar a ordenação na intenção original após a recuperação.
+
+## Limitações atuais do reranking
+
+- o reranker atual é heurístico, nao é cross-encoder nem reranker semântico robusto;
+- ele usa apenas sinais já disponíveis localmente: `retrieval_score`, overlap com `title`, overlap com `tags` e densidade lexical no texto do chunk;
+- ele atua sobre até `max_candidates` chunks já recuperados, o que preserva custo e comparabilidade, mas limita ganho potencial quando o candidato ideal ficou fora do pool do retrieval;
+- o reranking atual pode reordenar os chunks e recalcular o `score` final, mas preserva rastreabilidade do `retrieval_score` original no payload técnico;
+- a latência adicional tende a ser pequena, mas ainda cresce linearmente com a quantidade de candidatos reranqueados.
 
 ## Limitações atuais da query expansion
 
@@ -254,7 +267,7 @@ Implementação factual:
 - ela faz varredura completa da collection já persistida no Chroma do tenant;
 - o score lexical continua simples e baseado em tokenizer local + overlap de termos;
 - chunks lexicais sem evidência semântica recebem score apenas lexical ponderado pelos pesos atuais do baseline;
-- essa camada melhora cobertura de candidatos, mas ainda nao implementa fusão sofisticada, query rewriting nem reranking.
+- essa camada melhora cobertura de candidatos, mas ainda nao implementa fusão sofisticada nem reranker semântico avançado.
 
 ## Como comparar estratégias experimentalmente
 
@@ -278,7 +291,12 @@ No estado atual:
   - query usada no retrieval;
   - termos adicionados;
   - strategy_name aplicada;
-- o tracking experimental da run passa a registrar `retrieval_strategy_name` e `query_transform_strategy_name` para distinguir a variante semântica/híbrida da etapa de expansão dentro do mesmo `retriever_version`.
+- o resultado técnico do retrieval expõe `params_used.reranking` com:
+  - strategy_name;
+  - se houve aplicação;
+  - sobre quantos candidatos o reranker rodou;
+  - pesos ativos da heurística;
+- o tracking experimental da run passa a registrar `retrieval_strategy_name`, `query_transform_strategy_name` e `rerank_strategy_name` para distinguir os três eixos da execução dentro do mesmo `retriever_version`.
 
 ### Benchmark
 
@@ -308,11 +326,12 @@ Critérios mínimos de leitura:
 - integração opcional da nova estratégia no runtime RAG e no benchmark offline;
 - query expansion heurística opt-in baseada em `keywords` do tenant;
 - separação explícita entre query original e query efetivamente usada no retrieval;
+- reranking heurístico opt-in aplicado após a recuperação inicial e antes da resposta técnica final;
+- preservação do `retrieval_score` original quando o reranking está ativo;
 - redução adicional de duplicação entre runtime e executor offline ao reaproveitar o repositório de retrieval.
 
 ## O que fica explicitamente para os próximos blocos
 
-- `CPPX-F5-T4`: reranking pós-recuperação;
 - `CPPX-F5-T5`: exposição ampliada dos parâmetros experimentais novos;
 - `CPPX-F5-T6`: comparação formal entre variantes;
 - `CPPX-F5-T7`: consolidação da baseline vencedora ou matriz de trade-offs.
@@ -323,5 +342,6 @@ Critérios mínimos de leitura:
 - a camada lexical atual depende de full scan da collection, o que é honesto para este bloco, mas ainda nao escala como um índice lexical dedicado;
 - a query expansion atual depende da qualidade e da cobertura dos `keywords` cadastrados no tenant;
 - query rewriting mal calibrado pode distorcer intenção e mascarar ganho artificial em cobertura, por isso a etapa continua opt-in e rastreável;
+- o reranker atual pode favorecer títulos e tags bem curados, mas nao resolve ausência de candidatos bons no pool inicial;
 - reranking pode melhorar relevância e ainda assim piorar custo/latência sem benefício suficiente;
 - promover estratégia nova sem trocar o `retriever_version` ou sem registrar seus parâmetros quebraria comparabilidade.

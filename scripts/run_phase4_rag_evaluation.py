@@ -65,6 +65,11 @@ def parse_args() -> argparse.Namespace:
         default="",
         help="Strategy_name opcional de query transformation para a run offline.",
     )
+    parser.add_argument(
+        "--rerank-strategy",
+        default="",
+        help="Strategy_name opcional de reranking para a run offline.",
+    )
     return parser.parse_args()
 
 
@@ -87,6 +92,7 @@ async def run() -> int:
         max_cases=args.max_cases,
         strategy_name=args.retrieval_strategy or None,
         query_transform_strategy_name=args.query_transform_strategy or None,
+        rerank_strategy_name=args.rerank_strategy or None,
     )
 
     print(
@@ -96,6 +102,7 @@ async def run() -> int:
                 "dataset_version": execution.dataset.manifest.dataset_version,
                 "retrieval_strategy_name": execution.tracking_run.run_contract.retrieval_strategy_name,
                 "query_transform_strategy_name": execution.tracking_run.run_contract.query_transform_strategy_name,
+                "rerank_strategy_name": execution.tracking_run.run_contract.rerank_strategy_name,
                 "run_id": logged_run.run_id,
                 "tracking_uri": logged_run.tracking_uri,
                 "cases_total": len(execution.case_executions),

@@ -500,6 +500,7 @@ class ChatService:
                 top_k=self._active_top_k(),
                 boost_enabled=False,
                 collection=self.rag_service.chroma_repository.collection_name(tenant_id),
+                strategy_name=self.artifact_resolver.retrieval_strategy_name(),
             ),
         )
 

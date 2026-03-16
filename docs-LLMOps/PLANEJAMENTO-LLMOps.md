@@ -281,6 +281,15 @@ Nenhuma instalação nova deve ocorrer nesta fase. Toda evolução deve ser guia
 * `CPPX-F5-T6 — Executar comparação entre estratégias`
 * `CPPX-F5-T7 — Consolidar baseline vencedora ou matriz de trade-offs`
 
+### Fechamento estrutural atual do bloco
+
+Na branch `feat/fase5-retrieval-query-reranking`, este planejamento passa a ter o seguinte recorte fechado:
+
+- `CPPX-F5-T1` documentado em `docs-LLMOps/fases/FASE5-RETRIEVAL-HIBRIDO.md`;
+- baseline atual do retrieval explicitado sem troca de comportamento default;
+- contrato preparatório mínimo adicionado apenas para nome da estratégia ativa, pesos do score baseline e `candidate_pool_multiplier`;
+- `CPPX-F5-T2` a `CPPX-F5-T7` permanecem pendentes e fora deste bloco.
+
 ---
 
 ## Card Macro — Fase 6 — Observabilidade de Qualidade, Latência e Custo por Tenant

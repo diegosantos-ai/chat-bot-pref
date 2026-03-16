@@ -83,6 +83,7 @@ Documentos de fase atualmente presentes nesta pasta:
 - `fases/FASE2-LLMOPS.md`
 - `fases/FASE3-DATASET-BENCHMARK.md`
 - `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
+- `fases/FASE5-RETRIEVAL-HIBRIDO.md`
 
 ## Diretriz de manutenção
 
@@ -111,6 +112,7 @@ A sequência recomendada de leitura desta pasta é:
 5. `fases/FASE2-LLMOPS.md`
 6. `fases/FASE3-DATASET-BENCHMARK.md`
 7. `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
+8. `fases/FASE5-RETRIEVAL-HIBRIDO.md`
 
 ## Status
 
@@ -118,3 +120,4 @@ Fase 1 concluída com evidência local.
 Fase 2 consolidada neste escopo na branch `feat/fase2-rag-prompts`.
 Fase 3 consolidada neste escopo na branch `feat/dataset-avaliacao`, com baseline inicial de benchmark reproduzível para o tenant demonstrativo.
 Fase 4 consolidada neste escopo na branch `feat/avaliacao-rag-metricas-de-qualidade`, com avaliação formal offline, artifacts comparativos e baseline inicial rastreável do RAG.
+Na branch `feat/fase5-retrieval-query-reranking`, a Fase 5 foi aberta estruturalmente com `CPPX-F5-T1` documentado e um diff preparatório mínimo no contrato do retrieval atual, sem promover nova estratégia como default.

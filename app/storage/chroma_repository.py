@@ -8,13 +8,12 @@ import chromadb
 from chromadb.api.types import Documents, EmbeddingFunction
 
 from app.llmops import ActiveArtifactResolver
+from app.rag.retrieval_scoring import (
+    build_candidate_pool_size,
+    compute_weighted_retrieval_score,
+    tokenize_retrieval_text,
+)
 from app.settings import settings
-
-TOKEN_PATTERN = re.compile(r"[a-z0-9]+", re.IGNORECASE)
-
-
-def _tokenize(text: str) -> list[str]:
-    return TOKEN_PATTERN.findall(text.lower())
 
 
 @dataclass(frozen=True)
@@ -60,7 +59,7 @@ class HashEmbeddingFunction(EmbeddingFunction[Documents]):
 
     def _embed(self, text: str) -> list[float]:
         vector = [0.0] * self.dimensions
-        tokens = _tokenize(text)
+        tokens = tokenize_retrieval_text(text)
         if not tokens:
             return vector
 
@@ -160,24 +159,26 @@ class TenantChromaRepository:
 
         result = collection.query(
             query_texts=[query_text],
-            n_results=max(limit * 3, limit),
+            n_results=build_candidate_pool_size(
+                top_k=limit,
+                multiplier=self.artifact_resolver.retrieval_candidate_pool_multiplier(),
+            ),
         )
         ids = result.get("ids", [[]])[0]
         documents = result.get("documents", [[]])[0]
         metadatas = result.get("metadatas", [[]])[0]
         distances = result.get("distances", [[]])[0]
 
-        query_tokens = set(_tokenize(query_text))
+        query_tokens = tokenize_retrieval_text(query_text)
+        score_weights = self.artifact_resolver.retrieval_score_weights()
         scored_results: list[RetrievedChunk] = []
         for chunk_id, text, metadata, distance in zip(ids, documents, metadatas, distances):
-            content_tokens = set(_tokenize(text))
-            overlap = len(query_tokens & content_tokens)
-            if not query_tokens:
-                score = 0.0
-            else:
-                semantic_score = 0.0 if distance is None else 1 / (1 + max(distance, 0))
-                lexical_score = overlap / len(query_tokens)
-                score = round(min(1.0, (lexical_score * 0.75) + (semantic_score * 0.25)), 4)
+            score = compute_weighted_retrieval_score(
+                query_tokens=query_tokens,
+                text=text,
+                distance=distance,
+                weights=score_weights,
+            )
             if score < min_score:
                 continue
             scored_results.append(

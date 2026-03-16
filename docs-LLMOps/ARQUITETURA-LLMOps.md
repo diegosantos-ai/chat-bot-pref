@@ -321,6 +321,15 @@ Aumentar a qualidade da recuperação de contexto por meio de estratégias compa
 
 Nenhuma estratégia adicional deve ser consolidada sem benchmark comparativo.
 
+### Estado atual da branch
+
+No estado atual da branch da Fase 5:
+
+- o baseline ativo continua sendo uma busca tenant-aware em Chroma com rescoring lexical simples sobre os candidatos recuperados;
+- a estratégia default nao foi trocada;
+- os parâmetros ativos do baseline ficam resolvidos em `ai_artifacts/rag/retrieval/` via `ActiveArtifactResolver`;
+- o detalhamento incremental de `CPPX-F5-T1` fica registrado em `docs-LLMOps/fases/FASE5-RETRIEVAL-HIBRIDO.md`.
+
 ## Bloco 7 — Observabilidade ampliada
 
 ### Papel
@@ -530,4 +539,3 @@ Novas camadas definidas conceitualmente.
 Próximo passo: iniciar execução da Fase 1 conforme `PLANEJAMENTO-LLMOps.md`.
 
 ````
-

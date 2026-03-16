@@ -51,6 +51,10 @@ from app.services.llm_service import LLMComposeService, LLMGenerationResponse
 from app.services.prompt_service import PromptService
 from app.services.tenant_profile_service import TenantProfileService
 from app.policy_guard.service import PolicyGuardService, PostPolicyInput
+from app.rag.retrieval_scoring import (
+    build_candidate_pool_size,
+    compute_weighted_retrieval_score,
+)
 from app.settings import settings
 from app.storage.chroma_repository import HashEmbeddingFunction, TenantChromaRepository
 from app.storage.document_repository import FileDocumentRepository
@@ -1634,6 +1638,7 @@ class OfflineRagEvaluationExecutor:
         top_k = self.chroma_repository.artifact_resolver.retrieval_top_k_default()
         min_score = 0.0
         collection_name = self.chroma_repository.collection_name(tenant_id)
+        strategy_name = self.chroma_repository.artifact_resolver.retrieval_strategy_name()
         documents_count = len(self.document_repository.list_documents(tenant_id))
         ingest_status = self.document_repository.read_ingest_status(tenant_id)
         chunks_count = int(ingest_status.get("chunks_count", 0) or 0)
@@ -1652,6 +1657,7 @@ class OfflineRagEvaluationExecutor:
                     top_k=top_k,
                     boost_enabled=False,
                     collection=collection_name,
+                    strategy_name=strategy_name,
                 ),
             )
         if chunks_count == 0 or collection_name not in self.chroma_repository.list_collection_names():
@@ -1670,6 +1676,7 @@ class OfflineRagEvaluationExecutor:
                     top_k=top_k,
                     boost_enabled=False,
                     collection=collection_name,
+                    strategy_name=strategy_name,
                 ),
             )
 
@@ -1677,9 +1684,13 @@ class OfflineRagEvaluationExecutor:
         query_embedding = self.chroma_repository.embedding_function([query])[0]
         raw_result = collection.query(
             query_embeddings=[query_embedding],
-            n_results=max(top_k * 3, top_k),
+            n_results=build_candidate_pool_size(
+                top_k=top_k,
+                multiplier=self.chroma_repository.artifact_resolver.retrieval_candidate_pool_multiplier(),
+            ),
         )
         query_tokens = _tokenize(query)
+        score_weights = self.chroma_repository.artifact_resolver.retrieval_score_weights()
         scored_chunks: list[RagRetrievedChunk] = []
         ids = raw_result.get("ids", [[]])[0]
         documents = raw_result.get("documents", [[]])[0]
@@ -1687,9 +1698,12 @@ class OfflineRagEvaluationExecutor:
         distances = raw_result.get("distances", [[]])[0]
 
         for chunk_id, text, metadata, distance in zip(ids, documents, metadatas, distances):
-            semantic_score = 0.0 if distance is None else 1 / (1 + max(float(distance), 0.0))
-            lexical_score = _lexical_score(query_tokens=query_tokens, text=text)
-            score = round(min(1.0, (lexical_score * 0.75) + (semantic_score * 0.25)), 4)
+            score = compute_weighted_retrieval_score(
+                query_tokens=query_tokens,
+                text=text,
+                distance=distance,
+                weights=score_weights,
+            )
             if score < min_score:
                 continue
             payload = metadata or {}
@@ -1721,6 +1735,7 @@ class OfflineRagEvaluationExecutor:
                     top_k=top_k,
                     boost_enabled=False,
                     collection=collection_name,
+                    strategy_name=strategy_name,
                 ),
             )
 
@@ -1737,6 +1752,7 @@ class OfflineRagEvaluationExecutor:
                 top_k=top_k,
                 boost_enabled=False,
                 collection=collection_name,
+                strategy_name=strategy_name,
             ),
         )
 
@@ -1757,6 +1773,7 @@ class OfflineRagEvaluationExecutor:
                 top_k=self.chroma_repository.artifact_resolver.retrieval_top_k_default(),
                 boost_enabled=False,
                 collection=collection_name,
+                strategy_name=self.chroma_repository.artifact_resolver.retrieval_strategy_name(),
             ),
         )
 
@@ -1987,16 +2004,6 @@ def _tokenize(text: str) -> list[str]:
     import re
 
     return re.findall(TOKEN_PATTERN, text.lower())
-
-
-def _lexical_score(*, query_tokens: list[str], text: str) -> float:
-    """Calcula o componente lexical do score usado no retrieval offline."""
-
-    if not query_tokens:
-        return 0.0
-    content_tokens = set(_tokenize(text))
-    overlap = len(set(query_tokens) & content_tokens)
-    return overlap / len(set(query_tokens))
 
 
 def _build_methodology_notes(

@@ -1,9 +1,15 @@
 {
   "boost_enabled_default": false,
+  "candidate_pool_multiplier": 3,
   "collection_strategy": "tenant_collection_name",
   "embedding_version": "hash_embedding_v1",
   "min_score_default": 0.0,
+  "score_weights": {
+    "lexical": 0.75,
+    "semantic": 0.25
+  },
   "scope": "tenant_aware",
+  "strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
   "top_k_default": 3,
   "vector_store": "chroma"
 }

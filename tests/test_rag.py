@@ -112,6 +112,10 @@ def test_rag_document_crud_ingest_and_query_by_tenant(tmp_path) -> None:
     assert ingest_response.json()["chunks_count"] == 2
     assert ingest_response.json()["ready"] is True
     assert query_response.json()["status"] == "ready"
+    assert (
+        query_response.json()["params_used"]["strategy_name"]
+        == "semantic_candidates_with_lexical_rescoring_v1"
+    )
     assert query_response.json()["chunks"][0]["title"] == "Horario Alvara"
     assert other_tenant_query.json()["status"] == "knowledge_base_not_loaded"
 

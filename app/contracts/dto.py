@@ -357,6 +357,7 @@ class RagQueryParamsUsed(BaseModel):
     top_k: int
     boost_enabled: bool
     collection: str
+    strategy_name: str
 
 
 class RagQueryResponse(BaseModel):

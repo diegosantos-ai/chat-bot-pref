@@ -68,6 +68,63 @@ class ActiveJsonArtifact:
         return self.metadata.version_id
 
 
+@dataclass(frozen=True, slots=True)
+class Phase5ExperimentalAxisConfig:
+    """Representa a configuração resolvida de um eixo experimental da Fase 5."""
+
+    strategy_name: str
+    supported_strategies: tuple[str, ...]
+    params: dict[str, Any]
+
+    def __post_init__(self) -> None:
+        """Valida o contrato mínimo do eixo experimental resolvido."""
+
+        if not self.strategy_name.strip():
+            raise ValueError("strategy_name do eixo experimental nao pode ser vazia.")
+        if not self.supported_strategies:
+            raise ValueError("supported_strategies do eixo experimental nao pode ficar vazia.")
+        if self.strategy_name not in self.supported_strategies:
+            raise ValueError("strategy_name ativa precisa constar em supported_strategies.")
+
+    def as_payload(self) -> dict[str, Any]:
+        """Retorna o eixo em formato serializável e estável."""
+
+        return {
+            "strategy_name": self.strategy_name,
+            "supported_strategies": list(self.supported_strategies),
+            "params": self.params,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class Phase5ExperimentalConfig:
+    """Agrupa a configuração experimental resolvida dos três eixos da Fase 5."""
+
+    retrieval: Phase5ExperimentalAxisConfig
+    query_transformation: Phase5ExperimentalAxisConfig
+    reranking: Phase5ExperimentalAxisConfig
+
+    def as_payload(self) -> dict[str, Any]:
+        """Retorna a matriz experimental ativa em formato serializável."""
+
+        return {
+            "retrieval": self.retrieval.as_payload(),
+            "query_transformation": self.query_transformation.as_payload(),
+            "reranking": self.reranking.as_payload(),
+        }
+
+    def as_tracking_params(self) -> dict[str, str]:
+        """Retorna a matriz ativa pronta para registro em tracking experimental."""
+
+        return {
+            "phase5_experiment_axes_json": json.dumps(
+                self.as_payload(),
+                ensure_ascii=False,
+                sort_keys=True,
+            )
+        }
+
+
 class ActiveArtifactResolver:
     """Resolve e valida a versão ativa dos artefatos versionáveis da Fase 2."""
 
@@ -114,6 +171,21 @@ class ActiveArtifactResolver:
         if top_k < 1:
             raise ValueError("top_k_default deve ser maior ou igual a 1.")
         return top_k
+
+    def retrieval_min_score_default(self) -> float:
+        """Retorna o `min_score` default declarado para o retrieval ativo."""
+
+        payload = self.resolve_retrieval_config().payload
+        min_score = float(payload.get("min_score_default", 0.0))
+        if min_score < 0.0:
+            raise ValueError("min_score_default deve ser maior ou igual a 0.")
+        return min_score
+
+    def retrieval_boost_enabled_default(self) -> bool:
+        """Retorna o `boost_enabled` default declarado para o retrieval ativo."""
+
+        payload = self.resolve_retrieval_config().payload
+        return bool(payload.get("boost_enabled_default", False))
 
     def retrieval_embedding_version(self) -> str:
         """Retorna a versão ativa do embedding declarada para o retrieval."""
@@ -333,6 +405,60 @@ class ActiveArtifactResolver:
         return RerankingConfig(
             max_candidates=max_candidates,
             score_weights=score_weights,
+        )
+
+    def resolve_phase5_experimental_config(
+        self,
+        *,
+        retrieval_strategy_name: str | None = None,
+        query_transform_strategy_name: str | None = None,
+        rerank_strategy_name: str | None = None,
+    ) -> Phase5ExperimentalConfig:
+        """Resolve a superfície experimental ativa da Fase 5 de forma centralizada."""
+
+        retrieval_score_weights = self.retrieval_score_weights()
+        query_transformation_config = self.query_transformation_config()
+        reranking_config = self.reranking_config()
+
+        retrieval_axis = Phase5ExperimentalAxisConfig(
+            strategy_name=self.resolve_retrieval_strategy_name(retrieval_strategy_name),
+            supported_strategies=self.retrieval_supported_strategy_names(),
+            params={
+                "top_k_default": self.retrieval_top_k_default(),
+                "min_score_default": self.retrieval_min_score_default(),
+                "boost_enabled_default": self.retrieval_boost_enabled_default(),
+                "candidate_pool_multiplier": self.retrieval_candidate_pool_multiplier(),
+                "score_weights": {
+                    "lexical": retrieval_score_weights.lexical,
+                    "semantic": retrieval_score_weights.semantic,
+                },
+            },
+        )
+        query_transformation_axis = Phase5ExperimentalAxisConfig(
+            strategy_name=self.resolve_query_transform_strategy_name(query_transform_strategy_name),
+            supported_strategies=self.query_transform_supported_strategy_names(),
+            params={
+                "max_added_terms": query_transformation_config.max_added_terms,
+                "source_fields": list(query_transformation_config.source_fields),
+            },
+        )
+        reranking_axis = Phase5ExperimentalAxisConfig(
+            strategy_name=self.resolve_rerank_strategy_name(rerank_strategy_name),
+            supported_strategies=self.rerank_supported_strategy_names(),
+            params={
+                "max_candidates": reranking_config.max_candidates,
+                "score_weights": {
+                    "retrieval_score": reranking_config.score_weights.retrieval_score,
+                    "title_overlap": reranking_config.score_weights.title_overlap,
+                    "tag_overlap": reranking_config.score_weights.tag_overlap,
+                    "text_density": reranking_config.score_weights.text_density,
+                },
+            },
+        )
+        return Phase5ExperimentalConfig(
+            retrieval=retrieval_axis,
+            query_transformation=query_transformation_axis,
+            reranking=reranking_axis,
         )
 
     def chunk_split_strategy(self) -> str:

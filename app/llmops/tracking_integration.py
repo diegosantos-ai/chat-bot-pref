@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import json
 
 from app.audit import ExperimentalRunContract, PHASE1_TENANT_SEGREGATION
 from app.llmops.active_artifacts import ActiveArtifactResolver, ActiveTextArtifact
@@ -19,6 +20,7 @@ class Phase2TrackingMetadata:
     retriever_version_id: str
     chunking_version: str
     chunking_version_id: str
+    phase5_experiment_axes: dict[str, object]
 
     def as_tags(self) -> dict[str, str]:
         """Retorna as tags comparativas da Fase 2 para filtragem no tracking."""
@@ -35,6 +37,11 @@ class Phase2TrackingMetadata:
 
         return {
             "chunking_version": self.chunking_version,
+            "phase5_experiment_axes_json": json.dumps(
+                self.phase5_experiment_axes,
+                ensure_ascii=False,
+                sort_keys=True,
+            ),
         }
 
     def as_artifact_payload(self) -> dict[str, str]:
@@ -46,6 +53,7 @@ class Phase2TrackingMetadata:
             "retriever_version_id": self.retriever_version_id,
             "chunking_version": self.chunking_version,
             "chunking_version_id": self.chunking_version_id,
+            "phase5_experiment_axes": self.phase5_experiment_axes,
         }
 
 
@@ -112,6 +120,11 @@ def build_phase2_tracking_run(
     retrieval_artifact = resolver.resolve_retrieval_config()
     chunking_artifact = resolver.resolve_chunking_config()
     repository = chroma_repository or TenantChromaRepository(artifact_resolver=resolver)
+    experimental_config = resolver.resolve_phase5_experimental_config(
+        retrieval_strategy_name=retrieval_strategy_name,
+        query_transform_strategy_name=query_transform_strategy_name,
+        rerank_strategy_name=rerank_strategy_name,
+    )
 
     run_contract = ExperimentalRunContract(
         tenant_id=tenant_id,
@@ -119,11 +132,9 @@ def build_phase2_tracking_run(
         prompt_version=prompt_artifact.version,
         policy_version=policy_artifact.version,
         retriever_version=repository.retriever_version(),
-        retrieval_strategy_name=resolver.resolve_retrieval_strategy_name(retrieval_strategy_name),
-        query_transform_strategy_name=resolver.resolve_query_transform_strategy_name(
-            query_transform_strategy_name
-        ),
-        rerank_strategy_name=resolver.resolve_rerank_strategy_name(rerank_strategy_name),
+        retrieval_strategy_name=experimental_config.retrieval.strategy_name,
+        query_transform_strategy_name=experimental_config.query_transformation.strategy_name,
+        rerank_strategy_name=experimental_config.reranking.strategy_name,
         embedding_version=repository.embedding_version(),
         dataset_version=dataset_version,
         model_provider=(model_provider or settings.LLM_PROVIDER).strip(),
@@ -140,6 +151,7 @@ def build_phase2_tracking_run(
         retriever_version_id=retrieval_artifact.version_id,
         chunking_version=chunking_artifact.version,
         chunking_version_id=chunking_artifact.version_id,
+        phase5_experiment_axes=experimental_config.as_payload(),
     )
     return Phase2TrackingRun(
         run_contract=run_contract,

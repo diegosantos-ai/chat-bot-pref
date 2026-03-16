@@ -64,6 +64,7 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
     policy = resolver.resolve_policy_text()
     retrieval = resolver.resolve_retrieval_config()
     chunking = resolver.resolve_chunking_config()
+    experimental_config = resolver.resolve_phase5_experimental_config()
 
     assert composer.version == settings.PROMPT_BASE_VERSION
     assert fallback.version == settings.PROMPT_FALLBACK_VERSION
@@ -105,6 +106,12 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
     assert resolver.query_transformation_config().source_fields == ("keywords",)
     assert resolver.reranking_config().max_candidates == 5
     assert resolver.reranking_config().score_weights.retrieval_score == 0.35
+    assert experimental_config.retrieval.strategy_name == BASELINE_RETRIEVAL_STRATEGY_NAME
+    assert experimental_config.query_transformation.strategy_name == NO_QUERY_TRANSFORM_STRATEGY_NAME
+    assert experimental_config.reranking.strategy_name == NO_RERANK_STRATEGY_NAME
+    assert experimental_config.retrieval.params["candidate_pool_multiplier"] == 3
+    assert experimental_config.query_transformation.params["source_fields"] == ["keywords"]
+    assert experimental_config.reranking.params["max_candidates"] == 5
     assert chunking.version == PHASE2_ARTIFACT_CATALOG.chunking_config.version
     assert chunking.payload["split_strategy"] == "double_newline_paragraphs"
 

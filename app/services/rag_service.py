@@ -181,13 +181,14 @@ class RagService:
     def query(self, request: RagQueryRequest) -> RagQueryResponse:
         tenant_id = request.tenant_id or ""
         status = self.status(tenant_id)
-        strategy_name = self.artifact_resolver.resolve_retrieval_strategy_name(request.strategy_name)
-        query_transform_strategy_name = self.artifact_resolver.resolve_query_transform_strategy_name(
-            request.query_transform_strategy_name
+        experimental_config = self.artifact_resolver.resolve_phase5_experimental_config(
+            retrieval_strategy_name=request.strategy_name,
+            query_transform_strategy_name=request.query_transform_strategy_name,
+            rerank_strategy_name=request.rerank_strategy_name,
         )
-        rerank_strategy_name = self.artifact_resolver.resolve_rerank_strategy_name(
-            request.rerank_strategy_name
-        )
+        strategy_name = experimental_config.retrieval.strategy_name
+        query_transform_strategy_name = experimental_config.query_transformation.strategy_name
+        rerank_strategy_name = experimental_config.reranking.strategy_name
         query_transformation = self.query_transformation_service.transform_query(
             query_text=request.query,
             documents=self.document_repository.list_documents(tenant_id),
@@ -234,6 +235,7 @@ class RagService:
                     boost_enabled=request.boost_enabled,
                     collection=self.chroma_repository.collection_name(tenant_id),
                     strategy_name=strategy_name,
+                    experimental_axes=experimental_config.as_payload(),
                     query_transformation=self._to_query_transformation_used(query_transformation),
                     reranking=self._to_reranking_used(reranking),
                 ),
@@ -267,6 +269,7 @@ class RagService:
                 boost_enabled=request.boost_enabled,
                 collection=self.chroma_repository.collection_name(tenant_id),
                 strategy_name=strategy_name,
+                experimental_axes=experimental_config.as_payload(),
                 query_transformation=self._to_query_transformation_used(query_transformation),
                 reranking=self._to_reranking_used(reranking),
             ),

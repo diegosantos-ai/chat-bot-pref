@@ -103,6 +103,7 @@ async def run() -> int:
                 "retrieval_strategy_name": execution.tracking_run.run_contract.retrieval_strategy_name,
                 "query_transform_strategy_name": execution.tracking_run.run_contract.query_transform_strategy_name,
                 "rerank_strategy_name": execution.tracking_run.run_contract.rerank_strategy_name,
+                "phase5_experiment_axes": execution.tracking_run.tracking_metadata.phase5_experiment_axes,
                 "run_id": logged_run.run_id,
                 "tracking_uri": logged_run.tracking_uri,
                 "cases_total": len(execution.case_executions),

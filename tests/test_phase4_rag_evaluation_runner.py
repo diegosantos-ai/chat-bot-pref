@@ -147,6 +147,10 @@ def test_phase4_executor_logs_minimum_tracking_run_in_mlflow(tmp_path) -> None:
     assert run.data.params["evaluator_mode"] == "offline_heuristic_ragas"
     assert run.data.params["query_transform_strategy_name"] == NO_QUERY_TRANSFORM_STRATEGY_NAME
     assert run.data.params["rerank_strategy_name"] == NO_RERANK_STRATEGY_NAME
+    assert (
+        json.loads(run.data.params["phase5_experiment_axes_json"])["retrieval"]["strategy_name"]
+        == execution.tracking_run.run_contract.retrieval_strategy_name
+    )
     assert run.data.params["vectorstore_fingerprint"] == execution.vectorstore_fingerprint
     assert run.data.params["selected_cases_count"] == "1"
     assert run.data.metrics["cases_total"] == 1.0
@@ -189,6 +193,7 @@ def test_phase4_executor_generates_comparison_artifacts_with_required_fields(tmp
     comparison_snapshot = json.loads(
         second_logged_run.comparison_snapshot_path.read_text(encoding="utf-8")
     )
+    report_payload = json.loads(second_logged_run.report_path.read_text(encoding="utf-8"))
     case_ranking = json.loads(
         second_logged_run.case_ranking_path.read_text(encoding="utf-8")
     )
@@ -201,6 +206,7 @@ def test_phase4_executor_generates_comparison_artifacts_with_required_fields(tmp
     assert comparison_snapshot["tenant_id"] == "prefeitura-vila-serena"
     assert comparison_snapshot["runs_compared"] == 2
     assert "scores_from_offline_heuristic_ragas_are_not_external_semantic_judgments" in comparison_snapshot["methodology_notes"]
+    assert report_payload["phase5_experiment_axes"]["retrieval"]["strategy_name"]
 
     rows_by_run_id = {row["run_id"]: row for row in comparison_snapshot["runs"]}
     assert first_logged_run.run_id in rows_by_run_id
@@ -265,7 +271,12 @@ def test_phase4_executor_tracks_query_transform_strategy_in_run_and_case_artifac
 
     assert run.data.params["query_transform_strategy_name"] == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
     assert execution.case_executions[0].query_transform_strategy_name == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
+    assert execution.case_executions[0].retrieval_strategy_name
     assert case_payload["query_transform_strategy_name"] == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
+    assert (
+        case_payload["experimental_axes"]["query_transformation"]["strategy_name"]
+        == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
+    )
     assert "retrieval_query" in case_payload
 
 
@@ -288,7 +299,12 @@ def test_phase4_executor_tracks_rerank_strategy_in_run_and_case_artifacts(tmp_pa
 
     assert run.data.params["rerank_strategy_name"] == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
     assert execution.case_executions[0].rerank_strategy_name == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    assert case_payload["retrieval_strategy_name"] == execution.case_executions[0].retrieval_strategy_name
     assert case_payload["rerank_strategy_name"] == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    assert (
+        case_payload["experimental_axes"]["reranking"]["strategy_name"]
+        == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    )
     assert "reranked_candidates" in case_payload
 
 

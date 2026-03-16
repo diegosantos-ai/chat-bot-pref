@@ -8,6 +8,7 @@ Registrar o fechamento estrutural dos blocos:
 - `CPPX-F5-T2 — Implementar camada lexical complementar`
 - `CPPX-F5-T3 — Implementar query rewriting ou expansion controlado`
 - `CPPX-F5-T4 — Integrar reranker ao pipeline de recuperação`
+- `CPPX-F5-T5 — Expor parâmetros experimentais de retrieval avançado`
 
 Este documento descreve:
 
@@ -32,6 +33,7 @@ Este documento nao declara como implementado:
   - `CPPX-F5-T2`
   - `CPPX-F5-T3`
   - `CPPX-F5-T4`
+  - `CPPX-F5-T5`
 - critério de aceite do bloco: arquitetura-alvo pequena, incremental, tenant-aware, com variante lexical real, query expansion opt-in, reranking pós-recuperação e comparabilidade por benchmark/tracking
 - validação mínima deste bloco:
   - leitura cruzada entre `ARQUITETURA-LLMOps.md`, `PLANEJAMENTO-LLMOps.md` e o código do retrieval;
@@ -286,6 +288,11 @@ No estado atual:
 
 - a variante continua identificada no tracking por `retriever_version` e `retriever_version_id`;
 - o resultado técnico do retrieval expõe `params_used.strategy_name`;
+- o resultado técnico do retrieval expõe `params_used.experimental_axes` com:
+  - `retrieval`, `query_transformation` e `reranking`;
+  - `strategy_name`;
+  - `supported_strategies`;
+  - `params` ativos de cada eixo;
 - o resultado técnico do retrieval expõe `params_used.query_transformation` com:
   - query original;
   - query usada no retrieval;
@@ -296,7 +303,48 @@ No estado atual:
   - se houve aplicação;
   - sobre quantos candidatos o reranker rodou;
   - pesos ativos da heurística;
-- o tracking experimental da run passa a registrar `retrieval_strategy_name`, `query_transform_strategy_name` e `rerank_strategy_name` para distinguir os três eixos da execução dentro do mesmo `retriever_version`.
+- o tracking experimental da run passa a registrar `retrieval_strategy_name`, `query_transform_strategy_name`, `rerank_strategy_name` e `phase5_experiment_axes_json` para distinguir os três eixos da execução dentro do mesmo `retriever_version`.
+
+## Matriz experimental atualmente suportada
+
+O contrato experimental consolidado da Fase 5 agora fica resolvido em `app/llmops/active_artifacts.py` por meio de um único objeto lógico com três eixos:
+
+- `retrieval`
+- `query_transformation`
+- `reranking`
+
+Cada eixo expõe:
+
+- `strategy_name`
+- `supported_strategies`
+- `params`
+
+No estado atual, a matriz suportada e comparável é:
+
+- retrieval:
+  - `semantic_candidates_with_lexical_rescoring_v1`
+  - `semantic_plus_full_collection_lexical_candidates_v1`
+- query transformation:
+  - `no_query_transformation_v1`
+  - `tenant_keyword_query_expansion_v1`
+- reranking:
+  - `no_rerank_v1`
+  - `heuristic_post_retrieval_rerank_v1`
+
+Parâmetros ativos por eixo hoje:
+
+- retrieval:
+  - `top_k_default`
+  - `min_score_default`
+  - `boost_enabled_default`
+  - `candidate_pool_multiplier`
+  - `score_weights`
+- query transformation:
+  - `max_added_terms`
+  - `source_fields`
+- reranking:
+  - `max_candidates`
+  - `score_weights`
 
 ### Benchmark
 
@@ -328,11 +376,12 @@ Critérios mínimos de leitura:
 - separação explícita entre query original e query efetivamente usada no retrieval;
 - reranking heurístico opt-in aplicado após a recuperação inicial e antes da resposta técnica final;
 - preservação do `retrieval_score` original quando o reranking está ativo;
+- consolidação da superfície experimental da Fase 5 em um contrato único por eixo, resolvido a partir do artefato ativo e reaproveitado por runtime, benchmark offline, tracking e CLI;
+- exposição explícita da matriz ativa em `params_used.experimental_axes` e em `phase5_experiment_axes_json` no tracking experimental;
 - redução adicional de duplicação entre runtime e executor offline ao reaproveitar o repositório de retrieval.
 
 ## O que fica explicitamente para os próximos blocos
 
-- `CPPX-F5-T5`: exposição ampliada dos parâmetros experimentais novos;
 - `CPPX-F5-T6`: comparação formal entre variantes;
 - `CPPX-F5-T7`: consolidação da baseline vencedora ou matriz de trade-offs.
 

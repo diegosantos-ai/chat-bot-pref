@@ -24,6 +24,9 @@ from app.observability.metrics import (
     record_chat_request,
     record_llm_composition,
     record_pipeline_estimated_cost,
+    record_pipeline_fallback,
+    record_pipeline_policy_block,
+    record_pipeline_retrieval_empty,
     track_pipeline_stage_latency,
     record_policy_decision,
     record_retrieval,
@@ -151,6 +154,13 @@ class ChatService:
                 reason_codes=pre_decision.reason_codes,
                 channel=channel,
             )
+            if pre_decision.decision == "block":
+                record_pipeline_policy_block(
+                    tenant_id=tenant_id,
+                    stage=pre_decision.stage,
+                    reason_codes=pre_decision.reason_codes,
+                    channel=channel,
+                )
             self._append_policy_event(
                 request_id=resolved_request_id,
                 tenant_id=tenant_id,
@@ -218,6 +228,10 @@ class ChatService:
                         channel=channel,
                     )
                 else:
+                    record_pipeline_retrieval_empty(
+                        tenant_id=tenant_id,
+                        channel=channel,
+                    )
                     initial_reason_code = self._fallback_reason_from_rag(rag_response)
                     llm_result, llm_latency = await self._compose_fallback_with_span(
                         tenant_profile=tenant_profile,
@@ -321,6 +335,13 @@ class ChatService:
                 reason_codes=post_decision.reason_codes,
                 channel=channel,
             )
+            if post_decision.decision == "block":
+                record_pipeline_policy_block(
+                    tenant_id=tenant_id,
+                    stage=post_decision.stage,
+                    reason_codes=post_decision.reason_codes,
+                    channel=channel,
+                )
             self._append_policy_event(
                 request_id=resolved_request_id,
                 tenant_id=tenant_id,
@@ -649,6 +670,11 @@ class ChatService:
         span_name: str,
     ) -> tuple[LLMGenerationResponse, float]:
         started_at = perf_counter()
+        record_pipeline_fallback(
+            tenant_id=tenant_profile.tenant_id,
+            reason_code=reason_code,
+            channel=channel,
+        )
         with track_pipeline_stage_latency(
             tenant_id=tenant_profile.tenant_id,
             stage_name=PipelineStageName.COMPOSER,

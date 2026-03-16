@@ -162,7 +162,7 @@ PHASE6_MINIMAL_METRICS: Final[tuple[Phase6MetricDefinition, ...]] = (
         stage_name=PipelineStageName.FALLBACK,
         description="Total de respostas em modo fallback por tenant e motivo principal.",
         dimensions=PHASE6_OPERATIONAL_DIMENSIONS_BASE,
-        status=ContractStatus.PLANNED,
+        status=ContractStatus.ACTIVE,
         source_paths=(
             "app/services/chat_service.py:_compose_fallback_with_span",
             "app/observability/metrics.py:record_llm_composition",
@@ -175,7 +175,7 @@ PHASE6_MINIMAL_METRICS: Final[tuple[Phase6MetricDefinition, ...]] = (
         stage_name=PipelineStageName.BLOCKED,
         description="Total de bloqueios de policy_pre ou policy_post por tenant.",
         dimensions=PHASE6_OPERATIONAL_DIMENSIONS_BASE,
-        status=ContractStatus.PLANNED,
+        status=ContractStatus.ACTIVE,
         source_paths=(
             "app/services/chat_service.py:policy_pre",
             "app/services/chat_service.py:policy_post",
@@ -189,7 +189,7 @@ PHASE6_MINIMAL_METRICS: Final[tuple[Phase6MetricDefinition, ...]] = (
         stage_name=PipelineStageName.RETRIEVAL,
         description="Total de retrieval sem chunks uteis por tenant.",
         dimensions=PHASE6_OPERATIONAL_DIMENSIONS_BASE,
-        status=ContractStatus.PLANNED,
+        status=ContractStatus.ACTIVE,
         source_paths=(
             "app/services/rag_service.py:query",
             "app/observability/metrics.py:record_retrieval",

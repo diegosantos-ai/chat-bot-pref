@@ -1,0 +1,7 @@
+{
+  "permission": {
+    "skill": {
+      "chat-pref-*": "allow"
+    }
+  }
+}

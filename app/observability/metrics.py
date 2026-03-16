@@ -60,6 +60,28 @@ PIPELINE_ESTIMATED_COST_USD_TOTAL = Counter(
     registry=REGISTRY,
 )
 
+PIPELINE_FALLBACK_TOTAL = Counter(
+    "chatpref_pipeline_fallback_total",
+    "Total de respostas em modo fallback por tenant e motivo principal.",
+    labelnames=("tenant_id", "reason_code", "channel"),
+    registry=REGISTRY,
+)
+
+PIPELINE_POLICY_BLOCK_TOTAL = Counter(
+    "chatpref_pipeline_policy_block_total",
+    "Total de bloqueios de policy_pre ou policy_post por tenant.",
+    labelnames=("tenant_id", "stage", "reason_code", "channel"),
+    registry=REGISTRY,
+)
+
+PIPELINE_RETRIEVAL_EMPTY_TOTAL = Counter(
+    "chatpref_pipeline_retrieval_empty_total",
+    "Total de retrieval sem chunks uteis por tenant.",
+    labelnames=("tenant_id", "channel"),
+    registry=REGISTRY,
+)
+
+
 
 def record_chat_request(*, channel: str) -> None:
     CHAT_REQUESTS_TOTAL.labels(channel=channel or "unknown").inc()
@@ -142,6 +164,48 @@ def record_pipeline_estimated_cost(
         llm_provider=llm_provider or "unknown",
         llm_model=llm_model or "unknown",
     ).inc(max(estimated_cost_usd, 0.0))
+
+
+def record_pipeline_fallback(
+    *,
+    tenant_id: str,
+    reason_code: str,
+    channel: str,
+) -> None:
+    """Registra explicitamente um evento de fallback no pipeline transacional."""
+    PIPELINE_FALLBACK_TOTAL.labels(
+        tenant_id=tenant_id or "unknown",
+        reason_code=reason_code or "unknown",
+        channel=channel or "unknown",
+    ).inc()
+
+def record_pipeline_policy_block(
+    *,
+    tenant_id: str,
+    stage: str,
+    reason_codes: list[str],
+    channel: str,
+) -> None:
+    """Registra explícitamente um bloqueio de policy no pipeline transacional."""
+    normalized_reason_codes = reason_codes or ["unknown"]
+    for reason_code in normalized_reason_codes:
+        PIPELINE_POLICY_BLOCK_TOTAL.labels(
+            tenant_id=tenant_id or "unknown",
+            stage=stage or "unknown",
+            reason_code=reason_code,
+            channel=channel or "unknown",
+        ).inc()
+
+def record_pipeline_retrieval_empty(
+    *,
+    tenant_id: str,
+    channel: str,
+) -> None:
+    """Registra explicitamente um retrieval que nao retornou contexto util."""
+    PIPELINE_RETRIEVAL_EMPTY_TOTAL.labels(
+        tenant_id=tenant_id or "unknown",
+        channel=channel or "unknown",
+    ).inc()
 
 
 @contextmanager

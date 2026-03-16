@@ -1,0 +1,41 @@
+{
+  "phase": "F4",
+  "artifact_type": "baseline_summary",
+  "run_id": "c50c6041a7ee4158bd8416ff92f160b6",
+  "request_id": "req-rag-eval-10b4375b584e",
+  "experiment_name": "chat-pref-fase5-retrieval-comparison",
+  "tenant_id": "prefeitura-vila-serena",
+  "dataset_version": "benchmark_v1",
+  "selected_cases_count": 17,
+  "dataset_cases_count": 17,
+  "full_dataset_run": true,
+  "evaluator_library": "ragas",
+  "evaluator_library_version": "0.2.15",
+  "evaluator_mode": "offline_heuristic_ragas",
+  "official_metrics": {
+    "faithfulness_mean": 0.75,
+    "answer_relevance_mean": 0.0,
+    "expected_context_coverage_mean": 0.5385,
+    "retrieval_empty_rate": 0.1765,
+    "cases_total": 17,
+    "cases_evaluated": 14,
+    "cases_partial": 3,
+    "cases_skipped": 0
+  },
+  "official_metric_status": {
+    "faithfulness": "baseline_primary",
+    "answer_relevance": "baseline_primary_with_low_interpretability_on_current_stack",
+    "expected_context_coverage": "baseline_complementary_heuristic",
+    "retrieval_empty_rate": "baseline_complementary_structural"
+  },
+  "partial_or_blocked_metrics": {
+    "context_precision": "blocked_without_reference_answer",
+    "context_recall": "blocked_without_reference_answer",
+    "faithfulness": "partial_when_policy_pre_blocks_retrieval_or_context_is_empty"
+  },
+  "methodology_notes": [
+    "offline_heuristic_evaluator",
+    "benchmark_cases_with_missing_fields",
+    "skipped_metrics_present"
+  ]
+}

@@ -9,6 +9,7 @@ Registrar o fechamento estrutural dos blocos:
 - `CPPX-F5-T3 — Implementar query rewriting ou expansion controlado`
 - `CPPX-F5-T4 — Integrar reranker ao pipeline de recuperação`
 - `CPPX-F5-T5 — Expor parâmetros experimentais de retrieval avançado`
+- `CPPX-F5-T6 — Executar comparação entre estratégias`
 
 Este documento descreve:
 
@@ -34,6 +35,7 @@ Este documento nao declara como implementado:
   - `CPPX-F5-T3`
   - `CPPX-F5-T4`
   - `CPPX-F5-T5`
+  - `CPPX-F5-T6`
 - critério de aceite do bloco: arquitetura-alvo pequena, incremental, tenant-aware, com variante lexical real, query expansion opt-in, reranking pós-recuperação e comparabilidade por benchmark/tracking
 - validação mínima deste bloco:
   - leitura cruzada entre `ARQUITETURA-LLMOps.md`, `PLANEJAMENTO-LLMOps.md` e o código do retrieval;
@@ -380,9 +382,66 @@ Critérios mínimos de leitura:
 - exposição explícita da matriz ativa em `params_used.experimental_axes` e em `phase5_experiment_axes_json` no tracking experimental;
 - redução adicional de duplicação entre runtime e executor offline ao reaproveitar o repositório de retrieval.
 
+## Comparativo preliminar executado em 2026-03-16
+
+Execução realizada com:
+
+- tenant: `prefeitura-vila-serena`
+- dataset: `benchmark_v1`
+- benchmark completo: `17` casos
+- experimento MLflow: `chat-pref-fase5-retrieval-comparison`
+- script de orquestração: `scripts/run_phase5_strategy_comparison.py`
+
+Combinações executadas:
+
+| Label | Retrieval | Query transformation | Reranking |
+|---|---|---|---|
+| `baseline_semantic_only` | `semantic_candidates_with_lexical_rescoring_v1` | `no_query_transformation_v1` | `no_rerank_v1` |
+| `hybrid_lexical_only` | `semantic_plus_full_collection_lexical_candidates_v1` | `no_query_transformation_v1` | `no_rerank_v1` |
+| `hybrid_plus_query_transform` | `semantic_plus_full_collection_lexical_candidates_v1` | `tenant_keyword_query_expansion_v1` | `no_rerank_v1` |
+| `hybrid_plus_rerank` | `semantic_plus_full_collection_lexical_candidates_v1` | `no_query_transformation_v1` | `heuristic_post_retrieval_rerank_v1` |
+| `hybrid_plus_query_transform_plus_rerank` | `semantic_plus_full_collection_lexical_candidates_v1` | `tenant_keyword_query_expansion_v1` | `heuristic_post_retrieval_rerank_v1` |
+
+Métricas observadas:
+
+| Label | Faithfulness | Answer relevance | Expected context coverage | Retrieval empty rate | Latência total da run (ms) |
+|---|---:|---:|---:|---:|---:|
+| `baseline_semantic_only` | `0.7500` | `0.0000` | `0.5385` | `0.1765` | `168.421` |
+| `hybrid_lexical_only` | `0.8214` | `0.0000` | `0.7308` | `0.1765` | `182.013` |
+| `hybrid_plus_query_transform` | `0.8214` | `0.0000` | `0.6538` | `0.1765` | `204.387` |
+| `hybrid_plus_rerank` | `0.7857` | `0.0000` | `0.7308` | `0.1765` | `194.760` |
+| `hybrid_plus_query_transform_plus_rerank` | `0.7500` | `0.0000` | `0.6538` | `0.1765` | `190.309` |
+
+Contagens estruturais observadas em todas as combinações:
+
+- `cases_total = 17`
+- `cases_evaluated = 14`
+- `cases_partial = 3`
+- `cases_skipped = 0`
+
+Leitura preliminar:
+
+- `hybrid_lexical_only` foi a combinação com melhor sinal conjunto do recorte atual:
+  - `faithfulness_mean` subiu de `0.7500` para `0.8214`;
+  - `expected_context_coverage_mean` subiu de `0.5385` para `0.7308`;
+  - a latência total da run aumentou `13.592 ms` frente à baseline.
+- `hybrid_plus_query_transform` não trouxe ganho adicional sobre `hybrid_lexical_only`:
+  - manteve `faithfulness_mean` em `0.8214`;
+  - reduziu `expected_context_coverage_mean` para `0.6538`;
+  - aumentou mais a latência total.
+- `hybrid_plus_rerank` preservou o ganho de cobertura de `0.7308`, mas com `faithfulness_mean` inferior ao `hybrid_lexical_only` e custo de latência maior.
+- `hybrid_plus_query_transform_plus_rerank` voltou ao mesmo `faithfulness_mean` da baseline e não superou a variante híbrida simples em cobertura.
+- `answer_relevance_mean` ficou em `0.0000` em toda a matriz e não discriminou variantes neste recorte; por isso, ele não sustenta decisão isolada neste bloco.
+- `retrieval_empty_rate` permaneceu em `0.1765` em todas as combinações; neste benchmark atual, a Fase 5 não alterou o vazio de retrieval medido.
+
+Conclusão metodológica deste bloco:
+
+- existe um candidato preliminar razoável para `T7`: `semantic_plus_full_collection_lexical_candidates_v1` sem query transformation e sem reranking;
+- a evidência atual não sustenta promoção de query expansion heurística ou reranking heurístico como complemento default da variante híbrida;
+- o bloco continua honesto quanto aos limites: a decisão final de promoção ou matriz de trade-offs ainda pertence ao `CPPX-F5-T7`.
+
 ## O que fica explicitamente para os próximos blocos
 
-- `CPPX-F5-T6`: comparação formal entre variantes;
 - `CPPX-F5-T7`: consolidação da baseline vencedora ou matriz de trade-offs.
 
 ## Riscos e limites identificados

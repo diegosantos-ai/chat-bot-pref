@@ -22,9 +22,11 @@ from app.observability.logging import log_event
 from app.observability.metrics import (
     record_chat_request,
     record_llm_composition,
+    track_pipeline_stage_latency,
     record_policy_decision,
     record_retrieval,
 )
+from app.observability.phase6_contracts import PipelineStageName
 from app.observability.tracing import annotate_current_span, get_tracer
 from app.policy_guard.service import PolicyGuardService, PostPolicyInput
 from app.services.llm_service import LLMComposeService, LLMGenerationResponse
@@ -121,19 +123,25 @@ class ChatService:
                 ),
             )
 
-            with self.tracer.start_as_current_span("policy_pre") as policy_pre_span:
-                annotate_current_span(
-                    request_id=resolved_request_id,
-                    tenant_id=tenant_id,
-                    session_id=resolved_session_id,
-                    channel=channel,
-                )
-                pre_decision = self.policy_guard.evaluate_pre(chat_request.message, tenant_profile)
-                annotate_current_span(
-                    policy_stage=pre_decision.stage,
-                    decision=pre_decision.decision,
-                    reason_codes=",".join(pre_decision.reason_codes),
-                )
+            with track_pipeline_stage_latency(
+                tenant_id=tenant_id,
+                stage_name=PipelineStageName.POLICY_PRE,
+                channel=channel,
+            ) as mark_policy_pre_status:
+                with self.tracer.start_as_current_span("policy_pre") as policy_pre_span:
+                    annotate_current_span(
+                        request_id=resolved_request_id,
+                        tenant_id=tenant_id,
+                        session_id=resolved_session_id,
+                        channel=channel,
+                    )
+                    pre_decision = self.policy_guard.evaluate_pre(chat_request.message, tenant_profile)
+                    annotate_current_span(
+                        policy_stage=pre_decision.stage,
+                        decision=pre_decision.decision,
+                        reason_codes=",".join(pre_decision.reason_codes),
+                    )
+                mark_policy_pre_status(pre_decision.decision)
 
             record_policy_decision(
                 stage=pre_decision.stage,
@@ -258,26 +266,32 @@ class ChatService:
                 ),
             )
 
-            with self.tracer.start_as_current_span("policy_post") as policy_post_span:
-                annotate_current_span(
-                    request_id=resolved_request_id,
-                    tenant_id=tenant_id,
-                    session_id=resolved_session_id,
-                    channel=channel,
-                )
-                post_decision = self.policy_guard.evaluate_post(
-                    PostPolicyInput(
-                        question=chat_request.message,
-                        candidate_response=llm_result.message,
-                        rag_response=rag_response,
-                    ),
-                    pre_decision=pre_decision,
-                )
-                annotate_current_span(
-                    policy_stage=post_decision.stage,
-                    decision=post_decision.decision,
-                    reason_codes=",".join(post_decision.reason_codes),
-                )
+            with track_pipeline_stage_latency(
+                tenant_id=tenant_id,
+                stage_name=PipelineStageName.POLICY_POST,
+                channel=channel,
+            ) as mark_policy_post_status:
+                with self.tracer.start_as_current_span("policy_post") as policy_post_span:
+                    annotate_current_span(
+                        request_id=resolved_request_id,
+                        tenant_id=tenant_id,
+                        session_id=resolved_session_id,
+                        channel=channel,
+                    )
+                    post_decision = self.policy_guard.evaluate_post(
+                        PostPolicyInput(
+                            question=chat_request.message,
+                            candidate_response=llm_result.message,
+                            rag_response=rag_response,
+                        ),
+                        pre_decision=pre_decision,
+                    )
+                    annotate_current_span(
+                        policy_stage=post_decision.stage,
+                        decision=post_decision.decision,
+                        reason_codes=",".join(post_decision.reason_codes),
+                    )
+                mark_policy_post_status(post_decision.decision)
 
             record_policy_decision(
                 stage=post_decision.stage,
@@ -339,50 +353,55 @@ class ChatService:
                     ),
                 )
 
-            with self.tracer.start_as_current_span("response") as response_span:
-                annotate_current_span(
-                    request_id=resolved_request_id,
-                    tenant_id=tenant_id,
-                    session_id=resolved_session_id,
-                    channel=channel,
-                )
-                response = ChatResponse(
-                    request_id=resolved_request_id,
-                    session_id=resolved_session_id,
-                    tenant_id=tenant_id,
-                    message=final_llm_result.message,
-                    channel=channel,
-                )
+            with track_pipeline_stage_latency(
+                tenant_id=tenant_id,
+                stage_name=PipelineStageName.RESPONSE_FINAL,
+                channel=channel,
+            ):
+                with self.tracer.start_as_current_span("response") as response_span:
+                    annotate_current_span(
+                        request_id=resolved_request_id,
+                        tenant_id=tenant_id,
+                        session_id=resolved_session_id,
+                        channel=channel,
+                    )
+                    response = ChatResponse(
+                        request_id=resolved_request_id,
+                        session_id=resolved_session_id,
+                        tenant_id=tenant_id,
+                        message=final_llm_result.message,
+                        channel=channel,
+                    )
 
-                exchange_record = ChatExchangeRecord(
-                    request_id=response.request_id,
-                    tenant_id=tenant_id,
-                    session_id=resolved_session_id,
-                    channel=channel,
-                    user_message=chat_request.message,
-                    assistant_message=response.message,
-                )
-                self.repository.append_exchange(exchange_record)
+                    exchange_record = ChatExchangeRecord(
+                        request_id=response.request_id,
+                        tenant_id=tenant_id,
+                        session_id=resolved_session_id,
+                        channel=channel,
+                        user_message=chat_request.message,
+                        assistant_message=response.message,
+                    )
+                    self.repository.append_exchange(exchange_record)
 
-                self._append_event(
-                    request_id=response.request_id,
-                    tenant_id=tenant_id,
-                    session_id=resolved_session_id,
-                    channel=channel,
-                    event_type="chat_response_generated",
-                    payload=self._build_audit_payload(
-                        {
-                            "message": response.message,
-                            "provider": final_llm_result.provider,
-                            "model": final_llm_result.model,
-                            "prompt_version": final_llm_result.prompt_version,
-                            "response_mode": final_llm_result.mode,
-                            "policy_version": post_decision.policy_version,
-                            "reason_codes": self._join_reason_codes(post_decision or pre_decision),
-                        },
-                        normalized_audit_context,
-                    ),
-                )
+                    self._append_event(
+                        request_id=response.request_id,
+                        tenant_id=tenant_id,
+                        session_id=resolved_session_id,
+                        channel=channel,
+                        event_type="chat_response_generated",
+                        payload=self._build_audit_payload(
+                            {
+                                "message": response.message,
+                                "provider": final_llm_result.provider,
+                                "model": final_llm_result.model,
+                                "prompt_version": final_llm_result.prompt_version,
+                                "response_mode": final_llm_result.mode,
+                                "policy_version": post_decision.policy_version,
+                                "reason_codes": self._join_reason_codes(post_decision or pre_decision),
+                            },
+                            normalized_audit_context,
+                        ),
+                    )
 
             process_span.set_status(Status(StatusCode.OK))
             log_event(
@@ -562,22 +581,28 @@ class ChatService:
         channel: str,
     ) -> tuple[LLMGenerationResponse, float]:
         started_at = perf_counter()
-        with self.tracer.start_as_current_span("compose"):
-            result = await self.llm_service.compose_answer(
-                tenant_profile=tenant_profile,
-                question=question,
-                context_chunks=context_chunks,
-            )
-            latency_seconds = perf_counter() - started_at
-            annotate_current_span(
-                provider=result.provider,
-                model=result.model,
-                prompt_version=result.prompt_version,
-                mode=result.mode,
-                channel=channel,
-                latency_ms=f"{latency_seconds * 1000:.2f}",
-            )
-            return result, latency_seconds
+        with track_pipeline_stage_latency(
+            tenant_id=tenant_profile.tenant_id,
+            stage_name=PipelineStageName.COMPOSER,
+            channel=channel,
+        ) as mark_composer_status:
+            with self.tracer.start_as_current_span("compose"):
+                result = await self.llm_service.compose_answer(
+                    tenant_profile=tenant_profile,
+                    question=question,
+                    context_chunks=context_chunks,
+                )
+                latency_seconds = perf_counter() - started_at
+                annotate_current_span(
+                    provider=result.provider,
+                    model=result.model,
+                    prompt_version=result.prompt_version,
+                    mode=result.mode,
+                    channel=channel,
+                    latency_ms=f"{latency_seconds * 1000:.2f}",
+                )
+                mark_composer_status(result.mode)
+                return result, latency_seconds
 
     async def _compose_fallback_with_span(
         self,
@@ -590,24 +615,30 @@ class ChatService:
         span_name: str,
     ) -> tuple[LLMGenerationResponse, float]:
         started_at = perf_counter()
-        with self.tracer.start_as_current_span(span_name):
-            result = await self.llm_service.compose_fallback(
-                tenant_profile=tenant_profile,
-                question=question,
-                reason_code=reason_code,
-                policy_summary=policy_summary,
-            )
-            latency_seconds = perf_counter() - started_at
-            annotate_current_span(
-                provider=result.provider,
-                model=result.model,
-                prompt_version=result.prompt_version,
-                mode=result.mode,
-                channel=channel,
-                reason_code=reason_code,
-                latency_ms=f"{latency_seconds * 1000:.2f}",
-            )
-            return result, latency_seconds
+        with track_pipeline_stage_latency(
+            tenant_id=tenant_profile.tenant_id,
+            stage_name=PipelineStageName.COMPOSER,
+            channel=channel,
+        ) as mark_composer_status:
+            with self.tracer.start_as_current_span(span_name):
+                result = await self.llm_service.compose_fallback(
+                    tenant_profile=tenant_profile,
+                    question=question,
+                    reason_code=reason_code,
+                    policy_summary=policy_summary,
+                )
+                latency_seconds = perf_counter() - started_at
+                annotate_current_span(
+                    provider=result.provider,
+                    model=result.model,
+                    prompt_version=result.prompt_version,
+                    mode=result.mode,
+                    channel=channel,
+                    reason_code=reason_code,
+                    latency_ms=f"{latency_seconds * 1000:.2f}",
+                )
+                mark_composer_status(result.mode)
+                return result, latency_seconds
 
     def _truncate(self, text: str) -> str:
         normalized = text.replace("\n", " ").strip()

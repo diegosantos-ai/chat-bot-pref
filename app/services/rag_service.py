@@ -21,6 +21,8 @@ from app.contracts.dto import (
     RagStatusResponse,
 )
 from app.llmops import ActiveArtifactResolver
+from app.observability.metrics import track_pipeline_stage_latency
+from app.observability.phase6_contracts import PipelineStageName
 from app.rag.query_transformation import QueryTransformationResult, QueryTransformationService
 from app.rag.reranking import RerankingResult, RerankingService, build_identity_reranking
 from app.storage.chroma_repository import IngestChunk
@@ -189,33 +191,53 @@ class RagService:
         strategy_name = experimental_config.retrieval.strategy_name
         query_transform_strategy_name = experimental_config.query_transformation.strategy_name
         rerank_strategy_name = experimental_config.reranking.strategy_name
-        query_transformation = self.query_transformation_service.transform_query(
-            query_text=request.query,
-            documents=self.document_repository.list_documents(tenant_id),
-            strategy_name=query_transform_strategy_name,
-            config=self.artifact_resolver.query_transformation_config(),
-        )
-        reranking_config = self.artifact_resolver.reranking_config()
-        chunks = self.chroma_repository.query_chunks(
+        with track_pipeline_stage_latency(
             tenant_id=tenant_id,
-            query_text=query_transformation.retrieval_query,
-            limit=request.top_k,
-            min_score=request.min_score,
-            strategy_name=strategy_name,
-        )
-        reranking = build_identity_reranking(
-            query_text=request.query,
-            strategy_name=rerank_strategy_name,
-            total_candidates=len(chunks),
-            config=reranking_config,
-        )
-        if chunks:
-            chunks, reranking = self.reranking_service.rerank_chunks(
+            stage_name=PipelineStageName.QUERY_EXPANSION,
+            channel="unknown",
+        ) as mark_query_expansion_status:
+            query_transformation = self.query_transformation_service.transform_query(
                 query_text=request.query,
-                chunks=chunks,
+                documents=self.document_repository.list_documents(tenant_id),
+                strategy_name=query_transform_strategy_name,
+                config=self.artifact_resolver.query_transformation_config(),
+            )
+            mark_query_expansion_status(
+                "applied" if query_transformation.applied else "not_applied"
+            )
+        reranking_config = self.artifact_resolver.reranking_config()
+        with track_pipeline_stage_latency(
+            tenant_id=tenant_id,
+            stage_name=PipelineStageName.RETRIEVAL,
+            channel="unknown",
+        ) as mark_retrieval_status:
+            chunks = self.chroma_repository.query_chunks(
+                tenant_id=tenant_id,
+                query_text=query_transformation.retrieval_query,
+                limit=request.top_k,
+                min_score=request.min_score,
+                strategy_name=strategy_name,
+            )
+            reranking = build_identity_reranking(
+                query_text=request.query,
                 strategy_name=rerank_strategy_name,
+                total_candidates=len(chunks),
                 config=reranking_config,
             )
+            if chunks:
+                chunks, reranking = self.reranking_service.rerank_chunks(
+                    query_text=request.query,
+                    chunks=chunks,
+                    strategy_name=rerank_strategy_name,
+                    config=reranking_config,
+                )
+
+            if not status.ready:
+                mark_retrieval_status("knowledge_base_not_loaded")
+            elif not chunks:
+                mark_retrieval_status("no_results")
+            else:
+                mark_retrieval_status("ready")
         if not status.ready or not chunks:
             message = status.message if not status.ready else (
                 f"Nenhum chunk do tenant '{tenant_id}' atingiu o score mínimo informado."

@@ -235,3 +235,23 @@ Conteudo do contrato:
 - `CPPX-F6-T5`: correlacao operacional-tracking em trilha tecnicamente verificavel
 - `CPPX-F6-T6`: painel tecnico minimo
 - `CPPX-F6-T7`: guia de leitura operacional final
+
+## Atualizacao do bloco CPPX-F6-T2
+
+Estado implementado no runtime apos este bloco:
+
+- serie Prometheus `chatpref_pipeline_stage_latency_seconds` ativa em `/metrics`;
+- labels usadas na serie: `tenant_id`, `stage_name`, `channel`, `status`;
+- instrumentacao com ponto reutilizavel central em `app/observability/metrics.py` (`track_pipeline_stage_latency`);
+- estagios hoje observaveis no fluxo transacional:
+	- `policy_pre`
+	- `query_expansion`
+	- `retrieval`
+	- `composer`
+	- `policy_post`
+	- `response_final`
+
+Lacunas mantidas de forma explicita:
+
+- `classification` continua nao aplicavel ao runtime atual por ausencia de etapa ativa no caminho transacional;
+- custo estimado, fallback/bloqueio/retrieval vazio como metricas dedicadas e correlacao trace-run continuam para blocos seguintes da Fase 6.

@@ -9,6 +9,7 @@ from typing import Any
 
 from app.llmops.artifact_catalog import AI_ARTIFACTS_DIR, PHASE2_ARTIFACT_CATALOG, Phase2ArtifactCatalog
 from app.llmops.artifact_catalog import VersionedArtifactDescriptor
+from app.rag.retrieval_scoring import RetrievalScoreWeights
 from app.llmops.versioning import ArtifactVersionMetadata, build_content_hash, load_artifact_metadata
 from app.settings import settings
 
@@ -109,6 +110,37 @@ class ActiveArtifactResolver:
 
         payload = self.resolve_retrieval_config().payload
         return str(payload.get("embedding_version", settings.RAG_EMBEDDING_VERSION)).strip()
+
+    def retrieval_strategy_name(self) -> str:
+        """Retorna o nome tecnico da estrategia ativa de retrieval."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_value = str(payload.get("strategy_name", self.resolve_retrieval_config().version)).strip()
+        if not raw_value:
+            raise ValueError("strategy_name do retrieval nao pode ser vazio.")
+        return raw_value
+
+    def retrieval_candidate_pool_multiplier(self) -> int:
+        """Retorna o multiplicador do pool inicial de candidatos do retrieval."""
+
+        payload = self.resolve_retrieval_config().payload
+        multiplier = int(payload.get("candidate_pool_multiplier", 3))
+        if multiplier < 1:
+            raise ValueError("candidate_pool_multiplier deve ser maior ou igual a 1.")
+        return multiplier
+
+    def retrieval_score_weights(self) -> RetrievalScoreWeights:
+        """Retorna os pesos ativos do score combinado do retrieval atual."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_weights = payload.get("score_weights", {})
+        if raw_weights is None:
+            raw_weights = {}
+        if not isinstance(raw_weights, dict):
+            raise ValueError("score_weights do retrieval deve ser um objeto JSON.")
+        lexical = float(raw_weights.get("lexical", 0.75))
+        semantic = float(raw_weights.get("semantic", 0.25))
+        return RetrievalScoreWeights(lexical=lexical, semantic=semantic)
 
     def chunk_split_strategy(self) -> str:
         """Retorna a estratégia ativa de fracionamento textual."""

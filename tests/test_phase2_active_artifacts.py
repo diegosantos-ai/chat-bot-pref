@@ -59,6 +59,10 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
     assert retrieval.version == settings.RAG_RETRIEVER_VERSION
     assert retrieval.payload["top_k_default"] == settings.LLM_CONTEXT_TOP_K
     assert retrieval.payload["embedding_version"] == settings.RAG_EMBEDDING_VERSION
+    assert resolver.retrieval_strategy_name() == "semantic_candidates_with_lexical_rescoring_v1"
+    assert resolver.retrieval_candidate_pool_multiplier() == 3
+    assert resolver.retrieval_score_weights().lexical == 0.75
+    assert resolver.retrieval_score_weights().semantic == 0.25
     assert chunking.version == PHASE2_ARTIFACT_CATALOG.chunking_config.version
     assert chunking.payload["split_strategy"] == "double_newline_paragraphs"
 
@@ -90,6 +94,7 @@ def test_retrieval_top_k_default_falls_back_to_settings_when_config_key_is_missi
                 "embedding_version": settings.RAG_EMBEDDING_VERSION,
                 "min_score_default": 0.0,
                 "scope": "tenant_aware",
+                "strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
                 "vector_store": "chroma",
             },
             ensure_ascii=False,
@@ -107,6 +112,8 @@ def test_retrieval_top_k_default_falls_back_to_settings_when_config_key_is_missi
     resolver = ActiveArtifactResolver(artifacts_dir=artifacts_dir)
 
     assert resolver.retrieval_top_k_default() == settings.LLM_CONTEXT_TOP_K
+    assert resolver.retrieval_candidate_pool_multiplier() == 3
+    assert resolver.retrieval_strategy_name() == "semantic_candidates_with_lexical_rescoring_v1"
 
 
 def test_rag_runtime_uses_active_chunking_and_retriever_versions(tmp_path) -> None:

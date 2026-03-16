@@ -199,6 +199,7 @@ class RagService:
                     top_k=request.top_k,
                     boost_enabled=request.boost_enabled,
                     collection=self.chroma_repository.collection_name(tenant_id),
+                    strategy_name=self.artifact_resolver.retrieval_strategy_name(),
                 ),
             )
 
@@ -227,6 +228,7 @@ class RagService:
                 top_k=request.top_k,
                 boost_enabled=request.boost_enabled,
                 collection=self.chroma_repository.collection_name(tenant_id),
+                strategy_name=self.artifact_resolver.retrieval_strategy_name(),
             ),
         )
 

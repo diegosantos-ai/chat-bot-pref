@@ -57,6 +57,7 @@ class ExperimentalRunContract:
     retriever_version: str
     retrieval_strategy_name: str
     query_transform_strategy_name: str
+    rerank_strategy_name: str
     embedding_version: str
     dataset_version: str
     model_provider: str
@@ -76,6 +77,7 @@ class ExperimentalRunContract:
             "retriever_version": self.retriever_version,
             "retrieval_strategy_name": self.retrieval_strategy_name,
             "query_transform_strategy_name": self.query_transform_strategy_name,
+            "rerank_strategy_name": self.rerank_strategy_name,
             "embedding_version": self.embedding_version,
             "dataset_version": self.dataset_version,
             "model_provider": self.model_provider,
@@ -108,6 +110,7 @@ class ExperimentalRunContract:
             "retriever_version": self.retriever_version,
             "retrieval_strategy_name": self.retrieval_strategy_name,
             "query_transform_strategy_name": self.query_transform_strategy_name,
+            "rerank_strategy_name": self.rerank_strategy_name,
             "embedding_version": self.embedding_version,
             "dataset_version": self.dataset_version,
             "model_provider": self.model_provider,
@@ -134,6 +137,7 @@ class ExperimentalRunContract:
             "retriever_version": self.retriever_version,
             "retrieval_strategy_name": self.retrieval_strategy_name,
             "query_transform_strategy_name": self.query_transform_strategy_name,
+            "rerank_strategy_name": self.rerank_strategy_name,
             "embedding_version": self.embedding_version,
             "dataset_version": self.dataset_version,
             "model_provider": self.model_provider,

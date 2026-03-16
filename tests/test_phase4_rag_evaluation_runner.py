@@ -26,6 +26,10 @@ from app.rag.query_transformation import (
     NO_QUERY_TRANSFORM_STRATEGY_NAME,
     TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
 )
+from app.rag.reranking import (
+    HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME,
+    NO_RERANK_STRATEGY_NAME,
+)
 from app.services.demo_tenant_service import DemoTenantService
 from app.services.rag_service import RagService
 from app.storage.chroma_repository import TenantChromaRepository
@@ -142,6 +146,7 @@ def test_phase4_executor_logs_minimum_tracking_run_in_mlflow(tmp_path) -> None:
     assert run.data.params["dataset_version"] == "benchmark_v1"
     assert run.data.params["evaluator_mode"] == "offline_heuristic_ragas"
     assert run.data.params["query_transform_strategy_name"] == NO_QUERY_TRANSFORM_STRATEGY_NAME
+    assert run.data.params["rerank_strategy_name"] == NO_RERANK_STRATEGY_NAME
     assert run.data.params["vectorstore_fingerprint"] == execution.vectorstore_fingerprint
     assert run.data.params["selected_cases_count"] == "1"
     assert run.data.metrics["cases_total"] == 1.0
@@ -211,6 +216,7 @@ def test_phase4_executor_generates_comparison_artifacts_with_required_fields(tmp
         assert row["prompt_version"]
         assert row["policy_version"]
         assert row["retriever_version"]
+        assert row["rerank_strategy_name"]
         assert row["chunking_version"]
         assert row["vectorstore_fingerprint"]
 
@@ -261,6 +267,29 @@ def test_phase4_executor_tracks_query_transform_strategy_in_run_and_case_artifac
     assert execution.case_executions[0].query_transform_strategy_name == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
     assert case_payload["query_transform_strategy_name"] == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
     assert "retrieval_query" in case_payload
+
+
+def test_phase4_executor_tracks_rerank_strategy_in_run_and_case_artifacts(tmp_path) -> None:
+    _bootstrap_demo_knowledge_base(tmp_path)
+    executor = _build_executor(tmp_path)
+
+    execution, logged_run = asyncio.run(
+        executor.execute_and_track(
+            manifest_path=_manifest_path(),
+            case_ids=("vs-normal-001",),
+            rerank_strategy_name=HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME,
+        )
+    )
+
+    client = MlflowClient(tracking_uri=logged_run.tracking_uri)
+    run = client.get_run(logged_run.run_id)
+    report_payload = json.loads(logged_run.report_path.read_text(encoding="utf-8"))
+    case_payload = report_payload["cases"][0]
+
+    assert run.data.params["rerank_strategy_name"] == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    assert execution.case_executions[0].rerank_strategy_name == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    assert case_payload["rerank_strategy_name"] == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    assert "reranked_candidates" in case_payload
 
 
 @dataclass

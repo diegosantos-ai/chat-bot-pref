@@ -42,6 +42,8 @@ class RetrievedChunk:
     text: str
     tags: list[str]
     score: float
+    retrieval_score: float | None = None
+    rerank_score: float | None = None
 
 
 class HashEmbeddingFunction(EmbeddingFunction[Documents]):
@@ -313,6 +315,8 @@ class TenantChromaRepository:
             text=str(text),
             tags=self._split_tags(str(payload.get("tags", ""))),
             score=score,
+            retrieval_score=score,
+            rerank_score=None,
         )
 
     def reset_tenant_collection(self, tenant_id: str) -> list[str]:

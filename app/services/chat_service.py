@@ -13,6 +13,7 @@ from app.contracts.dto import (
     RagQueryParamsUsed,
     RagQueryRequest,
     RagQueryResponse,
+    RagRerankingUsed,
     RagQueryTransformationUsed,
 )
 from app.llmops import ActiveArtifactResolver
@@ -489,6 +490,7 @@ class ChatService:
 
     def _build_empty_rag_response(self, tenant_id: str, query: str) -> RagQueryResponse:
         query_transformation_config = self.artifact_resolver.query_transformation_config()
+        reranking_config = self.artifact_resolver.reranking_config()
         return RagQueryResponse(
             tenant_id=tenant_id,
             query=query,
@@ -511,6 +513,20 @@ class ChatService:
                     added_terms=[],
                     source_fields=list(query_transformation_config.source_fields),
                     max_added_terms=query_transformation_config.max_added_terms,
+                ),
+                reranking=RagRerankingUsed(
+                    strategy_name=self.artifact_resolver.rerank_strategy_name(),
+                    applied=False,
+                    input_query=query,
+                    reranked_candidates=0,
+                    total_candidates=0,
+                    max_candidates=reranking_config.max_candidates,
+                    score_weights={
+                        "retrieval_score": reranking_config.score_weights.retrieval_score,
+                        "title_overlap": reranking_config.score_weights.title_overlap,
+                        "tag_overlap": reranking_config.score_weights.tag_overlap,
+                        "text_density": reranking_config.score_weights.text_density,
+                    },
                 ),
             ),
         )

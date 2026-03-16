@@ -15,6 +15,11 @@ from app.rag.query_transformation import (
     QueryTransformationConfig,
     SUPPORTED_QUERY_TRANSFORM_SOURCE_FIELDS,
 )
+from app.rag.reranking import (
+    NO_RERANK_STRATEGY_NAME,
+    RerankScoreWeights,
+    RerankingConfig,
+)
 from app.llmops.versioning import ArtifactVersionMetadata, build_content_hash, load_artifact_metadata
 from app.settings import settings
 
@@ -256,6 +261,78 @@ class ActiveArtifactResolver:
         return QueryTransformationConfig(
             max_added_terms=max_added_terms,
             source_fields=tuple(normalized_source_fields or ("keywords",)),
+        )
+
+    def rerank_strategy_name(self) -> str:
+        """Retorna o nome tecnico da estrategia ativa de reranking."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_value = str(payload.get("rerank_strategy_name", NO_RERANK_STRATEGY_NAME)).strip()
+        if not raw_value:
+            raise ValueError("rerank_strategy_name nao pode ser vazio.")
+        return raw_value
+
+    def rerank_supported_strategy_names(self) -> tuple[str, ...]:
+        """Retorna as estrategias de reranking declaradas no artefato ativo."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_values = payload.get("supported_rerank_strategies")
+        active_strategy = self.rerank_strategy_name()
+        if raw_values in (None, []):
+            return (active_strategy,)
+        if not isinstance(raw_values, list):
+            raise ValueError("supported_rerank_strategies deve ser uma lista JSON.")
+
+        normalized_values: list[str] = []
+        for item in raw_values:
+            normalized_item = str(item).strip()
+            if normalized_item and normalized_item not in normalized_values:
+                normalized_values.append(normalized_item)
+        if not normalized_values:
+            raise ValueError("supported_rerank_strategies nao pode ficar vazia.")
+        if active_strategy not in normalized_values:
+            raise ValueError(
+                "A rerank_strategy_name ativa precisa constar em supported_rerank_strategies."
+            )
+        return tuple(normalized_values)
+
+    def resolve_rerank_strategy_name(self, strategy_name: str | None = None) -> str:
+        """Resolve a estrategia de reranking usada na execucao."""
+
+        desired_strategy = str(strategy_name or self.rerank_strategy_name()).strip()
+        if not desired_strategy:
+            raise ValueError("rerank_strategy_name nao pode ser vazia.")
+        supported_strategies = self.rerank_supported_strategy_names()
+        if desired_strategy not in supported_strategies:
+            raise ValueError(f"strategy_name de reranking nao suportada: {desired_strategy}")
+        return desired_strategy
+
+    def reranking_config(self) -> RerankingConfig:
+        """Retorna os parametros ativos da etapa de reranking."""
+
+        payload = self.resolve_retrieval_config().payload
+        raw_params = payload.get("rerank_params", {})
+        if raw_params is None:
+            raw_params = {}
+        if not isinstance(raw_params, dict):
+            raise ValueError("rerank_params deve ser um objeto JSON.")
+
+        max_candidates = int(raw_params.get("max_candidates", 5))
+        raw_weights = raw_params.get("score_weights", {})
+        if raw_weights is None:
+            raw_weights = {}
+        if not isinstance(raw_weights, dict):
+            raise ValueError("rerank_params.score_weights deve ser um objeto JSON.")
+
+        score_weights = RerankScoreWeights(
+            retrieval_score=float(raw_weights.get("retrieval_score", 0.35)),
+            title_overlap=float(raw_weights.get("title_overlap", 0.35)),
+            tag_overlap=float(raw_weights.get("tag_overlap", 0.2)),
+            text_density=float(raw_weights.get("text_density", 0.1)),
+        )
+        return RerankingConfig(
+            max_candidates=max_candidates,
+            score_weights=score_weights,
         )
 
     def chunk_split_strategy(self) -> str:

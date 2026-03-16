@@ -6,6 +6,10 @@ from app.rag.query_transformation import (
     NO_QUERY_TRANSFORM_STRATEGY_NAME,
     TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
 )
+from app.rag.reranking import (
+    HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME,
+    NO_RERANK_STRATEGY_NAME,
+)
 from app.rag.retrieval_scoring import (
     BASELINE_RETRIEVAL_STRATEGY_NAME,
     HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
@@ -130,6 +134,8 @@ def test_rag_document_crud_ingest_and_query_by_tenant(tmp_path) -> None:
         query_response.json()["params_used"]["query_transformation"]["retrieval_query"]
         == "Qual o horario do alvara?"
     )
+    assert query_response.json()["params_used"]["reranking"]["strategy_name"] == NO_RERANK_STRATEGY_NAME
+    assert query_response.json()["params_used"]["reranking"]["applied"] is False
     assert query_response.json()["chunks"][0]["title"] == "Horario Alvara"
     assert other_tenant_query.json()["status"] == "knowledge_base_not_loaded"
 
@@ -176,6 +182,18 @@ def test_rag_query_supports_explicit_strategies_and_rejects_unknown_values(tmp_p
                 "query_transform_strategy_name": TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
             },
         )
+        reranked_response = client.post(
+            "/api/rag/query",
+            json={
+                "tenant_id": "prefeitura-demo",
+                "query": "Qual o horario do alvara?",
+                "min_score": 0.1,
+                "top_k": 3,
+                "boost_enabled": False,
+                "strategy_name": HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
+                "rerank_strategy_name": HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME,
+            },
+        )
         invalid_response = client.post(
             "/api/rag/query",
             json={
@@ -190,6 +208,14 @@ def test_rag_query_supports_explicit_strategies_and_rejects_unknown_values(tmp_p
                 "tenant_id": "prefeitura-demo",
                 "query": "Qual o horario?",
                 "query_transform_strategy_name": "query_transform.inexistente",
+            },
+        )
+        invalid_rerank_response = client.post(
+            "/api/rag/query",
+            json={
+                "tenant_id": "prefeitura-demo",
+                "query": "Qual o horario?",
+                "rerank_strategy_name": "rerank.inexistente",
             },
         )
     finally:
@@ -216,10 +242,24 @@ def test_rag_query_supports_explicit_strategies_and_rejects_unknown_values(tmp_p
         == "Qual o horario? alvara"
     )
     assert expanded_response.json()["params_used"]["query_transformation"]["added_terms"] == ["alvara"]
+    assert reranked_response.status_code == 200
+    assert (
+        reranked_response.json()["params_used"]["reranking"]["strategy_name"]
+        == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    )
+    assert reranked_response.json()["params_used"]["reranking"]["applied"] is True
+    assert (
+        reranked_response.json()["params_used"]["reranking"]["reranked_candidates"]
+        == reranked_response.json()["total_chunks"]
+    )
+    assert reranked_response.json()["chunks"][0]["retrieval_score"] is not None
+    assert reranked_response.json()["chunks"][0]["rerank_score"] is not None
     assert invalid_response.status_code == 400
     assert "nao suportada" in invalid_response.json()["detail"]
     assert invalid_query_transform_response.status_code == 400
     assert "query transformation" in invalid_query_transform_response.json()["detail"]
+    assert invalid_rerank_response.status_code == 400
+    assert "reranking" in invalid_rerank_response.json()["detail"]
 
 
 def test_rag_reset_removes_current_and_legacy_collections(tmp_path) -> None:

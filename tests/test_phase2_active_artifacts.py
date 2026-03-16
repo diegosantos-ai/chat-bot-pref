@@ -8,6 +8,10 @@ from app.rag.query_transformation import (
     NO_QUERY_TRANSFORM_STRATEGY_NAME,
     TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
 )
+from app.rag.reranking import (
+    HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME,
+    NO_RERANK_STRATEGY_NAME,
+)
 from app.rag.retrieval_scoring import (
     BASELINE_RETRIEVAL_STRATEGY_NAME,
     HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
@@ -77,6 +81,11 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
         NO_QUERY_TRANSFORM_STRATEGY_NAME,
         TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
     )
+    assert resolver.rerank_strategy_name() == NO_RERANK_STRATEGY_NAME
+    assert resolver.rerank_supported_strategy_names() == (
+        NO_RERANK_STRATEGY_NAME,
+        HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME,
+    )
     assert (
         resolver.resolve_retrieval_strategy_name(HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME)
         == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
@@ -85,11 +94,17 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
         resolver.resolve_query_transform_strategy_name(TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME)
         == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
     )
+    assert (
+        resolver.resolve_rerank_strategy_name(HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME)
+        == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    )
     assert resolver.retrieval_candidate_pool_multiplier() == 3
     assert resolver.retrieval_score_weights().lexical == 0.75
     assert resolver.retrieval_score_weights().semantic == 0.25
     assert resolver.query_transformation_config().max_added_terms == 4
     assert resolver.query_transformation_config().source_fields == ("keywords",)
+    assert resolver.reranking_config().max_candidates == 5
+    assert resolver.reranking_config().score_weights.retrieval_score == 0.35
     assert chunking.version == PHASE2_ARTIFACT_CATALOG.chunking_config.version
     assert chunking.payload["split_strategy"] == "double_newline_paragraphs"
 
@@ -125,6 +140,11 @@ def test_retrieval_top_k_default_falls_back_to_settings_when_config_key_is_missi
                     NO_QUERY_TRANSFORM_STRATEGY_NAME,
                     TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME,
                 ],
+                "rerank_strategy_name": NO_RERANK_STRATEGY_NAME,
+                "supported_rerank_strategies": [
+                    NO_RERANK_STRATEGY_NAME,
+                    HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME,
+                ],
                 "scope": "tenant_aware",
                 "strategy_name": BASELINE_RETRIEVAL_STRATEGY_NAME,
                 "supported_strategies": [
@@ -151,6 +171,7 @@ def test_retrieval_top_k_default_falls_back_to_settings_when_config_key_is_missi
     assert resolver.retrieval_candidate_pool_multiplier() == 3
     assert resolver.retrieval_strategy_name() == BASELINE_RETRIEVAL_STRATEGY_NAME
     assert resolver.query_transform_strategy_name() == NO_QUERY_TRANSFORM_STRATEGY_NAME
+    assert resolver.rerank_strategy_name() == NO_RERANK_STRATEGY_NAME
 
 
 def test_rag_runtime_uses_active_chunking_and_retriever_versions(tmp_path) -> None:

@@ -63,6 +63,9 @@ def test_metrics_endpoint_exposes_phase11_series(tmp_path, monkeypatch) -> None:
     assert 'stage_name="composer"' in payload
     assert 'stage_name="policy_post"' in payload
     assert 'stage_name="response_final"' in payload
+    assert "chatpref_pipeline_estimated_cost_usd_total" in payload
+    assert 'stage_name="retrieval"' in payload
+    assert 'stage_name="composer"' in payload
 
 
 def test_structured_logs_include_request_id_and_event_type(tmp_path) -> None:

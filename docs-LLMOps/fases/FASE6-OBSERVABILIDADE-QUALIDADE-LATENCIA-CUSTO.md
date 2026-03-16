@@ -254,4 +254,27 @@ Estado implementado no runtime apos este bloco:
 Lacunas mantidas de forma explicita:
 
 - `classification` continua nao aplicavel ao runtime atual por ausencia de etapa ativa no caminho transacional;
-- custo estimado, fallback/bloqueio/retrieval vazio como metricas dedicadas e correlacao trace-run continuam para blocos seguintes da Fase 6.
+- fallback/bloqueio/retrieval vazio como metricas dedicadas e correlacao trace-run continuam para blocos seguintes da Fase 6.
+
+## Atualizacao do bloco CPPX-F6-T3
+
+Estado implementado no runtime apos este bloco:
+
+- serie Prometheus `chatpref_pipeline_estimated_cost_usd_total` ativa em `/metrics`;
+- labels usadas na serie: `tenant_id`, `stage_name`, `channel`, `status`, `llm_provider`, `llm_model`;
+- metodologia centralizada em `app/observability/cost_estimation.py`, sem valores magicos espalhados;
+- configuracao central minima em `app/settings.py` para heuristica de token e preco por 1k tokens.
+
+Metodologia aplicada por etapa:
+
+- `composer` (LLM):
+	- `provider=mock` -> custo operacional `0.0` com status `non_billed`;
+	- provedores nao-mock -> custo estimado por heuristica `chars_per_token_heuristic_v1`.
+- `retrieval`:
+	- runtime atual com Chroma local -> custo operacional `0.0` com status `non_billed`;
+	- nao ha estimativa monetaria externa de retrieval neste bloco.
+
+Leitura honesta dos limites:
+
+- o valor de `composer` fora de `mock` e estimado por heuristica de caracteres, nao e custo contabil exato;
+- o custo de retrieval em infraestrutura externa (quando existir) permanece nao mensuravel no runtime atual e fica para evolucao posterior.

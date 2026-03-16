@@ -145,10 +145,14 @@ PHASE6_MINIMAL_METRICS: Final[tuple[Phase6MetricDefinition, ...]] = (
         stage_name=PipelineStageName.COMPOSER,
         description="Custo estimado acumulado do estagio de composicao/fallback por tenant.",
         dimensions=PHASE6_OPERATIONAL_DIMENSIONS_BASE,
-        status=ContractStatus.PLANNED,
+        status=ContractStatus.ACTIVE,
         source_paths=(
+            "app/observability/cost_estimation.py",
+            "app/observability/metrics.py:record_pipeline_estimated_cost",
+            "app/services/chat_service.py:process",
             "app/services/llm_service.py:compose_answer",
             "app/services/llm_service.py:compose_fallback",
+            "app/services/rag_service.py:query",
         ),
     ),
     Phase6MetricDefinition(

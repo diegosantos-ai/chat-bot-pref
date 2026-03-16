@@ -34,6 +34,9 @@ class Settings(BaseSettings):
     RAG_EMBEDDING_VERSION: str = "hash_embedding_v1"
     LLM_MIN_CONTEXT_SCORE: float = 0.2
     LLM_CONTEXT_TOP_K: int = 3
+    LLM_COST_ESTIMATION_CHARS_PER_TOKEN: int = 4
+    LLM_COST_ESTIMATION_INPUT_USD_PER_1K_TOKENS: float = 0.0
+    LLM_COST_ESTIMATION_OUTPUT_USD_PER_1K_TOKENS: float = 0.0
     CORS_ORIGINS: list[str] = Field(
         default_factory=lambda: [
             "http://localhost:3000",
@@ -170,6 +173,32 @@ class Settings(BaseSettings):
         if top_k < 1 or top_k > 8:
             raise ValueError("LLM_CONTEXT_TOP_K deve ficar entre 1 e 8.")
         return top_k
+
+    @field_validator("LLM_COST_ESTIMATION_CHARS_PER_TOKEN", mode="before")
+    @classmethod
+    def parse_llm_cost_estimation_chars_per_token(cls, value: Any) -> int:
+        try:
+            chars_per_token = int(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("LLM_COST_ESTIMATION_CHARS_PER_TOKEN deve ser inteiro.") from exc
+        if chars_per_token < 1 or chars_per_token > 20:
+            raise ValueError("LLM_COST_ESTIMATION_CHARS_PER_TOKEN deve ficar entre 1 e 20.")
+        return chars_per_token
+
+    @field_validator(
+        "LLM_COST_ESTIMATION_INPUT_USD_PER_1K_TOKENS",
+        "LLM_COST_ESTIMATION_OUTPUT_USD_PER_1K_TOKENS",
+        mode="before",
+    )
+    @classmethod
+    def parse_llm_cost_estimation_usd_per_1k_tokens(cls, value: Any) -> float:
+        try:
+            usd_per_1k = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Valor de custo estimado por 1k tokens deve ser numerico.") from exc
+        if usd_per_1k < 0.0 or usd_per_1k > 100.0:
+            raise ValueError("Valor de custo estimado por 1k tokens deve ficar entre 0.0 e 100.0.")
+        return usd_per_1k
 
     @field_validator(
         "CORS_ORIGINS",

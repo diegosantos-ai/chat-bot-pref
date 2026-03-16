@@ -126,11 +126,19 @@ Comando mínimo atual:
   --case-id vs-risco-policy-001
 ```
 
+Comando comparativo atual da Fase 5:
+
+```bash
+./.venv/bin/python scripts/run_phase5_strategy_comparison.py \
+  --manifest benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json
+```
+
 Saída esperada:
 
 - resumo JSON curto no terminal;
 - criação do backend local do `MLflow` em `artifacts/llmops/fase4_rag_evaluation/`;
 - geração de artifacts por run em `artifacts/llmops/fase4_rag_evaluation/run_reports/`.
+- quando a comparação da Fase 5 for usada, o sumário consolidado da matriz é escrito em `artifacts/llmops/fase5_retrieval_comparison/run_reports/phase5_strategy_comparison_summary.json`.
 
 ### Etapa 4 — Registrar métricas e artifacts
 Persistir os resultados no sistema de tracking adotado, incluindo métricas e artifacts comparativos.

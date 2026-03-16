@@ -1,0 +1,420 @@
+{
+  "phase": "F5",
+  "artifact_type": "phase5_strategy_comparison",
+  "generated_at": "2026-03-16T12:36:17.375719+00:00",
+  "experiment_name": "chat-pref-fase5-retrieval-comparison",
+  "manifest_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json",
+  "selected_case_ids": [],
+  "max_cases": null,
+  "variants_compared": 5,
+  "methodology_notes": [
+    "A matriz compara apenas combinacoes ja implementadas e rastreaveis da Fase 5.",
+    "Nao houve mudanca de algoritmo durante a comparacao; apenas execucao do benchmark offline existente.",
+    "Latencia observada e total por run; nao representa perfil detalhado por estagio.",
+    "Ausencia de melhora clara tambem e resultado valido para fechamento do bloco."
+  ],
+  "baseline_reference": {
+    "label": "baseline_semantic_only",
+    "retrieval_strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
+    "query_transform_strategy_name": "no_query_transformation_v1",
+    "rerank_strategy_name": "no_rerank_v1",
+    "run_id": "63b6a6e1034343bcb5eb0f911f0b61c9"
+  },
+  "results": [
+    {
+      "label": "baseline_semantic_only",
+      "rationale": "Controla a referencia herdada sem retrieval lexical complementar, query expansion ou reranking.",
+      "run_id": "63b6a6e1034343bcb5eb0f911f0b61c9",
+      "tenant_id": "prefeitura-vila-serena",
+      "dataset_version": "benchmark_v1",
+      "retrieval_strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
+      "query_transform_strategy_name": "no_query_transformation_v1",
+      "rerank_strategy_name": "no_rerank_v1",
+      "phase5_experiment_axes": {
+        "retrieval": {
+          "strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
+          "supported_strategies": [
+            "semantic_candidates_with_lexical_rescoring_v1",
+            "semantic_plus_full_collection_lexical_candidates_v1"
+          ],
+          "params": {
+            "top_k_default": 3,
+            "min_score_default": 0.0,
+            "boost_enabled_default": false,
+            "candidate_pool_multiplier": 3,
+            "score_weights": {
+              "lexical": 0.75,
+              "semantic": 0.25
+            }
+          }
+        },
+        "query_transformation": {
+          "strategy_name": "no_query_transformation_v1",
+          "supported_strategies": [
+            "no_query_transformation_v1",
+            "tenant_keyword_query_expansion_v1"
+          ],
+          "params": {
+            "max_added_terms": 4,
+            "source_fields": [
+              "keywords"
+            ]
+          }
+        },
+        "reranking": {
+          "strategy_name": "no_rerank_v1",
+          "supported_strategies": [
+            "no_rerank_v1",
+            "heuristic_post_retrieval_rerank_v1"
+          ],
+          "params": {
+            "max_candidates": 5,
+            "score_weights": {
+              "retrieval_score": 0.35,
+              "title_overlap": 0.35,
+              "tag_overlap": 0.2,
+              "text_density": 0.1
+            }
+          }
+        }
+      },
+      "metrics": {
+        "cases_total": 17,
+        "cases_evaluated": 14,
+        "cases_partial": 3,
+        "cases_skipped": 0,
+        "faithfulness_mean": 0.75,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.5385,
+        "retrieval_empty_rate": 0.1765,
+        "total_latency_ms": 587.496,
+        "estimated_cost": 0.0
+      },
+      "report_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-d50bd978b969_rag_evaluation_run.json",
+      "comparison_snapshot_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-d50bd978b969_rag_evaluation_comparison.json",
+      "deltas_vs_baseline": {
+        "faithfulness_mean": 0.0,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.0,
+        "retrieval_empty_rate": 0.0,
+        "total_latency_ms": 0.0
+      }
+    },
+    {
+      "label": "hybrid_lexical_only",
+      "rationale": "Isola o impacto da camada lexical complementar real sem alterar query nem ranking final.",
+      "run_id": "6b7f422e2ec94c3281a4ff037fe2acee",
+      "tenant_id": "prefeitura-vila-serena",
+      "dataset_version": "benchmark_v1",
+      "retrieval_strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "query_transform_strategy_name": "no_query_transformation_v1",
+      "rerank_strategy_name": "no_rerank_v1",
+      "phase5_experiment_axes": {
+        "retrieval": {
+          "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+          "supported_strategies": [
+            "semantic_candidates_with_lexical_rescoring_v1",
+            "semantic_plus_full_collection_lexical_candidates_v1"
+          ],
+          "params": {
+            "top_k_default": 3,
+            "min_score_default": 0.0,
+            "boost_enabled_default": false,
+            "candidate_pool_multiplier": 3,
+            "score_weights": {
+              "lexical": 0.75,
+              "semantic": 0.25
+            }
+          }
+        },
+        "query_transformation": {
+          "strategy_name": "no_query_transformation_v1",
+          "supported_strategies": [
+            "no_query_transformation_v1",
+            "tenant_keyword_query_expansion_v1"
+          ],
+          "params": {
+            "max_added_terms": 4,
+            "source_fields": [
+              "keywords"
+            ]
+          }
+        },
+        "reranking": {
+          "strategy_name": "no_rerank_v1",
+          "supported_strategies": [
+            "no_rerank_v1",
+            "heuristic_post_retrieval_rerank_v1"
+          ],
+          "params": {
+            "max_candidates": 5,
+            "score_weights": {
+              "retrieval_score": 0.35,
+              "title_overlap": 0.35,
+              "tag_overlap": 0.2,
+              "text_density": 0.1
+            }
+          }
+        }
+      },
+      "metrics": {
+        "cases_total": 17,
+        "cases_evaluated": 14,
+        "cases_partial": 3,
+        "cases_skipped": 0,
+        "faithfulness_mean": 0.8214,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.7308,
+        "retrieval_empty_rate": 0.1765,
+        "total_latency_ms": 171.131,
+        "estimated_cost": 0.0
+      },
+      "report_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-833f29fdfac0_rag_evaluation_run.json",
+      "comparison_snapshot_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-833f29fdfac0_rag_evaluation_comparison.json",
+      "deltas_vs_baseline": {
+        "faithfulness_mean": 0.0714,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.1923,
+        "retrieval_empty_rate": 0.0,
+        "total_latency_ms": -416.365
+      }
+    },
+    {
+      "label": "hybrid_plus_query_transform",
+      "rationale": "Mede o ganho ou ruido adicional da query expansion sobre a variante hibrida.",
+      "run_id": "9264a229d4954d9895f2196ad22b8fb3",
+      "tenant_id": "prefeitura-vila-serena",
+      "dataset_version": "benchmark_v1",
+      "retrieval_strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "query_transform_strategy_name": "tenant_keyword_query_expansion_v1",
+      "rerank_strategy_name": "no_rerank_v1",
+      "phase5_experiment_axes": {
+        "retrieval": {
+          "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+          "supported_strategies": [
+            "semantic_candidates_with_lexical_rescoring_v1",
+            "semantic_plus_full_collection_lexical_candidates_v1"
+          ],
+          "params": {
+            "top_k_default": 3,
+            "min_score_default": 0.0,
+            "boost_enabled_default": false,
+            "candidate_pool_multiplier": 3,
+            "score_weights": {
+              "lexical": 0.75,
+              "semantic": 0.25
+            }
+          }
+        },
+        "query_transformation": {
+          "strategy_name": "tenant_keyword_query_expansion_v1",
+          "supported_strategies": [
+            "no_query_transformation_v1",
+            "tenant_keyword_query_expansion_v1"
+          ],
+          "params": {
+            "max_added_terms": 4,
+            "source_fields": [
+              "keywords"
+            ]
+          }
+        },
+        "reranking": {
+          "strategy_name": "no_rerank_v1",
+          "supported_strategies": [
+            "no_rerank_v1",
+            "heuristic_post_retrieval_rerank_v1"
+          ],
+          "params": {
+            "max_candidates": 5,
+            "score_weights": {
+              "retrieval_score": 0.35,
+              "title_overlap": 0.35,
+              "tag_overlap": 0.2,
+              "text_density": 0.1
+            }
+          }
+        }
+      },
+      "metrics": {
+        "cases_total": 17,
+        "cases_evaluated": 14,
+        "cases_partial": 3,
+        "cases_skipped": 0,
+        "faithfulness_mean": 0.8214,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.6538,
+        "retrieval_empty_rate": 0.1765,
+        "total_latency_ms": 252.566,
+        "estimated_cost": 0.0
+      },
+      "report_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-3bbbf766f06d_rag_evaluation_run.json",
+      "comparison_snapshot_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-3bbbf766f06d_rag_evaluation_comparison.json",
+      "deltas_vs_baseline": {
+        "faithfulness_mean": 0.0714,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.1153,
+        "retrieval_empty_rate": 0.0,
+        "total_latency_ms": -334.93
+      }
+    },
+    {
+      "label": "hybrid_plus_rerank",
+      "rationale": "Mede o efeito do reranking heuristico mantendo a query original.",
+      "run_id": "0cde4a7dd60b483e98de2d8f30c22b73",
+      "tenant_id": "prefeitura-vila-serena",
+      "dataset_version": "benchmark_v1",
+      "retrieval_strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "query_transform_strategy_name": "no_query_transformation_v1",
+      "rerank_strategy_name": "heuristic_post_retrieval_rerank_v1",
+      "phase5_experiment_axes": {
+        "retrieval": {
+          "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+          "supported_strategies": [
+            "semantic_candidates_with_lexical_rescoring_v1",
+            "semantic_plus_full_collection_lexical_candidates_v1"
+          ],
+          "params": {
+            "top_k_default": 3,
+            "min_score_default": 0.0,
+            "boost_enabled_default": false,
+            "candidate_pool_multiplier": 3,
+            "score_weights": {
+              "lexical": 0.75,
+              "semantic": 0.25
+            }
+          }
+        },
+        "query_transformation": {
+          "strategy_name": "no_query_transformation_v1",
+          "supported_strategies": [
+            "no_query_transformation_v1",
+            "tenant_keyword_query_expansion_v1"
+          ],
+          "params": {
+            "max_added_terms": 4,
+            "source_fields": [
+              "keywords"
+            ]
+          }
+        },
+        "reranking": {
+          "strategy_name": "heuristic_post_retrieval_rerank_v1",
+          "supported_strategies": [
+            "no_rerank_v1",
+            "heuristic_post_retrieval_rerank_v1"
+          ],
+          "params": {
+            "max_candidates": 5,
+            "score_weights": {
+              "retrieval_score": 0.35,
+              "title_overlap": 0.35,
+              "tag_overlap": 0.2,
+              "text_density": 0.1
+            }
+          }
+        }
+      },
+      "metrics": {
+        "cases_total": 17,
+        "cases_evaluated": 14,
+        "cases_partial": 3,
+        "cases_skipped": 0,
+        "faithfulness_mean": 0.7857,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.7308,
+        "retrieval_empty_rate": 0.1765,
+        "total_latency_ms": 180.249,
+        "estimated_cost": 0.0
+      },
+      "report_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-5ad19927d9e4_rag_evaluation_run.json",
+      "comparison_snapshot_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-5ad19927d9e4_rag_evaluation_comparison.json",
+      "deltas_vs_baseline": {
+        "faithfulness_mean": 0.0357,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.1923,
+        "retrieval_empty_rate": 0.0,
+        "total_latency_ms": -407.247
+      }
+    },
+    {
+      "label": "hybrid_plus_query_transform_plus_rerank",
+      "rationale": "Mede a composicao completa atualmente suportada na Fase 5, sem promover default.",
+      "run_id": "a034e06706f94437af2d6a6d03598886",
+      "tenant_id": "prefeitura-vila-serena",
+      "dataset_version": "benchmark_v1",
+      "retrieval_strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "query_transform_strategy_name": "tenant_keyword_query_expansion_v1",
+      "rerank_strategy_name": "heuristic_post_retrieval_rerank_v1",
+      "phase5_experiment_axes": {
+        "retrieval": {
+          "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+          "supported_strategies": [
+            "semantic_candidates_with_lexical_rescoring_v1",
+            "semantic_plus_full_collection_lexical_candidates_v1"
+          ],
+          "params": {
+            "top_k_default": 3,
+            "min_score_default": 0.0,
+            "boost_enabled_default": false,
+            "candidate_pool_multiplier": 3,
+            "score_weights": {
+              "lexical": 0.75,
+              "semantic": 0.25
+            }
+          }
+        },
+        "query_transformation": {
+          "strategy_name": "tenant_keyword_query_expansion_v1",
+          "supported_strategies": [
+            "no_query_transformation_v1",
+            "tenant_keyword_query_expansion_v1"
+          ],
+          "params": {
+            "max_added_terms": 4,
+            "source_fields": [
+              "keywords"
+            ]
+          }
+        },
+        "reranking": {
+          "strategy_name": "heuristic_post_retrieval_rerank_v1",
+          "supported_strategies": [
+            "no_rerank_v1",
+            "heuristic_post_retrieval_rerank_v1"
+          ],
+          "params": {
+            "max_candidates": 5,
+            "score_weights": {
+              "retrieval_score": 0.35,
+              "title_overlap": 0.35,
+              "tag_overlap": 0.2,
+              "text_density": 0.1
+            }
+          }
+        }
+      },
+      "metrics": {
+        "cases_total": 17,
+        "cases_evaluated": 14,
+        "cases_partial": 3,
+        "cases_skipped": 0,
+        "faithfulness_mean": 0.75,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.6538,
+        "retrieval_empty_rate": 0.1765,
+        "total_latency_ms": 177.903,
+        "estimated_cost": 0.0
+      },
+      "report_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-a21678622393_rag_evaluation_run.json",
+      "comparison_snapshot_path": "/media/diegosantos/TOSHIBA EXT/Projetos/Desenvolvendo/chat-bot-pref/artifacts/llmops/fase5_retrieval_comparison/run_reports/req-rag-eval-a21678622393_rag_evaluation_comparison.json",
+      "deltas_vs_baseline": {
+        "faithfulness_mean": 0.0,
+        "answer_relevance_mean": 0.0,
+        "expected_context_coverage_mean": 0.1153,
+        "retrieval_empty_rate": 0.0,
+        "total_latency_ms": -409.593
+      }
+    }
+  ]
+}

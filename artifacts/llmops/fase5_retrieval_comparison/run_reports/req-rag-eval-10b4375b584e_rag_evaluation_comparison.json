@@ -1,0 +1,72 @@
+{
+  "phase": "F4",
+  "artifact_type": "comparison_snapshot",
+  "experiment_name": "chat-pref-fase5-retrieval-comparison",
+  "tenant_id": "prefeitura-vila-serena",
+  "runs_compared": 1,
+  "dataset_versions": [
+    "benchmark_v1"
+  ],
+  "evaluator_modes": [
+    "offline_heuristic_ragas"
+  ],
+  "methodology_notes": [
+    "scores_from_offline_heuristic_ragas_are_not_external_semantic_judgments",
+    "runs_with_missing_fields_or_partial_metrics_remain_explicit"
+  ],
+  "runs": [
+    {
+      "run_id": "c50c6041a7ee4158bd8416ff92f160b6",
+      "request_id": "req-rag-eval-10b4375b584e",
+      "experiment_name": "chat-pref-fase5-retrieval-comparison",
+      "tenant_id": "prefeitura-vila-serena",
+      "dataset_version": "benchmark_v1",
+      "prompt_version": "base_v1",
+      "prompt_version_id": "prompt.composer_base.base_v1.4183563896f8",
+      "policy_version": "policy_v1",
+      "policy_version_id": "policy.institutional_policy.policy_v1.2803a9fb52c4",
+      "retriever_version": "tenant_chroma_hash_v1",
+      "retrieval_strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
+      "query_transform_strategy_name": "no_query_transformation_v1",
+      "rerank_strategy_name": "no_rerank_v1",
+      "retriever_version_id": "retrieval_config.tenant_chroma_hash.tenant_chroma_hash_v1.f3615f5b32c5",
+      "embedding_version": "hash_embedding_v1",
+      "chunking_version": "paragraph_split_v1",
+      "chunking_version_id": "chunking_config.paragraph_split.paragraph_split_v1.38126ab04c99",
+      "vectorstore_collection": "chat_pref_docs__prefeitura_vila_serena",
+      "vectorstore_fingerprint": "vectorstore.prefeitura-vila-serena.7981c51ae681aa08",
+      "evaluator_library": "ragas",
+      "evaluator_library_version": "0.2.15",
+      "evaluator_mode": "offline_heuristic_ragas",
+      "model_provider": "mock",
+      "model_name": "mock-compose-v1",
+      "selected_cases_count": 17,
+      "observed_prompt_versions": "base_v1,fallback_v1",
+      "total_latency_ms": 168.421,
+      "cases_total": 17,
+      "cases_evaluated": 14,
+      "cases_partial": 3,
+      "cases_skipped": 0,
+      "cases_with_methodology_limitations": 17,
+      "faithfulness_mean": 0.75,
+      "answer_relevance_mean": 0.0,
+      "context_precision_mean": null,
+      "context_recall_mean": null,
+      "expected_context_coverage_mean": 0.5385,
+      "retrieval_empty_rate": 0.1765,
+      "faithfulness_cases": 14,
+      "answer_relevance_cases": 17,
+      "context_precision_cases": 0,
+      "context_recall_cases": 0,
+      "expected_context_coverage_cases": 13,
+      "retrieval_empty_cases": 3,
+      "heuristic_evaluator": true,
+      "methodology_notes": [
+        "offline_heuristic_evaluator",
+        "benchmark_cases_with_missing_fields",
+        "skipped_metrics_present"
+      ],
+      "logged_at": "2026-03-16T12:31:47.180557+00:00"
+    }
+  ]
+}

@@ -53,6 +53,13 @@ PIPELINE_STAGE_LATENCY_SECONDS = Histogram(
     registry=REGISTRY,
 )
 
+PIPELINE_ESTIMATED_COST_USD_TOTAL = Counter(
+    "chatpref_pipeline_estimated_cost_usd_total",
+    "Custo operacional estimado acumulado por tenant e estagio do pipeline.",
+    labelnames=("tenant_id", "stage_name", "channel", "status", "llm_provider", "llm_model"),
+    registry=REGISTRY,
+)
+
 
 def record_chat_request(*, channel: str) -> None:
     CHAT_REQUESTS_TOTAL.labels(channel=channel or "unknown").inc()
@@ -112,6 +119,29 @@ def record_pipeline_stage_latency(
         channel=channel or "unknown",
         status=status or "unknown",
     ).observe(max(latency_seconds, 0.0))
+
+
+def record_pipeline_estimated_cost(
+    *,
+    tenant_id: str,
+    stage_name: str | PipelineStageName,
+    channel: str,
+    status: str,
+    estimated_cost_usd: float,
+    llm_provider: str = "",
+    llm_model: str = "",
+) -> None:
+    """Registra custo operacional estimado por tenant e estagio sem labels de alta cardinalidade."""
+
+    resolved_stage_name = stage_name.value if isinstance(stage_name, PipelineStageName) else stage_name
+    PIPELINE_ESTIMATED_COST_USD_TOTAL.labels(
+        tenant_id=tenant_id or "unknown",
+        stage_name=resolved_stage_name or "unknown",
+        channel=channel or "unknown",
+        status=status or "unknown",
+        llm_provider=llm_provider or "unknown",
+        llm_model=llm_model or "unknown",
+    ).inc(max(estimated_cost_usd, 0.0))
 
 
 @contextmanager

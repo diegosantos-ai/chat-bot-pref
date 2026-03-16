@@ -7,6 +7,7 @@ from typing import Protocol
 import httpx
 
 from app.contracts.dto import RagRetrievedChunk
+from app.observability.cost_estimation import estimate_llm_operational_cost
 from app.services.prompt_service import PromptArtifact, PromptService
 from app.services.tenant_profile_service import TenantProfile
 from app.settings import settings
@@ -29,6 +30,11 @@ class LLMGenerationResponse:
     prompt_version: str
     message: str
     mode: str
+    estimated_cost_usd: float = 0.0
+    cost_estimation_status: str = ""
+    cost_estimation_method: str = ""
+    input_tokens_estimated: int = 0
+    output_tokens_estimated: int = 0
 
 
 class LLMProvider(Protocol):
@@ -254,7 +260,24 @@ class LLMComposeService:
             tenant_profile=tenant_profile,
             context_chunks=context_chunks,
         )
-        return await self.provider.generate(request)
+        response = await self.provider.generate(request)
+        cost_estimation = estimate_llm_operational_cost(
+            provider=response.provider,
+            input_text=prompt.content,
+            output_text=response.message,
+        )
+        return LLMGenerationResponse(
+            provider=response.provider,
+            model=response.model,
+            prompt_version=response.prompt_version,
+            message=response.message,
+            mode=response.mode,
+            estimated_cost_usd=cost_estimation.estimated_cost_usd,
+            cost_estimation_status=cost_estimation.status,
+            cost_estimation_method=cost_estimation.method,
+            input_tokens_estimated=cost_estimation.input_tokens_estimated,
+            output_tokens_estimated=cost_estimation.output_tokens_estimated,
+        )
 
     async def compose_fallback(
         self,
@@ -279,7 +302,24 @@ class LLMComposeService:
             reason_code=reason_code,
             policy_summary=policy_summary,
         )
-        return await self.provider.generate(request)
+        response = await self.provider.generate(request)
+        cost_estimation = estimate_llm_operational_cost(
+            provider=response.provider,
+            input_text=prompt.content,
+            output_text=response.message,
+        )
+        return LLMGenerationResponse(
+            provider=response.provider,
+            model=response.model,
+            prompt_version=response.prompt_version,
+            message=response.message,
+            mode=response.mode,
+            estimated_cost_usd=cost_estimation.estimated_cost_usd,
+            cost_estimation_status=cost_estimation.status,
+            cost_estimation_method=cost_estimation.method,
+            input_tokens_estimated=cost_estimation.input_tokens_estimated,
+            output_tokens_estimated=cost_estimation.output_tokens_estimated,
+        )
 
     def policy_version(self) -> str:
         return self.prompt_service.load_policy_text().version

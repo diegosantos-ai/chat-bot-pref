@@ -17,11 +17,13 @@ from app.contracts.dto import (
     RagQueryTransformationUsed,
 )
 from app.llmops import ActiveArtifactResolver
+from app.observability.cost_estimation import estimate_retrieval_operational_cost
 from app.observability.context import update_correlation_context
 from app.observability.logging import log_event
 from app.observability.metrics import (
     record_chat_request,
     record_llm_composition,
+    record_pipeline_estimated_cost,
     track_pipeline_stage_latency,
     record_policy_decision,
     record_retrieval,
@@ -191,6 +193,14 @@ class ChatService:
                     )
 
                 record_retrieval(status=rag_response.status, channel=channel)
+                retrieval_cost = estimate_retrieval_operational_cost()
+                record_pipeline_estimated_cost(
+                    tenant_id=tenant_id,
+                    stage_name=PipelineStageName.RETRIEVAL,
+                    channel=channel,
+                    status=retrieval_cost.status,
+                    estimated_cost_usd=retrieval_cost.estimated_cost_usd,
+                )
                 self._append_retrieval_event(
                     request_id=resolved_request_id,
                     tenant_id=tenant_id,
@@ -248,6 +258,15 @@ class ChatService:
                 channel=channel,
                 latency_seconds=llm_latency,
             )
+            record_pipeline_estimated_cost(
+                tenant_id=tenant_id,
+                stage_name=PipelineStageName.COMPOSER,
+                channel=channel,
+                status=llm_result.cost_estimation_status,
+                estimated_cost_usd=llm_result.estimated_cost_usd,
+                llm_provider=llm_result.provider,
+                llm_model=llm_result.model,
+            )
             self._append_event(
                 request_id=resolved_request_id,
                 tenant_id=tenant_id,
@@ -261,6 +280,9 @@ class ChatService:
                         "prompt_version": llm_result.prompt_version,
                         "mode": llm_result.mode,
                         "latency_ms": f"{llm_latency * 1000:.2f}",
+                        "estimated_cost_usd": f"{llm_result.estimated_cost_usd:.8f}",
+                        "cost_estimation_status": llm_result.cost_estimation_status,
+                        "cost_estimation_method": llm_result.cost_estimation_method,
                     },
                     normalized_audit_context,
                 ),
@@ -335,6 +357,15 @@ class ChatService:
                     channel=channel,
                     latency_seconds=rewrite_latency,
                 )
+                record_pipeline_estimated_cost(
+                    tenant_id=tenant_id,
+                    stage_name=PipelineStageName.COMPOSER,
+                    channel=channel,
+                    status=final_llm_result.cost_estimation_status,
+                    estimated_cost_usd=final_llm_result.estimated_cost_usd,
+                    llm_provider=final_llm_result.provider,
+                    llm_model=final_llm_result.model,
+                )
                 self._append_event(
                     request_id=resolved_request_id,
                     tenant_id=tenant_id,
@@ -348,6 +379,9 @@ class ChatService:
                             "prompt_version": final_llm_result.prompt_version,
                             "reason_codes": self._join_reason_codes(post_decision),
                             "latency_ms": f"{rewrite_latency * 1000:.2f}",
+                            "estimated_cost_usd": f"{final_llm_result.estimated_cost_usd:.8f}",
+                            "cost_estimation_status": final_llm_result.cost_estimation_status,
+                            "cost_estimation_method": final_llm_result.cost_estimation_method,
                         },
                         normalized_audit_context,
                     ),

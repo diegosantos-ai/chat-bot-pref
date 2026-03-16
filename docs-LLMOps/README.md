@@ -84,6 +84,7 @@ Documentos de fase atualmente presentes nesta pasta:
 - `fases/FASE3-DATASET-BENCHMARK.md`
 - `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
 - `fases/FASE5-RETRIEVAL-HIBRIDO.md`
+- `fases/FASE6-OBSERVABILIDADE-QUALIDADE-LATENCIA-CUSTO.md`
 
 ## Diretriz de manutenção
 
@@ -113,6 +114,7 @@ A sequência recomendada de leitura desta pasta é:
 6. `fases/FASE3-DATASET-BENCHMARK.md`
 7. `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
 8. `fases/FASE5-RETRIEVAL-HIBRIDO.md`
+9. `fases/FASE6-OBSERVABILIDADE-QUALIDADE-LATENCIA-CUSTO.md`
 
 ## Status
 

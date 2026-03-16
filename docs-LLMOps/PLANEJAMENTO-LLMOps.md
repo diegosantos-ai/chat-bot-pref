@@ -344,6 +344,10 @@ Nenhuma instalação nova deve ocorrer nesta fase. O foco é enriquecer a observ
 * `CPPX-F6-T6 — Consolidar visão mínima em dashboard técnico`
 * `CPPX-F6-T7 — Documentar leitura operacional das métricas`
 
+Detalhamento do bloco inicial desta fase:
+
+- `docs-LLMOps/fases/FASE6-OBSERVABILIDADE-QUALIDADE-LATENCIA-CUSTO.md` (contrato minimo de metricas, dimensoes e pontos candidatos de instrumentacao para `CPPX-F6-T1`).
+
 ---
 
 ## Card Macro — Fase 7 — CI de GenAI com Regressão de Prompt e Dry-Run Experimental

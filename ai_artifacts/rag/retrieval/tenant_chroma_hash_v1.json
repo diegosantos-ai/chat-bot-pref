@@ -34,7 +34,7 @@
     "no_query_transformation_v1",
     "tenant_keyword_query_expansion_v1"
   ],
-  "strategy_name": "semantic_candidates_with_lexical_rescoring_v1",
+  "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
   "supported_strategies": [
     "semantic_candidates_with_lexical_rescoring_v1",
     "semantic_plus_full_collection_lexical_candidates_v1"

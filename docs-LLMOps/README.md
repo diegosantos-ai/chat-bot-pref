@@ -120,4 +120,4 @@ Fase 1 concluída com evidência local.
 Fase 2 consolidada neste escopo na branch `feat/fase2-rag-prompts`.
 Fase 3 consolidada neste escopo na branch `feat/dataset-avaliacao`, com baseline inicial de benchmark reproduzível para o tenant demonstrativo.
 Fase 4 consolidada neste escopo na branch `feat/avaliacao-rag-metricas-de-qualidade`, com avaliação formal offline, artifacts comparativos e baseline inicial rastreável do RAG.
-Na branch `feat/fase5-retrieval-query-reranking`, a Fase 5 avançou até `CPPX-F5-T6`, mantendo o baseline como default, preservando a camada lexical complementar opt-in, a query expansion controlada, o reranking heurístico pós-recuperação, a superfície explícita dos parâmetros experimentais dos três eixos e a primeira comparação reproduzível entre combinações relevantes.
+Na branch `feat/fase5-retrieval-query-reranking`, a Fase 5 foi fechada até `CPPX-F5-T7`, promovendo `semantic_plus_full_collection_lexical_candidates_v1` com `no_query_transformation_v1` e `no_rerank_v1` como baseline recomendada do recorte atual, mantendo query expansion e reranking heurísticos como eixos experimentais não promovidos.

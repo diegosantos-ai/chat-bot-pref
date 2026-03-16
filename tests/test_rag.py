@@ -124,10 +124,13 @@ def test_rag_document_crud_ingest_and_query_by_tenant(tmp_path) -> None:
     assert ingest_response.json()["chunks_count"] == 2
     assert ingest_response.json()["ready"] is True
     assert query_response.json()["status"] == "ready"
-    assert query_response.json()["params_used"]["strategy_name"] == BASELINE_RETRIEVAL_STRATEGY_NAME
+    assert (
+        query_response.json()["params_used"]["strategy_name"]
+        == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
+    )
     assert (
         query_response.json()["params_used"]["experimental_axes"]["retrieval"]["strategy_name"]
-        == BASELINE_RETRIEVAL_STRATEGY_NAME
+        == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
     )
     assert (
         query_response.json()["params_used"]["experimental_axes"]["retrieval"]["params"]["candidate_pool_multiplier"]

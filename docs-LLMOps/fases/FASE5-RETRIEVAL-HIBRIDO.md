@@ -10,6 +10,7 @@ Registrar o fechamento estrutural dos blocos:
 - `CPPX-F5-T4 — Integrar reranker ao pipeline de recuperação`
 - `CPPX-F5-T5 — Expor parâmetros experimentais de retrieval avançado`
 - `CPPX-F5-T6 — Executar comparação entre estratégias`
+- `CPPX-F5-T7 — Consolidar baseline vencedora ou matriz de trade-offs`
 
 Este documento descreve:
 
@@ -17,12 +18,13 @@ Este documento descreve:
 - os pontos corretos de extensão no código;
 - a arquitetura-alvo incremental da Fase 5;
 - como as variantes devem ser comparadas experimentalmente;
-- os limites deste bloco e o que permanece para os próximos cortes.
+- a decisão de fechamento da Fase 5 para o recorte atual;
+- os limites deste bloco e o que permanece experimental.
 
-Este documento nao declara como implementado:
+Este documento nao declara:
 
-- promoção de nova estratégia como default;
-- comparação formal consolidada entre todas as variantes da fase.
+- vencedor absoluto fora do recorte atual do benchmark offline;
+- superioridade generalizada de query expansion heurística ou reranking heurístico.
 
 ## Enquadramento do bloco
 
@@ -36,6 +38,7 @@ Este documento nao declara como implementado:
   - `CPPX-F5-T4`
   - `CPPX-F5-T5`
   - `CPPX-F5-T6`
+  - `CPPX-F5-T7`
 - critério de aceite do bloco: arquitetura-alvo pequena, incremental, tenant-aware, com variante lexical real, query expansion opt-in, reranking pós-recuperação e comparabilidade por benchmark/tracking
 - validação mínima deste bloco:
   - leitura cruzada entre `ARQUITETURA-LLMOps.md`, `PLANEJAMENTO-LLMOps.md` e o código do retrieval;
@@ -434,15 +437,66 @@ Leitura preliminar:
 - `answer_relevance_mean` ficou em `0.0000` em toda a matriz e não discriminou variantes neste recorte; por isso, ele não sustenta decisão isolada neste bloco.
 - `retrieval_empty_rate` permaneceu em `0.1765` em todas as combinações; neste benchmark atual, a Fase 5 não alterou o vazio de retrieval medido.
 
-Conclusão metodológica deste bloco:
+Conclusão metodológica consolidada da Fase 5:
 
-- existe um candidato preliminar razoável para `T7`: `semantic_plus_full_collection_lexical_candidates_v1` sem query transformation e sem reranking;
+- `semantic_plus_full_collection_lexical_candidates_v1` sem query transformation e sem reranking foi promovida como baseline recomendada do recorte atual;
 - a evidência atual não sustenta promoção de query expansion heurística ou reranking heurístico como complemento default da variante híbrida;
-- o bloco continua honesto quanto aos limites: a decisão final de promoção ou matriz de trade-offs ainda pertence ao `CPPX-F5-T7`.
+- a decisão continua honesta quanto aos limites: trata-se da melhor combinação no benchmark offline atual do tenant demonstrativo, e não de um vencedor absoluto fora desse recorte.
 
-## O que fica explicitamente para os próximos blocos
+## Decisão final da Fase 5
 
-- `CPPX-F5-T7`: consolidação da baseline vencedora ou matriz de trade-offs.
+Baseline recomendada do recorte atual:
+
+- retrieval: `semantic_plus_full_collection_lexical_candidates_v1`
+- query transformation: `no_query_transformation_v1`
+- reranking: `no_rerank_v1`
+
+Justificativa técnica:
+
+- melhorou `faithfulness_mean` de `0.7500` para `0.8214`;
+- melhorou `expected_context_coverage_mean` de `0.5385` para `0.7308`;
+- manteve `retrieval_empty_rate` em `0.1765`;
+- não exigiu query expansion nem reranking adicionais para sustentar esse ganho.
+
+Decisão contratual:
+
+- o artefato ativo de retrieval passa a resolver `semantic_plus_full_collection_lexical_candidates_v1` como `strategy_name` default;
+- `query_transform_strategy_name` permanece em `no_query_transformation_v1`;
+- `rerank_strategy_name` permanece em `no_rerank_v1`.
+
+## O que foi promovido e o que permaneceu experimental
+
+Promovido:
+
+- `semantic_plus_full_collection_lexical_candidates_v1` como retrieval default do recorte atual da Fase 5.
+
+Permanece experimental:
+
+- `semantic_candidates_with_lexical_rescoring_v1` como baseline anterior, preservada para comparação e possível rollback controlado;
+- `tenant_keyword_query_expansion_v1`, porque não sustentou ganho adicional suficiente sobre `hybrid_lexical_only`;
+- `heuristic_post_retrieval_rerank_v1`, porque não sustentou ganho adicional suficiente para promoção;
+- a combinação completa com query transformation e reranking, porque não superou a baseline recomendada.
+
+## Checklist honesto de aceite da Fase 5
+
+Entregue:
+
+- arquitetura-alvo incremental da Fase 5 documentada;
+- baseline anterior formalizada e mantida como variante comparável;
+- camada lexical complementar real, tenant-aware e rastreável;
+- query expansion controlada, opt-in e rastreável;
+- reranking heurístico pós-recuperação, opt-in e rastreável;
+- superfície experimental consolidada em três eixos explícitos;
+- comparação reproduzível entre cinco combinações relevantes;
+- fechamento formal com baseline recomendada do recorte atual.
+
+Não entregue:
+
+- query rewriting por LLM;
+- índice lexical dedicado;
+- reranker semântico robusto ou cross-encoder;
+- demonstração de ganho generalizado fora do benchmark atual;
+- decisão universal de baseline para qualquer tenant, corpus ou cenário futuro.
 
 ## Riscos e limites identificados
 
@@ -452,4 +506,6 @@ Conclusão metodológica deste bloco:
 - query rewriting mal calibrado pode distorcer intenção e mascarar ganho artificial em cobertura, por isso a etapa continua opt-in e rastreável;
 - o reranker atual pode favorecer títulos e tags bem curados, mas nao resolve ausência de candidatos bons no pool inicial;
 - reranking pode melhorar relevância e ainda assim piorar custo/latência sem benefício suficiente;
+- a promoção atual se apoia em um único recorte de benchmark tenant-aware; novos tenants ou corpus mais amplos podem exigir reabertura da decisão;
+- `answer_relevance_mean` continuou não discriminativo no recorte atual, então a decisão não deve ser lida como consenso de todas as métricas;
 - promover estratégia nova sem trocar o `retriever_version` ou sem registrar seus parâmetros quebraria comparabilidade.

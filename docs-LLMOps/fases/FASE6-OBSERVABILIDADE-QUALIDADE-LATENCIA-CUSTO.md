@@ -74,9 +74,9 @@ Sinais ativos hoje:
 | `chatpref_pipeline_requests_total` | Counter | Volume de requests por tenant e canal | Definida em contrato |
 | `chatpref_pipeline_stage_latency_seconds` | Histogram | Latencia por etapa (`stage_name`) | Definida em contrato |
 | `chatpref_pipeline_estimated_cost_usd_total` | Counter | Custo estimado acumulado por tenant | Definida em contrato |
-| `chatpref_pipeline_fallback_total` | Counter | Taxa de fallback por tenant e motivo | Definida em contrato |
-| `chatpref_pipeline_policy_block_total` | Counter | Bloqueios de policy por etapa | Definida em contrato |
-| `chatpref_pipeline_retrieval_empty_total` | Counter | Retrieval vazio por tenant | Definida em contrato |
+| `chatpref_pipeline_fallback_total` | Counter | Taxa de fallback por tenant e motivo | Ativo (T4) |
+| `chatpref_pipeline_policy_block_total` | Counter | Bloqueios de policy por etapa | Ativo (T4) |
+| `chatpref_pipeline_retrieval_empty_total` | Counter | Retrieval vazio por tenant | Ativo (T4) |
 
 ### 2) Sinais de auditoria operacional (nao misturar com tracking)
 

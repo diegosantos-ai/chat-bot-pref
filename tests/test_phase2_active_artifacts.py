@@ -72,7 +72,7 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
     assert retrieval.version == settings.RAG_RETRIEVER_VERSION
     assert retrieval.payload["top_k_default"] == settings.LLM_CONTEXT_TOP_K
     assert retrieval.payload["embedding_version"] == settings.RAG_EMBEDDING_VERSION
-    assert resolver.retrieval_strategy_name() == BASELINE_RETRIEVAL_STRATEGY_NAME
+    assert resolver.retrieval_strategy_name() == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
     assert resolver.retrieval_supported_strategy_names() == (
         BASELINE_RETRIEVAL_STRATEGY_NAME,
         HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME,
@@ -106,7 +106,7 @@ def test_active_artifact_resolver_loads_runtime_versions_and_metadata() -> None:
     assert resolver.query_transformation_config().source_fields == ("keywords",)
     assert resolver.reranking_config().max_candidates == 5
     assert resolver.reranking_config().score_weights.retrieval_score == 0.35
-    assert experimental_config.retrieval.strategy_name == BASELINE_RETRIEVAL_STRATEGY_NAME
+    assert experimental_config.retrieval.strategy_name == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
     assert experimental_config.query_transformation.strategy_name == NO_QUERY_TRANSFORM_STRATEGY_NAME
     assert experimental_config.reranking.strategy_name == NO_RERANK_STRATEGY_NAME
     assert experimental_config.retrieval.params["candidate_pool_multiplier"] == 3

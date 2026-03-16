@@ -3,7 +3,6 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?logo=fastapi&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Auditoria%20%26%20Dados-4169E1?logo=postgresql&logoColor=white)
 ![ChromaDB](https://img.shields.io/badge/ChromaDB-RAG-7B61FF)
 ![Docker](https://img.shields.io/badge/Docker-Execu%C3%A7%C3%A3o%20Local-2496ED?logo=docker&logoColor=white)
 ![Telegram](https://img.shields.io/badge/Telegram-Canal%20de%20Demo-26A5E4?logo=telegram&logoColor=white)
@@ -12,7 +11,6 @@
 ![AWS](https://img.shields.io/badge/AWS-Deploy%20Target-FF9900?logo=amazonaws&logoColor=white)
 ![MLflow](https://img.shields.io/badge/MLflow-Experiment%20Tracking-0194E2)
 ![OpenTelemetry](https://img.shields.io/badge/OpenTelemetry-Tracing%20%26%20Observability-6E43FF)
-![Airflow](https://img.shields.io/badge/Airflow-Orquestra%C3%A7%C3%A3o%20Offline-017CEE?logo=apacheairflow&logoColor=white)
 
 > Plataforma de atendimento digital para prefeituras, projetada para combinar **IA aplicada**, **recuperação semântica com RAG**, **guardrails**, **auditoria**, **observabilidade** e **arquitetura tenant-aware**, evoluindo agora para uma nova fase de **LLMOps, avaliação formal, governança e rastreabilidade experimental**.
 
@@ -39,7 +37,7 @@ O foco atual deixa de ser apenas a sustentação de uma base funcional e passa a
 
 O objetivo desta nova etapa continua o mesmo em essência: provar **GenAI com método**, agora com uma camada explícita de experimentação, benchmark, versionamento e governança técnica.
 
-No recorte atual da branch de desenvolvimento, as **Fases 1 a 4** desse ciclo foram consolidadas na camada **offline/experimental**, com tracking por tenant, benchmark reproduzível, avaliação formal offline de RAG, artifacts comparativos e baseline inicial rastreável.
+No recorte atual da branch de desenvolvimento, as **Fases 1 a 5** desse ciclo foram consolidadas na camada **offline/experimental**, com tracking por tenant, benchmark reproduzível, avaliação formal offline de RAG, comparação entre variantes de retrieval e baseline recomendada da Fase 5 formalmente registrada.
 
 ---
 
@@ -88,7 +86,7 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 ### Incluído
 - API backend em FastAPI
 - pipeline de processamento tenant-aware com composição generativa mínima, RAG validado e guardrails rastreáveis
-- arquitetura multi-tenant em consolidação
+- arquitetura multi-tenant explicitada por contrato
 - auditoria mínima operacional e evidências de validação
 - Docker e ambiente local reproduzível
 - tenant fictício demonstrativo
@@ -100,6 +98,8 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 - versionamento experimental de prompts, policies e configurações de RAG
 - benchmark reproduzível e tenant-aware para avaliação offline
 - avaliação formal offline de RAG com métricas por run, artifacts comparativos e baseline inicial documentada
+- baseline recomendada da Fase 5 promovida para `semantic_plus_full_collection_lexical_candidates_v1`
+- query transformation e reranking heurísticos mantidos como eixos experimentais opt-in
 
 ### Não incluído neste momento
 - produto enterprise finalizado
@@ -125,42 +125,44 @@ A documentação da nova fase de evolução, focada em **LLMOps, avaliação e g
 
 - `docs-LLMOps/`
 
-### Backend
+### Runtime ativo
 - Python 3.11+
 - FastAPI
 - Pydantic
 - Uvicorn
-- PostgreSQL
-
-### IA / RAG
-- Google Gemini
 - ChromaDB
-- Retrieval-Augmented Generation
-- query expansion
-- guardrails por política
-
-### Persistência e Infra
-- PostgreSQL
-- Redis
 - Docker
 - Docker Compose
 
-### Operação e Observabilidade
-- Prometheus
-- Grafana
-- Loki
-- OpenTelemetry
-- logs estruturados
-- auditoria de pipeline
+### IA, RAG e guardrails
+- retrieval tenant-aware
+- baseline híbrida da Fase 5 com camada lexical complementar ativa
+- query transformation heurística opt-in
+- reranking heurístico opt-in
+- guardrails por política
+- Google Gemini como provedor opcional, mantendo `mock` como baseline reproduzível
 
-### Automação, Entrega e LLMOps
+### Observabilidade e operação
+- logs estruturados
+- métricas em `/metrics`
+- OpenTelemetry
+- auditoria `audit.v1`
+
+### Entrega e LLMOps
 - GitHub Actions
 - Terraform
 - AWS
 - MLflow
-- avaliação formal de RAG
+- benchmark offline tenant-aware
+- avaliação formal offline de RAG
 - scripts operacionais em Python e Bash
-- Airflow como orquestrador offline da fase LLMOps
+
+### Presentes no repositório, mas fora do runtime mínimo ativo
+- PostgreSQL
+- Redis
+- Grafana
+- Loki
+- Airflow
 
 ---
 
@@ -174,19 +176,18 @@ A arquitetura do projeto foi estruturada para suportar um fluxo de atendimento i
 
 | Componente | Função |
 |---|---|
-| `app/main.py` | inicialização da aplicação FastAPI |
-| `app/api/` | endpoints HTTP e webhooks |
-| `app/orchestrator/service.py` | coordenação do pipeline principal |
-| `app/classifier/service.py` | classificação de intenção |
-| `app/policy_guard/service.py` | guardrails e validações |
-| `app/rag/retriever.py` | recuperação semântica |
-| `app/rag/composer.py` | geração de resposta contextual |
-| `app/audit/` | auditoria e rastreabilidade |
+| `app/main.py` | bootstrap do FastAPI e registro dos routers ativos |
+| `app/api/` | endpoints HTTP, RAG, métricas e webhooks |
+| `app/services/chat_service.py` | fluxo principal atual com retrieval, composição, guardrails e auditoria |
+| `app/services/rag_service.py` | operações de retrieval, ingest e status por tenant |
+| `app/services/telegram_service.py` | canal Telegram com resolução explícita de tenant |
+| `app/policy_guard/service.py` | `policy_pre`, `policy_post` e `PolicyDecision` |
+| `app/llmops/` | tracking experimental, executor offline e resolução de artefatos |
+| `app/storage/` | persistência local, auditoria por tenant, documentos e Chroma |
 | `app/tenant_context.py` | contexto assíncrono de tenant |
 | `app/tenant_resolver.py` | resolução de tenant |
-| `admin-panel/` | interface administrativa |
-| `db/` | schema e migrations |
-| `logging/`, `dashboards/`, `grafana/` | observabilidade |
+| `docs-fundacao-operacional/` | documentação da base operacional validada |
+| `docs-LLMOps/` | documentação viva da camada de LLMOps |
 
 ---
 
@@ -202,17 +203,20 @@ O fluxo abaixo representa a direcao do pipeline completo do case. Na base ativa 
 5. A resposta é validada, registrada em auditoria e devolvida ao canal.
 6. Logs, métricas e evidências podem ser coletados para análise operacional.
 
-### Etapas principais do pipeline
-- normalização de texto
-- análise de formalidade e sentimento
-- classificação de intent
-- policy PRE
-- query expansion
-- retrieval
+### Etapas principais do pipeline ativo
+- resolução explícita de `tenant_id`
+- `policy_pre`
+- retrieval tenant-aware
 - composição via LLM
-- policy POST
+- `policy_post`
 - resposta final
-- auditoria e métricas
+- auditoria, logs, métricas e traces
+
+### Capacidades experimentais da Fase 5
+- retrieval híbrido com camada lexical complementar agora é a baseline recomendada do recorte atual
+- query transformation continua opt-in e rastreável
+- reranking continua opt-in e rastreável
+- benchmark e tracking permanecem separados da auditoria operacional
 
 ---
 
@@ -316,7 +320,7 @@ Na branch de desenvolvimento, este README passa a cumprir dois papéis:
 2. posicionar a nova fase de evolução do projeto, focada em **LLMOps, avaliação formal, governança e observabilidade avançada**.
 
 - **Base consolidada:** Fundação Operacional concluída e validada localmente, na CI e no deploy remoto.
-- **Nova fase em andamento:** Fase 1 — GenAI com Método: LLMOps, Avaliação e Governança, com **Fases 1 a 4 já consolidadas neste escopo offline/experimental**.
+- **Nova fase em andamento:** Fase 1 — GenAI com Método: LLMOps, Avaliação e Governança, com **Fases 1 a 5 já consolidadas neste escopo offline/experimental**.
 - **Eixo transversal já consolidado:** Guardrail Rastreável distribuído entre as fases finais da fundação operacional.
 
 ### Já existe
@@ -347,11 +351,13 @@ Na branch de desenvolvimento, este README passa a cumprir dois papéis:
 * benchmark reproduzível por tenant com dataset versionado da Fase 3
 * avaliação formal offline de RAG com `faithfulness`, `answer_relevance` e métricas complementares viáveis
 * artifacts comparativos por run/experimento e baseline inicial rastreável da Fase 4
+* baseline recomendada da Fase 5 promovida para retrieval híbrido com camada lexical complementar
+* query transformation e reranking heurísticos preservados como experimentos opt-in
 
-### Ainda em evolução após a conclusão da Fase 4
+### Ainda em evolução após a conclusão da Fase 5
 
-* comparação entre estratégias de retrieval e modelos
 * observabilidade ampliada de qualidade, latência e custo
+* comparação futura em novos tenants e corpus para revalidar a baseline promovida
 * orquestração offline com Airflow
 * monitoramento de deriva semântica
 * documentação viva da camada de LLMOps
@@ -359,17 +365,12 @@ Na branch de desenvolvimento, este README passa a cumprir dois papéis:
 ### Limites declarados do estado atual
 
 * `LLM_PROVIDER=mock` continua sendo o baseline reproduzível da base operacional
-* a camada de LLMOps já possui benchmark e avaliação formal offline, mas ainda não deve ser tratada como plenamente ativa no runtime transacional
+* a camada de LLMOps já possui benchmark, avaliação formal offline e baseline recomendada da Fase 5, mas ainda não deve ser tratada como plenamente ativa no runtime transacional fora do que foi explicitamente promovido em artefato
 * o Telegram público do ambiente remoto depende de secrets externos não versionados
 * o deploy remoto validado usa `sslip.io`, sem domínio próprio, rotação de secrets ou CD completo
 * a baseline inicial da Fase 4 usa `ragas` em modo `offline_heuristic_ragas`, útil para comparabilidade técnica entre runs, mas não equivalente a uma avaliação semântica forte com juiz externo
 * `context_precision` e `context_recall` continuam bloqueadas no baseline atual quando falta `reference_answer` no benchmark
-
-### Limites declarados do recorte final
-
-* `LLM_PROVIDER=mock` continua sendo o baseline reproduzível do projeto
-* o Telegram público do ambiente remoto depende de secrets externos não versionados
-* o deploy remoto validado usa `sslip.io`, sem domínio próprio, rotação de secrets ou CD completo
+* a promoção da baseline da Fase 5 vale para o recorte atual do benchmark do tenant demonstrativo, não como vencedor absoluto para qualquer corpus
 
 ### Evoluções opcionais após o fechamento do case
 
@@ -421,10 +422,11 @@ O projeto passa a ser organizado em dois ciclos complementares:
 * Fase 11 — Governança, explicabilidade e evidência de decisão
 * Fase 12 — Alinhamento final da narrativa técnica e material de demonstração
 
-Estado atual deste ciclo na branch `feat/avaliacao-rag-metricas-de-qualidade`:
+Estado atual deste ciclo na branch `feat/fase5-retrieval-query-reranking`:
 
-* Fases 1 a 4 concluídas neste escopo
+* Fases 1 a 5 concluídas neste escopo
 * Fase 4 encerrada com benchmark conectado ao executor offline, tracking experimental em `MLflow`, artifacts comparativos e baseline inicial documentada em `docs-LLMOps/fases/FASE4-AVALIACAO-FORMAL-RAG.md`
+* Fase 5 encerrada com comparação reproduzível entre cinco combinações relevantes e baseline recomendada documentada em `docs-LLMOps/fases/FASE5-RETRIEVAL-HIBRIDO.md`
 ---
 
 ## Critério de Aceite do Projeto
@@ -579,7 +581,7 @@ Na branch atual, esse canal já possui dois modos de operação validados:
 
 ## Observabilidade, Auditoria e Evidências
 
-O projeto já combina a visibilidade operacional validada na Fundação Operacional com uma camada offline/experimental de tracking e avaliação formal consolidada até a Fase 4 da trilha de LLMOps.
+O projeto já combina a visibilidade operacional validada na Fundação Operacional com uma camada offline/experimental de tracking e avaliação formal consolidada até a Fase 5 da trilha de LLMOps.
 
 Na base ativa já validada, a evidência operacional inclui:
 - auditoria versionada `audit.v1`
@@ -596,6 +598,7 @@ Na camada offline/experimental já consolidada nesta branch, o projeto também r
 - comparação entre runs por métricas e parâmetros
 - artifacts comparativos por experimento
 - baseline inicial rastreável da qualidade do RAG
+- baseline recomendada da Fase 5 para retrieval avançado
 
 Ainda não está consolidado neste recorte:
 - leitura de deriva semântica ativa
@@ -617,6 +620,7 @@ Para leitura humana mais direta do case e da nova fase, use também:
 * métricas experimentais comparáveis
 * artifacts de avaliação
 * baseline inicial documentada da Fase 4
+* baseline recomendada documentada da Fase 5
 * matriz de cenários validados
 
 ### Valor desta camada
@@ -675,12 +679,12 @@ O recorte continua enxuto de propósito: entrega real, baixo custo e operação 
 * manter a coerência entre operação local, CI e deploy remoto
 
 ### Nova fase — LLMOps
-* fortalecer a baseline inicial da Fase 4 com `reference_answer` e métricas de contexto hoje bloqueadas
-* comparar estratégias de retrieval, reranking e versões de prompt sobre a baseline já formalizada
+* fortalecer o benchmark com `reference_answer` e métricas de contexto hoje bloqueadas
+* revalidar a baseline promovida da Fase 5 em novos recortes, tenants ou corpus quando houver material suficiente
 * ampliar observabilidade experimental para qualidade, custo e latência por tenant
 * introduzir orquestração offline de ingestão, benchmark e reindexação
 * evoluir para leitura de deriva semântica da base vetorial
-* consolidar material técnico de demonstração com a Fase 4 já encerrada
+* consolidar material técnico de demonstração com as Fases 4 e 5 já encerradas
 
 ### Evolução opcional de infraestrutura
 * endurecer a operação remota com domínio próprio, rotação de secrets e CD

@@ -2,9 +2,9 @@
   "artifact_type": "retrieval_config",
   "artifact_name": "tenant_chroma_hash",
   "version_label": "tenant_chroma_hash_v1",
-  "version_id": "retrieval_config.tenant_chroma_hash.tenant_chroma_hash_v1.f3615f5b32c5",
-  "content_hash": "28aec8a6f4dc1298d39bd0910c46c7101c4f99b0846a8c00fd2c51f29c6d9ebd",
+  "version_id": "retrieval_config.tenant_chroma_hash.tenant_chroma_hash_v1.a788e35b662b",
+  "content_hash": "60fb45575b4b3607b6e40f62cc6e12364e060a5b8fba1ecb02906d6bfeb6caa5",
   "status": "candidate",
   "created_at": "2026-03-15T00:00:00Z",
-  "notes": "Configuracao tenant-aware de retrieval com baseline explicito, variante lexical complementar opt-in, query expansion controlada e reranking heuristico pos-recuperacao."
+  "notes": "Configuracao tenant-aware de retrieval com baseline recomendada da Fase 5 promovida para a variante lexical complementar, mantendo query transformation e reranking como eixos experimentais opt-in."
 }

@@ -31,7 +31,7 @@ def test_phase2_tracking_run_uses_active_versions_and_metadata() -> None:
     assert tracking_run.run_contract.prompt_version == settings.PROMPT_BASE_VERSION
     assert tracking_run.run_contract.policy_version == settings.POLICY_TEXT_VERSION
     assert tracking_run.run_contract.retriever_version == settings.RAG_RETRIEVER_VERSION
-    assert tracking_run.run_contract.retrieval_strategy_name == BASELINE_RETRIEVAL_STRATEGY_NAME
+    assert tracking_run.run_contract.retrieval_strategy_name == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
     assert tracking_run.run_contract.query_transform_strategy_name == NO_QUERY_TRANSFORM_STRATEGY_NAME
     assert tracking_run.run_contract.rerank_strategy_name == NO_RERANK_STRATEGY_NAME
     assert tracking_run.run_contract.embedding_version == settings.RAG_EMBEDDING_VERSION
@@ -39,7 +39,7 @@ def test_phase2_tracking_run_uses_active_versions_and_metadata() -> None:
     assert tracking_run.as_params()["chunking_version"] == resolver.resolve_chunking_config().version
     assert (
         json.loads(tracking_run.as_params()["phase5_experiment_axes_json"])["retrieval"]["strategy_name"]
-        == BASELINE_RETRIEVAL_STRATEGY_NAME
+        == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
     )
     assert tracking_run.as_tags()["prompt_version_id"] == resolver.resolve_composer_prompt().version_id
     assert tracking_run.as_tags()["policy_version_id"] == resolver.resolve_policy_text().version_id

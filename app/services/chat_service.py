@@ -489,6 +489,7 @@ class ChatService:
         )
 
     def _build_empty_rag_response(self, tenant_id: str, query: str) -> RagQueryResponse:
+        experimental_config = self.artifact_resolver.resolve_phase5_experimental_config()
         query_transformation_config = self.artifact_resolver.query_transformation_config()
         reranking_config = self.artifact_resolver.reranking_config()
         return RagQueryResponse(
@@ -504,9 +505,10 @@ class ChatService:
                 top_k=self._active_top_k(),
                 boost_enabled=False,
                 collection=self.rag_service.chroma_repository.collection_name(tenant_id),
-                strategy_name=self.artifact_resolver.retrieval_strategy_name(),
+                strategy_name=experimental_config.retrieval.strategy_name,
+                experimental_axes=experimental_config.as_payload(),
                 query_transformation=RagQueryTransformationUsed(
-                    strategy_name=self.artifact_resolver.query_transform_strategy_name(),
+                    strategy_name=experimental_config.query_transformation.strategy_name,
                     applied=False,
                     original_query=query,
                     retrieval_query=query,
@@ -515,7 +517,7 @@ class ChatService:
                     max_added_terms=query_transformation_config.max_added_terms,
                 ),
                 reranking=RagRerankingUsed(
-                    strategy_name=self.artifact_resolver.rerank_strategy_name(),
+                    strategy_name=experimental_config.reranking.strategy_name,
                     applied=False,
                     input_query=query,
                     reranked_candidates=0,

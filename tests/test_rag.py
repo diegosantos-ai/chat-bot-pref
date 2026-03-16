@@ -126,6 +126,14 @@ def test_rag_document_crud_ingest_and_query_by_tenant(tmp_path) -> None:
     assert query_response.json()["status"] == "ready"
     assert query_response.json()["params_used"]["strategy_name"] == BASELINE_RETRIEVAL_STRATEGY_NAME
     assert (
+        query_response.json()["params_used"]["experimental_axes"]["retrieval"]["strategy_name"]
+        == BASELINE_RETRIEVAL_STRATEGY_NAME
+    )
+    assert (
+        query_response.json()["params_used"]["experimental_axes"]["retrieval"]["params"]["candidate_pool_multiplier"]
+        == 3
+    )
+    assert (
         query_response.json()["params_used"]["query_transformation"]["strategy_name"]
         == NO_QUERY_TRANSFORM_STRATEGY_NAME
     )
@@ -226,9 +234,17 @@ def test_rag_query_supports_explicit_strategies_and_rejects_unknown_values(tmp_p
         hybrid_response.json()["params_used"]["strategy_name"]
         == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
     )
+    assert (
+        hybrid_response.json()["params_used"]["experimental_axes"]["retrieval"]["strategy_name"]
+        == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
+    )
     assert expanded_response.status_code == 200
     assert (
         expanded_response.json()["params_used"]["query_transformation"]["strategy_name"]
+        == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
+    )
+    assert (
+        expanded_response.json()["params_used"]["experimental_axes"]["query_transformation"]["strategy_name"]
         == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
     )
     assert expanded_response.json()["params_used"]["query_transformation"]["applied"] is True
@@ -245,6 +261,10 @@ def test_rag_query_supports_explicit_strategies_and_rejects_unknown_values(tmp_p
     assert reranked_response.status_code == 200
     assert (
         reranked_response.json()["params_used"]["reranking"]["strategy_name"]
+        == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    )
+    assert (
+        reranked_response.json()["params_used"]["experimental_axes"]["reranking"]["strategy_name"]
         == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
     )
     assert reranked_response.json()["params_used"]["reranking"]["applied"] is True

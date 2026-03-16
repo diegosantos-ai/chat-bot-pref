@@ -1,3 +1,5 @@
+import json
+
 from app.llmops import ActiveArtifactResolver
 from app.llmops.tracking_integration import build_phase2_tracking_run
 from app.rag.query_transformation import (
@@ -35,6 +37,10 @@ def test_phase2_tracking_run_uses_active_versions_and_metadata() -> None:
     assert tracking_run.run_contract.embedding_version == settings.RAG_EMBEDDING_VERSION
     assert tracking_run.run_contract.top_k == settings.LLM_CONTEXT_TOP_K
     assert tracking_run.as_params()["chunking_version"] == resolver.resolve_chunking_config().version
+    assert (
+        json.loads(tracking_run.as_params()["phase5_experiment_axes_json"])["retrieval"]["strategy_name"]
+        == BASELINE_RETRIEVAL_STRATEGY_NAME
+    )
     assert tracking_run.as_tags()["prompt_version_id"] == resolver.resolve_composer_prompt().version_id
     assert tracking_run.as_tags()["policy_version_id"] == resolver.resolve_policy_text().version_id
     assert tracking_run.as_tags()["retriever_version_id"] == resolver.resolve_retrieval_config().version_id
@@ -75,6 +81,10 @@ def test_phase2_tracking_run_supports_retrieval_strategy_override() -> None:
         tracking_run.as_params()["retrieval_strategy_name"]
         == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
     )
+    assert (
+        json.loads(tracking_run.as_params()["phase5_experiment_axes_json"])["retrieval"]["strategy_name"]
+        == HYBRID_FULL_COLLECTION_LEXICAL_STRATEGY_NAME
+    )
 
 
 def test_phase2_tracking_run_supports_query_transform_strategy_override() -> None:
@@ -96,6 +106,10 @@ def test_phase2_tracking_run_supports_query_transform_strategy_override() -> Non
         tracking_run.as_params()["query_transform_strategy_name"]
         == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
     )
+    assert (
+        json.loads(tracking_run.as_params()["phase5_experiment_axes_json"])["query_transformation"]["strategy_name"]
+        == TENANT_KEYWORD_QUERY_EXPANSION_STRATEGY_NAME
+    )
 
 
 def test_phase2_tracking_run_supports_rerank_strategy_override() -> None:
@@ -115,5 +129,9 @@ def test_phase2_tracking_run_supports_rerank_strategy_override() -> None:
     )
     assert (
         tracking_run.as_params()["rerank_strategy_name"]
+        == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
+    )
+    assert (
+        json.loads(tracking_run.as_params()["phase5_experiment_axes_json"])["reranking"]["strategy_name"]
         == HEURISTIC_POST_RETRIEVAL_RERANK_STRATEGY_NAME
     )

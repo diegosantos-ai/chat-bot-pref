@@ -1,0 +1,64 @@
+{
+  "phase": "F4",
+  "artifact_type": "case_ranking",
+  "experiment_name": "chat-pref-fase4-rag-evaluation",
+  "run_id": "134a1603f998486999cd4ada885a0ea2",
+  "request_id": "req-rag-eval-5ef81f7b7875",
+  "tenant_id": "prefeitura-vila-serena",
+  "dataset_version": "benchmark_v1",
+  "evaluator_library": "ragas",
+  "evaluator_mode": "offline_heuristic_ragas",
+  "methodology_notes": [
+    "offline_heuristic_evaluator",
+    "benchmark_cases_with_missing_fields",
+    "skipped_metrics_present"
+  ],
+  "status_counts": {
+    "evaluated": 1,
+    "partial": 0,
+    "skipped": 0
+  },
+  "best_evaluated_cases": [
+    {
+      "case_id": "vs-normal-001",
+      "scenario_type": "atendimento_normal",
+      "status": "evaluated",
+      "mandatory_score_mean": 0.5,
+      "faithfulness": 1.0,
+      "answer_relevance": 0.0,
+      "expected_context_coverage": 1.0,
+      "response_mode": "answer",
+      "rag_status": "ready",
+      "prompt_version": "base_v1",
+      "policy_version": "policy_v1",
+      "best_score": 0.3574,
+      "methodology_limitation": true,
+      "skipped_metrics": {
+        "context_precision": "missing_fields:reference_answer",
+        "context_recall": "missing_fields:reference_answer"
+      }
+    }
+  ],
+  "worst_evaluated_cases": [
+    {
+      "case_id": "vs-normal-001",
+      "scenario_type": "atendimento_normal",
+      "status": "evaluated",
+      "mandatory_score_mean": 0.5,
+      "faithfulness": 1.0,
+      "answer_relevance": 0.0,
+      "expected_context_coverage": 1.0,
+      "response_mode": "answer",
+      "rag_status": "ready",
+      "prompt_version": "base_v1",
+      "policy_version": "policy_v1",
+      "best_score": 0.3574,
+      "methodology_limitation": true,
+      "skipped_metrics": {
+        "context_precision": "missing_fields:reference_answer",
+        "context_recall": "missing_fields:reference_answer"
+      }
+    }
+  ],
+  "non_evaluated_cases": []
+}

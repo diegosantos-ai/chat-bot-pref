@@ -289,9 +289,10 @@ Na branch `feat/fase5-retrieval-query-reranking`, este planejamento passa a ter 
 - `CPPX-F5-T2` implementado com camada lexical complementar real por full scan da collection do tenant;
 - `CPPX-F5-T3` implementado com query expansion heurística opt-in baseada em metadados `keywords` do tenant;
 - `CPPX-F5-T4` implementado com reranking heurístico pós-recuperação, opt-in e rastreável;
+- `CPPX-F5-T5` implementado com consolidação da superfície experimental da fase em contrato único por eixo, compartilhado entre runtime, benchmark offline, tracking e CLI;
 - baseline atual do retrieval explicitado sem troca de comportamento default;
-- tracking e benchmark passam a distinguir a execução por `retrieval_strategy_name`, `query_transform_strategy_name` e `rerank_strategy_name`;
-- `CPPX-F5-T5` a `CPPX-F5-T7` permanecem pendentes e fora deste bloco.
+- tracking e benchmark passam a distinguir a execução por `retrieval_strategy_name`, `query_transform_strategy_name`, `rerank_strategy_name` e pela matriz `phase5_experiment_axes`;
+- `CPPX-F5-T6` e `CPPX-F5-T7` permanecem pendentes e fora deste bloco.
 
 ---
 

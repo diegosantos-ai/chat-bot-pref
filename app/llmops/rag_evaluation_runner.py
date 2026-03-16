@@ -223,6 +223,7 @@ class RagEvaluationCaseExecution:
     latency_ms: float
     pre_decision: PolicyDecision
     post_decision: PolicyDecision
+    retrieval_strategy_name: str
     query_transform_strategy_name: str
     query_transformation_applied: bool
     retrieval_query: str
@@ -230,6 +231,7 @@ class RagEvaluationCaseExecution:
     rerank_strategy_name: str
     reranking_applied: bool
     reranked_candidates: int
+    experimental_axes: dict[str, object]
     retrieved_chunk_titles: tuple[str, ...]
     best_score: float
 
@@ -269,6 +271,7 @@ class RagEvaluationCaseExecution:
             "model_name": self.model_name,
             "latency_ms": self.latency_ms,
             "best_score": self.best_score,
+            "retrieval_strategy_name": self.retrieval_strategy_name,
             "query_transform_strategy_name": self.query_transform_strategy_name,
             "query_transformation_applied": self.query_transformation_applied,
             "retrieval_query": self.retrieval_query,
@@ -276,6 +279,7 @@ class RagEvaluationCaseExecution:
             "rerank_strategy_name": self.rerank_strategy_name,
             "reranking_applied": self.reranking_applied,
             "reranked_candidates": self.reranked_candidates,
+            "experimental_axes": self.experimental_axes,
             "pre_decision": self.pre_decision.model_dump(mode="json"),
             "post_decision": self.post_decision.model_dump(mode="json"),
             "metrics": self.case_result.as_artifact_payload(),
@@ -409,6 +413,7 @@ class RagEvaluationRunExecution:
             "evaluator_library": self.stack_resolution.metric_library.value,
             "evaluator_library_version": self.stack_resolution.metric_library_version,
             "evaluator_mode": self.evaluator_mode,
+            "phase5_experiment_axes": self.tracking_run.tracking_metadata.phase5_experiment_axes,
             "tracking": {
                 "request_id": self.run_request_id,
                 "tracking_target": self.stack_resolution.tracking_target,
@@ -1490,17 +1495,14 @@ class OfflineRagEvaluationExecutor:
         resolved_tenant_id = (tenant_id or dataset.manifest.tenant_id).strip()
         if dataset.manifest.tenant_id != resolved_tenant_id:
             raise ValueError("O manifest informado nao corresponde ao tenant_id solicitado.")
-        resolved_strategy_name = self.chroma_repository.artifact_resolver.resolve_retrieval_strategy_name(
-            strategy_name
+        experimental_config = self.chroma_repository.artifact_resolver.resolve_phase5_experimental_config(
+            retrieval_strategy_name=strategy_name,
+            query_transform_strategy_name=query_transform_strategy_name,
+            rerank_strategy_name=rerank_strategy_name,
         )
-        resolved_query_transform_strategy_name = (
-            self.chroma_repository.artifact_resolver.resolve_query_transform_strategy_name(
-                query_transform_strategy_name
-            )
-        )
-        resolved_rerank_strategy_name = self.chroma_repository.artifact_resolver.resolve_rerank_strategy_name(
-            rerank_strategy_name
-        )
+        resolved_strategy_name = experimental_config.retrieval.strategy_name
+        resolved_query_transform_strategy_name = experimental_config.query_transformation.strategy_name
+        resolved_rerank_strategy_name = experimental_config.reranking.strategy_name
 
         selected_cases = _select_benchmark_cases(
             dataset=dataset,
@@ -1713,6 +1715,7 @@ class OfflineRagEvaluationExecutor:
             latency_ms=latency_ms,
             pre_decision=pre_decision,
             post_decision=post_decision,
+            retrieval_strategy_name=rag_response.params_used.strategy_name,
             query_transform_strategy_name=rag_response.params_used.query_transformation.strategy_name,
             query_transformation_applied=rag_response.params_used.query_transformation.applied,
             retrieval_query=rag_response.params_used.query_transformation.retrieval_query,
@@ -1720,6 +1723,7 @@ class OfflineRagEvaluationExecutor:
             rerank_strategy_name=rag_response.params_used.reranking.strategy_name,
             reranking_applied=rag_response.params_used.reranking.applied,
             reranked_candidates=rag_response.params_used.reranking.reranked_candidates,
+            experimental_axes=rag_response.params_used.experimental_axes.model_dump(mode="json"),
             retrieved_chunk_titles=tuple(chunk.title for chunk in rag_response.chunks),
             best_score=rag_response.best_score,
         )
@@ -1738,16 +1742,17 @@ class OfflineRagEvaluationExecutor:
         top_k = self.chroma_repository.artifact_resolver.retrieval_top_k_default()
         min_score = 0.0
         collection_name = self.chroma_repository.collection_name(tenant_id)
-        resolved_strategy_name = self.chroma_repository.artifact_resolver.resolve_retrieval_strategy_name(
-            strategy_name
+        experimental_config = self.chroma_repository.artifact_resolver.resolve_phase5_experimental_config(
+            retrieval_strategy_name=strategy_name,
+            query_transform_strategy_name=query_transform_strategy_name,
+            rerank_strategy_name=rerank_strategy_name,
         )
-        resolved_rerank_strategy_name = self.chroma_repository.artifact_resolver.resolve_rerank_strategy_name(
-            rerank_strategy_name
-        )
+        resolved_strategy_name = experimental_config.retrieval.strategy_name
+        resolved_rerank_strategy_name = experimental_config.reranking.strategy_name
         query_transformation = self._resolve_query_transformation(
             tenant_id=tenant_id,
             query=query,
-            query_transform_strategy_name=query_transform_strategy_name,
+            query_transform_strategy_name=experimental_config.query_transformation.strategy_name,
         )
         reranking_config = self.chroma_repository.artifact_resolver.reranking_config()
         documents_count = len(self.document_repository.list_documents(tenant_id))
@@ -1770,13 +1775,16 @@ class OfflineRagEvaluationExecutor:
                 total_chunks=0,
                 best_score=0.0,
                 params_used=RagQueryParamsUsed(
-                    min_score=min_score,
-                    top_k=top_k,
-                    boost_enabled=False,
-                    collection=collection_name,
-                    strategy_name=resolved_strategy_name,
-                    query_transformation=self._to_query_transformation_used(query_transformation),
-                    reranking=self._to_reranking_used(reranking),
+                    **self._build_query_params_used_payload(
+                        min_score=min_score,
+                        top_k=top_k,
+                        boost_enabled=False,
+                        collection=collection_name,
+                        experimental_config=experimental_config.as_payload(),
+                        strategy_name=resolved_strategy_name,
+                        query_transformation=query_transformation,
+                        reranking=reranking,
+                    )
                 ),
             )
         if chunks_count == 0 or collection_name not in self.chroma_repository.list_collection_names():
@@ -1791,13 +1799,16 @@ class OfflineRagEvaluationExecutor:
                 total_chunks=0,
                 best_score=0.0,
                 params_used=RagQueryParamsUsed(
-                    min_score=min_score,
-                    top_k=top_k,
-                    boost_enabled=False,
-                    collection=collection_name,
-                    strategy_name=resolved_strategy_name,
-                    query_transformation=self._to_query_transformation_used(query_transformation),
-                    reranking=self._to_reranking_used(reranking),
+                    **self._build_query_params_used_payload(
+                        min_score=min_score,
+                        top_k=top_k,
+                        boost_enabled=False,
+                        collection=collection_name,
+                        experimental_config=experimental_config.as_payload(),
+                        strategy_name=resolved_strategy_name,
+                        query_transformation=query_transformation,
+                        reranking=reranking,
+                    )
                 ),
             )
 
@@ -1845,13 +1856,16 @@ class OfflineRagEvaluationExecutor:
                 total_chunks=0,
                 best_score=0.0,
                 params_used=RagQueryParamsUsed(
-                    min_score=min_score,
-                    top_k=top_k,
-                    boost_enabled=False,
-                    collection=collection_name,
-                    strategy_name=resolved_strategy_name,
-                    query_transformation=self._to_query_transformation_used(query_transformation),
-                    reranking=self._to_reranking_used(reranking),
+                    **self._build_query_params_used_payload(
+                        min_score=min_score,
+                        top_k=top_k,
+                        boost_enabled=False,
+                        collection=collection_name,
+                        experimental_config=experimental_config.as_payload(),
+                        strategy_name=resolved_strategy_name,
+                        query_transformation=query_transformation,
+                        reranking=reranking,
+                    )
                 ),
             )
 
@@ -1864,13 +1878,16 @@ class OfflineRagEvaluationExecutor:
             total_chunks=len(selected_chunks),
             best_score=max(chunk.score for chunk in selected_chunks),
             params_used=RagQueryParamsUsed(
-                min_score=min_score,
-                top_k=top_k,
-                boost_enabled=False,
-                collection=collection_name,
-                strategy_name=resolved_strategy_name,
-                query_transformation=self._to_query_transformation_used(query_transformation),
-                reranking=self._to_reranking_used(reranking),
+                **self._build_query_params_used_payload(
+                    min_score=min_score,
+                    top_k=top_k,
+                    boost_enabled=False,
+                    collection=collection_name,
+                    experimental_config=experimental_config.as_payload(),
+                    strategy_name=resolved_strategy_name,
+                    query_transformation=query_transformation,
+                    reranking=reranking,
+                )
             ),
         )
 
@@ -1885,17 +1902,14 @@ class OfflineRagEvaluationExecutor:
         """Constroi a resposta tecnica de retrieval quando a policy_pre bloqueia o caso."""
 
         collection_name = self.chroma_repository.collection_name(benchmark_case.tenant_id)
-        resolved_strategy_name = self.chroma_repository.artifact_resolver.resolve_retrieval_strategy_name(
-            strategy_name
+        experimental_config = self.chroma_repository.artifact_resolver.resolve_phase5_experimental_config(
+            retrieval_strategy_name=strategy_name,
+            query_transform_strategy_name=query_transform_strategy_name,
+            rerank_strategy_name=rerank_strategy_name,
         )
-        resolved_query_transform_strategy_name = (
-            self.chroma_repository.artifact_resolver.resolve_query_transform_strategy_name(
-                query_transform_strategy_name
-            )
-        )
-        resolved_rerank_strategy_name = self.chroma_repository.artifact_resolver.resolve_rerank_strategy_name(
-            rerank_strategy_name
-        )
+        resolved_strategy_name = experimental_config.retrieval.strategy_name
+        resolved_query_transform_strategy_name = experimental_config.query_transformation.strategy_name
+        resolved_rerank_strategy_name = experimental_config.reranking.strategy_name
         query_transformation = build_identity_query_transformation(
             query_text=benchmark_case.input_query,
             strategy_name=resolved_query_transform_strategy_name,
@@ -1916,15 +1930,43 @@ class OfflineRagEvaluationExecutor:
             total_chunks=0,
             best_score=0.0,
             params_used=RagQueryParamsUsed(
-                min_score=0.0,
-                top_k=self.chroma_repository.artifact_resolver.retrieval_top_k_default(),
-                boost_enabled=False,
-                collection=collection_name,
-                strategy_name=resolved_strategy_name,
-                query_transformation=self._to_query_transformation_used(query_transformation),
-                reranking=self._to_reranking_used(reranking),
+                **self._build_query_params_used_payload(
+                    min_score=0.0,
+                    top_k=self.chroma_repository.artifact_resolver.retrieval_top_k_default(),
+                    boost_enabled=False,
+                    collection=collection_name,
+                    experimental_config=experimental_config.as_payload(),
+                    strategy_name=resolved_strategy_name,
+                    query_transformation=query_transformation,
+                    reranking=reranking,
+                )
             ),
         )
+
+    def _build_query_params_used_payload(
+        self,
+        *,
+        min_score: float,
+        top_k: int,
+        boost_enabled: bool,
+        collection: str,
+        experimental_config: dict[str, object],
+        strategy_name: str,
+        query_transformation: QueryTransformationResult,
+        reranking: RerankingResult,
+    ) -> dict[str, object]:
+        """Monta o payload técnico comum do retrieval usado no runtime offline."""
+
+        return {
+            "min_score": min_score,
+            "top_k": top_k,
+            "boost_enabled": boost_enabled,
+            "collection": collection,
+            "strategy_name": strategy_name,
+            "experimental_axes": experimental_config,
+            "query_transformation": self._to_query_transformation_used(query_transformation),
+            "reranking": self._to_reranking_used(reranking),
+        }
 
     def _resolve_query_transformation(
         self,

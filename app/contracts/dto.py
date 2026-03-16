@@ -383,12 +383,25 @@ class RagRerankingUsed(BaseModel):
     score_weights: dict[str, float] = Field(default_factory=dict)
 
 
+class RagExperimentalAxisUsed(BaseModel):
+    strategy_name: str
+    supported_strategies: list[str] = Field(default_factory=list)
+    params: dict[str, Any] = Field(default_factory=dict)
+
+
+class RagExperimentalAxesUsed(BaseModel):
+    retrieval: RagExperimentalAxisUsed
+    query_transformation: RagExperimentalAxisUsed
+    reranking: RagExperimentalAxisUsed
+
+
 class RagQueryParamsUsed(BaseModel):
     min_score: float
     top_k: int
     boost_enabled: bool
     collection: str
     strategy_name: str
+    experimental_axes: RagExperimentalAxesUsed
     query_transformation: RagQueryTransformationUsed
     reranking: RagRerankingUsed
 

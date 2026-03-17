@@ -333,12 +333,14 @@ class RagQueryRequest(BaseModel):
     strategy_name: Optional[str] = None
     query_transform_strategy_name: Optional[str] = None
     rerank_strategy_name: Optional[str] = None
+    run_id: Optional[str] = None
 
     @field_validator(
         "tenant_id",
         "strategy_name",
         "query_transform_strategy_name",
         "rerank_strategy_name",
+        "run_id",
         mode="before",
     )
     @classmethod

@@ -413,8 +413,17 @@ class ActiveArtifactResolver:
         retrieval_strategy_name: str | None = None,
         query_transform_strategy_name: str | None = None,
         rerank_strategy_name: str | None = None,
+        run_id: str | None = None,
     ) -> Phase5ExperimentalConfig:
         """Resolve a superfície experimental ativa da Fase 5 de forma centralizada."""
+
+        # run_params = self._params_from_run(run_id)
+        # if run_params:
+        #     retrieval_strategy_name = run_params.get("retrieval_strategy_name", retrieval_strategy_name)
+        #     query_transform_strategy_name = run_params.get(
+        #         "query_transform_strategy_name", query_transform_strategy_name
+        #     )
+        #     rerank_strategy_name = run_params.get("rerank_strategy_name", rerank_strategy_name)
 
         retrieval_score_weights = self.retrieval_score_weights()
         query_transformation_config = self.query_transformation_config()
@@ -478,6 +487,19 @@ class ActiveArtifactResolver:
 
         payload = self.resolve_chunking_config().payload
         return str(payload.get("empty_content_fallback", "full_content")).strip()
+
+    # def _params_from_run(self, run_id: str | None) -> dict[str, Any]:
+    #     """Carrega os parâmetros de uma run do MLflow se o run_id for informado."""
+    #
+    #     if not run_id:
+    #         return {}
+    #     try:
+    #         import mlflow
+    #
+    #         run = mlflow.get_run(run_id)
+    #         return run.data.params
+    #     except (ImportError, mlflow.exceptions.MlflowException):
+    #         return {}
 
     def _resolve_text_artifact(self, descriptor: VersionedArtifactDescriptor) -> ActiveTextArtifact:
         """Carrega um artefato textual e valida sua consistência com o sidecar."""

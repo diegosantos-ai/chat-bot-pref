@@ -81,17 +81,28 @@ class ChatService:
         normalized_audit_context = self._normalize_audit_context(audit_context)
         channel = chat_request.channel
         tenant_profile = self.tenant_profile_service.get_profile(tenant_id)
+
+        run_id = normalized_audit_context.get("run_id", "")
+        parent_run_id = normalized_audit_context.get("parent_run_id", "")
+        strategy_name = normalized_audit_context.get("strategy_name", "")
+
         update_correlation_context(
             request_id=resolved_request_id,
             tenant_id=tenant_id,
             session_id=resolved_session_id,
             channel=channel,
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+            strategy_name=strategy_name,
         )
         annotate_current_span(
             request_id=resolved_request_id,
             tenant_id=tenant_id,
             session_id=resolved_session_id,
             channel=channel,
+            run_id=run_id,
+            parent_run_id=parent_run_id,
+            strategy_name=strategy_name,
         )
         record_chat_request(channel=channel)
 
@@ -101,6 +112,9 @@ class ChatService:
                 tenant_id=tenant_id,
                 session_id=resolved_session_id,
                 channel=channel,
+                run_id=run_id,
+                parent_run_id=parent_run_id,
+                strategy_name=strategy_name,
             )
             log_event(
                 "chat.process.started",
@@ -195,6 +209,7 @@ class ChatService:
                             top_k=self._active_top_k(),
                             min_score=0.0,
                             boost_enabled=False,
+                            run_id=run_id,
                         )
                     )
                     annotate_current_span(

@@ -12,6 +12,9 @@ class CorrelationContext:
     channel: str = ""
     method: str = ""
     path: str = ""
+    run_id: str = ""
+    parent_run_id: str = ""
+    strategy_name: str = ""
 
 
 _context_var: ContextVar[CorrelationContext] = ContextVar(
@@ -32,6 +35,9 @@ def set_correlation_context(
     channel: str = "",
     method: str = "",
     path: str = "",
+    run_id: str = "",
+    parent_run_id: str = "",
+    strategy_name: str = "",
 ) -> Token[CorrelationContext]:
     context = CorrelationContext(
         request_id=request_id.strip(),
@@ -40,6 +46,9 @@ def set_correlation_context(
         channel=channel.strip(),
         method=method.strip(),
         path=path.strip(),
+        run_id=run_id.strip(),
+        parent_run_id=parent_run_id.strip(),
+        strategy_name=strategy_name.strip(),
     )
     return _context_var.set(context)
 

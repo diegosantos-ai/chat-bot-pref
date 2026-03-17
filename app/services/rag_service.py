@@ -187,6 +187,7 @@ class RagService:
             retrieval_strategy_name=request.strategy_name,
             query_transform_strategy_name=request.query_transform_strategy_name,
             rerank_strategy_name=request.rerank_strategy_name,
+            run_id=request.run_id,
         )
         strategy_name = experimental_config.retrieval.strategy_name
         query_transform_strategy_name = experimental_config.query_transformation.strategy_name

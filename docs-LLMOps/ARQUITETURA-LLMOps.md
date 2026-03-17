@@ -46,19 +46,19 @@ Essa fundação permanece válida e continua sendo a base de execução do siste
 
 A arquitetura da fase LLMOps segue cinco diretrizes estruturais:
 
-1. **tenant-awareness como requisito transversal**  
+1. **tenant-awareness como requisito transversal**
    Nenhuma camada nova deve misturar dados, métricas, experimentos ou artefatos de tenants distintos de forma insegura.
 
-2. **separação entre operação e experimento**  
+2. **separação entre operação e experimento**
    O fluxo operacional de atendimento e a trilha de experimentação devem coexistir sem se confundir.
 
-3. **benchmark antes de otimização**  
+3. **benchmark antes de otimização**
    Evoluções de prompt, retrieval, modelo ou policy devem nascer comparáveis.
 
-4. **instrumentação antes de sofisticação**  
+4. **instrumentação antes de sofisticação**
    A arquitetura deve medir antes de sofisticar.
 
-5. **estado atual distinto de arquitetura-alvo**  
+5. **estado atual distinto de arquitetura-alvo**
    O documento deve continuar distinguindo com rigor o que já está validado do que ainda está em implantação.
 
 ## Arquitetura-alvo da fase

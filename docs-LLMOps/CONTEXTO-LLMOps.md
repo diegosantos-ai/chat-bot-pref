@@ -94,19 +94,19 @@ Esta fase não tem como objetivo:
 
 A execução desta fase deve seguir os princípios abaixo:
 
-- **tenant-awareness como requisito estrutural**  
+- **tenant-awareness como requisito estrutural**
   Nenhuma solução de tracking, avaliação ou observabilidade deve misturar dados de tenants distintos de forma insegura.
 
-- **separação entre operação e experimento**  
+- **separação entre operação e experimento**
   Auditoria de atendimento e rastreamento experimental devem coexistir, mas não se confundir.
 
-- **estado atual distinto de arquitetura-alvo**  
+- **estado atual distinto de arquitetura-alvo**
   A documentação deve explicitar o que já está validado e o que permanece planejado.
 
-- **evolução guiada por benchmark**  
+- **evolução guiada por benchmark**
   Mudanças em prompt, retrieval, modelo ou policy devem ser comparáveis e justificáveis.
 
-- **instrumentação antes de otimização**  
+- **instrumentação antes de otimização**
   O projeto deve evitar sofisticar uma camada que ainda não esteja mensurada de forma suficiente.
 
 ## Relação com a fase anterior
@@ -161,6 +161,6 @@ A arquitetura-alvo e a distinção entre estado atual e estado planejado devem s
 
 Fase em abertura formal.
 
-Planejamento macro definido.  
-Estrutura documental em consolidação.  
+Planejamento macro definido.
+Estrutura documental em consolidação.
 Próximo passo: formalização da arquitetura-alvo da fase.

@@ -46,19 +46,19 @@ Ele deve responder perguntas como:
 
 A separação foi adotada pelos seguintes motivos:
 
-1. **clareza de responsabilidade**  
+1. **clareza de responsabilidade**
    Auditoria e experimentação têm objetivos diferentes e não devem disputar o mesmo modelo mental nem o mesmo contrato de persistência.
 
-2. **governança de dados**  
+2. **governança de dados**
    O dado operacional do atendimento e o dado experimental possuem diferentes propósitos de retenção, leitura e análise.
 
-3. **manutenção arquitetural**  
+3. **manutenção arquitetural**
    Separar essas camadas reduz acoplamento e evita transformar a auditoria em depósito genérico de telemetria experimental.
 
-4. **tenant-awareness**  
+4. **tenant-awareness**
    A segregação por tenant deve existir em ambas as camadas, mas isso não exige fusão entre elas.
 
-5. **evolução controlada**  
+5. **evolução controlada**
    O ciclo de experimentação pode crescer em volume, cardinalidade e granularidade sem degradar o desenho da camada operacional.
 
 ## Consequências

@@ -26,31 +26,31 @@ INSERT INTO tenants (tenant_id, name) VALUES ('default', 'Default System Tenant'
 -- Omitirmos audit_events temporalmente para evitar quebras se já tiver dados, ou forçamos com default.
 -- Como é uma migração para MVP limpo, adicionamos com constraint NOT NULL e um valor default genérico.
 
-ALTER TABLE usuarios_anonimos 
+ALTER TABLE usuarios_anonimos
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE audit_events 
+ALTER TABLE audit_events
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE rag_queries 
+ALTER TABLE rag_queries
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE conversas 
+ALTER TABLE conversas
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE scrap_configs 
+ALTER TABLE scrap_configs
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE scrap_schedules 
+ALTER TABLE scrap_schedules
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE scrap_results 
+ALTER TABLE scrap_results
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE rag_documents 
+ALTER TABLE rag_documents
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
-ALTER TABLE admin_users 
+ALTER TABLE admin_users
 ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) NOT NULL DEFAULT 'default' REFERENCES tenants(tenant_id);
 
 
@@ -141,24 +141,24 @@ CREATE POLICY tenant_isolation_policy ON admin_users
 -- 6. Adicionar tabela de credenciais isoladas (Para as APIs Meta)
 CREATE TABLE IF NOT EXISTS tenant_credentials (
     tenant_id VARCHAR(50) PRIMARY KEY REFERENCES tenants(tenant_id) ON DELETE CASCADE,
-    
+
     -- META API (Page/App Credentials)
     meta_page_id VARCHAR(255),
     meta_access_token VARCHAR(500),
     meta_app_secret VARCHAR(255),
     meta_webhook_verify_token VARCHAR(255),
-    
+
     -- Instagram specific
     meta_ig_page_id VARCHAR(255),
     meta_ig_access_token VARCHAR(500),
     meta_ig_app_secret VARCHAR(255),
     meta_ig_webhook_verify_token VARCHAR(255),
-    
+
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Tabela puramente de configurações técnicas/vazamento de tenant_id, não precisa de policy de isolation row level 
+-- Tabela puramente de configurações técnicas/vazamento de tenant_id, não precisa de policy de isolation row level
 -- pois o app backend fará query direta pelo ID ao receber proxy ingress headers/body, mas ativamos por precaução de blindagem.
 ALTER TABLE tenant_credentials ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_isolation_policy ON tenant_credentials;

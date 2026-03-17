@@ -1,7 +1,7 @@
 -- Migration: Cache de Perfis Meta (Instagram/Facebook)
 -- Data: 2026-02-14
 -- Autor: Agente {bot_name}
--- 
+--
 -- Cria tabela para cachear perfis de usuários do Instagram/Facebook
 -- evitando chamadas repetidas à API da Meta.
 
@@ -19,10 +19,10 @@ CREATE TABLE IF NOT EXISTS meta_user_profiles (
 );
 
 -- Índices para busca eficiente
-CREATE INDEX IF NOT EXISTS idx_meta_user_profiles_lookup 
+CREATE INDEX IF NOT EXISTS idx_meta_user_profiles_lookup
 ON meta_user_profiles(platform_user_id, platform);
 
-CREATE INDEX IF NOT EXISTS idx_meta_user_profiles_updated 
+CREATE INDEX IF NOT EXISTS idx_meta_user_profiles_updated
 ON meta_user_profiles(updated_at);
 
 -- Trigger para atualizar updated_at automaticamente
@@ -41,17 +41,17 @@ CREATE TRIGGER update_meta_user_profiles_updated_at
     EXECUTE FUNCTION update_updated_at_column();
 
 -- Comentários para documentação
-COMMENT ON TABLE meta_user_profiles IS 
+COMMENT ON TABLE meta_user_profiles IS
 'Cache de perfis do Instagram/Facebook para evitar chamadas repetidas à API da Meta. Dados são atualizados a cada 30 dias ou quando necessário.';
 
-COMMENT ON COLUMN meta_user_profiles.platform_user_id IS 
+COMMENT ON COLUMN meta_user_profiles.platform_user_id IS
 'ID do usuário na plataforma (Instagram ou Facebook)';
 
-COMMENT ON COLUMN meta_user_profiles.platform IS 
+COMMENT ON COLUMN meta_user_profiles.platform IS
 'Plataforma de origem: instagram ou facebook';
 
-COMMENT ON COLUMN meta_user_profiles.username IS 
+COMMENT ON COLUMN meta_user_profiles.username IS
 'Username/handle do usuário (ex: @perfil_oficial)';
 
-COMMENT ON COLUMN meta_user_profiles.name IS 
+COMMENT ON COLUMN meta_user_profiles.name IS
 'Nome completo do perfil';

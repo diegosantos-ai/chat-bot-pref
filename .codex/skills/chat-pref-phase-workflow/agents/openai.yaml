@@ -1,4 +1,0 @@
-interface:
-  display_name: "Chat Pref Workflow"
-  short_description: "Workflow por fase para o Chat Pref"
-  default_prompt: "Use $chat-pref-phase-workflow para enquadrar esta task no ciclo, fase, criterio de aceite e validacao do Chat Pref."

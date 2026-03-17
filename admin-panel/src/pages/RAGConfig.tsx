@@ -205,7 +205,7 @@ export default function RAGConfigPage() {
               <span>1.00 (mais restritivo)</span>
             </div>
             <p className={styles.paramDesc}>
-              Documentos com score abaixo deste valor são descartados. 
+              Documentos com score abaixo deste valor são descartados.
               Valor padrão recomendado: 0.35
             </p>
           </div>
@@ -231,7 +231,7 @@ export default function RAGConfigPage() {
               <span>20</span>
             </div>
             <p className={styles.paramDesc}>
-              Número máximo de documentos a recuperar por query. 
+              Número máximo de documentos a recuperar por query.
               Valor padrão recomendado: 7
             </p>
           </div>
@@ -276,7 +276,7 @@ export default function RAGConfigPage() {
               </label>
             </div>
             <p className={styles.paramDesc}>
-              Quando ativado, documentos que contêm siglas municipais (IPSU, REFIS, MEI, etc.) 
+              Quando ativado, documentos que contêm siglas municipais (IPSU, REFIS, MEI, etc.)
               recibida um boost no score de relevância.
             </p>
           </div>
@@ -315,7 +315,7 @@ export default function RAGConfigPage() {
           <div className={styles.infoCard}>
             <h4>Min Score</h4>
             <p>
-              Controla a qualidade mínima dos documentos retornados. 
+              Controla a qualidade mínima dos documentos retornados.
               Scores mais altos = menos resultados, mas mais precisos.
             </p>
           </div>

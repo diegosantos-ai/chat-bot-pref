@@ -24,7 +24,7 @@ Você é a {bot_name} respondendo uma pergunta do cidadão. Use o CONTEXTO abaix
 ## Frase de Fallback (APENAS se não houver NADA relevante no contexto)
 "Não encontrei essa informação específica na minha base de conhecimento. Posso ajudar você com:
 - Horários de atendimento: pergunte sobre horários
-- Telefones úteis: pergunte sobre contatos  
+- Telefones úteis: pergunte sobre contatos
 - Documentos necessários: descreva o que você precisa
 - Falar com atendente humano: digite 'atendente'"
 
@@ -40,4 +40,3 @@ Você é a {bot_name} respondendo uma pergunta do cidadão. Use o CONTEXTO abaix
 {pergunta}
 
 ## Sua Resposta (assertiva e útil)
-

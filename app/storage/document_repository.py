@@ -66,4 +66,3 @@ class FileDocumentRepository:
         if not status_path.exists():
             return {}
         return json.loads(status_path.read_text(encoding="utf-8"))
-

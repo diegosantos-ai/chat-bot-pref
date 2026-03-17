@@ -1,4 +1,4 @@
-# Chat Pref  
+# Chat Pref
 ### Plataforma de Atendimento Municipal com IA, RAG, Arquitetura Tenant-Aware e Evolução em LLMOps
 
 ![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)

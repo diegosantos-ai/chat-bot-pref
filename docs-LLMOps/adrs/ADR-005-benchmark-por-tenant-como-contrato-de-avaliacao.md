@@ -30,19 +30,19 @@ Toda avaliação formal relevante do pipeline RAG deve considerar o tenant como 
 
 A decisão foi adotada pelos seguintes motivos:
 
-1. **tenant-awareness como requisito estrutural**  
+1. **tenant-awareness como requisito estrutural**
    O projeto não pode misturar avaliação entre tenants como se fossem um mesmo sistema semântico.
 
-2. **maior fidelidade de avaliação**  
+2. **maior fidelidade de avaliação**
    A qualidade do pipeline depende fortemente da base documental e do contexto institucional do tenant.
 
-3. **melhor capacidade de diagnóstico**  
+3. **melhor capacidade de diagnóstico**
    Benchmark por tenant facilita identificar se a degradação vem de base, retrieval, prompt ou policy.
 
-4. **maior segurança na promoção de mudanças**  
+4. **maior segurança na promoção de mudanças**
    Mudanças deixam de ser promovidas por média global e passam a ser avaliadas em recortes mais realistas.
 
-5. **coerência com a arquitetura multi-tenant**  
+5. **coerência com a arquitetura multi-tenant**
    Se a operação é segregada por tenant, a avaliação também deve ser.
 
 ## Escopo da decisão

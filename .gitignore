@@ -387,3 +387,4 @@ scripts/verify_features.py
 .agent/scripts/auto_preview.py
 tmp/marketingskills
 docs/conferencia_testes.txt
+.env.compose

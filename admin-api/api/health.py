@@ -102,4 +102,3 @@ async def system_info():
         "admin_key_hint": masked_key,
         "database_url_hint": DATABASE_URL[:30] + "..." if DATABASE_URL else "not set",
     }
-

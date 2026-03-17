@@ -246,4 +246,3 @@ def track_pipeline_stage_latency(
 
 def render_metrics() -> tuple[bytes, str]:
     return generate_latest(REGISTRY), CONTENT_TYPE_LATEST
-

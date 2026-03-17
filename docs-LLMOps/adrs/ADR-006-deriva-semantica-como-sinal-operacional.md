@@ -28,16 +28,16 @@ Deriva semântica, no contexto do Chat Pref, será entendida como deterioração
 
 A decisão foi adotada pelos seguintes motivos:
 
-1. **coerência com arquitetura multi-tenant**  
+1. **coerência com arquitetura multi-tenant**
    Cada tenant possui base documental própria e, portanto, pode degradar de forma independente.
 
-2. **melhor diagnóstico de falha**  
+2. **melhor diagnóstico de falha**
    Tratar deriva semântica explicitamente ajuda a distinguir problemas de base, retrieval, prompt ou modelo.
 
-3. **alinhamento com benchmark por tenant**  
+3. **alinhamento com benchmark por tenant**
    A avaliação formal só produz valor pleno quando também permite detectar perda de qualidade ao longo do tempo.
 
-4. **governança da camada RAG**  
+4. **governança da camada RAG**
    A base vetorial precisa ser tratada como ativo versionável e monitorável, não como componente estático presumidamente saudável.
 
 5. **operabilidade**

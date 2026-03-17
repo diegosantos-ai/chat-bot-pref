@@ -58,4 +58,3 @@ def update_correlation_context(**values: str) -> CorrelationContext:
 
 def reset_correlation_context(token: Token[CorrelationContext]) -> None:
     _context_var.reset(token)
-

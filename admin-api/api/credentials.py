@@ -29,11 +29,11 @@ async def get_credentials(tenant_id: str):
             "SELECT * FROM tenant_credentials WHERE tenant_id = $1",
             tenant_id
         )
-        
+
         if not row:
             # Se não existe linha de credencial, retorna estrutura vazia
             return {f: "" for f in CREDENTIAL_FIELDS}
-        
+
         # Mascaramento para o Admin ver que existe mas não ver o token inteiro
         res = {}
         for f in CREDENTIAL_FIELDS:
@@ -53,21 +53,21 @@ async def update_credentials(tenant_id: str, creds: CredentialUpdate):
             "SELECT 1 FROM tenant_credentials WHERE tenant_id = $1",
             tenant_id
         )
-        
+
         if not exists:
             # Se não existe, cria (assumindo que o tenant_id seja válido)
             await conn.execute(
                 "INSERT INTO tenant_credentials (tenant_id) VALUES ($1)",
                 tenant_id
             )
-            
+
         update_data = creds.dict(exclude_unset=True)
         if not update_data:
             return {"status": "no changes"}
-            
+
         set_clause = ", ".join([f"{k} = ${i+2}" for i, k in enumerate(update_data.keys())])
         values = list(update_data.values())
-        
+
         await conn.execute(
             f"UPDATE tenant_credentials SET {set_clause} WHERE tenant_id = $1",
             tenant_id, *values

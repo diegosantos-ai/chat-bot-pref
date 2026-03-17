@@ -5,7 +5,7 @@
   "scope": "MVE_PILOT",
   "frozen_for_pilot": true,
   "description": "Prompts do Atendimento Digital da Prefeitura de {client_name}",
-  
+
   "prompts": {
     "system": {
       "file": "system.txt",
@@ -13,7 +13,7 @@
       "variables": ["{{base_id}}", "{{current_date}}"]
     },
     "classifier": {
-      "file": "classifier.txt", 
+      "file": "classifier.txt",
       "purpose": "Classifica a intenção do usuário",
       "variables": ["{{user_message}}", "{{intents_list}}"]
     },

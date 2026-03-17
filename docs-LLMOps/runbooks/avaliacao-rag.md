@@ -265,16 +265,16 @@ Limitação metodológica relevante do estado atual:
 
 Ao final de uma avaliação, a decisão técnica deve cair em uma das seguintes categorias:
 
-- **promover**  
+- **promover**
   quando houver ganho ou trade-off aceitável sustentado por evidência;
 
-- **manter em observação**  
+- **manter em observação**
   quando houver sinal promissor, mas com evidência ainda insuficiente;
 
-- **revisar**  
+- **revisar**
   quando houver resultado inconclusivo ou degradado;
 
-- **reverter**  
+- **reverter**
   quando a mudança piorar baseline validada.
 
 ## Relação com outros documentos

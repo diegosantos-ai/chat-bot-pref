@@ -52,4 +52,3 @@ def test_pipeline_retrieval_empty_metrics():
         {"tenant_id": "test_tenant", "channel": "web"}
     )
     assert after == before + 1.0
-

@@ -32,7 +32,7 @@ Airflow será utilizado para coordenar jobs recorrentes e desacoplados do runtim
 
 A escolha por Airflow foi feita pelos seguintes motivos:
 
-1. **separação clara entre online e offline**  
+1. **separação clara entre online e offline**
    O projeto precisa distinguir de forma explícita o que pertence ao fluxo síncrono de atendimento e o que deve ser executado como job assíncrono e orquestrado.
 
 2. **aderência ao tipo de tarefa**

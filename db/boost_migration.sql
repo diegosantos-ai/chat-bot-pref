@@ -8,7 +8,7 @@ DECLARE
     cnt INTEGER;
 BEGIN
     SELECT COUNT(*) INTO cnt FROM boost_configs WHERE tipo = 'sigla';
-    
+
     IF cnt = 0 THEN
         -- Import acronyms from the hardcoded file
         INSERT INTO boost_configs (nome, tipo, valor, boost_value, prioridade, ativo) VALUES
@@ -63,7 +63,7 @@ BEGIN
             ('LDO', 'sigla', 'LDO', 0.2, 49, true),
             ('PM', 'sigla', 'PM', 0.2, 50, true),
             ('BM', 'sigla', 'BM', 0.2, 51, true);
-        
+
         RAISE NOTICE 'Imported 51 acronyms';
     ELSE
         RAISE NOTICE 'Already have % acronyms, skipping import', cnt;

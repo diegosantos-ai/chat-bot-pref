@@ -5,6 +5,7 @@
 # Cores para output
 CYAN := \033[36m
 RESET := \033[0m
+PRE_COMMIT := $(if $(wildcard .venv/bin/pre-commit),.venv/bin/pre-commit,pre-commit)
 
 help: ## Mostra esta mensagem de ajuda
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "$(CYAN)%-20s$(RESET) %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -15,7 +16,7 @@ setup: ## Bootstrapping inicial da nova máquina (instala pacotes, links de dotf
 
 lint: ## Roda linters em todo o repositório (Shell, Terraform, Python, Markdown)
 	@echo "Executando pre-commit hooks..."
-	@pre-commit run --all-files
+	@$(PRE_COMMIT) run --all-files
 
 update: ## Atualiza repositórios, dotfiles e pacotes locais
 	@echo "Atualizando ambiente local..."

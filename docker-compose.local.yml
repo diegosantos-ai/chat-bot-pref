@@ -1,8 +1,18 @@
 services:
   chat-pref-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
     container_name: chat-pref-api-dev
     env_file:
       - .env.compose
     environment:
       ENV: dev
-      DEBUG: true
+      DEBUG: "true"
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - chat_pref_data:/app/data
+
+volumes:
+  chat_pref_data:

@@ -13,10 +13,13 @@ repos:
       - id: terraform_fmt
       - id: terraform_tflint
 
-  - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.9.0
+  - repo: local
     hooks:
-      - id: shellcheck
+      - id: shellcheck-local
+        name: ShellCheck v0.9.0
+        entry: /usr/bin/shellcheck
+        language: system
+        files: \.(sh|bash)$
         args: ["--severity=warning"]
         exclude: '\.zshrc$'
 

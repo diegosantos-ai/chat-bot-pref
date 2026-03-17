@@ -65,7 +65,6 @@ add_task_result() {
 
 current_branch="(desconhecida)"
 python_cmd=""
-pip_cmd=""
 
 section "Contexto do repositório"
 if [[ ! -d "$ROOT_DIR" ]]; then
@@ -98,7 +97,6 @@ else
 fi
 
 if "$python_cmd" -m pip --version >/dev/null 2>&1; then
-  pip_cmd="$python_cmd -m pip"
   info "Python detectado: $($python_cmd --version 2>&1)"
   info "Pip detectado: $($python_cmd -m pip --version 2>&1)"
 else
@@ -107,8 +105,6 @@ else
 fi
 
 section "Arquivos e documentação-base"
-README_OK=0
-DOCS_OK=0
 REQ_OK=0
 REQDEV_OK=0
 APP_AUDIT_OK=0
@@ -116,7 +112,6 @@ APP_RAG_OK=0
 
 if has_file "README.md"; then
   pass "README.md encontrado"
-  README_OK=1
 else
   fail "README.md ausente"
 fi
@@ -154,8 +149,6 @@ done
 if [[ $planning_doc_found -eq 0 ]]; then
   fail "Doc de planejamento da fase não encontrado em nenhuma variante de nome esperada"
 fi
-
-[[ $missing_docs -eq 0 && $planning_doc_found -eq 1 ]] && DOCS_OK=1
 
 if has_file "requirements.txt"; then
   lines=$(grep -Ev '^\s*#|^\s*$' requirements.txt | wc -l | tr -d ' ')
@@ -256,18 +249,14 @@ else
 fi
 
 section "Inspeção do código e contratos ativos"
-TENANT_CODE=0
-REQUEST_CODE=0
 MLFLOW_CODE=0
 PROMPT_CODE=0
 RETRIEVER_CODE=0
-EMBEDDING_CODE=0
 
 if has_dir "app"; then
   tcount=$(count_contains "app" "tenant_id")
   if [[ "$tcount" -gt 0 ]]; then
     pass "tenant_id encontrado no código (${tcount} ocorrências)"
-    TENANT_CODE=1
   else
     warn "tenant_id não encontrado no código sob app/"
   fi
@@ -275,7 +264,6 @@ if has_dir "app"; then
   rcount=$(count_contains "app" "request_id")
   if [[ "$rcount" -gt 0 ]]; then
     pass "request_id encontrado no código (${rcount} ocorrências)"
-    REQUEST_CODE=1
   else
     warn "request_id não encontrado no código sob app/"
   fi
@@ -307,7 +295,6 @@ if has_dir "app"; then
   embcount=$(count_contains "app" "embedding")
   if [[ "$embcount" -gt 0 ]]; then
     pass "Sinais de embeddings no código (${embcount} ocorrências)"
-    EMBEDDING_CODE=1
   else
     warn "Sinais de embeddings não encontrados em app/"
   fi

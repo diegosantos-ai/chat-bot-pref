@@ -278,3 +278,19 @@ Leitura honesta dos limites:
 
 - o valor de `composer` fora de `mock` e estimado por heuristica de caracteres, nao e custo contabil exato;
 - o custo de retrieval em infraestrutura externa (quando existir) permanece nao mensuravel no runtime atual e fica para evolucao posterior.
+
+## Atualizacao do bloco CPPX-F6-T5
+
+Estado implementado no runtime apos este bloco:
+
+- o `CorrelationContext` de observabilidade em `app/observability/context.py` foi estendido para incluir `run_id`, `parent_run_id` e `strategy_name`;
+- o `ChatService` agora propaga esses identificadores para o contexto de correlacao e para os spans do OpenTelemetry a partir do `audit_context` do request;
+- o endpoint `/api/chat` agora aceita headers `X-Parent-Run-ID` e `X-Strategy-Name` para injetar contexto experimental;
+- o `X-Request-ID` passa a ser usado como `run_id` quando presente;
+- a chamada ao `RagService` a partir do `ChatService` agora propaga o `run_id`, permitindo que o `ActiveArtifactResolver` resolva configuracoes experimentais a partir de uma run do MLflow, caso o `mlflow` esteja disponivel no ambiente.
+
+Leitura honesta dos limites:
+
+- a correlacao e minima e depende da injecao externa dos headers;
+- a resolucao de parametros a partir da run de MLflow e opcional e tratada com um import seguro para nao quebrar o runtime se `mlflow` nao estiver instalado;
+- nao ha garantia de que *toda* execucao tera um `run_id` associado, apenas aquelas iniciadas com o devido contexto (ex: smoke tests da Fase 10).

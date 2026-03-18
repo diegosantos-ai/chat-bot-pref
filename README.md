@@ -35,6 +35,31 @@ O foco deste repositório não é um front-end comercial, mas a solidez do **Bac
 > *Para uma leitura executiva aprofundada dos limites deste sistema, consulte nossa documentação de [Decisões e Trade-Offs](docs-fundacao-operacional/tradeoffs_decisoes.md) e [Matrizes de Capacidade](docs-fundacao-operacional/matriz_capacidades.md).*
 
 ---
+## Fluxo end-to-end
+
+```mermaid
+flowchart LR
+    A[Canal] --> B[API]
+    B --> C[Tenant]
+    C --> D[Policy]
+    D --> E[Retrieval]
+    E --> F[(ChromaDB)]
+    E --> G[LLM]
+    G --> H[Response]
+    H --> I[Audit Evidence]
+    I --> J[(Auditoria)]
+
+    B -. traces .-> K[OpenTelemetry]
+    I -. decisão .-> K
+    E -. benchmark .-> L[Offline Eval]
+    G -. runs .-> M[MLflow]
+    M -. gate .-> N[CI]
+```
+--- 
+
+O fluxo principal começa no canal de entrada e segue pela API, que resolve o tenant, aplica as políticas de segurança, recupera contexto no RAG e aciona o adaptador LLM para compor a resposta. A saída é devolvida com trilha de auditoria e evidência operacional da decisão. Em paralelo, benchmark offline, tracking experimental em MLflow, observabilidade e CI permanecem separados do runtime transacional para preservar governança, reprodutibilidade e clareza arquitetural.
+
+---
 
 ## 💻 Como Explorar (Execução Local / Lab)
 

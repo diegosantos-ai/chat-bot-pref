@@ -16,8 +16,8 @@ def evaluate_gate(reports_dir: Path) -> int:
         print(f"FAIL: Parse do relatório RAG falhou, JSON corrompido. {e}")
         return 1
 
-    cases_total = report.get("cases_total", 0)
-    cases_evaluated = report.get("cases_evaluated", 0)
+    cases_total = report.get("tracking", {}).get("metrics", {}).get("cases_total", report.get("cases_total", 0))
+    cases_evaluated = report.get("tracking", {}).get("metrics", {}).get("cases_evaluated", report.get("cases_evaluated", 0))
 
     if cases_total == 0 or cases_evaluated == 0:
         print("FAIL: O runner nao executou sequer o baseline estrito vazio (cases_evaluated=0).")

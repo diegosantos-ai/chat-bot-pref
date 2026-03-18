@@ -318,3 +318,46 @@ O que a visao NAO mostra (Limites):
 - Como os endpoints expostos pelo `/metrics` baseiam-se na memoria transacional sob lifecycle da thread rodando ou exporter, caso a maquina seja reiniciada, somente a "Correlacao via disco de Audit" se mantera persistida. A visao historica exigiria injecao real no Prometheus Database/Grafana de visao de producao (fora de escopo restrito T6).
 - Não apresenta UI interativa web ("decorativa").
 - Não faz cruzamentos detalhados do texto "exato" da interacao para debugar conversas (para previnir vazamento de informacao/auditoria dentro do painel agregado de metricas).
+
+## Atualizacao do bloco CPPX-F6-T7
+
+Este bloco consolida o fechamento documental da Fase 6, fornecendo um guia operacional de como ler os sinais implementados através do viewer utilitário `scripts/view_phase6_metrics.py`. As decisões aqui firmadas respeitam a honestidade metodológica e preservam o menor diff coerente para um ciclo de observabilidade mínimo.
+
+### Guia de Leitura Operacional
+
+Para obter a visão técnica da Fase 6, o fluxo mínimo de validação local é:
+1. Subir a aplicação usando seu workflow padrão: `make run` ou `.venv/bin/python -m uvicorn app.main:app`
+2. Gerar requisições utilizando os scripts locais (ex: `scripts/smoke_tests.py` ou via `curl` simulando queries válidas e fallback)
+3. Rodar o utilitário em um terminal em separado: `.venv/bin/python scripts/view_phase6_metrics.py`
+
+#### Interpretação dos Sinais (Cenário: Tenant `prefeitura-demo`)
+- **Latência por Estágio (`chatpref_pipeline_stage_latency_seconds_sum / _count`)**:
+  - Exibe o tempo médio gasto nas etapas do pipeline (`policy_pre`, `query_expansion`, `retrieval`, `composer`, `policy_post`, `response_final`). Se o tenant possuir picos, foca a leitura na etapa mais custosa.
+- **Custo Estimado (`chatpref_pipeline_estimated_cost_usd_total`)**:
+  - Exibido quando há execuções roteadas para infraestrutura externa não-mock (calculado na heurística por chars).
+  - *Sinal:* Se o provider = `mock` ou status = `non_billed` o custo do LLM e retrieval reflete zero (0.0).
+- **Fallback (`chatpref_pipeline_fallback_total > 0`)**:
+  - Indica atendimento roteado para fallback da política. Comum ao ter consultas onde a base documental inexiste ou o threshold de similaridade rejeita o contexto.
+- **Retrieval Vazio (`chatpref_pipeline_retrieval_empty_total > 0`)**:
+  - Indica que o search vetorial foi executado com sucesso e não retornou documentos válidos para a policy. Na maioria das arquiteturas RAG, ativará em seguida o fallback modelado.
+- **Policy Block (`chatpref_pipeline_policy_block_total > 0` ou `= 0`)**:
+  - Se `= 0` nos cenários de fallback seguro: atesta que a restrição de policy agiu sem necessidade de bloqueio violento pelo guardrail textual. Bloqueios explícitos contabilizam `> 0`.
+- **Correlação Operacional ↔ Experimental (Auditoria local)**:
+  - Rastreio de instâncias `X-Parent-Run-ID` ou `X-Strategy-Name`. Ausência de correlação aponta uma execução de request normal (gerada organicamente sem injeção do header de tracking do MLflow / pipeline explícito).
+
+### O que a Fase 6 Entrega Agora
+- Instrumentação real de latência, fallback e sinal vazio nos fluxos FastAPI do RAG.
+- Abstração central de cálculo de custo do `composer` no RAG por heurística v1 sem mágicas.
+- View operável (Terminal Console Dashboard) de rápido feedback loop `script/view_phase6_metrics.py` que independe de pacotes externos.
+- Integração básica e registro do run_id nas persistências do Auditor Operacional File-based (Relação com Fase 1).
+
+### O que a Fase 6 Ainda NÃO Entrega (Limites Reais)
+- **Não há completude histórica**: Como o Prometheus Registry utilizado expõe os counters/gauges em lifecycle de memória, as agregações perdem as métricas com o refresh/restart do host. Apenas o link em disco local de audição é persistente.
+- **Não há UI ou Dashboard Gráfico Produção**: Painéis em Grafana ou front-end bonitos foram explícitos 'out of scope', por não sustentarmos infraestrutura Prometheus externa neste ciclo local.
+- **Não há tracking fundido**: Auditoria Operacional (file `audit*`) e Tracking de Avaliação (MLflow) não são a mesma coisa; garantimos cruzamento apenas quando exposto os cabeçalhos intencionalmente.
+
+### Checklist Final de Aceite
+- [x] Contrato mínimo de observabilidade validado localmente (T1) e métricas mapeadas no main/endpoints (T2, T3, T4).
+- [x] Auditoria local rastreando runs e correlacionando IDs do MLflow (T5).
+- [x] Ferramenta mínima de view técnico por tenant confirmada (T6).
+- [x] Limites arquiteturais honestos devidamente estabelecidos e fechamento explícito da fase estruturado (T7).

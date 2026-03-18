@@ -1,0 +1,288 @@
+ cat .github/workflows/ci.yml | grep -A 20 "Run offline RAG Evaluation"
+ killall nano
+ killall nano
+ rm tmp_sed.sh 2>/dev/null
+ sed -i 's/LLM_PROVIDER: mock/LLM_PROVIDER: mock\n          MLFLOW_RUN_NAME: ci-dry-run-${{ github.sha }}\n          GIT_COMMIT: ${{ github.sha }}\n          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}/g' .github/workflows/ci.yml
+ cat << 'EOF' >> docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md
+
+### Separação de Tracking Experimental vs. Auditoria Operacional
+A execução deste workflow gera um arquivo `mlflow.db` contendo os *runs* e *metrics* do teste.
+- **Isso NÃO é Auditoria Operacional.** A auditoria (`app/storage/audit_repository.py`) foca no tráfego real com munícipes e rastreabilidade por protocolo HTTP/Tenant.
+- **Isso É Tracking Experimental.** O objetivo do `mlflow.db` (acoplado por Pull Request) é isolar a evidência técnica do desenvolvedor (O que mudou nas policies e prompts e quais *scores* variaram no CI).
+
+### Leitura dos Artefatos
+Os resultados contínuos são upados no GitHub Actions (artefato `genai-ci-mlflow-tracking`).
+Para ler o diretório internamente basta instanciar a UI do MLflow apontando para a pasta extraída:
+`mlflow ui --backend-store-uri sqlite:///mlflow.db --serve-artifacts`
+EOF
+ cat .github/workflows/ci.yml | grep -A 10 "run_phase4_rag_evaluation"
+ killall nano
+ grep -A 10 "run_phase4_rag_evaluation" .github/workflows/ci.yml
+ cat tmp_sed.sh || echo ""
+ cat .github/workflows/ci.yml | grep -A 15 "Run offline RAG"
+ sed -i 's/LLM_PROVIDER: mock/LLM_PROVIDER: mock\n          MLFLOW_RUN_NAME: ci-dry-run-${{ github.sha }}\n          GIT_COMMIT: ${{ github.sha }}\n          GIT_BRANCH: ${{ github.head_ref || github.ref_name }}/g' .github/workflows/ci.yml
+ git checkout -- .github/workflows/ci.yml
+ cat .github/workflows/ci.yml
+ cat scripts/run_phase4_rag_evaluation.py | grep -E "cases_total|cases_evaluated" -B 2 -A 5
+ cat scripts/run_phase4_rag_evaluation.py | grep -E "cases_total|cases_evaluated" -B 2 -A 5
+ cat tmp/mlflow_ci_run/run_reports/*_run.json | grep -A 10 "cases_total"
+ killall nano && cat tmp/mlflow_ci_run/run_reports/*_run.json | grep -A 10 "cases_total"
+ git branch
+ ps aux | grep zsh
+ cat scripts/run_phase4_rag_evaluation.py | grep faithfulness
+ cat << 'EOF' > scripts/evaluate_genai_ci_gate.py
+import sys
+import json
+from pathlib import Path
+
+def evaluate_gate(reports_dir: Path) -> int:
+    run_files = list(reports_dir.glob("*_run.json"))
+    if not run_files:
+        print("FAIL: Nenhum arquivo _run.json encontrado no tracking-dir.")
+        return 1
+
+    report_file = run_files[0]
+    try:
+        report = json.loads(report_file.read_text())
+    except Exception as e:
+        print(f"FAIL: Parse do relatorio rebentado. {e}")
+        return 1
+
+    cases_total = report.get("cases_total", 0)
+    cases_evaluated = report.get("cases_evaluated", 0)
+
+    if cases_total == 0 or cases_evaluated == 0:
+        print("FAIL: O runner nao preencheu nenum caso (cases_evaluated=0).")
+        return 1
+
+    if cases_evaluated < cases_total:
+         print(f"FAIL: Foram pulados casos no CI. Evaluated: {cases_evaluated} / Total: {cases_total}")
+         return 1
+
+    print("PASS: Estrutura do Json do Runner e passagens sistemicas validas!")
+    print("AVISO: Tracking numerico rigoroso como faithfulness e relevance ignorados no mock-provider.")
+
+    return 0
+
+if __name__ == "__main__":
+    workdir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("tmp/mlflow_ci_run/run_reports")
+    sys.exit(evaluate_gate(workdir))
+EOF
+ cat << 'EOF' >> docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md
+
+## Critérios de Bloqueio em CI e Regra de Decisão (Gate)
+
+### Bloqueio Duro (Hard-Fail / Exit 1)
+O pipeline será derrubado instantaneamente em qualquer uma das hipóteses:
+- O runner gerar de saída código de erro estrutural do Python.
+- Nenhum artefato JSON rastreável for deixado pela run em `tmp/mlflow_ci_run/run_reports/`.
+- O valor inferido de `cases_evaluated` for menor que `cases_total` no JSON do benchmark, significando que um artefato crashou parte do sub-range sem corromper o executor em si.
+
+### Bloqueio por Qualidade (Soft-Fail)
+- Inexistente nesse momento.
+
+### Aviso Sancionável (Skip)
+- Qualquer ruído oriundo do `LLM_PROVIDER=mock` nas métricas semânticas absolutas como `faithfulness_mean` ou `answer_relevance_mean`. Como o mock é rígido, não aplicaremos trava sobre a *nota* nesta triagem.
+EOF
+ chmod +x scripts/evaluate_genai_ci_gate.py
+ sed -i '/Upload MLflow Tracking Artifacts/i \      - name: Validate GenAI Regression Gate (Hard-fail)\n        run: python scripts/evaluate_genai_ci_gate.py "tmp/mlflow_ci_run/run_reports"\n' .github/workflows/ci.yml
+ cat scripts/evaluate_genai_ci_gate.py
+ cat << 'EOF' >> docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md
+
+## Critérios de Bloqueio em CI e Regra de Decisão (Gate)
+
+### Bloqueio Duro (Hard-Fail / Exit 1)
+O pipeline será derrubado instantaneamente em qualquer uma das hipóteses:
+- O runner gerar de saída código de erro estrutural do Python.
+- Nenhum artefato JSON rastreável for deixado pela run em `tmp/mlflow_ci_run/run_reports/`.
+- O valor inferido de `cases_evaluated` for menor que `cases_total` no JSON do benchmark, significando que um artefato crashou parte do sub-range sem corromper o executor em si.
+
+### Bloqueio por Qualidade (Soft-Fail)
+- Inexistente nesse momento.
+
+### Aviso Sancionável (Skip)
+- Qualquer ruído oriundo do `LLM_PROVIDER=mock` nas métricas semânticas absolutas como `faithfulness_mean` ou `answer_relevance_mean`. Como o mock é rígido, não aplicaremos trava sobre a *nota* nesta triagem.
+EOF
+ git status
+ cat docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md
+ git --no-pager diff docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md
+ killall nano
+ kill $(pgrep -f "git diff")
+ PYTHONUNBUFFERED=1 cat docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md
+ ls -la docs-LLMOps/fases
+ echo ""
+ python -c 'print(open("docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md").read())'
+ git add docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md .github/workflows/ci.yml scripts/evaluate_genai_ci_gate.py
+ python scripts/evaluate_genai_ci_gate.py "tmp/mlflow_ci_run/run_reports"
+ cat << 'EOF' >> docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md
+
+## Política de Aprovação de Mudanças em IA
+
+Toda Pull Request contendo manipulação em pastas-chave da engenharia de features generativas (prompts, schemas de policy, hyper-parâmetros de base/conhecimento):
+1. **DEVE** transacionar sob aprovação positiva (Exit 0) da automação deste Gate de PR (Job `genai-dry-run`).
+2. **Avaliação Humana de Qualidade (Reviewer)**: Quando a esteira indicar *Warning* (skip) com rebaixamento de *Faithfulness/Relevance*, o desenvolvedor revisor obriga-se a justificar no corpo da PR, pois a esteira não bloqueia artificialmente devido ao limitador empírico do Provider `mock`.
+3. **Escopo Operacional**: Promoções que envolvam falhas hard-coded (sintaxe de JSON do motor de RAG) terão a mescla inibida estruturalmente pelo Github.
+EOF
+ cat << 'EOF' >> docs-LLMOps/README.md
+
+### Fase 7 — CI de GenAI com Regressão de Prompt e Dry-Run Experimental
+* **Status:** Concluída.
+* **Mecanismo:** `genai-dry-run` acoplado ao workflow `CI` nativo via GitHub Actions. Validação focada em *dry-runs* usando o provider simulado (`mock`) para aprovação não-bloqueante quantitativa, porém bloqueante estrutural para pipelines JSON do tenant/pipeline RAG.
+EOF
+ cat docs-LLMOps/README.md | grep "Fase 7" -A 4
+ cat scripts/evaluate_genai_ci_gate.py
+ python scripts/evaluate_genai_ci_gate.py "tmp/mlflow_ci_run/run_reports"
+ cat tmp/mlflow_ci_run/run_reports/*_run.json
+ echo "Validation complete"
+ grep -n "Fase 7" docs-LLMOps/README.md docs-LLMOps/PLANEJAMENTO-LLMOps.md README.md
+ git status
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - "chore/**"
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUNBUFFERED: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+
+jobs:
+  quality:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-dev.txt
+
+      - name: Lint minimo do runtime
+        run: python scripts/lint_runtime.py
+
+      - name: Varredura anti-residuos historicos
+        run: python scripts/check_runtime_residues.py
+
+      - name: Compileall
+        run: python -m compileall app scripts tests
+
+      - name: Pytest
+        run: python -m pytest tests -q
+
+  docker-build-and-smoke:
+    name: Docker Build And Smoke
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
+
+      - name: Validate docker compose
+        run: |
+          docker compose -f docker-compose.yml config
+          docker compose -f docker-compose.yml -f docker-compose.local.yml config
+
+      - name: Validate Docker build
+        run: docker build -t chat-pref-ci -f Dockerfile .
+
+      - name: Run smoke prod reuse
+        run: |
+          docker compose -f docker-compose.yml up -d --build
+          until [ "$(docker inspect -f '{{.State.Health.Status}}' chat-pref-api 2>/dev/null)" = "healthy" ]; do sleep 1; done
+          python scripts/smoke_tests.py \
+            --env prod \
+            --runtime-mode reuse \
+            --tenant-id prefeitura-vila-serena \
+            --tenant-manifest tenants/prefeitura-vila-serena/tenant.json \
+            --phase-report fase11 \
+            --json-out artifacts/fase11-smoke-prod.json
+
+      - name: Upload smoke artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fase11-smoke-prod
+          path: artifacts/fase11-smoke-prod.json
+
+      - name: Teardown docker
+        if: always()
+        run: docker compose -f docker-compose.yml down -v
+
+  genai-dry-run:
+    name: GenAI Dry-Run Regression
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python -m pip install -r requirements.txt
+          python -m pip install -r requirements-dev.txt
+
+      - name: Run offline RAG Evaluation (Mock)
+        env:
+          LLM_PROVIDER: mock
+        run: |
+          python scripts/run_phase4_rag_evaluation.py \
+            --manifest benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json \
+            --tenant-id prefeitura-vila-serena \
+            --experiment-name "ci-genai-dry-run" \ \
+            --tracking-dir "tmp/mlflow_ci_run" \
+            --max-cases 3
+
+      - name: Upload MLflow Tracking Artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: genai-ci-mlflow-tracking
+          path: tmp/mlflow_ci_run/

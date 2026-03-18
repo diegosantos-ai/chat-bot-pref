@@ -1,5 +1,9 @@
 # pip install -r requirements-airflow.txt
 
-apache-airflow>=3.0.0,<4.0.0
+# Escopo mínimo e coerente para orquestração offline
+apache-airflow>=2.10.0,<3.0.0
 psycopg[binary]>=3.2.0,<4.0.0
 pandas>=2.2.0,<3.0.0
+
+# Providers mínimos sugeridos para cenários RAG e HTTP (podem ser expandidos sob demanda)
+apache-airflow-providers-http>=4.10.0,<5.0.0

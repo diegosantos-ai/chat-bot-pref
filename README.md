@@ -55,9 +55,22 @@ flowchart LR
     G -. runs .-> M[MLflow]
     M -. gate .-> N[CI]
 ```
---- 
+
+🎨 **[Deseja ver a versão completa? Abra o nosso diagrama avançado End-to-End interativo aqui.](docs-fundacao-operacional/diagrama_end_to_end.html)**
 
 O fluxo principal começa no canal de entrada e segue pela API, que resolve o tenant, aplica as políticas de segurança, recupera contexto no RAG e aciona o adaptador LLM para compor a resposta. A saída é devolvida com trilha de auditoria e evidência operacional da decisão. Em paralelo, benchmark offline, tracking experimental em MLflow, observabilidade e CI permanecem separados do runtime transacional para preservar governança, reprodutibilidade e clareza arquitetural.
+
+---
+
+## 🔍 Onde Estão as Evidências do Projeto
+
+As evidências deste repositório não ficam condensadas num arquivo único, elas estão segmentadas por blocos funcionais para atestar cada face do ciclo de engenharia:
+
+1. **[Evidência Operacional e de Runtime](app/audit/)**: Comprova que o fluxo transacional funciona. Inclui [auditoria por tenant](app/storage/audit_repository.py), `request_id`, *reason_codes*, e [traces/métricas OpenTelemetry](app/observability/). Mostra se a requisição sofreu fallback, bloqueio ou concluiu normalmente.
+2. **[Avaliação Offline e Tracking (LLMOps)](docs-LLMOps/)**: Comprova que a IA é validada com base metodológica. Inclui [datasets controlados de baseline](benchmark_datasets/), script de [avaliação formal Ragas](scripts/run_phase4_rag_evaluation.py) e tracking estruturado de parâmetros no MLflow.
+3. **[Documentação Técnica Consolidada](docs-fundacao-operacional/)**: Mostra que a base é clara e defensável. Abrange a [Arquitetura Ativa](docs-fundacao-operacional/arquitetura.md), o registro aberto de [Trade-offs](docs-fundacao-operacional/tradeoffs_decisoes.md), o [Estudo de Caso Principal](docs-fundacao-operacional/estudo_de_caso.md) e o [Roteiro de Demonstração (Walkthrough)](docs-fundacao-operacional/roteiro_demonstracao.md).
+4. **[CI e Validadores de Automação](.github/workflows/)**: Comprova repetibilidade de governança. Possui [pipelines de regressão GenAI](scripts/evaluate_genai_ci_gate.py) agindo como *hard-fails* do repositório, dry-runs e automação de qualidade de código.
+5. **[Este README](README.md)**: Opera como sua "Bússola de Navegação" global, servindo de ponto de salto para todo este corpo de trabalho, não substituindo as evidências, apenas indexando-as.
 
 ---
 

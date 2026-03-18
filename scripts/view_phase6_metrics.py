@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Visão técnica mínima da Fase 6 (Qualidade, Latência e Custo por Tenant).
+Uso: Inicie o app principal e execute: python scripts/view_phase6_metrics.py
 Lê as métricas do runtime principal (/metrics) e o registro local de auditoria
 para consolidar um painel operacional no terminal.
 """

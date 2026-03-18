@@ -50,3 +50,33 @@ A adoção de múltiplos LLMs exige separação rígida de camadas para que o si
 
 ---
 **Status da Implementação no Bloco 1 (Contrato)**: Contrato e delimitações propostos. Refino das estruturas de exceção no domínio sendo preparadas para não escalar escopo precipitadamente.
+
+## Bloco 2: Implementação Comparativa e Fechamento
+
+### 1. Provedores Integrados e Modo Controlado
+Para evitar dependências inseguras ou exposição de segredos, a implementação adotada para este ciclo baseia-se em:
+- **`GeminiLLMProvider`**: Abstração HTTP nativa.
+- **`OpenAILLMProvider`**: Abstração HTTP nativa criada via `httpx` para não prender o projeto a bibliotecas de fornecedores específicos.
+- **Modo Comparativo Controlado (`mock`)**: Usado ativamente nos pipelines offline via script `run_phase10_multi_llm_comparison.py`, medindo impacto simulado de _delays_ e latência através de _variants_ de mock.
+
+### 2. Tracking e Recomendação Técnica
+
+Através das validações rodadas em modo comparado:
+- O painel experimental do MLflow consegue receber explicitamente as instâncias de `provider` ("openai", "gemini", "mock"), `model_name` e `temperature`.
+- A arquitetura permite injetar `LLMComposeService` com _LLMProviders_ dinâmicos para avaliações futuras, separando o `runtime` síncrono da carga horária de benchmark.
+
+**Recomendação Técnica Consolidada:**
+O pipeline confirmou que é estável injetar múltiplos protocólos. Recomenda-se avançar com o Gemini _flash_ como modelo padrão principal (pelo custo historicamente menor no mercado atual de _Tier 1_) enquanto consolida-se a "OpenAI" como fallback primário (caso disponível a key) ativado via `LLMProviderUnavailableError`.
+
+### 3. Status Fim-a-Fim (O que entrou vs O que não entrou)
+
+- **Entregue:**
+  - Contrato multi-LLM (`LLMProvider`) estruturador de exceções.
+  - Integração do provedor OpenAI baseada puramente em `httpx`.
+  - Exposição de `provider`, `model_name` e `temperature` nas chamadas ao MLflow local durante modo experimental.
+  - Script offline que orquestra a variação customizada de construtores LLM para teste A/B (`scripts/run_phase10_multi_llm_comparison.py`).
+- **Apenas preparado:** Implementação assíncrona automática (`retry` wrapper) ou disparo autônomo dentro no core do Uvicorn para não forçar roteamento em tempo real sem validação robusta de latências conjuntas.
+- **Fora de Escopo:** Instalação de SDKs pesados (`openai-python`), UI visual de custo.
+
+---
+_A Fase 10 cumpre seu critério de aceite oferecendo a ponte entre comparação LLM modular e arquitetura transacional local._

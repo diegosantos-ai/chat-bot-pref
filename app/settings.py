@@ -148,8 +148,8 @@ class Settings(BaseSettings):
         normalized = str(value or "").strip().lower()
         if not normalized:
             return "mock"
-        if normalized not in {"mock", "gemini"}:
-            raise ValueError("LLM_PROVIDER deve ser mock ou gemini.")
+        if normalized not in {"mock", "gemini", "openai"}:
+            raise ValueError("LLM_PROVIDER deve ser mock, gemini ou openai.")
         return normalized
 
     @field_validator("LLM_MIN_CONTEXT_SCORE", mode="before")

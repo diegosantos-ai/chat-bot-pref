@@ -117,6 +117,8 @@ A sequência recomendada de leitura desta pasta é:
 8. `fases/FASE5-RETRIEVAL-HIBRIDO.md`
 9. `fases/FASE6-OBSERVABILIDADE-QUALIDADE-LATENCIA-CUSTO.md`
 10. `fases/FASE7-CI-GENAI-REGRESSAO.md`
+11. `fases/FASE8-ORQUESTRACAO-AIRFLOW.md`
+12. `fases/FASE9-DERIVA-SEMANTICA-BASE-VETORIAL.md`
 
 ## Status
 
@@ -127,3 +129,5 @@ Fase 4 consolidada neste escopo na branch `feat/avaliacao-rag-metricas-de-qualid
 Na branch `feat/fase5-retrieval-query-reranking`, a Fase 5 foi fechada até `CPPX-F5-T7`, promovendo `semantic_plus_full_collection_lexical_candidates_v1` com `no_query_transformation_v1` e `no_rerank_v1` como baseline recomendada do recorte atual, mantendo query expansion e reranking heurísticos como eixos experimentais não promovidos.
 Na branch `feat/observabilidade-latencia-custo`, a Fase 6 foi fechada até `CPPX-F6-T7`, entregando registro observacional transacional em Prometheus (/metrics) sobre Latências, Correlação de Tracking, Retrievais, Fallbacks e calculo heurístico financeiro integrados como view limpo local (Painel em Terminal).
 Na branch `feat/ci-genai-regressao`, a Fase 7 foi concluída tecnicamente. Foi entregue um gate de regressão via GitHub Actions usando provider mock (dry-run estrutural) e avaliação via script, gerando rastreabilidade nativa em banco efêmero isolado, assegurando estabilidade estrutural sem inflar a conta na nuvem. A avaliação semântica real (qualidade fina) e provider real em PR continuam fora de escopo deste gate específico, preservando fronteiras limpas de experimento e transacional.
+Na branch `feat/orquestracao-airflow`, a Fase 8 foi fechada estabelecendo a fronteira offline via Apache Airflow isolado do runtime principal. Foram validadas a instalacao dedicada (Python 3.13 e Airflow 2.11.2) e o mapeamento das DAGs prioritarias iniciais (ingest, avaliacao e reindexacao) suportadas pelo tracking estrutural, deixando o schedule produtivo robusto como passo futuro.
+Na branch `feat/semantica-base-vetorial`, a Fase 9 foi entregue com a fundacao diagnostica documental. Foram estabelecidos indicadores de saude semantica da base, matriz diagnostica de sintomas por tenant, e definido um protocolo experimental de comparacao reproduzivel entre versoes da base (corpus + configuracao), permitindo respostas claras sobre regressao que poderao ser consumidas no Airflow futuramente.

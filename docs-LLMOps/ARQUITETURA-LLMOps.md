@@ -395,14 +395,13 @@ Detectar sinais de deterioração da qualidade semântica da base de conheciment
 
 ### Responsabilidades
 
-* comparar desempenho entre versões de base vetorial;
-* identificar queda de relevância ou aumento de fallback;
-* sinalizar degradações associáveis a base, retrieval ou modelo;
-* sustentar reavaliação de ingest, chunking e configuração.
+* protocolar método e critério comparativo de desempenho entre versões de base vetorial;
+* estabelecer indicadores de queda de relevância ou aumento de recusa;
+* compor matriz diagnóstica de degradações associáveis a base, retrieval ou modelo.
 
 ### Situação
 
-**Arquitetura-alvo da fase.**
+**Fase 9 consolidada no modo fundação-diagnóstica**. Processo protocolado nas fronteiras de avaliação offline em conjunto funcional com rastreabilidade, sem impacto no código do runtime de produção e apto para gatilhos operacionais.
 
 ### Sinais previstos
 

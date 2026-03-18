@@ -412,9 +412,13 @@ Na branch `feat/ci-genai-regressao`, este planejamento passa a ter o seguinte re
 
 Introduzir orquestração formal para ingest, reindexação, avaliação e tarefas recorrentes do ecossistema RAG, incluindo a preparação do ambiente isolado de Airflow e a instalação controlada das dependências de orquestração.
 
-### Resultado esperado
+### Resultado esperado (Entregue)
 
-Processos offline executáveis de forma organizada, reproduzível e segregada do runtime online, com ambiente dedicado de Airflow configurado sem contaminar o ambiente principal do backend.
+Processos offline e mapeamento de DAGs prioritárias entregues de forma organizada, com ambiente dedicado de Airflow (Python 3.13 e Airflow 2.11.2) isolado do runtime transacional.
+
+### Fora do escopo entregue nesta etapa
+
+* execução de processos recorrentes e agendamento robusto sistêmico operando ativamente em produção; as execuções de prova permaneceram em testes controlados guiados.
 
 ### Critério de aceite
 
@@ -464,9 +468,13 @@ Airflow deve ser tratado como ambiente separado e como ativo operacional da fase
 
 Criar mecanismos para detectar degradação da qualidade semântica da base documental e distinguir problemas de base, retrieval ou modelo, operando sobre os ambientes já preparados para avaliação e, quando aplicável, para orquestração offline.
 
-### Resultado esperado
+### Resultado esperado (Entregue)
 
-Projeto apto a monitorar sinais de deterioração semântica por tenant e acionar reavaliação de ingest, chunking ou configuração, sem improviso de ambiente nesta etapa.
+Fundação diagnóstica do ecossistema formalizado. Criada matriz de diagnóstico, limites matemáticos configurados e estabelecido o protocolo de comparação vetorial para isolar a natureza do erro. Não implementou-se reavaliação 100% autônoma ou on-the-fly request.
+
+### Fora do escopo entregue nesta etapa
+
+* persistência sistêmica unificada do repositório de snapshots e a execução acoplada end-to-end com automação absoluta permanecem no roadmap.
 
 ### Critério de aceite
 

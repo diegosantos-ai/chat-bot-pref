@@ -388,4 +388,3 @@ scripts/verify_features.py
 tmp/marketingskills
 docs/conferencia_testes.txt
 .env.compose
-docs-fundacao-operacional/roteiro_demonstracao.md

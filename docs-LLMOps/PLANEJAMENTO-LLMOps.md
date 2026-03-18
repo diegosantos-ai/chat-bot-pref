@@ -350,7 +350,7 @@ Detalhamento do bloco inicial desta fase:
 
 ---
 
-## Card Macro — Fase 7 — CI de GenAI com Regressão de Prompt e Dry-Run Experimental
+## Card Macro — Fase 7 — CI de GenAI com Regressão de Prompt e Dry-Run Experimental (CONCLUÍDA)
 
 ### Objetivo da fase
 
@@ -394,6 +394,15 @@ Nenhuma instalação nova deve ocorrer aqui no backend Python. Tooling externo d
 * `CPPX-F7-T5 — Definir critérios de bloqueio por qualidade e rastreabilidade`
 * `CPPX-F7-T6 — Validar execução com provider mock e cenário controlado`
 * `CPPX-F7-T7 — Documentar política de aprovação de mudanças em IA`
+
+### Fechamento estrutural atual do bloco
+
+Na branch `feat/ci-genai-regressao`, este planejamento passa a ter o seguinte recorte fechado:
+
+- `CPPX-F7-T1` a `CPPX-F7-T7` foram implementadas configurando um job dedicado (`genai-dry-run`) no repositório;
+- a execução aproveitou a camada offline mockada em conjunto com limite explícito de execuções (`--max-cases 3`) para validar comportamentos estáticos e estruturais de MLflow/Ragas operando em CI;
+- o rastreamento foi isolado no artefato `mlflow.db` acoplado ao Github Actions (`genai-ci-mlflow-tracking`), consolidando a política de separação formal entre auditoria operacional e fluxo experimental;
+- a documentação metodológica foi gerada em `docs-LLMOps/fases/FASE7-CI-GENAI-REGRESSAO.md` delimitando de forma transparente que métricas semânticas acuradas e provedores LLM online continuam fora de escopo deste CI rápido (mantendo-se o mock para avaliação de integridade).
 
 ---
 

@@ -1,0 +1,392 @@
+{
+  "phase": "F4",
+  "experiment_name": "ci-genai-dry-run",
+  "tenant_id": "prefeitura-vila-serena",
+  "dataset_version": "benchmark_v1",
+  "dataset_manifest": "benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json",
+  "vectorstore_collection": "chat_pref_docs__prefeitura_vila_serena",
+  "vectorstore_fingerprint": "vectorstore.prefeitura-vila-serena.7981c51ae681aa08",
+  "evaluator_library": "ragas",
+  "evaluator_library_version": "0.2.15",
+  "evaluator_mode": "offline_heuristic_ragas",
+  "phase5_experiment_axes": {
+    "retrieval": {
+      "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "supported_strategies": [
+        "semantic_candidates_with_lexical_rescoring_v1",
+        "semantic_plus_full_collection_lexical_candidates_v1"
+      ],
+      "params": {
+        "top_k_default": 3,
+        "min_score_default": 0.0,
+        "boost_enabled_default": false,
+        "candidate_pool_multiplier": 3,
+        "score_weights": {
+          "lexical": 0.75,
+          "semantic": 0.25
+        }
+      }
+    },
+    "query_transformation": {
+      "strategy_name": "no_query_transformation_v1",
+      "supported_strategies": [
+        "no_query_transformation_v1",
+        "tenant_keyword_query_expansion_v1"
+      ],
+      "params": {
+        "max_added_terms": 4,
+        "source_fields": [
+          "keywords"
+        ]
+      }
+    },
+    "reranking": {
+      "strategy_name": "no_rerank_v1",
+      "supported_strategies": [
+        "no_rerank_v1",
+        "heuristic_post_retrieval_rerank_v1"
+      ],
+      "params": {
+        "max_candidates": 5,
+        "score_weights": {
+          "retrieval_score": 0.35,
+          "title_overlap": 0.35,
+          "tag_overlap": 0.2,
+          "text_density": 0.1
+        }
+      }
+    }
+  },
+  "tracking": {
+    "request_id": "req-rag-eval-6fdeaedebe60",
+    "tracking_target": "mlflow",
+    "tags": {
+      "phase": "F4",
+      "run_kind": "rag_formal_evaluation",
+      "evaluator_library": "ragas",
+      "evaluator_mode": "offline_heuristic_ragas",
+      "vectorstore_collection": "chat_pref_docs__prefeitura_vila_serena",
+      "vectorstore_fingerprint": "vectorstore.prefeitura-vila-serena.7981c51ae681aa08",
+      "dataset_manifest": "benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json",
+      "prompt_version_scope": "single",
+      "tenant_id": "prefeitura-vila-serena",
+      "request_id": "req-rag-eval-6fdeaedebe60",
+      "prompt_version_id": "prompt.composer_base.base_v1.4183563896f8",
+      "policy_version_id": "policy.institutional_policy.policy_v1.2803a9fb52c4",
+      "retriever_version_id": "retrieval_config.tenant_chroma_hash.tenant_chroma_hash_v1.a788e35b662b",
+      "chunking_version_id": "chunking_config.paragraph_split.paragraph_split_v1.38126ab04c99"
+    },
+    "params": {
+      "prompt_version": "base_v1",
+      "policy_version": "policy_v1",
+      "retriever_version": "tenant_chroma_hash_v1",
+      "retrieval_strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "query_transform_strategy_name": "no_query_transformation_v1",
+      "rerank_strategy_name": "no_rerank_v1",
+      "embedding_version": "hash_embedding_v1",
+      "dataset_version": "benchmark_v1",
+      "model_provider": "mock",
+      "model_name": "mock-compose-v1",
+      "top_k": "3",
+      "chunking_version": "paragraph_split_v1",
+      "phase5_experiment_axes_json": "{\"query_transformation\": {\"params\": {\"max_added_terms\": 4, \"source_fields\": [\"keywords\"]}, \"strategy_name\": \"no_query_transformation_v1\", \"supported_strategies\": [\"no_query_transformation_v1\", \"tenant_keyword_query_expansion_v1\"]}, \"reranking\": {\"params\": {\"max_candidates\": 5, \"score_weights\": {\"retrieval_score\": 0.35, \"tag_overlap\": 0.2, \"text_density\": 0.1, \"title_overlap\": 0.35}}, \"strategy_name\": \"no_rerank_v1\", \"supported_strategies\": [\"no_rerank_v1\", \"heuristic_post_retrieval_rerank_v1\"]}, \"retrieval\": {\"params\": {\"boost_enabled_default\": false, \"candidate_pool_multiplier\": 3, \"min_score_default\": 0.0, \"score_weights\": {\"lexical\": 0.75, \"semantic\": 0.25}, \"top_k_default\": 3}, \"strategy_name\": \"semantic_plus_full_collection_lexical_candidates_v1\", \"supported_strategies\": [\"semantic_candidates_with_lexical_rescoring_v1\", \"semantic_plus_full_collection_lexical_candidates_v1\"]}}",
+      "experiment_name": "ci-genai-dry-run",
+      "dataset_manifest": "benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json",
+      "selected_case_ids": "vs-normal-001,vs-normal-002",
+      "selected_cases_count": "2",
+      "observed_prompt_versions": "base_v1",
+      "vectorstore_collection": "chat_pref_docs__prefeitura_vila_serena",
+      "vectorstore_fingerprint": "vectorstore.prefeitura-vila-serena.7981c51ae681aa08",
+      "vectorstore_version": "vectorstore.prefeitura-vila-serena.7981c51ae681aa08",
+      "evaluator_library": "ragas",
+      "evaluator_library_version": "0.2.15",
+      "evaluator_mode": "offline_heuristic_ragas"
+    },
+    "metrics": {
+      "retrieval_empty_rate": 0.0,
+      "cases_total": 2.0,
+      "faithfulness_mean": 1.0,
+      "answer_relevance_mean": 0.0,
+      "expected_context_coverage_mean": 1.0,
+      "latency_ms": 65.135,
+      "estimated_cost": 0.0,
+      "cases_evaluated": 2.0,
+      "cases_partial": 0.0,
+      "cases_skipped": 0.0,
+      "cases_with_methodology_limitations": 2.0,
+      "faithfulness_cases": 2.0,
+      "answer_relevance_cases": 2.0,
+      "context_precision_cases": 0.0,
+      "context_recall_cases": 0.0,
+      "expected_context_coverage_cases": 2.0,
+      "retrieval_empty_cases": 0.0,
+      "context_precision_skipped": 2.0,
+      "context_recall_skipped": 2.0
+    }
+  },
+  "summary": {
+    "tenant_id": "prefeitura-vila-serena",
+    "dataset_version": "benchmark_v1",
+    "metric_library": "ragas",
+    "metric_library_version": "0.2.15",
+    "tracking_target": "mlflow",
+    "total_cases": 2,
+    "metric_case_counts": {
+      "faithfulness": 2,
+      "answer_relevance": 2,
+      "context_precision": 0,
+      "context_recall": 0,
+      "expected_context_coverage": 2,
+      "retrieval_empty": 0
+    },
+    "metrics": {
+      "retrieval_empty_rate": 0.0,
+      "cases_total": 2.0,
+      "faithfulness_mean": 1.0,
+      "answer_relevance_mean": 0.0,
+      "expected_context_coverage_mean": 1.0
+    }
+  },
+  "cases": [
+    {
+      "case_id": "vs-normal-001",
+      "tenant_id": "prefeitura-vila-serena",
+      "scenario_type": "atendimento_normal",
+      "priority_tier": "p1",
+      "coverage_type": "tenant_demonstrativo",
+      "status": "evaluated",
+      "request_id": "case-vs-normal-001-243c4265",
+      "question": "Qual o horario da Central de Atendimento ao Cidadao?",
+      "response": "De acordo com as informacoes institucionais da Prefeitura Municipal de Vila Serena, A Central de Atendimento ao Cidadao da Prefeitura Municipal de Vila Serena funciona de segunda a sexta, das 8h as 17h, com distribuicao de senhas ate as 16h30. Se precisar de atendimento formal, procure os canais oficiais da prefeitura.",
+      "retrieved_contexts": [
+        "A Central de Atendimento ao Cidadao da Prefeitura Municipal de Vila Serena funciona de segunda a sexta, das 8h as 17h, com distribuicao de senhas ate as 16h30. O atendimento presencial e realizado na Praca das Palmeiras, 100, Centro Administrativo.",
+        "Os canais oficiais de orientacao sao o telefone (88) 4002-2020, o e-mail atendimento@vilaserena.gov.exemplo e o portal www.vilaserena.gov.exemplo. Demandas sobre servicos especificos podem ser triadas pela central antes do encaminhamento ao setor responsavel.",
+        "Pedidos de alvara para comercio de baixo risco devem ser iniciados na Sala do Empreendedor ou pelo Protocolo Geral, conforme a natureza da atividade. O atendimento inicial ocorre de segunda a sexta, das 8h as 16h."
+      ],
+      "retrieved_chunk_titles": [
+        "Central de Atendimento Presencial e Canais Oficiais",
+        "Central de Atendimento Presencial e Canais Oficiais",
+        "Alvara de Funcionamento para Comercio de Baixo Risco"
+      ],
+      "rag_status": "ready",
+      "response_mode": "answer",
+      "prompt_version": "base_v1",
+      "policy_version": "policy_v1",
+      "model_provider": "mock",
+      "model_name": "mock-compose-v1",
+      "latency_ms": 48.219,
+      "best_score": 0.7157,
+      "retrieval_strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "query_transform_strategy_name": "no_query_transformation_v1",
+      "query_transformation_applied": false,
+      "retrieval_query": "Qual o horario da Central de Atendimento ao Cidadao?",
+      "added_query_terms": [],
+      "rerank_strategy_name": "no_rerank_v1",
+      "reranking_applied": false,
+      "reranked_candidates": 0,
+      "experimental_axes": {
+        "retrieval": {
+          "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+          "supported_strategies": [
+            "semantic_candidates_with_lexical_rescoring_v1",
+            "semantic_plus_full_collection_lexical_candidates_v1"
+          ],
+          "params": {
+            "top_k_default": 3,
+            "min_score_default": 0.0,
+            "boost_enabled_default": false,
+            "candidate_pool_multiplier": 3,
+            "score_weights": {
+              "lexical": 0.75,
+              "semantic": 0.25
+            }
+          }
+        },
+        "query_transformation": {
+          "strategy_name": "no_query_transformation_v1",
+          "supported_strategies": [
+            "no_query_transformation_v1",
+            "tenant_keyword_query_expansion_v1"
+          ],
+          "params": {
+            "max_added_terms": 4,
+            "source_fields": [
+              "keywords"
+            ]
+          }
+        },
+        "reranking": {
+          "strategy_name": "no_rerank_v1",
+          "supported_strategies": [
+            "no_rerank_v1",
+            "heuristic_post_retrieval_rerank_v1"
+          ],
+          "params": {
+            "max_candidates": 5,
+            "score_weights": {
+              "retrieval_score": 0.35,
+              "title_overlap": 0.35,
+              "tag_overlap": 0.2,
+              "text_density": 0.1
+            }
+          }
+        }
+      },
+      "pre_decision": {
+        "stage": "policy_pre",
+        "decision": "allow",
+        "reason_codes": [],
+        "policy_version": "policy_v1",
+        "summary": "Pergunta dentro do escopo inicial para seguir ao retrieval e composicao.",
+        "metadata": {
+          "matched_rule": "allow"
+        }
+      },
+      "post_decision": {
+        "stage": "policy_post",
+        "decision": "allow",
+        "reason_codes": [],
+        "policy_version": "policy_v1",
+        "summary": "Resposta candidata manteve aderencia ao contexto e ao escopo institucional.",
+        "metadata": {
+          "retrieval_status": "ready",
+          "best_score": "0.7157"
+        }
+      },
+      "metrics": {
+        "case_id": "vs-normal-001",
+        "tenant_id": "prefeitura-vila-serena",
+        "faithfulness": 1.0,
+        "answer_relevance": 0.0,
+        "context_precision": null,
+        "context_recall": null,
+        "expected_context_coverage": 1.0,
+        "retrieval_empty": false
+      },
+      "skipped_metrics": {
+        "context_precision": "missing_fields:reference_answer",
+        "context_recall": "missing_fields:reference_answer"
+      }
+    },
+    {
+      "case_id": "vs-normal-002",
+      "tenant_id": "prefeitura-vila-serena",
+      "scenario_type": "atendimento_normal",
+      "priority_tier": "p1",
+      "coverage_type": "tenant_demonstrativo",
+      "status": "evaluated",
+      "request_id": "case-vs-normal-002-38bca5b5",
+      "question": "Quais documentos basicos para protocolo geral presencial?",
+      "response": "De acordo com as informacoes institucionais da Prefeitura Municipal de Vila Serena, Para protocolo geral, os documentos basicos mais comuns sao documento com foto, CPF, comprovante de endereco e formulario padrao quando exigido pelo servico. Se precisar de atendimento formal, procure os canais oficiais da prefeitura.",
+      "retrieved_contexts": [
+        "Para protocolo geral, os documentos basicos mais comuns sao documento com foto, CPF, comprovante de endereco e formulario padrao quando exigido pelo servico. Quando o pedido for apresentado por representante, tambem pode ser solicitado documento do procurador e procuracao simples assinada.",
+        "Pedidos de alvara para comercio de baixo risco devem ser iniciados na Sala do Empreendedor ou pelo Protocolo Geral, conforme a natureza da atividade. O atendimento inicial ocorre de segunda a sexta, das 8h as 16h.",
+        "O Atende Vila Serena orienta o publico sobre horarios de atendimento, canais oficiais, documentos basicos exigidos e informacoes publicas sobre servicos municipais. Seu escopo e informativo e foi desenhado para apoiar a comunicacao inicial com a prefeitura ficticia."
+      ],
+      "retrieved_chunk_titles": [
+        "Protocolo Geral e Documentos Basicos",
+        "Alvara de Funcionamento para Comercio de Baixo Risco",
+        "Escopo Informativo do Atende Vila Serena"
+      ],
+      "rag_status": "ready",
+      "response_mode": "answer",
+      "prompt_version": "base_v1",
+      "policy_version": "policy_v1",
+      "model_provider": "mock",
+      "model_name": "mock-compose-v1",
+      "latency_ms": 16.595,
+      "best_score": 0.5357,
+      "retrieval_strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+      "query_transform_strategy_name": "no_query_transformation_v1",
+      "query_transformation_applied": false,
+      "retrieval_query": "Quais documentos basicos para protocolo geral presencial?",
+      "added_query_terms": [],
+      "rerank_strategy_name": "no_rerank_v1",
+      "reranking_applied": false,
+      "reranked_candidates": 0,
+      "experimental_axes": {
+        "retrieval": {
+          "strategy_name": "semantic_plus_full_collection_lexical_candidates_v1",
+          "supported_strategies": [
+            "semantic_candidates_with_lexical_rescoring_v1",
+            "semantic_plus_full_collection_lexical_candidates_v1"
+          ],
+          "params": {
+            "top_k_default": 3,
+            "min_score_default": 0.0,
+            "boost_enabled_default": false,
+            "candidate_pool_multiplier": 3,
+            "score_weights": {
+              "lexical": 0.75,
+              "semantic": 0.25
+            }
+          }
+        },
+        "query_transformation": {
+          "strategy_name": "no_query_transformation_v1",
+          "supported_strategies": [
+            "no_query_transformation_v1",
+            "tenant_keyword_query_expansion_v1"
+          ],
+          "params": {
+            "max_added_terms": 4,
+            "source_fields": [
+              "keywords"
+            ]
+          }
+        },
+        "reranking": {
+          "strategy_name": "no_rerank_v1",
+          "supported_strategies": [
+            "no_rerank_v1",
+            "heuristic_post_retrieval_rerank_v1"
+          ],
+          "params": {
+            "max_candidates": 5,
+            "score_weights": {
+              "retrieval_score": 0.35,
+              "title_overlap": 0.35,
+              "tag_overlap": 0.2,
+              "text_density": 0.1
+            }
+          }
+        }
+      },
+      "pre_decision": {
+        "stage": "policy_pre",
+        "decision": "allow",
+        "reason_codes": [],
+        "policy_version": "policy_v1",
+        "summary": "Pergunta dentro do escopo inicial para seguir ao retrieval e composicao.",
+        "metadata": {
+          "matched_rule": "allow"
+        }
+      },
+      "post_decision": {
+        "stage": "policy_post",
+        "decision": "allow",
+        "reason_codes": [],
+        "policy_version": "policy_v1",
+        "summary": "Resposta candidata manteve aderencia ao contexto e ao escopo institucional.",
+        "metadata": {
+          "retrieval_status": "ready",
+          "best_score": "0.5357"
+        }
+      },
+      "metrics": {
+        "case_id": "vs-normal-002",
+        "tenant_id": "prefeitura-vila-serena",
+        "faithfulness": 1.0,
+        "answer_relevance": 0.0,
+        "context_precision": null,
+        "context_recall": null,
+        "expected_context_coverage": 1.0,
+        "retrieval_empty": false
+      },
+      "skipped_metrics": {
+        "context_precision": "missing_fields:reference_answer",
+        "context_recall": "missing_fields:reference_answer"
+      }
+    }
+  ]
+}

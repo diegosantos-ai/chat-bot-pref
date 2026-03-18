@@ -6,9 +6,9 @@ Este documento descreve a arquitetura real da base ativa do Chat Pref.
 
 O `README.md` continua mantendo a stack-alvo do case. Aqui, a prioridade e registrar:
 
-- o runtime ativo hoje
-- os contratos ja validados
-- o que ainda e apenas evolucao planejada
+- o runtime ativo consolidado (Fundacao Operacional entregue)
+- os contratos ja validados e auditaveis
+- a fronteira entre fluxo sincronizado e experimentacao offline (LLMOps)
 
 ## 2. Runtime ativo hoje
 

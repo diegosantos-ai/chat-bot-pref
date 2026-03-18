@@ -294,3 +294,27 @@ Leitura honesta dos limites:
 - a correlacao e minima e depende da injecao externa dos headers;
 - a resolucao de parametros a partir da run de MLflow e opcional e tratada com um import seguro para nao quebrar o runtime se `mlflow` nao estiver instalado;
 - nao ha garantia de que *toda* execucao tera um `run_id` associado, apenas aquelas iniciadas com o devido contexto (ex: smoke tests da Fase 10).
+
+## Atualizacao do bloco CPPX-F6-T6
+
+Estado implementado no runtime apos este bloco:
+
+- Criacao de utilitario local `scripts/view_phase6_metrics.py` que desempenha o papel de "Painel Operacional CLI", agregando dados do `/metrics` local e dos logs de auditoria de runtime (`data/runtime/audit`).
+- Solucao cumpre o objetivo do "dashboard tecnico sem inflar escopo e sem depender de stack nova ou ferramenta nova". Interface minimal baseada em terminal (Console Dashboard).
+
+Como utilizar:
+1. Inicie o runtime com o padrao do projeto (por exemplo, `make run` ou `.venv/bin/python -m uvicorn app.main:app`).
+2. Em um terminal isolado, execute comando `.venv/bin/python scripts/view_phase6_metrics.py`.
+
+O que a visao mostra na pratica:
+- **Fallback**: Qual tenant está acionando as rotas/respostas de fallback;
+- **Retrieval vazio**: Exibicao quantitativa de respostas acionadas sem contexto documental;
+- **Latencia**: Calculo de media derivado dos Prometheos Gauges/Counters de tempo, listando o `stage_name` mais lento por logica decrescente;
+- **Custos**: Demonstrativo acumulado financeiro agrupado entre o provedor LLM;
+- **Policy Block**: Agrupamento isolado ativacoes da Policy guardrails bloqueados;
+- **Correlacao**: Analise dos ultimos audits via disco (`data/`) para printar registros associados explicitamente via tracking (`X-Parent-Run-ID` ou `X-Strategy-Name`).
+
+O que a visao NAO mostra (Limites):
+- Como os endpoints expostos pelo `/metrics` baseiam-se na memoria transacional sob lifecycle da thread rodando ou exporter, caso a maquina seja reiniciada, somente a "Correlacao via disco de Audit" se mantera persistida. A visao historica exigiria injecao real no Prometheus Database/Grafana de visao de producao (fora de escopo restrito T6).
+- Não apresenta UI interativa web ("decorativa").
+- Não faz cruzamentos detalhados do texto "exato" da interacao para debugar conversas (para previnir vazamento de informacao/auditoria dentro do painel agregado de metricas).

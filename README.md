@@ -35,6 +35,28 @@ O foco deste repositório não é um front-end comercial, mas a solidez do **Bac
 > *Para uma leitura executiva aprofundada dos limites deste sistema, consulte nossa documentação de [Decisões e Trade-Offs](docs-fundacao-operacional/tradeoffs_decisoes.md) e [Matrizes de Capacidade](docs-fundacao-operacional/matriz_capacidades.md).*
 
 ---
+## Fluxo end-to-end
+
+```mermaid
+flowchart LR
+    A[Canal] --> B[API]
+    B --> C[Tenant]
+    C --> D[Policy]
+    D --> E[Retrieval]
+    E --> F[(ChromaDB)]
+    E --> G[LLM]
+    G --> H[Response]
+    H --> I[Audit Evidence]
+    I --> J[(Auditoria)]
+
+    B -. traces .-> K[OpenTelemetry]
+    I -. decisão .-> K
+    E -. benchmark .-> L[Offline Eval]
+    G -. runs .-> M[MLflow]
+    M -. gate .-> N[CI]
+```
+
+---
 
 ## 💻 Como Explorar (Execução Local / Lab)
 

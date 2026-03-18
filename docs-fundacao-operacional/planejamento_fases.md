@@ -45,7 +45,7 @@ seguir para a próxima fase.
 - [x] Fase 11 — Observabilidade Aplicada e Fechamento Técnico do Case
 - [x] Fase 12 — Automação de Qualidade com GitHub Actions
 - [x] Fase 13 — Infraestrutura como Código e Deploy em AWS
-- [ ] Fase 14 — Alinhamento Final entre Arquitetura, Operação e Documentação
+- [x] Fase 14 — Alinhamento Final entre Arquitetura, Operação e Documentação
 
 
 #### Tasks — Fase 1

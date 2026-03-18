@@ -31,7 +31,7 @@ O projeto foi estruturado para demonstrar, de forma prática:
 - canal real de operação via **Telegram**, com webhook HTTPS ativo no ambiente remoto demonstrativo
 - evolução para **CI/CD** e **deploy em AWS com Terraform**
 
-Com a consolidação da **Fundação Operacional**, o projeto entrou em uma nova etapa: a construção da camada de **LLMOps, avaliação formal, governança e observabilidade avançada**.
+Com a conclusão consolidada e auditável da **Fundação Operacional**, o projeto demonstra maturidade equivalente às exigências de plataforma e MLOps para ambientes síncronos, operando agora a trilha paralela: a construção da camada de **LLMOps, avaliação formal, governança e observabilidade avançada**.
 
 O foco atual deixa de ser apenas a sustentação de uma base funcional e passa a ser a evolução para uma plataforma de IA mais **rastreável, avaliável, governável e tecnicamente demonstrável**.
 

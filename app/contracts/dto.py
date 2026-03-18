@@ -5,6 +5,7 @@ from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.contracts.evidence import AuditEvidence
 
 def _normalize_optional_identifier(value: Optional[str]) -> Optional[str]:
     if value is None:
@@ -102,6 +103,8 @@ class ChatResponse(BaseModel):
     tenant_id: str
     message: str
     channel: str = "web"
+    evidence: AuditEvidence | None = Field(default=None, description="Evidência técnica da decisão")
+
 
 
 class ChatExchangeRecord(BaseModel):

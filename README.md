@@ -423,9 +423,10 @@ O projeto passa a ser organizado em dois ciclos complementares:
 * Fase 11 — Governança, explicabilidade e evidência de decisão
 * Fase 12 — Alinhamento final da narrativa técnica e material de demonstração
 
-Estado atual deste ciclo na branch `feat/multillm-fallback-avaliacao`:
+Estado atual deste ciclo na branch `feat/governanca-evidencia`:
 
 * Fases 1 a 10 concluídas neste escopo.
+* Fase 11 (Governança e Evidência) ativa no Bloco 1.
 * Fases recentes consolidaram orquestração offline, limites arquiteturais de experimentação, simulação de gate de regressão em CI genAI, diagnósticos de deriva e tracking de multi-provedores com controle nativo de guardrails.
 ---
 

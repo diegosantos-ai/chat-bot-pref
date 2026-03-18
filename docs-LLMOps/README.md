@@ -119,6 +119,8 @@ A sequência recomendada de leitura desta pasta é:
 10. `fases/FASE7-CI-GENAI-REGRESSAO.md`
 11. `fases/FASE8-ORQUESTRACAO-AIRFLOW.md`
 12. `fases/FASE9-DERIVA-SEMANTICA-BASE-VETORIAL.md`
+13. `fases/FASE10-MULTILLM-FALLBACK.md`
+14. `fases/FASE11-GOVERNANCA-EVIDENCIA.md`
 
 ## Status
 
@@ -132,3 +134,4 @@ Na branch `feat/ci-genai-regressao`, a Fase 7 foi concluída tecnicamente. Foi e
 Na branch `feat/orquestracao-airflow`, a Fase 8 foi fechada estabelecendo a fronteira offline via Apache Airflow isolado do runtime principal. Foram validadas a instalacao dedicada (Python 3.13 e Airflow 2.11.2) e o mapeamento das DAGs prioritarias iniciais (ingest, avaliacao e reindexacao) suportadas pelo tracking estrutural, deixando o schedule produtivo robusto como passo futuro.
 Na branch `feat/semantica-base-vetorial`, a Fase 9 foi entregue com a fundacao diagnostica documental. Foram estabelecidos indicadores de saude semantica da base, matriz diagnostica de sintomas por tenant, e definido um protocolo experimental de comparacao reproduzivel entre versoes da base (corpus + configuracao), permitindo respostas claras sobre regressao que poderao ser consumidas no Airflow futuramente.
 Na branch `feat/multillm-fallback-avaliacao`, a Fase 10 foi finalizada orquestrando suporte a Múltiplos LLMs (agora incluindo nativamente APIs da OpenAI para complementar o Gemini já existente). A fase formalizou domínios de erro por instabilidade do provedor, separou métricas para tracking offline comparável no MLflow, e isolou o runtime dessa experimentação com foco operacional em prover confiabilidade e alternativas de `fallback`.
+Na branch `feat/governanca-evidencia`, a Fase 11 iniciou com o Bloco 1, estruturando o contrato da Evidência de Decisão por request, definindo Reason Codes unificados e estabelecendo a fronteira explícita entre a auditoria da jornada transacional e as métricas do tracking experimental.

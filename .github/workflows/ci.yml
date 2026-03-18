@@ -134,6 +134,7 @@ jobs:
       - name: Run offline RAG Evaluation (Mock)
         env:
           LLM_PROVIDER: mock
+          MLFLOW_RUN_NAME: ci-dry-run-${{ github.sha }}
         run: |
           python scripts/run_phase4_rag_evaluation.py \
             --manifest benchmark_datasets/tenants/prefeitura-vila-serena/benchmark_v1/dataset_manifest.json \

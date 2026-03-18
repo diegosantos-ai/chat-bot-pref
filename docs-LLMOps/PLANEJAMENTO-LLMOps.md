@@ -546,14 +546,14 @@ Projeto apto a comparar modelos e justificar escolha de provedor com evidência 
 
 Nenhuma instalação nova obrigatória deve ocorrer nesta fase.
 
-#### Tasks — Fase 10
+#### Tasks — Fase 10 - (CONCLUÍDA)
 
-* `CPPX-F10-T1 — Definir contrato de multi-LLM e fallback`
-* `CPPX-F10-T2 — Integrar segundo provedor ou modo comparável`
-* `CPPX-F10-T3 — Expor parâmetros experimentais por modelo`
-* `CPPX-F10-T4 — Executar comparação de qualidade, custo e latência`
-* `CPPX-F10-T5 — Registrar fallback e motivo de acionamento`
-* `CPPX-F10-T6 — Consolidar recomendação técnica de escolha de modelo`
+* `[x] CPPX-F10-T1 — Definir contrato de multi-LLM e fallback`
+* `[x] CPPX-F10-T2 — Integrar segundo provedor ou modo comparável`
+* `[x] CPPX-F10-T3 — Expor parâmetros experimentais por modelo`
+* `[x] CPPX-F10-T4 — Executar comparação de qualidade, custo e latência`
+* `[x] CPPX-F10-T5 — Registrar fallback e motivo de acionamento`
+* `[x] CPPX-F10-T6 — Consolidar recomendação técnica de escolha de modelo`
 
 ---
 

@@ -1,0 +1,16 @@
+[
+  {
+    "variant_label": "mock_padrão_rapido",
+    "provider": "mock",
+    "model": "mock-compose-v1-flash",
+    "rationale": "Baseline transacional - Mock rápido e simulando custo baixo.",
+    "latency_avg_ms": 127.586
+  },
+  {
+    "variant_label": "mock_pesado_lento",
+    "provider": "mock",
+    "model": "mock-compose-v2-pro",
+    "rationale": "Simula provedor mais complexo com latência e custo maiores.",
+    "latency_avg_ms": 521.552
+  }
+]

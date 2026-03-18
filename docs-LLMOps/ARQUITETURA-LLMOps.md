@@ -442,6 +442,27 @@ Capacidade de responder, tecnicamente:
 * por que houve bloqueio, fallback ou resposta final;
 * sob qual configuração a execução ocorreu.
 
+## Bloco 11 — Multi-LLM e Fallback
+
+### Papel
+
+Garantir disponibilidade transacional contínua e experimentação desacoplada de provedores isolados.
+
+### Responsabilidades
+
+* encapsular geração por múltiplos provedores (`OpenAI`, `Gemini`, `Mock`);
+* estruturar erros semânticos (indisponibilidade transiente vs. erro lógico);
+* executar transição limpa para fallback em caso de falha externa, sem falsear histórico transacional;
+* manter os eixos de medição (temperature, model, custo/latência) integrados via painel (MLFlow).
+
+### Situação
+
+**Construído via abstrações nativas baseadas em HTTP para não gerar side-effects sobre o runtime.**
+
+### Resultado esperado
+
+* pipeline flexível que aceite alternância limpa entre _main_ e _fallback_ sem indisponibilidade visível no Chat.
+
 ## Separação entre camadas
 
 ### Auditoria operacional
@@ -499,6 +520,7 @@ Os seguintes contratos passam a ser estruturais na nova fase:
 * orquestração offline com Airflow
 * monitoramento de deriva semântica
 * observabilidade ampliada de qualidade, custo e latência
+* suporte a multi-LLM e fallback transacional
 * governança e explicabilidade técnica ampliadas
 
 ## Relação com o planejamento
@@ -535,6 +557,6 @@ Arquitetura-alvo formalizada para início da fase.
 
 Base herdada preservada.
 Novas camadas definidas conceitualmente.
-Próximo passo: iniciar execução da Fase 1 conforme `PLANEJAMENTO-LLMOps.md`.
+Próximo passo: iniciar execução da Fase 11 conforme `PLANEJAMENTO-LLMOps.md`.
 
 ````

@@ -423,11 +423,10 @@ O projeto passa a ser organizado em dois ciclos complementares:
 * Fase 11 — Governança, explicabilidade e evidência de decisão
 * Fase 12 — Alinhamento final da narrativa técnica e material de demonstração
 
-Estado atual deste ciclo na branch `feat/fase5-retrieval-query-reranking`:
+Estado atual deste ciclo na branch `feat/multillm-fallback-avaliacao`:
 
-* Fases 1 a 5 concluídas neste escopo
-* Fase 4 encerrada com benchmark conectado ao executor offline, tracking experimental em `MLflow`, artifacts comparativos e baseline inicial documentada em `docs-LLMOps/fases/FASE4-AVALIACAO-FORMAL-RAG.md`
-* Fase 5 encerrada com comparação reproduzível entre cinco combinações relevantes e baseline recomendada documentada em `docs-LLMOps/fases/FASE5-RETRIEVAL-HIBRIDO.md`
+* Fases 1 a 10 concluídas neste escopo.
+* Fases recentes consolidaram orquestração offline, limites arquiteturais de experimentação, simulação de gate de regressão em CI genAI, diagnósticos de deriva e tracking de multi-provedores com controle nativo de guardrails.
 ---
 
 ## Critério de Aceite do Projeto

@@ -71,6 +71,11 @@ class MockLLMProvider:
         self.model = (model or settings.LLM_MODEL).strip() or "mock-compose-v1"
 
     async def generate(self, request: LLMGenerationRequest) -> LLMGenerationResponse:
+        import asyncio
+        # Pequeno delay para simular diferenca de modelos no modo mock comparativo
+        delay = 0.5 if "pro" in self.model.lower() else 0.1
+        await asyncio.sleep(delay)
+
         if request.reason_code:
             message = self._fallback_message(request)
             mode = "fallback"
@@ -78,12 +83,20 @@ class MockLLMProvider:
             message = self._contextual_message(request)
             mode = "answer"
 
+        # Simula contagem de tokens pra experimentacao baseline
+        prompt_len = len(request.prompt.content.split())
+        reply_len = len(message.split())
+        estimated_cost = (prompt_len * 0.00001) + (reply_len * 0.00002)
+
         return LLMGenerationResponse(
             provider="mock",
             model=self.model,
             prompt_version=request.prompt.version,
             message=message,
             mode=mode,
+            input_tokens_estimated=prompt_len,
+            output_tokens_estimated=reply_len,
+            estimated_cost_usd=estimated_cost,
         )
 
     def _contextual_message(self, request: LLMGenerationRequest) -> str:
@@ -250,6 +263,77 @@ class GeminiLLMProvider:
         raise RuntimeError("Resposta do Gemini sem texto utilizavel.")
 
 
+class OpenAILLMProvider:
+    def __init__(
+        self,
+        *,
+        model: str | None = None,
+        api_key: str | None = None,
+        api_base_url: str = "https://api.openai.com/v1",
+        temperature: float = 0.0,
+    ) -> None:
+        self.model = (model or settings.LLM_MODEL).strip() or "gpt-4o-mini"
+        self.api_key = (api_key or settings.LLM_API_KEY).strip()
+        self.api_base_url = api_base_url.rstrip("/")
+        self.temperature = temperature
+
+    async def generate(self, request: LLMGenerationRequest) -> LLMGenerationResponse:
+        if not self.api_key:
+            raise RuntimeError("LLM_API_KEY obrigatorio para LLM_PROVIDER=openai.")
+
+        url = f"{self.api_base_url}/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
+        }
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "user", "content": request.prompt.content}
+            ],
+            "temperature": self.temperature,
+        }
+
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(url, headers=headers, json=payload)
+                response.raise_for_status()
+        except httpx.TimeoutException as e:
+            raise LLMProviderUnavailableError(f"Timeout no OpenAI: {str(e)}") from e
+        except httpx.HTTPStatusError as e:
+            if e.response.status_code == 429:
+                raise LLMProviderRateLimitError("Rate limit no OpenAI.") from e
+            if e.response.status_code in {500, 502, 503, 504}:
+                raise LLMProviderUnavailableError("OpenAI indisponivel.") from e
+            raise LLMProviderLogicError(f"Erro logico/negocio no OpenAI: {e.response.status_code}") from e
+
+        body = response.json()
+        message = self._extract_text(body)
+
+        # Tracking basico de estimativa para este provider
+        usage = body.get("usage", {})
+
+        return LLMGenerationResponse(
+            provider="openai",
+            model=self.model,
+            prompt_version=request.prompt.version,
+            message=message,
+            mode="fallback" if request.reason_code else "answer",
+            input_tokens_estimated=usage.get("prompt_tokens", 0),
+            output_tokens_estimated=usage.get("completion_tokens", 0),
+        )
+
+    def _extract_text(self, body: dict) -> str:
+        choices = body.get("choices", [])
+        if not choices:
+            raise RuntimeError("Resposta da OpenAI sem 'choices'.")
+        message = choices[0].get("message", {})
+        content = message.get("content")
+        if not content:
+            raise RuntimeError("Resposta da OpenAI vazia.")
+        return str(content).strip()
+
+
 class LLMComposeService:
     def __init__(
         self,
@@ -351,4 +435,6 @@ class LLMComposeService:
     def _build_provider(self) -> LLMProvider:
         if settings.LLM_PROVIDER == "gemini":
             return GeminiLLMProvider()
+        if settings.LLM_PROVIDER == "openai":
+            return OpenAILLMProvider()
         return MockLLMProvider()

@@ -61,6 +61,105 @@ O fluxo principal começa no canal de entrada e segue pela API, que resolve o te
 
 ---
 
+## Onde Estão as Evidências do Projeto
+
+As evidências do projeto não ficam concentradas em um único artefato. Elas estão distribuídas por camadas diferentes, cada uma responsável por comprovar um aspecto específico da solução.
+
+### 1. Evidência operacional do runtime
+Comprova que o sistema funciona no fluxo transacional real.
+
+Inclui, por exemplo:
+
+- auditoria operacional por request e por tenant
+- `request_id` e trilha de execução
+- `reason_codes`, bloqueios, fallback e status de decisão
+- logs estruturados
+- métricas expostas
+- traces correlacionados
+
+Essa camada responde perguntas como:
+- a API executa de ponta a ponta?
+- a decisão ficou rastreável?
+- houve bloqueio, fallback ou resposta normal?
+- o fluxo respeita o tenant e o contexto operacional?
+
+### 2. Benchmark offline e tracking experimental
+Comprova que o sistema foi avaliado com método, e não apenas implementado.
+
+Inclui, por exemplo:
+
+- benchmark reproduzível por tenant
+- datasets controlados
+- avaliação formal offline de RAG
+- comparação entre runs
+- baseline inicial e baseline promovida
+- tracking experimental em MLflow com parâmetros, métricas e artefatos
+
+Essa camada responde perguntas como:
+- houve comparação técnica entre variantes?
+- a escolha de configuração foi justificada?
+- existe baseline rastreável?
+- as decisões são reproduzíveis?
+
+### 3. Documentação técnica consolidada
+Comprova que a solução pode ser entendida, explicada e defendida sem depender de improviso.
+
+Inclui, por exemplo:
+
+- arquitetura consolidada
+- planejamento por fases
+- documentação de governança e evidência
+- estudo de caso
+- roteiro de demonstração
+- narrativa de trade-offs e decisões
+
+Essa camada responde perguntas como:
+- o que foi realmente entregue?
+- quais decisões de engenharia foram tomadas?
+- quais limites foram declarados?
+- como apresentar o projeto com clareza?
+
+### 4. CI e validadores automatizados
+Comprova que parte relevante do projeto pode ser verificada de forma repetível.
+
+Inclui, por exemplo:
+
+- workflows de CI
+- gates de validação
+- dry-run experimental
+- scripts de validação documental e estrutural
+- testes mínimos de sanidade
+
+Essa camada responde perguntas como:
+- a base do projeto continua íntegra?
+- a documentação está coerente com os artefatos?
+- a trilha de execução é reproduzível?
+- o projeto depende ou não de validação manual improvisada?
+
+### 5. README como índice de entrada
+O README funciona como ponto de navegação para as evidências, apontando para os materiais mais importantes do projeto.
+
+Ele não substitui benchmark, auditoria ou tracking, mas ajuda a localizar rapidamente:
+- o estado atual da solução
+- os principais componentes
+- os artefatos de estudo de caso
+- a documentação de arquitetura
+- os materiais de demonstração
+
+### Resumo
+As evidências do projeto estão distribuídas entre:
+
+- runtime operacional
+- auditoria e governança por request
+- benchmark offline
+- tracking experimental
+- documentação técnica
+- CI e validadores
+
+Essa separação é intencional: ela preserva clareza arquitetural, evita misturar operação com experimento e torna a solução mais defensável do ponto de vista técnico.
+
+---
+
 ## 💻 Como Explorar (Execução Local / Lab)
 
 O projeto requer um ambiente simples embasado em Docker para simular seu ambiente completo na sua máquina.

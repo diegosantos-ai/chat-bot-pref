@@ -46,6 +46,13 @@ Artefatos:
 - resposta HTTP com `X-Request-ID`
 
 ## Como apresentar para terceiros
+n
+Artefatos de Estudo de Caso (Para portfólio e bancas técnicas):
+1. [Estudo de Caso Principal](./estudo_de_caso.md)
+2. [Roteiro de Demonstração](./roteiro_demonstracao.md)
+3. [Decisões e Trade-offs](./tradeoffs_decisoes.md)
+4. [Matriz de Capacidades e Mercado](./matriz_capacidades.md)
+
 
 Leitura curta recomendada:
 

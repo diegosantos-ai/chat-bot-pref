@@ -1,13 +1,13 @@
-# Alinhamento Final com a Vaga e Material de Demonstração
+# Matriz de Capacidades Arquiteturais e Padrões de Indústria
 
 ## Objetivo
-Este documento consolida o alinhamento técnico entre o que foi construído durante as fases deste projeto e os requisitos frequentemente cobrados para vagas de Engenharia de IA, MLOps e Backend GenAI.
+Este documento consolida o alinhamento técnico entre o que foi construído durante as fases deste projeto e os requisitos fundamentais em desafios de Engenharia de IA, MLOps e Backend GenAI.
 
 Ele não promete maturidade inexistente. Limita-se a mapear evidências já ativas na **Fundação Operacional** e suportadas por validações em repositório.
 
-## Matriz de Aderência à Vaga
+## Matriz de Capacidades vs Padrões de Mercado
 
-| Requisito Típico da Vaga | Implementação Real no Projeto | Evidência Objetiva | Nível de Aderência | Lacuna Residual |
+| Requisito de Indústria | Implementação Real no Projeto | Evidência Objetiva | Status de Implementação | Lacuna Residual |
 | --- | --- | --- | --- | --- |
 | **Backend em Python moderno e APIs REST** | FastAPI modular, rotas isoladas (`/api/chat`, `/api/rag/*`, `/metrics`). Runtime assíncrono. | `app/main.py`, smoke tests locais e remotos passando. | Atendido | Nenhuma estrutural (não possui ORM complexo pois banco relacional não é do escopo crítico atual). |
 | **Desenvolvimento e Deploy de soluçōes com LLM** | Adaptador de LLM isolado, GenAI com método (prompts versionados), pipeline semântico via provider mock. | Artefatos de resposta com modelo transacional em `fase10-smoke-dev.json` e `fase11`. | Atendido com ressalva | Uso atual restrito ao `mock` para demonstração offline/barata de CI, sem provider comercial engatado no runtime remoto em default. |

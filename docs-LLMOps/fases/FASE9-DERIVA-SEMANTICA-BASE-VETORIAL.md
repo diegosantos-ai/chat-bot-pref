@@ -98,3 +98,55 @@ O ecossistema prevê o seguinte framework temporal:
 2. Após alguns meses, os `request_id` daquele tenant, antes satisfeitos, começam a acumular policy blocks ou retornos de contexto empobrecido (Observabilidade aponta a Drift).
 3. O diagnóstico usa a matriz de correlação. Se inferido envelhecimento, atua-se na camada Offline/Airflow para uma ingestão controlada (Dia N), criando uma nova *version of index*.
 4. A nova *base vetorial* é submetida ao Dataset de Benchmark do tenant no sistema de Experimentos MLflow comparada ao branch `main`, validando se hit-rate retomou o nível ideal antes de ser comissionada online.
+
+---
+
+## 6. Protocolo de Comparação entre Versões de Base (CPPX-F9-T3)
+
+A degradação não é um palpite empírico; a recuperação da relevância precisa ser provada. Para garantir que uma reindexação trará vantagem pragmática, o protocolo experimental deve respeitar balizas bem delineadas.
+
+### 6.1 Unidade de Comparação
+Qualquer "Run" experimental que avalia melhoria de RAG devido à correção da Deriva Semântica DEVE declarar no tracking os seguintes componentes para ser válida:
+- **`tenant_id` alvo**: A análise de RAG é intransferível entre prefeituras.
+- **Snapshot do Corpus**: Qual a tag dos arquivos-fonte do teste (ex: leis_2025 vs leis_2026).
+- **Configuração de Ingestão**: Versão do `chunking_artifact` utilizado.
+- **Configuração de Retrieval**: A estratégia ativa consumida pelo pipeline.
+
+### 6.2 Baseline de Referência
+A baseline de comparação não é o melhor resultado de ontem, mas o **snapshot estrutural que atende a produção hoje**. Para avaliar uma nova base, testa-se a "base antiga produtiva" contra "dataset de fallback autônomo atualizado", e em seguida compara-se a performance do "novo corpus indexado" contra o mesmo dataset.
+
+### 6.3 Regras de Interpretação (Métricas)
+Utiliza-se o arcabouço avaliativo introduzido via MLflow nas fases pretéritas:
+- **Oscilação Tolerável**: Variações relativas de ~5% no hit-rate de chunks corretos entre a base atual e a nova base.
+- **Regressão Relevante**: Queda persistente de pontuação em *Relevance* ou scores densos e baixos na recuperação estrita da vectorstore comparado com a performance histórica documentada.
+- **Vitória de Reindexação**: A nova combinação (corpus recente + config de chunking estabilizada) resgata o *rag_hit_rate* da amostra atual acima da base produtiva envelhecida.
+
+---
+
+## 7. Rotina Mínima de Reavaliação (CPPX-F9-T6)
+
+A rotina de reavaliação diz como a operação transiciona de "observar" para "atuar".
+
+### 7.1 Critérios de Disparo (Triggers Mínimos)
+Na configuração presente, o time deve enfileirar reavaliação por tenant quando um destes fatores isolados transborda:
+1. **Pico Sintomático de Recusa**: Saltos observáveis (ex: >15% no mês) nas *policy blocks* registradas via `audit.v1` associadas a relatórios de *zero-context chunks* para o RAG.
+2. **Denúncia Qualitativa Relevante**: A moderação do Tenant (prefeitura) notifica ou reencaminha interações com desinformação contumaz advindas de atualização gerencial (uma secretaria mudou mas o RAG desconhece).
+3. **Turnover Legislativo**: Tempo decorrido vs. publicações da praça. Mesmo sem queda de hit-rate, uma "reindexação forçada" na virada fiscal é justificada sem trânsito preditivo.
+
+### 7.2 Orquestração Offline vs Runtime
+A segregação entre os limites do modelo permanece vital:
+- **Ação Online (Runtime)**: FastAPI no ambiente transacional serve apenas instâncias de requisição. Ele **nunca** calcula comparativos MLflow, **nunca** efetua `upsert` colossal de bases guiado pelo usuário final e não mede sua própria deriva retroativa no request context.
+- **Ação Offline Primária**: De forma manual, engenheiros disparam a reindexação no CLI/scripts e envidenciam nos repositórios experimentais usando a DAG de "re-ingestion".
+- **Camada Airflow**: Tendo base na Fase 8, a observabilidade contínua (rodar `eval` sobre as log-queries noturnas) **pode e deve** ser encapsulada como uma DAG agendada cronologicamente na plataforma do Apache Airflow que opera alijada do path da API principal.
+
+---
+
+## 8. Narrativa Técnica Consolidada (Fechamento CPPX-F9-T7)
+
+Para a plataforma **Chat Pref**, a Deriva Semântica não configura um *bug estrutural de software* introduzido por deploys arbitrários. Trata-se da degeneração termodinâmica provinda do contínuo distanciamento temporal entre a **base de dados indexada e cristalizada** (o vetor RAG inicial da Prefeitura) e a contínua fluência do **real comportamento orgânico e linguístico** das demandas da população atendida.
+
+Conforme a prefeitura dita novas portarias, o cidadão usa semânticas diferentes de busca, ou os prefeitos migram políticas públicas, os *embeddings* outrora correspondentes a fatos atuais gradualmente falham em produzir clusters precisos de associação. A degradação semântica atinge então a API.
+
+A saúde sistêmica protege o core do produto transacional, pois o RAG impõe limites de aceitação que barram alucinações via *guardrails*. A "pior" degradação num cenário bem desenhado é falhar educadamente (*policy_post* recusando por abstenção de contexto), e não inventar a lei desatualizada com roupagem falaciosa.
+
+Assim, rastrear, analisar com precisão quantitativa numa camada *offline*, e re-indexar periodicamente versões das bases vetoriais com experimentação paralela, compõe não meramente um ajuste de qualidade pontual, mas sim a prática perene de MLOps imposta nesta infraestrutura arquitetural.

@@ -143,6 +143,9 @@ jobs:
             --tracking-dir "tmp/mlflow_ci_run" \
             --max-cases 3
 
+      - name: Validate GenAI Regression Gate (Hard-fail)
+        run: python scripts/evaluate_genai_ci_gate.py "tmp/mlflow_ci_run/run_reports"
+
       - name: Upload MLflow Tracking Artifacts
         uses: actions/upload-artifact@v4
         if: always()

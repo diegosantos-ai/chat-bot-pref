@@ -35,6 +35,30 @@ class LLMGenerationResponse:
     cost_estimation_method: str = ""
     input_tokens_estimated: int = 0
     output_tokens_estimated: int = 0
+    fallback_triggered: bool = False
+
+
+class LLMError(Exception):
+    """Base exception for all generative AI errors."""
+    pass
+
+
+class LLMProviderUnavailableError(LLMError):
+    """Raised when the LLM provider is completely unreachable (e.g. 502, 503, ti
+meout). Safely retryable via fallback."""
+    pass
+
+
+class LLMProviderRateLimitError(LLMError):
+    """Raised when the LLM provider rate limits the request (e.g. 429). Safely r
+etryable via fallback."""
+    pass
+
+
+class LLMProviderLogicError(LLMError):
+    """Raised for logical errors that SHOULD NOT trigger fallback (e.g. safety g
+uardrail trigger, malformed prompt)."""
+    pass
 
 
 class LLMProvider(Protocol):

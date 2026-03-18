@@ -593,12 +593,12 @@ Nenhuma instalação nova deve ocorrer nesta fase. Explicabilidade deve permanec
 
 #### Tasks — Fase 11
 
-* `CPPX-F11-T1 — Definir estrutura de evidência de decisão por request`
-* `CPPX-F11-T2 — Expor versão de prompt, policy e retrieval por resposta`
-* `CPPX-F11-T3 — Consolidar reason_codes e trilha de bloqueio ou fallback`
-* `CPPX-F11-T4 — Correlacionar contexto recuperado e resposta produzida`
-* `CPPX-F11-T5 — Revisar clareza da explicabilidade para demonstração`
-* `CPPX-F11-T6 — Documentar fronteira entre evidência operacional e experimental`
+* `[x] CPPX-F11-T1 — Definir estrutura de evidência de decisão por request`
+* `[x] CPPX-F11-T2 — Expor versão de prompt, policy e retrieval por resposta`
+* `[x] CPPX-F11-T3 — Consolidar reason_codes e trilha de bloqueio ou fallback`
+* `[ ] CPPX-F11-T4 — Correlacionar contexto recuperado e resposta produzida`
+* `[ ] CPPX-F11-T5 — Revisar clareza da explicabilidade para demonstração`
+* `[x] CPPX-F11-T6 — Documentar fronteira entre evidência operacional e experimental`
 
 ---
 

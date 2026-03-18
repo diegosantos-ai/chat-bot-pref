@@ -425,9 +425,9 @@ O projeto passa a ser organizado em dois ciclos complementares:
 
 Estado atual deste ciclo na branch `feat/governanca-evidencia`:
 
-* Fases 1 a 10 concluídas neste escopo.
-* Fase 11 (Governança e Evidência) ativa no Bloco 1.
-* Fases recentes consolidaram orquestração offline, limites arquiteturais de experimentação, simulação de gate de regressão em CI genAI, diagnósticos de deriva e tracking de multi-provedores com controle nativo de guardrails.
+* Fases 1 a 11 concluídas neste escopo.
+* Fase 11 (Governança e Evidência) finalizada, garantindo explicabilidade e transparência de decisão por request estruturado.
+* Fases recentes consolidaram orquestração offline, limites arquiteturais de experimentação, simulação de gate de regressão em CI genAI, diagnósticos de deriva, tracking de multi-provedores, e total observabilidade entre prompts, RAG configs e policies reativas.
 ---
 
 ## Critério de Aceite do Projeto

@@ -55,6 +55,9 @@ flowchart LR
     G -. runs .-> M[MLflow]
     M -. gate .-> N[CI]
 ```
+--- 
+
+O fluxo principal começa no canal de entrada e segue pela API, que resolve o tenant, aplica as políticas de segurança, recupera contexto no RAG e aciona o adaptador LLM para compor a resposta. A saída é devolvida com trilha de auditoria e evidência operacional da decisão. Em paralelo, benchmark offline, tracking experimental em MLflow, observabilidade e CI permanecem separados do runtime transacional para preservar governança, reprodutibilidade e clareza arquitetural.
 
 ---
 

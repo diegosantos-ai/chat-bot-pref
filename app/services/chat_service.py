@@ -16,6 +16,7 @@ from app.contracts.dto import (
     RagRerankingUsed,
     RagQueryTransformationUsed,
 )
+from app.contracts.evidence import AuditEvidence, DecisionStatus, ReasonCode, PromptEvidence, PolicyEvidence, RetrievalEvidence
 from app.llmops import ActiveArtifactResolver
 from app.observability.cost_estimation import estimate_retrieval_operational_cost
 from app.observability.context import update_correlation_context
@@ -442,6 +443,55 @@ class ChatService:
                         message=final_llm_result.message,
                         channel=channel,
                     )
+
+                    # --- INJECAO DE EVIDENCIA OPERACIONAL (Fase 11) ---
+                    decision_status = DecisionStatus.PASSED
+                    evidence_reason_code = ReasonCode.SUCCESS_NORMAL
+
+                    if getattr(pre_decision, "decision", None) == "block":
+                        decision_status = DecisionStatus.BLOCKED
+                        evidence_reason_code = ReasonCode.BLOCK_POLICY_PRE
+                    elif post_decision and getattr(post_decision, "decision", None) == "block":
+                        decision_status = DecisionStatus.BLOCKED
+                        evidence_reason_code = ReasonCode.BLOCK_POLICY_POST
+                    elif rag_response and rag_response.status != "ready":
+                        decision_status = DecisionStatus.DEGRADED
+                        evidence_reason_code = ReasonCode.LIMIT_CONTEXT_INSUFFICIENT
+                    elif final_llm_result and final_llm_result.mode == "fallback":
+                        decision_status = DecisionStatus.DEGRADED
+                        evidence_reason_code = ReasonCode.SUCCESS_FALLBACK
+
+                    policy_version = (post_decision.policy_version if post_decision else None) or getattr(pre_decision, "policy_version", None)
+                    applied_rules = []
+                    if getattr(pre_decision, "reason_codes", None):
+                        applied_rules.extend(pre_decision.reason_codes)
+                    if post_decision and getattr(post_decision, "reason_codes", None):
+                        applied_rules.extend(post_decision.reason_codes)
+
+                    response.evidence = AuditEvidence(
+                        request_id=resolved_request_id,
+                        tenant_id=tenant_id,
+                        decision_status=decision_status,
+                        reason_code=evidence_reason_code,
+                        prompt=PromptEvidence(
+                            version=final_llm_result.prompt_version if final_llm_result else None,
+                            name=final_llm_result.mode if final_llm_result else None
+                        ),
+                        policy=PolicyEvidence(
+                            version=policy_version,
+                            applied_rules=applied_rules
+                        ),
+                        retrieval=RetrievalEvidence(
+                            strategy=rag_response.status if rag_response else None,
+                            documents_retrieved=len(rag_response.chunks) if rag_response and hasattr(rag_response, 'chunks') else 0,
+                            version=None
+                        ),
+                        provider_metadata={
+                            "provider": final_llm_result.provider if final_llm_result else None,
+                            "model": final_llm_result.model if final_llm_result else None
+                        }
+                    )
+                    # --------------------------------------------------
 
                     exchange_record = ChatExchangeRecord(
                         request_id=response.request_id,

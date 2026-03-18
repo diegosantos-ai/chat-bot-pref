@@ -29,12 +29,13 @@ A evidência acompanha o request HTTP quando solicitado ou no fluxo normal (no f
 - Latência em milissegundos por layer (vai para OpenTelemetry/Prometheus/MLFlow).
 - Scores RAGas (Answer Relevancy, Faithfulness). Isso nunca deve transbordar para evidência transacional de um usuário num chat, não faz sentido lógico e acopla a latência do app ao loop de avaliação offline.
 
-## 4. Status de Definição (Bloco 1)
-Neste bloco entregamos:
+## 4. Status de Definição (Blocos 1 e 2)
+Neste ciclo entregamos a funcionalidade fim a fim:
 - **Contrato Estrutural DTO**: Definido e integrado de forma opcional (`app/contracts/evidence.py` -> `AuditEvidence`).
-- **Reason Codes**: Catalogadas as razões de decisão lógicas (Fallback, Limitado, Bloqueio).
-- **Sem preenchimento reativo ativo ainda**: O core de orquestração (`chat_service`) **NÃO** popula o `AuditEvidence` até que esta fase amadureça como componente reativo, respeitando a instrução "preparar e não declarar entregue o que está incompleto". O DTO foi apenas anexado sem injetar dependência forte na pipeline ativa.
+- **Reason Codes Dinâmicos**: Catalogadas as razões lógicas (Fallback, Limitado, Bloqueio, Sucesso Normal).
+- **Core de Orquestração Reativo**: O orquestrador (`chat_service`) passou a inferir, em tempo de execução, metadados contextuais (ex: se o Fallback triggou `NO_KNOWLEDGE_BASE` com 0 documentos; se o RAG falhou em semântica com 3 documentos recuperados; ou se a IA principal respondeu com sucesso) amarrando isso tudo transparentemente na API JSON.
 
-## 5. Próximos Passos
-- Implementar a agregação da evidência na jornada do orquestrador (`chat_service.py`), construindo iterativamente e respeitando o RAG Tenant.
-- Vincular a saída JSON real nos Logs transacionais e garantir a resposta no Postman/Webhook com o Evidence object.
+## 5. Fechamento vs Fora de Escopo
+Foram concluídas as mecânicas de observabilidade aplicadas à requisição HTTP ativa. **Ficaram fora de escopo (preservando fronteiras arquiteturais)**:
+- Métricas experimentais como Faithfulness, Answer Relevancy;
+- Análise de Token/Latência em sub-nós (estes continuam segregados em log / OpenTelemetry).

@@ -37,7 +37,7 @@ O foco atual deixa de ser apenas a sustentação de uma base funcional e passa a
 
 O objetivo desta nova etapa continua o mesmo em essência: provar **GenAI com método**, agora com uma camada explícita de experimentação, benchmark, versionamento e governança técnica.
 
-No recorte atual da branch de desenvolvimento, as **Fases 1 a 5** desse ciclo foram consolidadas na camada **offline/experimental**, com tracking por tenant, benchmark reproduzível, avaliação formal offline de RAG, comparação entre variantes de retrieval e baseline recomendada da Fase 5 formalmente registrada.
+No recorte atual da branch de desenvolvimento, as **Fases 1 a 6** desse ciclo foram consolidadas na camada **offline/experimental**, com tracking por tenant, benchmark reproduzível, avaliação formal offline de RAG, comparação entre variantes de retrieval, baseline recomendada da Fase 5 formalmente registrada e registro transacional por Prometheus. Além disso, a **Fase 7** introduziu um gate contínuo de avaliação semântica por provider mock em CI (dry-run estrutural).
 
 ---
 
@@ -100,6 +100,7 @@ O case final busca demonstrar uma plataforma de IA aplicada ao setor público co
 - avaliação formal offline de RAG com métricas por run, artifacts comparativos e baseline inicial documentada
 - baseline recomendada da Fase 5 promovida para `semantic_plus_full_collection_lexical_candidates_v1`
 - query transformation e reranking heurísticos mantidos como eixos experimentais opt-in
+- gate de aprovação de CI (`genai-dry-run`) estabelecido validando estrutura de IA via mock provider com tracking experimental MLflow persistido em artefatos de PR
 
 ### Não incluído neste momento
 - produto enterprise finalizado

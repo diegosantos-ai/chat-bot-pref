@@ -85,6 +85,7 @@ Documentos de fase atualmente presentes nesta pasta:
 - `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
 - `fases/FASE5-RETRIEVAL-HIBRIDO.md`
 - `fases/FASE6-OBSERVABILIDADE-QUALIDADE-LATENCIA-CUSTO.md`
+- `fases/FASE7-CI-GENAI-REGRESSAO.md`
 
 ## Diretriz de manutenção
 
@@ -115,6 +116,7 @@ A sequência recomendada de leitura desta pasta é:
 7. `fases/FASE4-AVALIACAO-FORMAL-RAG.md`
 8. `fases/FASE5-RETRIEVAL-HIBRIDO.md`
 9. `fases/FASE6-OBSERVABILIDADE-QUALIDADE-LATENCIA-CUSTO.md`
+10. `fases/FASE7-CI-GENAI-REGRESSAO.md`
 
 ## Status
 
@@ -124,3 +126,4 @@ Fase 3 consolidada neste escopo na branch `feat/dataset-avaliacao`, com baseline
 Fase 4 consolidada neste escopo na branch `feat/avaliacao-rag-metricas-de-qualidade`, com avaliação formal offline, artifacts comparativos e baseline inicial rastreável do RAG.
 Na branch `feat/fase5-retrieval-query-reranking`, a Fase 5 foi fechada até `CPPX-F5-T7`, promovendo `semantic_plus_full_collection_lexical_candidates_v1` com `no_query_transformation_v1` e `no_rerank_v1` como baseline recomendada do recorte atual, mantendo query expansion e reranking heurísticos como eixos experimentais não promovidos.
 Na branch `feat/observabilidade-latencia-custo`, a Fase 6 foi fechada até `CPPX-F6-T7`, entregando registro observacional transacional em Prometheus (/metrics) sobre Latências, Correlação de Tracking, Retrievais, Fallbacks e calculo heurístico financeiro integrados como view limpo local (Painel em Terminal).
+Na branch `feat/ci-genai-regressao`, a Fase 7 foi concluída tecnicamente. Foi entregue um gate de regressão via GitHub Actions usando provider mock (dry-run estrutural) e avaliação via script, gerando rastreabilidade nativa em banco efêmero isolado, assegurando estabilidade estrutural sem inflar a conta na nuvem. A avaliação semântica real (qualidade fina) e provider real em PR continuam fora de escopo deste gate específico, preservando fronteiras limpas de experimento e transacional.
